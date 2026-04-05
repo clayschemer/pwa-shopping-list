@@ -1,0 +1,12 @@
+# Angular
+frontend/node_modules/
+frontend/dist/
+frontend/.angular/cache/
+
+# Environment files
+*.env
+.env.*
+
+# OS
+.DS_Store
+Thumbs.db

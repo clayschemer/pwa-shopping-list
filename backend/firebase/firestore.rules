@@ -1,0 +1,13 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // TODO: implement per BACKEND.md
+    // Key invariants:
+    // - Read/write requires authenticated UID matching a users/{userId} doc in the account
+    // - Items may not be hard-deleted (enforced at service layer)
+    // - Session writes scoped to the authenticated user
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

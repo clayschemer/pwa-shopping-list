@@ -1,0 +1,44 @@
+// _theme-modes.scss — Dark, high-contrast, compact, reduced-motion
+// See .claude/skills/angular-material3-theming/SKILL.md for full pattern.
+
+@use '@angular/material' as mat;
+
+// ─── LIGHT / DARK ────────────────────────────────────────────────────────────
+// Default: color-scheme: light dark on <html> (set in _theme-base.scss).
+// ThemeService adds these classes for explicit user overrides.
+
+html.theme-light {
+  color-scheme: light;
+}
+
+html.theme-dark {
+  color-scheme: dark;
+}
+
+// ─── HIGH CONTRAST ───────────────────────────────────────────────────────────
+
+@media (prefers-contrast: more) {
+  html {
+    @include mat.strong-focus-indicators();
+  }
+}
+
+body.theme-high-contrast {
+  @include mat.strong-focus-indicators();
+}
+
+// ─── COMPACT DENSITY ─────────────────────────────────────────────────────────
+// density: -2 per DESIGN.md decision.
+
+body.theme-compact {
+  @include mat.all-component-densities(-2);
+}
+
+// ─── REDUCED MOTION ──────────────────────────────────────────────────────────
+
+body.theme-reduce-motion * {
+  // Justified !important — globally suppressing all motion for explicit user setting.
+  transition-duration: 0.01ms !important;
+  animation-duration: 0.01ms !important;
+  animation-iteration-count: 1 !important;
+}

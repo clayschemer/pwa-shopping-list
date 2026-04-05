@@ -1,0 +1,18 @@
+// _theme-colors.scss — Palette definitions
+// Generated from DESIGN.md seed colours:
+//   Primary:  Terracotta, hue 18
+//   Secondary: Sage, hue 140
+//   Neutral:  hue 30 (warm grey)
+//
+// Run: ng generate @angular/material:theme-color
+// to regenerate from seed colours once the Angular Material schematic supports it.
+// Until then, define palettes manually or via the Material Theme Builder.
+
+@use '@angular/material' as mat;
+
+// TODO: Replace with generated tonal palettes from DESIGN.md seed colours before first visual review.
+// Generate with: ng generate @angular/material:theme-color
+// Seeds: Primary terracotta (hue 18), Secondary sage (hue 140).
+// Placeholder palettes in use until then:
+$primary-palette: mat.$orange-palette;
+$secondary-palette: mat.$green-palette;

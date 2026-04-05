@@ -1,0 +1,32 @@
+// _theme-base.scss — Angular Material 3 theme entry point
+// See .claude/skills/angular-material3-theming/SKILL.md for conventions.
+
+@use '@angular/material' as mat;
+@use './theme-colors' as theme;
+
+html {
+  @include mat.theme((
+    color: (
+      primary: theme.$primary-palette,
+      tertiary: theme.$secondary-palette,
+    ),
+    // Typography: DM Serif Display + Plus Jakarta Sans loaded via Google Fonts in index.html
+    typography: 'Plus Jakarta Sans',
+    density: 0,
+  ));
+
+  // Default: let the browser switch based on prefers-color-scheme.
+  // Explicit overrides applied via ThemeService classes (see _theme-modes.scss).
+  color-scheme: light dark;
+}
+
+html, body {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  background: var(--mat-sys-surface);
+  color: var(--mat-sys-on-surface);
+}
