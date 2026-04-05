@@ -1,9 +1,20 @@
 import { inject } from '@angular/core';
 import { CanActivateFn, Router } from '@angular/router';
+import { Store } from '@ngrx/store';
+import { filter, map, take } from 'rxjs';
+import { selectAuthStatus } from '../../store/account/account.selectors';
 
-// TODO: implement using auth state from store
 export const authGuard: CanActivateFn = () => {
+  const store = inject(Store);
   const router = inject(Router);
-  // Placeholder — redirect to sign-in until auth is implemented
-  return router.createUrlTree(['/sign-in']);
+
+  return store.select(selectAuthStatus).pipe(
+    filter((status) => status !== 'checking' && status !== 'loading'),
+    take(1),
+    map((status) => {
+      if (status === 'authenticated') return true;
+      if (status === 'access_denied') return router.createUrlTree(['/access-denied']);
+      return router.createUrlTree(['/sign-in']);
+    }),
+  );
 };

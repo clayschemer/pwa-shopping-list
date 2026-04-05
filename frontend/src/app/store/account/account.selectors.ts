@@ -1,2 +1,29 @@
-// account.selectors.ts — NgRx selectors for the account domain
-// See .claude/skills/angular/SKILL.md for conventions.
+import { createFeatureSelector, createSelector } from '@ngrx/store';
+import type { AccountState } from './account.reducer';
+
+export const selectAccountState = createFeatureSelector<AccountState>('account');
+
+export const selectAuthStatus = createSelector(
+  selectAccountState,
+  (state) => state.status,
+);
+
+export const selectCurrentUser = createSelector(
+  selectAccountState,
+  (state) => state.user,
+);
+
+export const selectAccount = createSelector(
+  selectAccountState,
+  (state) => state.account,
+);
+
+export const selectIsAuthenticated = createSelector(
+  selectAuthStatus,
+  (status) => status === 'authenticated',
+);
+
+export const selectIsAuthChecking = createSelector(
+  selectAuthStatus,
+  (status) => status === 'checking' || status === 'loading',
+);

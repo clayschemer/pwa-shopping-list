@@ -1,3 +1,4 @@
+import '../testing/init-testbed';
 import { TestBed } from '@angular/core/testing';
 import { App } from './app';
 

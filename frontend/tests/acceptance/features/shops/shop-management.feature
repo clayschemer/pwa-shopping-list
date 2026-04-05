@@ -38,7 +38,7 @@ Feature: Shop Management
     Given one or more shops exist
     When I switch to shop mode
     Then I should be prompted to select which shop I am shopping in
-    Or I should be able to proceed without selecting a shop
+    And I should be able to proceed without selecting a shop
 
   Scenario: Shopping without a selected shop uses global category order
     Given I am in shop mode
