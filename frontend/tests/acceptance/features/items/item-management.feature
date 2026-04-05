@@ -96,3 +96,10 @@ Feature: Item Management
     Given two or more items exist within the same category
     When I view the shopping list
     Then the items should be displayed in alphabetical order within their category
+
+  Scenario: Concurrent check conflict is handled gracefully
+    Given I am in shop mode
+    And another user checks an item at the same moment I do
+    When my check attempt is rejected because the other user was faster
+    Then I should be informed that the item has already been removed
+    And the item should no longer appear on my list

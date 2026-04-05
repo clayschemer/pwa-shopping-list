@@ -69,3 +69,15 @@ Feature: Category Management
     And no shop-specific category order has been configured
     When I view the shopping list
     Then the categories should be displayed in the global default order
+
+  Scenario: New categories are automatically added to all shops
+    Given one or more shops exist
+    When a new category is created
+    Then the new category should be automatically associated with all existing shops
+    And it should be explicitly excluded from a shop if not relevant to it
+
+  Scenario: Exclude a category from a shop
+    Given I am in plan mode
+    And a shop exists with one or more categories associated with it
+    When I exclude a category from that shop
+    Then that category and its items should not appear when shopping at that shop

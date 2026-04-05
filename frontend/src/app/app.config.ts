@@ -14,6 +14,10 @@ import { shopsReducer } from './store/shops/shops.reducer';
 import { ShopsEffects } from './store/shops/shops.effects';
 import { itemsReducer } from './store/items/items.reducer';
 import { ItemsEffects } from './store/items/items.effects';
+import { sessionsReducer } from './store/sessions/sessions.reducer';
+import { SessionsEffects } from './store/sessions/sessions.effects';
+import { uiReducer } from './store/ui/ui.reducer';
+import { UiEffects } from './store/ui/ui.effects';
 import { environment } from '../environments/environment';
 
 export const appConfig: ApplicationConfig = {
@@ -25,8 +29,10 @@ export const appConfig: ApplicationConfig = {
       categories: categoriesReducer,
       shops: shopsReducer,
       items: itemsReducer,
+      sessions: sessionsReducer,
+      ui: uiReducer,
     }),
-    provideEffects([AccountEffects, CategoriesEffects, ShopsEffects, ItemsEffects]),
+    provideEffects([AccountEffects, CategoriesEffects, ShopsEffects, ItemsEffects, SessionsEffects, UiEffects]),
     provideFirebaseApp(() => initializeApp(environment.firebase)),
     provideAuth(() => getAuth()),
     provideFirestore(() => getFirestore()),
