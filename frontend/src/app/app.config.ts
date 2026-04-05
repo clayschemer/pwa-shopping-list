@@ -8,14 +8,25 @@ import { getFirestore, provideFirestore } from '@angular/fire/firestore';
 import { routes } from './app.routes';
 import { accountReducer } from './store/account/account.reducer';
 import { AccountEffects } from './store/account/account.effects';
+import { categoriesReducer } from './store/categories/categories.reducer';
+import { CategoriesEffects } from './store/categories/categories.effects';
+import { shopsReducer } from './store/shops/shops.reducer';
+import { ShopsEffects } from './store/shops/shops.effects';
+import { itemsReducer } from './store/items/items.reducer';
+import { ItemsEffects } from './store/items/items.effects';
 import { environment } from '../environments/environment';
 
 export const appConfig: ApplicationConfig = {
   providers: [
     provideBrowserGlobalErrorListeners(),
     provideRouter(routes),
-    provideStore({ account: accountReducer }),
-    provideEffects([AccountEffects]),
+    provideStore({
+      account: accountReducer,
+      categories: categoriesReducer,
+      shops: shopsReducer,
+      items: itemsReducer,
+    }),
+    provideEffects([AccountEffects, CategoriesEffects, ShopsEffects, ItemsEffects]),
     provideFirebaseApp(() => initializeApp(environment.firebase)),
     provideAuth(() => getAuth()),
     provideFirestore(() => getFirestore()),

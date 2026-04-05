@@ -8,6 +8,7 @@ import { Action } from '@ngrx/store';
 import { AccountEffects } from './account.effects';
 import { authActions, accountActions } from './account.actions';
 import { AccountApiService } from '../../core/api/account-api.service';
+import { ChangeStreamService } from '../../core/stream/change-stream.service';
 import type { User } from '../../models/user.model';
 import type { Account } from '../../models/account.model';
 import type { AccessDeniedError } from '../../models/errors.model';
@@ -47,6 +48,7 @@ describe('AccountEffects', () => {
         provideMockActions(() => actions$),
         provideRouter([]),
         { provide: AccountApiService, useValue: accountApi },
+        { provide: ChangeStreamService, useValue: { connect: vi.fn(), disconnect: vi.fn() } },
       ],
     });
 

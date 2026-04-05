@@ -1,12 +1,11 @@
-// app.state.ts — Root NgRx store state shape
-// See .claude/skills/angular/SKILL.md for conventions.
+import type { AccountState } from './account/account.reducer';
+import type { CategoriesState } from './categories/categories.reducer';
+import type { ShopsState } from './shops/shops.reducer';
+import type { ItemsState } from './items/items.reducer';
 
-// TODO: import and compose per-domain state slices
 export interface AppState {
-  // items: ItemsState;
-  // categories: CategoriesState;
-  // shops: ShopsState;
-  // sessions: SessionsState;
-  // account: AccountState;
-  // ui: UiState;
+  account: AccountState;
+  categories: CategoriesState;
+  shops: ShopsState;
+  items: ItemsState;
 }
