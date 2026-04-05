@@ -1,15 +1,21 @@
 /**
  * Cross-slice derived selectors for the list display.
- * These join data from items + categories + shops and belong here to
+ * These join data from items + categories + shops + sessions and belong here to
  * avoid circular imports between domain folders.
  */
 import { createSelector } from '@ngrx/store';
 import { selectCategoriesOrderedGlobally, selectCategoryEntities } from '../categories/categories.selectors';
 import { selectShopById } from '../shops/shops.selectors';
-import { selectActiveItems } from '../items/items.selectors';
+import { selectActiveItems, selectAllItems, selectItemEntities } from '../items/items.selectors';
+import { selectAllSessions } from '../sessions/sessions.selectors';
 import type { Category } from '../../models/category.model';
 import type { Item } from '../../models/item.model';
-import type { CategoryId, ShopId } from '../../models/ids.model';
+import type { CategoryId, SessionId, ShopId, UserId } from '../../models/ids.model';
+
+export interface CategoryTotals {
+  estimated: number | null;     // sum of price for active unchecked items in category
+  sessionChecked: number;        // sum of priceSnapshot for checked items this session
+}
 
 export interface GroupedListEntry {
   category: Category | null;
@@ -147,6 +153,52 @@ export const selectOrderedCategoriesForShop = (shopId: ShopId | null) =>
       for (const cat of globalOrder) {
         if (!inOrder.has(cat.id)) result.push(cat);
       }
+      return result;
+    },
+  );
+
+/**
+ * Per-category totals for a given session and active items.
+ * Returns a map from CategoryId → CategoryTotals.
+ * Null category key covers uncategorised items.
+ */
+export const selectCategoryTotalsForSession = (sessionId: SessionId | null) =>
+  createSelector(
+    selectActiveItems,
+    selectItemEntities,
+    selectAllSessions,
+    (activeItems, itemEntities, sessions): Map<CategoryId | null, CategoryTotals> => {
+      const result = new Map<CategoryId | null, CategoryTotals>();
+
+      // Estimated totals from active (unchecked) items
+      for (const item of activeItems) {
+        const key = item.primaryCategoryId;
+        if (!result.has(key)) {
+          result.set(key, { estimated: null, sessionChecked: 0 });
+        }
+        const entry = result.get(key)!;
+        if (item.price !== null) {
+          entry.estimated = (entry.estimated ?? 0) + item.price;
+        }
+      }
+
+      // Session checked totals — look up item category from entity store
+      // (items may be removed but still in the entity map)
+      if (sessionId) {
+        const session = sessions.find((s) => s.id === sessionId);
+        if (session) {
+          for (const ci of session.checkedItems) {
+            if (ci.priceSnapshot === null) continue;
+            const item = itemEntities[ci.itemId];
+            const key = (item?.primaryCategoryId ?? null) as CategoryId | null;
+            if (!result.has(key)) {
+              result.set(key, { estimated: null, sessionChecked: 0 });
+            }
+            result.get(key)!.sessionChecked += ci.priceSnapshot;
+          }
+        }
+      }
+
       return result;
     },
   );

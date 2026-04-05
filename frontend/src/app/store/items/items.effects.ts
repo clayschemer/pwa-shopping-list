@@ -1,15 +1,20 @@
 import { inject, Injectable } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
-import { defer, from, map, switchMap } from 'rxjs';
+import { Store } from '@ngrx/store';
+import { defer, from, map, switchMap, withLatestFrom } from 'rxjs';
 import { itemsActions, itemsApiActions } from './items.actions';
-import { ItemApiService } from '../../core/api/item-api.service';
+import { uiActions } from '../ui/ui.actions';
+import { selectCurrentUser } from '../account/account.selectors';
+import { selectMyActiveSession } from '../sessions/sessions.selectors';
+import { ItemApiService, CheckSuccess } from '../../core/api/item-api.service';
 import { ChangeStreamService } from '../../core/stream/change-stream.service';
 import type { Item } from '../../models/item.model';
-import type { NameConflictError } from '../../models/errors.model';
+import type { CheckConflictError, NameConflictError } from '../../models/errors.model';
 
 @Injectable()
 export class ItemsEffects {
   private readonly actions$ = inject(Actions);
+  private readonly store = inject(Store);
   private readonly itemApi = inject(ItemApiService);
   private readonly streams = inject(ChangeStreamService);
 
@@ -88,5 +93,33 @@ export class ItemsEffects {
         ),
       ),
     ),
+  );
+
+  readonly checkItem$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(itemsActions.checkItemRequested),
+      switchMap(({ id, sessionId }) =>
+        from(this.itemApi.checkItem(id, sessionId)).pipe(
+          map((result) => {
+            if ((result as CheckConflictError).type === 'CHECK_CONFLICT') {
+              return itemsApiActions.checkConflict({ id });
+            }
+            const { item } = result as CheckSuccess;
+            return uiActions.checkUndoPending({ itemId: id, sessionId });
+          }),
+        ),
+      ),
+    ),
+  );
+
+  readonly uncheckItem$ = createEffect(
+    () =>
+      this.actions$.pipe(
+        ofType(itemsActions.uncheckItemRequested),
+        switchMap(({ id, sessionId }) =>
+          from(this.itemApi.uncheckItem(id, sessionId)),
+        ),
+      ),
+    { dispatch: false },
   );
 }
