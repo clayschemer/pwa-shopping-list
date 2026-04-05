@@ -1,3 +1,7 @@
+# Node
+node_modules/
+package-lock.json
+
 # Angular
 frontend/node_modules/
 frontend/dist/
