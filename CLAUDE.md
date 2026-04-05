@@ -3,7 +3,6 @@
 This is the persistent project context for Claude Code. Read this at the start of every session.
 
 **Also read at session start:** `DESIGN.md`, `DATA-MODEL.md`, `API-CONTRACT.md`, `PLANNING.md`.
-Note: `design-system.scss` contains all design tokens (colours, typography, spacing, motion contract).
 
 ---
 
@@ -16,6 +15,18 @@ You are an expert senior/staff software engineer with deep experience in both fr
 ## Model
 
 Use **`claude-opus-4-6`** for all API calls in this project.
+
+---
+
+## Skills
+
+Three project skills are active. Load them when working in their domains:
+
+| Skill | File | When to load |
+|---|---|---|
+| `angular` | `.claude/skills/angular/SKILL.md` | Any Angular code — components, services, store, effects, guards, pipes, tests, architecture decisions |
+| `angular-material3-theming` | `.claude/skills/angular-material3-theming/SKILL.md` | Theming, design tokens, Material component styling, dark/light/high-contrast/compact modes |
+| `scss-conventions` | `.claude/skills/scss-conventions/SKILL.md` | Any SCSS or CSS work in the frontend |
 
 ---
 
@@ -40,18 +51,18 @@ A shared shopping list PWA for two users (a couple). Private by default, may ope
 ## Tech Stack
 
 ### Frontend
-- **Framework:** Angular 21 (standalone components, pure SPA, no SSR) — upgrade to Angular 22 expected May 2026
-- **Forms:** Signal Forms — experimental in Angular 21, expected stable in Angular 22. Use when stable; fall back to Reactive Forms until then.
-- **State:** NgRx (store, effects, selectors)
-- **UI:** Angular Material 3
-- **PWA:** Offline support is nice-to-have, not a hard requirement
+- **Framework:** Angular 21 SPA (standalone components, no SSR) — Angular 22 upgrade expected May 2026
 - **Fonts:** DM Serif Display + Plus Jakarta Sans (Google Fonts)
+- **PWA:** Offline support is nice-to-have, not a hard requirement
+
+For Angular component patterns, NgRx structure, service design, Signal Forms, routing, and testing conventions → `.claude/skills/angular/SKILL.md`
+For Material 3 theming, design tokens, dark/light/high-contrast/compact mode setup → `.claude/skills/angular-material3-theming/SKILL.md`
+For SCSS conventions (BEM, units, layout, accessibility, reduced motion) → `.claude/skills/scss-conventions/SKILL.md`
 
 ### Testing
-- **Acceptance tests:** Cucumber.js with Gherkin `.feature` files
-- **Unit and component tests:** Vitest
+- **Acceptance tests:** Cucumber.js with Gherkin `.feature` files — scenarios describe observable behaviour only, no UI assumptions (David Farley style)
+- **Unit and component tests:** Vitest — see `.claude/skills/angular/SKILL.md` for conventions
 - **E2E (future):** Playwright (not in current scope)
-- **Style:** David Farley — tests describe observable system behaviour, no implementation detail
 
 ### Backend (current — Firebase)
 - Firestore for data persistence
@@ -87,18 +98,23 @@ A shared shopping list PWA for two users (a couple). Private by default, may ope
 │   ├── src/
 │   │   ├── app/
 │   │   │   ├── core/
-│   │   │   │   ├── api/             ← API service layer (the only place that touches backend)
-│   │   │   │   │   ├── shopping-list.service.ts   ← implements API-CONTRACT.md
-│   │   │   │   │   └── firebase/    ← Firebase implementation of service layer
+│   │   │   │   ├── api/             ← API service layer — the ONLY place that touches backend
+│   │   │   │   │   ├── item-api.service.ts
+│   │   │   │   │   ├── category-api.service.ts
+│   │   │   │   │   ├── shop-api.service.ts
+│   │   │   │   │   ├── session-api.service.ts
+│   │   │   │   │   └── account-api.service.ts
 │   │   │   │   ├── auth/
-│   │   │   │   └── store/           ← NgRx store, actions, reducers, effects, selectors
+│   │   │   │   └── stream/          ← change-stream.service.ts
+│   │   │   ├── store/               ← NgRx per-domain (items/, categories/, shops/, sessions/, account/, ui/)
 │   │   │   ├── features/
-│   │   │   │   ├── plan-mode/
-│   │   │   │   ├── shop-mode/
+│   │   │   │   ├── auth/
+│   │   │   │   ├── plan/
+│   │   │   │   ├── shop/
 │   │   │   │   ├── settings/
-│   │   │   │   └── auth/
-│   │   │   └── shared/              ← shared components, pipes, directives
-│   │   ├── assets/
+│   │   │   │   └── shared/          ← shared presentational components (no store access)
+│   │   │   ├── models/              ← domain types (*.model.ts)
+│   │   │   └── app.config.ts
 │   │   └── styles/                  ← design-system.scss + Angular Material theme
 │   ├── tests/
 │   │   └── acceptance/
@@ -130,6 +146,8 @@ A shared shopping list PWA for two users (a couple). Private by default, may ope
 ```
 
 **Key rule:** Nothing outside `frontend/src/app/core/api/` may import from or reference any backend SDK directly. All backend interaction flows through the service layer that implements `API-CONTRACT.md`.
+
+For detailed Angular file and folder conventions → `.claude/skills/angular/SKILL.md`
 
 ---
 
