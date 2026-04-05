@@ -143,6 +143,13 @@ Given('two or more items exist within the same category', function (this: ItemsW
   this.items.push(makeItem('Apples', 'cat-1'));
 });
 
+Given('one or more items were checked during a shopping session', function (this: ItemsWorld) {
+  this.items = this.items ?? [];
+  const item = makeItem('Session Checked Item', 'cat-1');
+  item.removed = true;
+  this.items.push(item);
+});
+
 Given('another user checks an item at the same moment I do', function (this: ItemsWorld) {
   // Simulate: another user already marked the item removed before my check
   this.items = this.items ?? [];
@@ -191,6 +198,14 @@ When('I assign a primary category and optionally one or more secondary categorie
 
 When('I view the shopping list', function (this: ItemsWorld) {
   // Viewing — no state change, assertions follow
+});
+
+When('I access the list in plan mode', function (this: ItemsWorld) {
+  this.mode = 'plan';
+});
+
+When('I view the shopping list in either mode', function (this: ItemsWorld) {
+  // Both plan and shop mode show uncategorised items — no state change needed
 });
 
 When('I check the item', function (this: ItemsWorld) {

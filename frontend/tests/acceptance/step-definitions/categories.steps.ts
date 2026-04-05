@@ -84,6 +84,15 @@ Given('no shop-specific category order has been configured', function (this: Cat
 
 // Note: 'one or more shops exist' is defined in shared.steps.ts
 
+Given('two or more shops exist', function (this: CategoriesWorld) {
+  this.categories = this.categories ?? [];
+  this.shops = this.shops ?? [];
+  if (this.shops.length < 2) {
+    this.shops.push({ id: `shop-${_shopId++}`, name: 'Shop Alpha', categoryOrder: this.categories.map((c) => c.id) });
+    this.shops.push({ id: `shop-${_shopId++}`, name: 'Shop Beta', categoryOrder: [...this.categories.map((c) => c.id)].reverse() });
+  }
+});
+
 Given('a shop exists with one or more categories associated with it', function (this: CategoriesWorld) {
   this.categories = this.categories ?? [];
   this.categories.push(makeCategory('Produce', 1));

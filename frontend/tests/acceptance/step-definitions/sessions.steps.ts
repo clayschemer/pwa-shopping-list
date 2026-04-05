@@ -154,6 +154,20 @@ Given('one or more shopping sessions have been completed', function (this: Sessi
   this.sessionHistory = [session];
 });
 
+Given('one or more items exist on the list', function (this: SessionsWorld) {
+  this.items = this.items ?? [];
+  if (!this.items.some((i) => !i.removed)) {
+    this.items.push({ id: 'sess-item-1', name: 'Milk', removed: false, price: null });
+  }
+});
+
+Given('one or more items with prices exist on the list', function (this: SessionsWorld) {
+  this.items = [
+    { id: 'sess-item-1', name: 'Milk', removed: false, price: 1.5 },
+    { id: 'sess-item-2', name: 'Bread', removed: false, price: 2.0 },
+  ];
+});
+
 // ---------------------------------------------------------------------------
 // When steps
 // ---------------------------------------------------------------------------
