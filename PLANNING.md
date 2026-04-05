@@ -23,39 +23,48 @@ A private shared shopping list PWA for two users. Mobile-first, accessibility-fi
 ├── DATA-MODEL.md        ← logical data model (backend-agnostic)
 ├── API-CONTRACT.md      ← service layer contract (types + operations)
 ├── DESIGN.md            ← UI/UX spec (all 6 screens signed off)
-├── design-system.scss   ← design tokens, typography, motion contract
+├── design-system.scss   ← design token specification (colours, typography, spacing, motion)
 │
 ├── frontend/            ← Angular PWA
 │   ├── src/
 │   │   ├── app/
 │   │   │   ├── core/
-│   │   │   │   ├── api/         ← API service layer — ONLY place that touches backend
-│   │   │   │   │   ├── shopping-list.service.ts
-│   │   │   │   │   └── firebase/ ← Firebase implementation
+│   │   │   │   ├── api/             ← API service layer — ONLY place that touches backend
+│   │   │   │   │   ├── item-api.service.ts
+│   │   │   │   │   ├── category-api.service.ts
+│   │   │   │   │   ├── shop-api.service.ts
+│   │   │   │   │   ├── session-api.service.ts
+│   │   │   │   │   └── account-api.service.ts
 │   │   │   │   ├── auth/
-│   │   │   │   └── store/       ← NgRx: actions, reducers, effects, selectors
+│   │   │   │   └── stream/          ← change-stream.service.ts
+│   │   │   ├── store/               ← NgRx per-domain (items/, categories/, shops/, sessions/, account/, ui/)
 │   │   │   ├── features/
-│   │   │   │   ├── plan-mode/
-│   │   │   │   ├── shop-mode/
+│   │   │   │   ├── auth/
+│   │   │   │   ├── plan/
+│   │   │   │   ├── shop/
 │   │   │   │   ├── settings/
-│   │   │   │   └── auth/
-│   │   │   └── shared/
-│   │   └── styles/              ← design-system.scss + Material theme
-│   └── tests/
-│       └── acceptance/
-│           ├── features/        ← Gherkin feature files (source of truth for behaviour)
-│           │   ├── auth/
-│           │   ├── modes/
-│           │   ├── settings/
-│           │   ├── categories/
-│           │   ├── shops/
-│           │   ├── items/
-│           │   ├── sessions/
-│           │   ├── ai-price-estimation/
-│           │   ├── ai-list-suggestions/
-│           │   ├── autocomplete/
-│           │   └── barcode-scanning/
-│           └── step-definitions/
+│   │   │   │   └── shared/          ← shared presentational components (no store access)
+│   │   │   ├── models/              ← domain types (*.model.ts)
+│   │   │   └── app.config.ts
+│   │   └── styles/                  ← Angular Material theme (_theme-*.scss)
+│   ├── tests/
+│   │   └── acceptance/
+│   │       ├── features/            ← Gherkin feature files (source of truth for behaviour)
+│   │       │   ├── auth/
+│   │       │   ├── modes/
+│   │       │   ├── settings/
+│   │       │   ├── categories/
+│   │       │   ├── shops/
+│   │       │   ├── items/
+│   │       │   ├── sessions/
+│   │       │   ├── ai-price-estimation/
+│   │       │   ├── ai-list-suggestions/
+│   │       │   ├── autocomplete/
+│   │       │   └── barcode-scanning/
+│   │       └── step-definitions/
+│   ├── angular.json
+│   ├── package.json
+│   └── tsconfig.json
 │
 └── backend/             ← backend project root
     ├── BACKEND.md       ← backend spec and decisions

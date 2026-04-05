@@ -38,13 +38,15 @@ Warm organic minimalism. The app should feel like a well-considered physical not
 Full token set (light, dark, high-contrast-light, high-contrast-dark) defined in `design-system.scss`.
 
 ### Theme Variants
-All four theme variants are defined in `design-system.scss` using CSS custom properties on `[data-theme]` attribute:
-- `light` (default)
-- `dark`
-- `high-contrast-light`
-- `high-contrast-dark`
+All four theme variants are supported. Implementation follows Angular Material 3 conventions
+(see `.claude/skills/angular-material3-theming/SKILL.md`):
 
-System preference auto-detected via `prefers-color-scheme` and `prefers-contrast` media queries. Explicit `[data-theme]` override takes priority.
+- Light/dark: `color-scheme: light dark` on `html` as default; `html.theme-light` / `html.theme-dark` classes for explicit overrides
+- High contrast: `@media (prefers-contrast: more)` as default; `body.theme-high-contrast` class for explicit override
+- Compact: `body.theme-compact` class applying `mat.all-component-densities(-2)`
+- Reduced motion: `@media (prefers-reduced-motion: reduce)` as default; `body.theme-reduce-motion` class for explicit override
+
+System preference is always the fallback. Classes are applied only when the user has made an explicit in-app choice, managed by a `ThemeService`.
 
 ### Motion Contract
 All duration and easing defined as CSS custom properties (`--app-duration-*`, `--app-easing-*`).
@@ -57,8 +59,10 @@ Under `prefers-reduced-motion: reduce`, all durations collapse to `0ms` — ever
 - Focus: `:focus-visible` ring, 3px offset, primary colour. High contrast: 4px, black/white
 - Font sizes respect user browser preferences (`font-size: 100%` on `html`)
 
-### Reference File
-`design-system.scss` — contains all tokens, mixins, typography scale, spacing scale, motion contract, focus styles, global base styles, and Angular Material 3 integration notes.
+### Reference Files
+`design-system.scss` (project root) — design token specification: palette definitions, typography scale, spacing scale, motion contract. A human-readable reference, also used as the source of CSS custom property values.
+
+`frontend/src/styles/` — Angular Material 3 implementation using multi-file structure (`_theme-colors.scss`, `_theme-base.scss`, `_theme-overrides.scss`, `_theme-modes.scss`). See `.claude/skills/angular-material3-theming/SKILL.md` for structure and conventions.
 
 ---
 
@@ -186,7 +190,10 @@ Bottom sheet. Title = item name.
 4. Price — optional
 5. Primary category — single-select chip group
 6. Also appears in (shop mode) — multi-select chip group (secondary categories)
-7. Available in shops — checkbox list of all shops
+7. Available in shops — checkbox list of all shops. Reflects which shops include this item's
+   primary category in their layout. Unchecking a shop removes the primary category from that
+   shop's `categoryOrder` — this affects all items under that category, not only this one.
+   Same operation as Category ⋯ → "Available in shops…" but accessible from the item.
 
 "Save changes" button is **sticky to the bottom** of the sheet at all times regardless of scroll position.
 
@@ -397,8 +404,8 @@ Access check occurs at `getAccount()` in the bootup sequence, not at the OAuth s
 
 ## Implementation Notes for Angular / Material 3
 
-- Use `mat.define-theme` with `use-system-variables: true` to read CSS custom properties from `design-system.scss`
-- For compact mode: apply `mat.all-component-densities(-1)` on `[data-compact]` root
+- Use `mat.define-theme` / `mat.theme()` per Angular Material 3 API — see `.claude/skills/angular-material3-theming/SKILL.md`
+- For compact mode: apply `mat.all-component-densities(-2)` on `body.theme-compact`
 - All AI features inactive unless `Account.aiConfig` is set — gate in service layer, not components
 - Mode (plan/shop) is client-side NgRx store state only — not persisted, not synced
 - Settings stored in `localStorage` — not in backend

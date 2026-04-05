@@ -79,6 +79,7 @@ Item
   - id
   - accountId: AccountId
   - name                                ← unique within account
+  - description: string | null          ← optional freetext shown beneath name in the list
   - quantity: number | null
   - unit: string | null
   - primaryCategoryId: CategoryId | null
@@ -96,6 +97,7 @@ Item
 
 **Notes on Item:**
 
+- `description` is optional freetext displayed beneath the item name in both modes. No functional role — purely informational.
 - `removed` is set to `true` by two actors: a plan-mode deletion, or a session check. It is cleared to `false` by an uncheck action (item restored to list).
 - `price`, `priceQuantity`, `priceUnit`, and `priceUpdatedAt` form a single price record. The last writer wins — user or AI. No separate manual/estimated distinction.
 - `aiMotivation` is set when the AI adds the item and is never updated. If the AI re-suggests the same item, the existing motivation is reused.

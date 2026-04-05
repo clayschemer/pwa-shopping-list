@@ -136,6 +136,7 @@ Item {
   id:                   ItemId
   accountId:            AccountId
   name:                 string
+  description:          string | null
   quantity:             number | null
   unit:                 string | null
   primaryCategoryId:    CategoryId | null
@@ -276,6 +277,7 @@ categoryChanges$: Observable<EntityChangeBatch<Category>>
 shopChanges$:     Observable<EntityChangeBatch<Shop>>
 sessionChanges$:  Observable<EntityChangeBatch<Session>>
 accountChanges$:  Observable<EntityChangeBatch<Account>>
+userChanges$:     Observable<EntityChangeBatch<User>>
 ```
 
 NgRx effects subscribe to these and apply each batch to the store. For each
@@ -404,7 +406,22 @@ Errors:  AiUnavailableError
 
 ---
 
-### 5.3 Items
+### 5.3 Users
+
+#### fetchAccountUsers
+```
+Intent:  Fetch all users belonging to the current account once, on app init.
+         Seeds the store. Subsequent changes arrive via userChanges$.
+         Used to resolve UserId references to display names and initials
+         (e.g. undo history menu, session participant display).
+Input:   none
+Output:  User[]
+Errors:  none
+```
+
+---
+
+### 5.4 Items
 
 #### fetchActiveList
 ```
@@ -420,6 +437,7 @@ Errors:  none
 Intent:  Add a new item to the shared list.
          The new Item arrives via itemChanges$.
 Input:   name:                 string
+         description:          string | null
          quantity:             number | null
          unit:                 string | null
          primaryCategoryId:    CategoryId | null
@@ -434,6 +452,7 @@ Intent:  Edit the details of an existing list item.
          The updated Item arrives via itemChanges$.
 Input:   id:                   ItemId
          name:                 string
+         description:          string | null
          quantity:             number | null
          unit:                 string | null
          primaryCategoryId:    CategoryId | null
@@ -503,7 +522,7 @@ Errors:  NotFoundError
 
 ---
 
-### 5.4 Categories
+### 5.5 Categories
 
 #### fetchAllCategories
 ```
@@ -564,7 +583,7 @@ Errors:  none
 
 ---
 
-### 5.5 Shops
+### 5.6 Shops
 
 #### fetchAllShops
 ```
@@ -622,7 +641,7 @@ Errors:  NotFoundError
 
 ---
 
-### 5.6 Sessions
+### 5.7 Sessions
 
 #### fetchActiveSessions
 ```
@@ -669,7 +688,7 @@ Errors:  NotFoundError
 
 ---
 
-### 5.7 Autocomplete
+### 5.8 Autocomplete
 
 #### fetchAutocompleteItems
 ```
@@ -695,7 +714,7 @@ The full Item entity is not returned here.
 
 ---
 
-### 5.8 AI Operations
+### 5.9 AI Operations
 
 All operations in this domain are no-ops if `Account.aiConfig` is null.
 The service implementation enforces this gate — callers do not need to check.
@@ -742,6 +761,7 @@ sequence through the service layer:
    fetchAllCategories()    — seed categories into store
    fetchAllShops()         — seed shops into store
    fetchActiveSessions()   — seed active sessions into store
+   fetchAccountUsers()     — seed users into store (for display name/initials resolution)
 
 4. Subscribe to all change Observables:
    itemChanges$
@@ -749,6 +769,7 @@ sequence through the service layer:
    shopChanges$
    sessionChanges$
    accountChanges$
+   userChanges$
    streamError$
 ```
 
@@ -788,3 +809,8 @@ The following concerns are intentionally outside this contract:
 - **Autocomplete filtering** — `fetchAutocompleteItems` returns the full eligible set.
   Filtering against the user's current input is done client-side in the store or
   component, not via a backend query.
+- **Autocomplete fetch timing** — `fetchAutocompleteItems` is not part of the bootup
+  sequence. It is called lazily on the first time the user opens the add-item flow
+  in a session, then cached for the remainder of the session. This avoids fetching
+  a potentially large historical item set on every app load, while still ensuring
+  suggestions are available before the user finishes typing their first character.
