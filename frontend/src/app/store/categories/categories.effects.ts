@@ -29,4 +29,42 @@ export class CategoriesEffects {
       map((changes) => categoriesApiActions.categoryStreamUpdated({ changes })),
     ),
   );
+
+  readonly addCategory$ = createEffect(
+    () =>
+      this.actions$.pipe(
+        ofType(categoriesActions.addCategoryRequested),
+        switchMap(({ name }) => from(this.categoryApi.addCategory(name))),
+      ),
+    { dispatch: false },
+  );
+
+  readonly renameCategory$ = createEffect(
+    () =>
+      this.actions$.pipe(
+        ofType(categoriesActions.renameCategoryRequested),
+        switchMap(({ id, name }) => from(this.categoryApi.renameCategory(id, name))),
+      ),
+    { dispatch: false },
+  );
+
+  readonly deleteCategory$ = createEffect(
+    () =>
+      this.actions$.pipe(
+        ofType(categoriesActions.deleteCategoryRequested),
+        switchMap(({ id }) => from(this.categoryApi.deleteCategory(id))),
+      ),
+    { dispatch: false },
+  );
+
+  readonly setGlobalOrder$ = createEffect(
+    () =>
+      this.actions$.pipe(
+        ofType(categoriesActions.setGlobalOrderRequested),
+        switchMap(({ orderedIds }) =>
+          from(this.categoryApi.setGlobalCategoryOrder(orderedIds)),
+        ),
+      ),
+    { dispatch: false },
+  );
 }

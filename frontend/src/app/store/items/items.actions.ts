@@ -40,6 +40,11 @@ export const itemsApiActions = createActionGroup({
   events: {
     'Fetch Active List Success': props<{ items: Item[] }>(),
     'Item Stream Updated': props<{ changes: EntityChange<Item>[] }>(),
+    'Add Item Success': props<{ item: Item }>(),
+    'Add Item Name Conflict': props<{ name: string }>(),
+    'Remove Item Success': props<{ id: ItemId }>(),
+    'Update Item Success': props<{ item: Item }>(),
+    'Update Item Name Conflict': props<{ name: string }>(),
     'Check Conflict': props<{ id: ItemId }>(),
   },
 });
