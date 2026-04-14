@@ -25,6 +25,11 @@ export interface AccessDeniedError {
   type: 'ACCESS_DENIED';
 }
 
+export interface AuthError {
+  type: 'AUTH_FAILED';
+  code: string;
+}
+
 export interface AiUnavailableError {
   type: 'AI_UNAVAILABLE';
 }

@@ -19,13 +19,3 @@ export const selectIsPlanMode = createSelector(
   selectUiState,
   (state) => state.mode === 'plan',
 );
-
-export const selectPendingUndo = createSelector(
-  selectUiState,
-  (state) => state.pendingUndo,
-);
-
-export const selectShowInactiveSessionReminder = createSelector(
-  selectUiState,
-  (state) => state.showInactiveSessionReminder,
-);

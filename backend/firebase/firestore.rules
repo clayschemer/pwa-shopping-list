@@ -1,13 +1,43 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    // TODO: implement per BACKEND.md
-    // Key invariants:
-    // - Read/write requires authenticated UID matching a users/{userId} doc in the account
-    // - Items may not be hard-deleted (enforced at service layer)
-    // - Session writes scoped to the authenticated user
-    match /{document=**} {
-      allow read, write: if false;
+
+    // A user belongs to accountId if their /users/{uid} doc says so.
+    // Uses get() — one extra read per rule evaluation, cached within a request.
+    function isMember(accountId) {
+      return request.auth != null
+        && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.accountId == accountId;
+    }
+
+    // Users can read their own document (needed by getAccount() to resolve accountId).
+    // Write is admin-only — allowlist management is out of scope for the app.
+    match /users/{userId} {
+      allow read: if request.auth != null && request.auth.uid == userId;
+      allow write: if false;
+    }
+
+    // Account document itself — readable by members (needed by getAccount()).
+    match /accounts/{accountId} {
+      allow read: if isMember(accountId);
+      allow write: if false; // Account creation is admin-only
+
+      // All sub-collections are fully accessible by account members.
+      match /categories/{categoryId} {
+        allow read, write: if isMember(accountId);
+      }
+
+      match /items/{itemId} {
+        allow read, write: if isMember(accountId);
+        // Hard-deletion prevention is enforced at the service layer, not here.
+      }
+
+      match /shops/{shopId} {
+        allow read, write: if isMember(accountId);
+      }
+
+      match /sessions/{sessionId} {
+        allow read, write: if isMember(accountId);
+      }
     }
   }
 }

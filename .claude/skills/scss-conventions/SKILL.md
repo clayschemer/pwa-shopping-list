@@ -33,63 +33,74 @@ description: >
 ### Block = Angular component selector
 The component's selector is always the BEM Block. This makes it immediately clear in DevTools which Angular component owns a style.
 
-```scss
-// Component selector: app-user-card
-.app-user-card { }
-.app-user-card__avatar { }
-.app-user-card__name { }
-.app-user-card__name--highlighted { }
-.app-user-card__actions { }
-.app-user-card__actions--hidden { }
-```
-
 ### Rules
-- **No nested BEM blocks.** If a child component appears inside a parent component's template, do NOT style it with the parent's BEM block. Each component styles only its own elements.
-- **No deep nesting in SCSS.** BEM elements are written at the root level of the file, not nested inside the block selector.
+- **No nested BEM blocks.** Each component styles only its own elements. Never style a child component's block from the parent.
+- **Nest `&__element` inside the block.** Use `&` to build flat selectors via nesting. The compiled output stays flat (`0,1,0` specificity) while the source stays readable and grouped.
+- **Nest `&--modifier` inside its element.**
 - **Modifiers are always on the element they modify**, not a wrapper.
+- **Never chain `&__element` inside another `&__element`** — that produces `.block__el1__el2` which is invalid BEM.
 
 ```scss
-// ✅ Correct — flat, low specificity
-.app-user-card { }
-.app-user-card__avatar { }
-.app-user-card__avatar--large { }
-
-// ❌ Wrong — nested BEM block
+// ✅ Correct — nested with &, flat output, no specificity increase
 .app-user-card {
-  .app-avatar { }       // this is another component's block
+  display: flex;
+
+  &__avatar {
+    width: 3rem;
+    height: 3rem;
+
+    &--large {
+      width: 5rem;
+      height: 5rem;
+    }
+
+    &:hover {
+      opacity: 0.85;
+    }
+  }
+
+  &__name {
+    font-size: 1rem;
+
+    &--highlighted {
+      font-weight: 700;
+    }
+  }
+
+  &__actions {
+    display: flex;
+    gap: 0.5rem;
+
+    &--hidden {
+      display: none;
+    }
+  }
 }
 
-// ❌ Wrong — SCSS nesting that inflates specificity
+// ❌ Wrong — nested BEM block (styling another component)
+.app-user-card {
+  .app-avatar { }
+}
+
+// ❌ Wrong — chained elements (produces .app-user-card__avatar__icon)
 .app-user-card {
   &__avatar {
-    &--large { }        // generates .app-user-card__avatar--large, but buried in nesting
+    &__icon { }
   }
+}
+
+// ❌ Wrong — bare class nesting that increases specificity
+.app-user-card {
+  .some-child { }       // specificity: 0,2,0 — never do this
 }
 ```
 
-### When nesting IS acceptable
-Only use SCSS nesting for:
-- Pseudo-classes/elements on the same element: `&:hover`, `&::before`
-- State selectors that Angular adds: `&.ng-invalid`, `&.active`
-- The `@media`, `@supports` blocks
-- `prefers-reduced-motion` and other `@media` feature queries
-
-```scss
-// ✅ Acceptable nesting
-.app-user-card__avatar {
-  width: 3rem;
-  height: 3rem;
-
-  &:hover {
-    opacity: 0.85;
-  }
-
-  &--large {
-    width: 5rem;
-    height: 5rem;
-  }
-}
-```
+### Nesting inside elements
+These are nested inside the `&__element` they belong to:
+- Pseudo-classes/elements: `&:hover`, `&::before`, `&:focus-visible`
+- State selectors: `&.ng-invalid`, `&.active`
+- Modifiers: `&--large`, `&--disabled`
+- `@media` / `@supports` / `prefers-reduced-motion` queries
 
 ---
 
@@ -104,7 +115,7 @@ Only use SCSS nesting for:
 | Border width | `px` (hairlines) |
 | Border radius | `rem` |
 | Line height | Unitless ratio (e.g. `1.5`) |
-| Media query breakpoints | `rem` (scales with user font size prefs) |
+| Container query thresholds | `rem` (scales with user font size prefs) |
 
 ```scss
 // ✅ Correct
@@ -285,10 +296,8 @@ Each Angular component gets its own `.scss` file (Angular's default). Within tha
 // 4. Modifiers — immediately after the element they modify
 .app-component-name__body--expanded { }
 
-// 5. Responsive overrides at the bottom
-@media (max-width: 48rem) {
-  .app-component-name { }
-}
+// 5. Container queries for responsive behaviour (nested inside the element)
+// No media query breakpoints — use @container instead
 ```
 
 ---

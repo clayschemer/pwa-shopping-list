@@ -20,6 +20,7 @@ description: >
 4. **No `!important`** — if you feel you need it, you are targeting the wrong layer. Use the correct token or mixin.
 5. **All four modes supported** — every project supports light/dark, high contrast, compact density, and reduced motion. System preference is always the default fallback; body/html classes override when the user has set an explicit app preference.
 6. **Scalable and modifiable** — theme structure must make it easy to change palettes, add variants, or swap tokens without cascading rewrites.
+7. **Token-based throughout** — all colours, spacing, and typography must reference system tokens (`--mat-sys-*`) or custom design tokens. Never hardcode colour values in component SCSS. This enables external token generators (Material Theme Builder, etc.) to produce dark, light, high-contrast, and compact themes by swapping token sets only.
 
 ---
 

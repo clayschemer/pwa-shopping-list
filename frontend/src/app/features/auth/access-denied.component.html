@@ -1,16 +1,17 @@
-<div class="access-denied">
-  <mat-icon class="access-denied__icon" aria-hidden="true">lock</mat-icon>
-  <h1 class="access-denied__title">Access Denied</h1>
-  <p class="access-denied__message">
-    Your account is not authorised to access this app.
-    Please contact the account owner.
+<div class="app-access-denied">
+  <h1 class="app-access-denied__title">Access denied</h1>
+  <p class="app-access-denied__message">
+    The account
+    @if (userEmail(); as user) {
+      <strong>{{ user.email }}</strong>
+    }
+    does not have permission to use this application.
   </p>
   <button
-    mat-raised-button
-    (click)="signOut()"
-    aria-label="Sign out"
+    mat-stroked-button
+    class="app-access-denied__action"
+    (click)="tryDifferentAccount()"
   >
-    <mat-icon aria-hidden="true">logout</mat-icon>
-    Sign out
+    Try a different account
   </button>
 </div>

@@ -17,21 +17,10 @@ export const routes: Routes = [
     canActivate: [authGuard],
     children: [
       {
-        path: 'plan',
+        path: '',
         loadComponent: () =>
           import('./features/plan/plan.component').then((m) => m.PlanComponent),
       },
-      {
-        path: 'shop',
-        loadComponent: () =>
-          import('./features/shop/shop.component').then((m) => m.ShopComponent),
-      },
-      {
-        path: 'settings',
-        loadComponent: () =>
-          import('./features/settings/settings.component').then((m) => m.SettingsComponent),
-      },
-      { path: '', redirectTo: 'plan', pathMatch: 'full' },
     ],
   },
 ];

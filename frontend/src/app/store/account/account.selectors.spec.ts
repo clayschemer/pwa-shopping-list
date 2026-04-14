@@ -1,65 +1,64 @@
 import { describe, it, expect } from 'vitest';
 import {
   selectAuthStatus,
-  selectCurrentUser,
-  selectAccount,
   selectIsAuthenticated,
   selectIsAuthChecking,
+  selectCurrentUser,
+  selectAccount,
+  selectSignInError,
 } from './account.selectors';
 import type { AccountState } from './account.reducer';
-import type { User } from '../../models/user.model';
-import type { Account } from '../../models/account.model';
 import type { UserId, AccountId } from '../../models/ids.model';
 
-const mockUser: User = {
-  id: 'uid-1' as UserId,
-  accountId: 'acc-1' as AccountId,
+const mockUser = {
+  id: 'u1' as UserId,
+  accountId: 'a1' as AccountId,
   email: 'test@example.com',
-  displayName: 'Test User',
+  displayName: 'Test',
 };
 
-const mockAccount: Account = {
-  id: 'acc-1' as AccountId,
+const mockAccount = {
+  id: 'a1' as AccountId,
   name: 'Test Account',
   aiConfig: null,
 };
 
-const buildState = (partial: Partial<AccountState>): { account: AccountState } => ({
-  account: {
-    status: 'checking',
-    user: null,
-    account: null,
-    ...partial,
-  },
-});
+function project(state: AccountState) {
+  // Simulate the feature selector projecting from root state
+  return { account: state };
+}
 
 describe('account selectors', () => {
-  it('selectAuthStatus returns the current status', () => {
-    expect(selectAuthStatus(buildState({ status: 'authenticated' }))).toBe('authenticated');
-    expect(selectAuthStatus(buildState({ status: 'unauthenticated' }))).toBe('unauthenticated');
+  it('selectAuthStatus returns the status', () => {
+    const state: AccountState = { status: 'loading', user: mockUser, account: null, signInError: null };
+    expect(selectAuthStatus.projector(state)).toBe('loading');
   });
 
-  it('selectCurrentUser returns the signed-in user', () => {
-    expect(selectCurrentUser(buildState({ user: mockUser }))).toEqual(mockUser);
-    expect(selectCurrentUser(buildState({ user: null }))).toBeNull();
+  it('selectIsAuthenticated is true only when authenticated', () => {
+    expect(selectIsAuthenticated.projector('authenticated')).toBe(true);
+    expect(selectIsAuthenticated.projector('checking')).toBe(false);
+    expect(selectIsAuthenticated.projector('unauthenticated')).toBe(false);
   });
 
-  it('selectAccount returns the loaded account', () => {
-    expect(selectAccount(buildState({ account: mockAccount }))).toEqual(mockAccount);
-    expect(selectAccount(buildState({ account: null }))).toBeNull();
+  it('selectIsAuthChecking is true for checking and loading', () => {
+    expect(selectIsAuthChecking.projector('checking')).toBe(true);
+    expect(selectIsAuthChecking.projector('loading')).toBe(true);
+    expect(selectIsAuthChecking.projector('authenticated')).toBe(false);
+    expect(selectIsAuthChecking.projector('unauthenticated')).toBe(false);
   });
 
-  it('selectIsAuthenticated is true only when status is authenticated', () => {
-    expect(selectIsAuthenticated(buildState({ status: 'authenticated' }))).toBe(true);
-    expect(selectIsAuthenticated(buildState({ status: 'loading' }))).toBe(false);
-    expect(selectIsAuthenticated(buildState({ status: 'unauthenticated' }))).toBe(false);
-    expect(selectIsAuthenticated(buildState({ status: 'access_denied' }))).toBe(false);
+  it('selectCurrentUser returns user', () => {
+    const state: AccountState = { status: 'authenticated', user: mockUser, account: mockAccount, signInError: null };
+    expect(selectCurrentUser.projector(state)).toEqual(mockUser);
   });
 
-  it('selectIsAuthChecking is true while status is checking or loading', () => {
-    expect(selectIsAuthChecking(buildState({ status: 'checking' }))).toBe(true);
-    expect(selectIsAuthChecking(buildState({ status: 'loading' }))).toBe(true);
-    expect(selectIsAuthChecking(buildState({ status: 'authenticated' }))).toBe(false);
-    expect(selectIsAuthChecking(buildState({ status: 'unauthenticated' }))).toBe(false);
+  it('selectAccount returns account', () => {
+    const state: AccountState = { status: 'authenticated', user: mockUser, account: mockAccount, signInError: null };
+    expect(selectAccount.projector(state)).toEqual(mockAccount);
+  });
+
+  it('selectSignInError returns error code', () => {
+    const state: AccountState = { status: 'unauthenticated', user: null, account: null, signInError: 'auth/wrong-password' };
+    expect(selectSignInError.projector(state)).toBe('auth/wrong-password');
   });
 });

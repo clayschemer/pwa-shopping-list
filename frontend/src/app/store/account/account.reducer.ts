@@ -9,12 +9,14 @@ export interface AccountState {
   status: AuthStatus;
   user: User | null;
   account: Account | null;
+  signInError: string | null;
 }
 
 export const initialAccountState: AccountState = {
   status: 'checking',
   user: null,
   account: null,
+  signInError: null,
 };
 
 export const accountReducer = createReducer(
@@ -25,12 +27,14 @@ export const accountReducer = createReducer(
     status: 'loading' as const,
     user,
     account: null,
+    signInError: null,
   })),
 
   on(authActions.authStateEmpty, () => ({
     status: 'unauthenticated' as const,
     user: null,
     account: null,
+    signInError: null,
   })),
 
   on(accountActions.accountLoaded, (state, { account }) => ({
@@ -45,9 +49,15 @@ export const accountReducer = createReducer(
     account: null,
   })),
 
+  on(authActions.signInFailed, (state, { code }) => ({
+    ...state,
+    signInError: code,
+  })),
+
   on(authActions.signedOut, () => ({
     status: 'unauthenticated' as const,
     user: null,
     account: null,
+    signInError: null,
   })),
 );

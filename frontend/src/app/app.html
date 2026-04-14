@@ -1,79 +1,65 @@
-<mat-sidenav-container class="app-shell" [hasBackdrop]="true">
+@if (isAuthenticated()) {
+  <header class="app-root__top-bar" [class.app-root__top-bar--shop]="isShopMode()">
+    @if (isPlanMode()) {
+      <button
+        mat-icon-button
+        class="app-root__menu-btn"
+        aria-label="Open navigation menu"
+      >
+        <mat-icon>menu</mat-icon>
+      </button>
+    } @else {
+      <button
+        mat-icon-button
+        class="app-root__undo-btn"
+        aria-label="View checked items"
+      >
+        <mat-icon>undo</mat-icon>
+      </button>
+    }
 
-  <!-- Nav Drawer -->
-  <mat-sidenav
-    #drawer
-    mode="over"
-    position="start"
-    [attr.aria-label]="'Navigation drawer'"
-  >
-    <app-nav-drawer (close)="drawer.close()" />
-  </mat-sidenav>
+    <nav class="app-root__mode-toggle" aria-label="Mode selection">
+      <button
+        class="app-root__mode-btn"
+        [class.app-root__mode-btn--active]="isPlanMode()"
+        (click)="switchToPlan()"
+        [attr.aria-current]="isPlanMode() ? 'page' : null"
+      >
+        Plan
+      </button>
+      <button
+        class="app-root__mode-btn"
+        [class.app-root__mode-btn--active]="isShopMode()"
+        (click)="switchToShop()"
+        [attr.aria-current]="isShopMode() ? 'page' : null"
+      >
+        Shop
+      </button>
+    </nav>
 
-  <!-- Main content area -->
-  <mat-sidenav-content>
+    @if (isPlanMode()) {
+      <a
+        mat-icon-button
+        class="app-root__settings-btn"
+        routerLink="/settings"
+        aria-label="Settings"
+      >
+        <mat-icon>settings</mat-icon>
+      </a>
+    } @else {
+      <div class="app-root__session-pill" aria-label="Active session">
+        Global
+      </div>
+    }
+  </header>
 
-    <!-- Top bar -->
-    <header class="top-bar" [class.top-bar--shop]="isShopMode()">
-      @if (isPlanMode()) {
-        <button
-          mat-icon-button
-          aria-label="Open navigation menu"
-          (click)="drawer.open()"
-        >
-          <mat-icon>menu</mat-icon>
-        </button>
-      } @else {
-        <!-- Undo button with badge in shop mode -->
-        <button
-          mat-icon-button
-          aria-label="View checked items"
-        >
-          <mat-icon>undo</mat-icon>
-        </button>
-      }
-
-      <!-- Mode toggle (centred) -->
-      @if (isAuthenticated()) {
-        <div class="top-bar__mode-toggle">
-          <button
-            class="top-bar__mode-btn"
-            [class.top-bar__mode-btn--active]="isPlanMode()"
-            (click)="switchToPlan()"
-            aria-label="Switch to plan mode"
-          >
-            Plan
-          </button>
-          <button
-            class="top-bar__mode-btn"
-            [class.top-bar__mode-btn--active]="isShopMode()"
-            (click)="switchToShop()"
-            aria-label="Switch to shop mode"
-          >
-            Shop
-          </button>
-        </div>
-      }
-
-      @if (isPlanMode()) {
-        <a
-          mat-icon-button
-          routerLink="/settings"
-          aria-label="Settings"
-        >
-          <mat-icon>settings</mat-icon>
-        </a>
-      } @else {
-        <!-- Session pill placeholder -->
-        <div class="top-bar__session-pill" aria-label="Active session">
-          {{ sessionShopName() }}
-        </div>
-      }
-    </header>
-
-    <!-- Routed page content -->
+  <main class="app-root__content">
     <router-outlet />
-
-  </mat-sidenav-content>
-
-</mat-sidenav-container>
+  </main>
+} @else if (isAuthChecking()) {
+  <div class="app-root__loading" role="status" aria-label="Loading application">
+    <mat-spinner diameter="48" />
+  </div>
+} @else {
+  <router-outlet />
+}

@@ -1,13 +1,83 @@
-<div class="sign-in">
-  <h1 class="sign-in__title">Shopping List</h1>
-  <p class="sign-in__subtitle">Sign in to access your shared list</p>
-  <button
-    mat-raised-button
-    class="sign-in__button"
-    (click)="signIn()"
-    aria-label="Sign in with Google"
-  >
-    <mat-icon aria-hidden="true">login</mat-icon>
-    Sign in with Google
-  </button>
+<div class="app-sign-in">
+  <div class="app-sign-in__header">
+    <h1 class="app-sign-in__title">Shopping List</h1>
+    <p class="app-sign-in__subtitle">Sign in to access your shared list</p>
+  </div>
+
+  <div class="app-sign-in__actions">
+    <button
+      mat-raised-button
+      class="app-sign-in__google-btn"
+      (click)="signInWithGoogle()"
+      aria-label="Continue with Google"
+    >
+      <mat-icon aria-hidden="true">login</mat-icon>
+      Continue with Google
+    </button>
+
+    <div class="app-sign-in__divider" role="separator">
+      <span class="app-sign-in__divider-text">or</span>
+    </div>
+
+    <form
+      class="app-sign-in__form"
+      (submit)="$event.preventDefault(); signInWithEmail()"
+      aria-label="Sign in with email"
+    >
+      <mat-form-field class="app-sign-in__field">
+        <mat-label>Email</mat-label>
+        <input
+          matInput
+          id="sign-in-email"
+          type="email"
+          autocomplete="email"
+          [value]="email()"
+          (input)="onEmailInput($event)"
+          required
+          [attr.aria-describedby]="errorMessage() ? 'sign-in-error' : null"
+          [attr.aria-invalid]="signInError() ? true : null"
+        />
+      </mat-form-field>
+
+      <mat-form-field class="app-sign-in__field">
+        <mat-label>Password</mat-label>
+        <input
+          matInput
+          id="sign-in-password"
+          type="password"
+          autocomplete="current-password"
+          [value]="password()"
+          (input)="onPasswordInput($event)"
+          required
+          [attr.aria-describedby]="errorMessage() ? 'sign-in-error' : null"
+          [attr.aria-invalid]="signInError() ? true : null"
+        />
+      </mat-form-field>
+
+      @if (errorMessage(); as msg) {
+        <p
+          id="sign-in-error"
+          class="app-sign-in__error"
+          role="alert"
+          aria-live="polite"
+        >
+          {{ msg }}
+        </p>
+      }
+
+      <button
+        mat-flat-button
+        class="app-sign-in__submit-btn"
+        type="submit"
+        [disabled]="!canSubmit() || emailSubmitting()"
+        [attr.aria-busy]="emailSubmitting()"
+      >
+        @if (emailSubmitting() && !signInError()) {
+          <mat-spinner diameter="20" />
+        } @else {
+          Sign in
+        }
+      </button>
+    </form>
+  </div>
 </div>

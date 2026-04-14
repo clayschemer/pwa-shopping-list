@@ -27,3 +27,8 @@ export const selectIsAuthChecking = createSelector(
   selectAuthStatus,
   (status) => status === 'checking' || status === 'loading',
 );
+
+export const selectSignInError = createSelector(
+  selectAccountState,
+  (state) => state.signInError,
+);

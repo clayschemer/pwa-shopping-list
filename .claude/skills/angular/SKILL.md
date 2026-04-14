@@ -13,7 +13,7 @@ Read this file whenever working on any Angular code: components, services, store
 
 - **Angular 21** — standalone components, typed forms, no SSR
 - **Angular 22** upgrade expected May 2026
-- **Signal Forms** — experimental in Angular 21, expected stable in Angular 22. **Do not use until Angular 22.**
+- **Signal Forms** — experimental in Angular 21, expected stable in Angular 22. Should be used eventhough experimental status.
 - **NgRx** — classic `@ngrx/store` + `@ngrx/effects` for main application state; `@ngrx/signals` where appropriate for local feature state
 - **Angular Material 3** — all UI primitives
 - **Vitest** — unit and component tests
@@ -36,6 +36,8 @@ Templates say **what** to show, never **how** to get it. Logic does not belong i
 ### Components — thin and smart
 
 Components are the decision-makers. They know what needs to happen and delegate to services to make it happen. They contain **code that decides**, not code that processes.
+
+Every component must use separate template and style files — never inline `template` or `styles` in the decorator. Each component consists of exactly three files: `*.component.ts`, `*.component.html`, and `*.component.scss`. Use `templateUrl` and `styleUrl` in `@Component`.
 
 > Component: Code that DECIDES. Service: Code that PROCESSES.
 
@@ -134,17 +136,17 @@ src/
 
 ### Standalone only
 
-Every component is standalone. No NgModules.
+Every component is standalone. No NgModules. Do not include `standalone: true` — it is the default since Angular 19 and the explicit flag is redundant noise.
 
 ```typescript
 @Component({
-  selector: 'app-item-card',
-  standalone: true,
+  selector: "app-item-card",
   imports: [MatCardModule, MatIconModule],
-  templateUrl: './item-card.component.html',
+  templateUrl: "./item-card.component.html",
+  styleUrl: "./item-card.component.scss",
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class ItemCardComponent { }
+export class ItemCardComponent {}
 ```
 
 ### OnPush everywhere
@@ -194,11 +196,16 @@ Use `providedIn: 'root'` for all singleton services. Only use feature-level prov
 ### Shape
 
 ```typescript
-@Injectable({ providedIn: 'root' })
+@Injectable({ providedIn: "root" })
 export class ItemPriceService {
   private readonly api = inject(ItemApiService);
 
-  setPrice(id: ItemId, price: number | null, qty: number | null, unit: string | null): Promise<void> {
+  setPrice(
+    id: ItemId,
+    price: number | null,
+    qty: number | null,
+    unit: string | null,
+  ): Promise<void> {
     return this.api.setItemPrice(id, price, qty, unit);
   }
 
@@ -233,11 +240,20 @@ Each domain gets its own folder under `store/` with four files: `actions`, `redu
 
 ```typescript
 // Good — describes what happened
-export const itemChecked = createAction('[Shop] Item Checked', props<{ itemId: ItemId; sessionId: SessionId }>());
-export const itemCheckConflicted = createAction('[Shop] Item Check Conflicted', props<{ itemId: ItemId }>());
+export const itemChecked = createAction(
+  "[Shop] Item Checked",
+  props<{ itemId: ItemId; sessionId: SessionId }>(),
+);
+export const itemCheckConflicted = createAction(
+  "[Shop] Item Check Conflicted",
+  props<{ itemId: ItemId }>(),
+);
 
 // Bad — describes what to do
-export const checkItem = createAction('[Items] Check Item', props<{ itemId: ItemId }>());
+export const checkItem = createAction(
+  "[Items] Check Item",
+  props<{ itemId: ItemId }>(),
+);
 ```
 
 ### Reducers — pure, minimal
@@ -253,11 +269,17 @@ on(itemsActions.itemAdded, (state, { item }) => itemsAdapter.upsertOne(item, sta
 If a component is computing something from store data, move it to a selector.
 
 ```typescript
-export const selectActiveItems = createSelector(
-  selectAllItems,
-  (items) => items.filter(item => !item.removed)
+export const selectActiveItems = createSelector(selectAllItems, (items) =>
+  items.filter((item) => !item.removed),
 );
 ```
+
+### State initialisation
+
+- Always define explicit `initialState` with safe defaults for every field
+- Use `loaded` flags to distinguish "empty because not fetched" from "empty because genuinely empty"
+- Effects that fetch data must only fire after their prerequisites are met (e.g., `accountLoaded` for entity effects) — never use `@ngrx/effects/init` for data fetches that require authentication
+- Fire-and-forget promises are forbidden — always `await` or handle the result in the observable chain
 
 ### Effects — one concern per effect
 
@@ -269,15 +291,18 @@ checkItem$ = createEffect(() =>
     ofType(shopActions.checkItemRequested),
     switchMap(({ itemId, sessionId }) =>
       from(this.itemApi.checkItem(itemId, sessionId)).pipe(
-        map(result =>
-          result.type === 'CHECK_SUCCESS'
-            ? shopActions.itemChecked({ item: result.item, session: result.session })
-            : shopActions.itemCheckConflicted({ itemId })
+        map((result) =>
+          result.type === "CHECK_SUCCESS"
+            ? shopActions.itemChecked({
+                item: result.item,
+                session: result.session,
+              })
+            : shopActions.itemCheckConflicted({ itemId }),
         ),
-        catchError(err => of(shopActions.itemCheckFailed({ error: err })))
-      )
-    )
-  )
+        catchError((err) => of(shopActions.itemCheckFailed({ error: err }))),
+      ),
+    ),
+  ),
 );
 ```
 
@@ -309,15 +334,24 @@ Local UI state → signals. Shared application state → NgRx.
 
 ```typescript
 export const routes: Routes = [
-  { path: 'sign-in', loadComponent: () => import('./features/auth/sign-in.component') },
   {
-    path: '',
+    path: "sign-in",
+    loadComponent: () => import("./features/auth/sign-in.component"),
+  },
+  {
+    path: "",
     canActivate: [authGuard],
     children: [
-      { path: 'plan', loadComponent: () => import('./features/plan/plan.component') },
-      { path: 'shop', loadComponent: () => import('./features/shop/shop.component') },
-    ]
-  }
+      {
+        path: "plan",
+        loadComponent: () => import("./features/plan/plan.component"),
+      },
+      {
+        path: "shop",
+        loadComponent: () => import("./features/shop/shop.component"),
+      },
+    ],
+  },
 ];
 ```
 
@@ -335,14 +369,68 @@ Use `loadComponent` for lazy routes. No lazy modules.
 
 ---
 
-## Accessibility
+## Accessibility — WCAG 2.1 AA
 
-- All interactive elements keyboard reachable
-- All icons that convey meaning have `aria-label`
-- All form fields have `<label>` or `aria-label`
-- Colour is never the only differentiator
-- Settings respect `prefers-color-scheme`, `prefers-reduced-motion`, `prefers-contrast` unless user has overridden them
+Full compliance is non-negotiable. Every component must meet these requirements:
+
+### Semantic HTML
+- Landmark roles: `<main>`, `<nav>`, `<header>`, `<footer>` used semantically — one `<main>` per page
+- Heading hierarchy: one `<h1>` per page, no skipped levels (`h1` → `h2` → `h3`, never `h1` → `h3`)
+- Lists (`<ul>`, `<ol>`) for groups of related items
+- `<button>` for actions, `<a>` for navigation — never the reverse
+
+### Forms
+- Every form input has a visible `<label>` associated via `for`/`id`, or `aria-label`/`aria-labelledby`
+- Error messages associated via `aria-describedby`
+- `aria-live="polite"` on error regions for dynamic error display
+- `autocomplete` attributes on identity fields (`email`, `current-password`, `name`, etc.)
+- Validation feedback on submit, not on blur (less disruptive)
+- `aria-busy="true"` on submit buttons during async operations
+- `aria-invalid="true"` on inputs with validation errors
+
+### Interactive elements
+- All interactive elements keyboard reachable and operable
+- Focus order matches visual order (no positive `tabindex`)
+- `:focus-visible` indicator on every interactive element
+- Touch targets ≥ 2.75rem (44×44px equivalent)
+- Icon-only buttons have `aria-label`
+- Decorative icons have `aria-hidden="true"`
+
+### Dynamic content
+- `aria-live="polite"` for content updates (toasts, inline errors, status changes)
+- `aria-live="assertive"` only for critical alerts
+- Colour is never the only differentiator — always pair with text, icon, or pattern
+
+### Media preferences
+- `prefers-color-scheme`, `prefers-reduced-motion`, `prefers-contrast` always respected
+- User-explicit overrides take precedence over system preferences
 - Test with a screen reader for features with dynamic list updates
+
+---
+
+## Progressive Enhancement & Responsive Design
+
+### Mobile-first
+- Base styles target the smallest viewport (320px minimum)
+- Every layout must work from 320px to unlimited width
+- No horizontal scroll at any viewport width
+
+### No global breakpoints — component-level responsiveness
+- **Do not use media query breakpoints** (`@media (min-width: ...)`) for layout changes. This approach is outdated and brittle.
+- Use **container queries** (`@container`) so each component adapts to its own available space, not the viewport.
+- Use **fluid techniques** (`clamp()`, `min()`, `max()`, `%`, `fr`) for sizing that scales continuously.
+- Use **intrinsic sizing** (`min-content`, `max-content`, `fit-content`) where appropriate.
+- Media queries are only acceptable for user preference features (`prefers-reduced-motion`, `prefers-color-scheme`, `prefers-contrast`, `pointer`).
+
+### Progressive enhancement
+- Core content is accessible with CSS only — JS enhances the experience
+- Graceful degradation: features that need JS still render meaningful HTML without it
+- Use semantic HTML as the foundation — styles and scripts layer on top
+
+### Touch & pointer
+- Touch targets ≥ 2.75rem on all interactive elements
+- Pointer-fine media query for hover-dependent interactions on desktop
+- No hover-only interactions — everything must be tap/click accessible
 
 ---
 
@@ -350,10 +438,12 @@ Use `loadComponent` for lazy routes. No lazy modules.
 
 ```typescript
 // Vitest — test behaviour, not implementation
-describe('ItemPriceService', () => {
-  it('returns false when priceUpdatedAt is null', () => {
+describe("ItemPriceService", () => {
+  it("returns false when priceUpdatedAt is null", () => {
     const service = new ItemPriceService(/* mocked deps */);
-    expect(service.isPriceStale({ ...mockItem, priceUpdatedAt: null })).toBe(false);
+    expect(service.isPriceStale({ ...mockItem, priceUpdatedAt: null })).toBe(
+      false,
+    );
   });
 });
 
@@ -367,22 +457,25 @@ TestBed.configureTestingModule({
 - Test observable outcomes, not private method calls
 - Mock at the API service layer boundary
 - Never mock signals — set their value directly
+- Every bug fix must start with a failing test that reproduces the bug
+- Every new feature starts with the acceptance test scenario, then unit tests, then implementation
+- Reducers must be tested with explicit state transitions, not just initial state checks
 
 ---
 
 ## File Naming
 
-| Type | Example |
-|---|---|
-| Component | `item-card.component.ts` |
-| Service | `item-price.service.ts` |
-| Actions | `items.actions.ts` |
-| Reducer | `items.reducer.ts` |
-| Selectors | `items.selectors.ts` |
-| Effects | `items.effects.ts` |
-| Model | `item.model.ts` |
-| Guard | `auth.guard.ts` |
-| Test | `item-price.service.spec.ts` |
+| Type      | Example                      |
+| --------- | ---------------------------- |
+| Component | `item-card.component.ts`     |
+| Service   | `item-price.service.ts`      |
+| Actions   | `items.actions.ts`           |
+| Reducer   | `items.reducer.ts`           |
+| Selectors | `items.selectors.ts`         |
+| Effects   | `items.effects.ts`           |
+| Model     | `item.model.ts`              |
+| Guard     | `auth.guard.ts`              |
+| Test      | `item-price.service.spec.ts` |
 
 ---
 
@@ -398,6 +491,13 @@ TestBed.configureTestingModule({
 - Use `console.log` in committed code
 - Write an NgRx effect that manipulates DOM or component state
 - Use `Subject` or `BehaviorSubject` for store-level state
+- Use inline `template` or `styles` in `@Component` — use `templateUrl` and `styleUrl` with separate files
+- Write `if`/`else` bodies without braces — always use curly braces even for single-line bodies
+- Include `standalone: true` in `@Component` — all components are standalone by default in Angular 19+
+- Use browser `prompt()`, `alert()`, or `confirm()` — use Material Dialog or Bottom Sheet
+- Dispatch actions that change unrelated state (e.g., changing mode when only layout selection is intended)
+- Show navigation chrome or app shell on unauthenticated screens — conditional rendering must gate the shell
+- Use `@ngrx/effects/init` to trigger data fetches that require authentication
 
 ---
 
