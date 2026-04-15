@@ -79,6 +79,8 @@ A private shared shopping list PWA for two users. Mobile-first, accessibility-fi
 - Signal Forms — experimental in Angular 21, expected stable in Angular 22. Use when stable; fall back to Reactive Forms until then.
 - NgRx for state management
 - Angular Material 3 for UI
+- **i18n:** `@jsverse/transloco` for runtime language switching (EN, NO, SV, DE, FR). Translation files at `public/assets/i18n/{lang}.json`. Chosen over Angular built-in i18n because language switching must work at runtime from a settings dropdown, not compile-time per-build.
+- **Theming:** `_theme-colors.scss` generated via Angular Material schematic or Material Theme Builder. Drop-in replaceable. High-contrast themes are full M3 palette overrides (AAA). Compact mode uses CSS custom properties for spacing/line-height beyond just Material density.
 - Fonts: DM Serif Display + Plus Jakarta Sans (Google Fonts)
 - Offline support: nice-to-have, not a hard requirement
 
@@ -186,6 +188,18 @@ SessionCheckedItem
 - **Sessions use `participants: UserId[]`** rather than a single `joinedBy` field. The product is currently two-user but the model supports any number of participants.
 - **Account is the top-level container.** All shared data belongs to an account. The model supports multiple users per account even though registration/invitation flows are not yet built.
 - **Two category totals in shop mode:** category total (all active unchecked items, drops when any session checks an item) and session checked total (this session's running checkout bill, drops on uncheck).
+
+---
+
+## Key UI & Settings Decisions
+
+- **Full-screen routes:** Settings and Manage Shops render without the app shell top bar (hamburger, mode toggle, cogwheel). They have their own `← Title` headers. The app shell uses `isFullScreenRoute` to conditionally hide chrome on `/settings` and `/manage-shops`.
+- **ThemeService** (`core/theme/theme.service.ts`) is the single owner of all device-local settings. It reads/writes localStorage, applies CSS classes to `html`/`body`, and syncs language to Transloco. Settings with `null` value (darkMode, reduceMotion, highContrast) mean "follow system preference".
+- **Transloco chosen over Angular i18n** because language must switch at runtime from a settings dropdown. Angular's built-in i18n produces one build per locale, which doesn't support this.
+- **Theme token structure** is designed for Material Theme Builder drop-in. `_theme-colors.scss` is the only file to replace. It exports `$primary-palette`, `$tertiary-palette`, and a `high-contrast-overrides($theme-type)` mixin. Regenerate with: `ng generate @angular/material:m3-theme --primary-color="#b23000" --secondary-color="#426f48" --neutral-color="#857468" --include-high-contrast --directory=src/styles`.
+- **Compact mode** goes beyond Material density. Nine CSS custom properties define all app-level spacing, and `.theme-compact` overrides them to ~50% reduced values. Components must use `var(--app-spacing-*)` etc. for this to work.
+- **High-contrast themes** are full M3 palette overrides (not just focus indicator changes). Generated with `--include-high-contrast`, they produce light+dark variants targeting AAA (≥7:1) contrast ratios on all surface/text pairs.
+- **Test infrastructure** for Transloco: `src/testing/transloco-testing.ts` provides `provideTranslocoTesting()` which loads the EN translation file. All component specs that render templates with transloco pipes must import this.
 
 ---
 

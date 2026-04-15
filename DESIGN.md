@@ -43,7 +43,7 @@ All four theme variants are supported. Implementation follows Angular Material 3
 
 - Light/dark: `color-scheme: light dark` on `html` as default; `html.theme-light` / `html.theme-dark` classes for explicit overrides
 - High contrast: `@media (prefers-contrast: more)` as default; `body.theme-high-contrast` class for explicit override
-- Compact: `body.theme-compact` class applying `mat.all-component-densities(-2)`
+- Compact: `body.theme-compact` class applying `mat.all-component-densities(-2)` **plus** CSS custom property overrides for all app-level spacing, line heights, and font sizes (`--app-spacing-*`, `--app-line-height-*`, `--app-font-size-*`). All component SCSS must use these tokens — not hardcoded values — so compact mode takes effect everywhere.
 - Reduced motion: `@media (prefers-reduced-motion: reduce)` as default; `body.theme-reduce-motion` class for explicit override
 
 System preference is always the fallback. Classes are applied only when the user has made an explicit in-app choice, managed by a `ThemeService`.
@@ -62,7 +62,13 @@ Under `prefers-reduced-motion: reduce`, all durations collapse to `0ms` — ever
 ### Reference Files
 `design-system.scss` (project root) — design token specification: palette definitions, typography scale, spacing scale, motion contract. A human-readable reference, also used as the source of CSS custom property values.
 
-`frontend/src/styles/` — Angular Material 3 implementation using multi-file structure (`_theme-colors.scss`, `_theme-base.scss`, `_theme-overrides.scss`, `_theme-modes.scss`). See `.claude/skills/angular-material3-theming/SKILL.md` for structure and conventions.
+`frontend/src/styles/` — Angular Material 3 implementation using multi-file structure:
+- `_theme-colors.scss` — **generated** tonal palettes + high-contrast overrides. Source: `ng generate @angular/material:m3-theme --primary-color="#b23000" --secondary-color="#426f48" --neutral-color="#857468" --include-high-contrast`. Compatible with Material Theme Builder (`material-foundation.github.io/material-theme-builder`) — to swap themes, replace this file with builder output.
+- `_theme-base.scss` — `mat.theme()` call + app-level spacing tokens.
+- `_theme-overrides.scss` — Global component token overrides.
+- `_theme-modes.scss` — Dark, high-contrast (full palette overrides for AAA), compact (density + spacing tokens), reduced-motion.
+
+See `.claude/skills/angular-material3-theming/SKILL.md` for conventions.
 
 ---
 
@@ -267,7 +273,7 @@ No indicator of the other user's active session.
 
 ## Settings (Screen 4)
 
-Accessed via ⚙ cogwheel in plan mode top bar. Not accessible in shop mode.
+Full-screen page — the app shell top bar (hamburger, mode toggle, cogwheel) is hidden. Settings has its own `← Settings` header with a back button. Accessed via ⚙ cogwheel in plan mode top bar. Not accessible in shop mode.
 
 ### Appearance
 | Setting | Control | Default |

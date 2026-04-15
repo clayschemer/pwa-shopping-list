@@ -55,6 +55,9 @@ A shared shopping list PWA for two users (a couple). Private by default, may ope
 - **Fonts:** DM Serif Display + Plus Jakarta Sans (Google Fonts)
 - **PWA:** Offline support is nice-to-have, not a hard requirement
 - **Animations:** Pure CSS only (`transition`, `@keyframes`). **Do not** use `@angular/animations` — it is deprecated. Never install or import `@angular/animations`, `BrowserAnimationsModule`, or `NoopAnimationsModule`.
+- **i18n:** Runtime language switching via `@jsverse/transloco`. Translation JSON files in `frontend/public/assets/i18n/{en,no,sv,de,fr}.json`. All user-facing strings must use the `transloco` pipe in templates or `TranslocoService.translate()` in TS. `ThemeService.language` drives `TranslocoService.setActiveLang()`.
+- **Theming:** `_theme-colors.scss` is generated via `ng generate @angular/material:m3-theme` (or Material Theme Builder at `material-foundation.github.io/material-theme-builder`). To swap themes, replace `_theme-colors.scss` with builder output — the structure is identical. High-contrast themes are full M3 palette overrides (light+dark) generated with `--include-high-contrast`.
+- **Compact mode:** Beyond `mat.all-component-densities(-2)`, compact mode overrides CSS custom properties (`--app-spacing-*`, `--app-line-height-*`, `--app-font-size-*`) to reduce all vertical spacing, line heights, and font sizes. All component SCSS should use these tokens for spacing.
 
 For Angular component patterns, NgRx structure, service design, Signal Forms, routing, and testing conventions → `.claude/skills/angular/SKILL.md`
 For Material 3 theming, design tokens, dark/light/high-contrast/compact mode setup → `.claude/skills/angular-material3-theming/SKILL.md`
@@ -106,6 +109,8 @@ For SCSS conventions (BEM, units, layout, accessibility, reduced motion) → `.c
 │   │   │   │   │   ├── session-api.service.ts
 │   │   │   │   │   └── account-api.service.ts
 │   │   │   │   ├── auth/
+│   │   │   │   ├── i18n/            ← Transloco config and HTTP loader
+│   │   │   │   ├── theme/           ← ThemeService — manages settings in localStorage, applies CSS classes
 │   │   │   │   └── stream/          ← change-stream.service.ts
 │   │   │   ├── store/               ← NgRx per-domain (items/, categories/, shops/, sessions/, account/, ui/)
 │   │   │   ├── features/
