@@ -1,0 +1,86 @@
+{
+  "app": {
+    "name": "Einkaufsliste",
+    "loading": "Anwendung wird geladen",
+    "plan": "Planen",
+    "shop": "Einkaufen"
+  },
+  "nav": {
+    "openMenu": "Navigationsmenü öffnen",
+    "viewChecked": "Abgehakte Artikel anzeigen",
+    "settings": "Einstellungen",
+    "activeSession": "Aktive Sitzung",
+    "global": "Global"
+  },
+  "navDrawer": {
+    "shopLayout": "Aktuelle Ladenaufteilung",
+    "globalAll": "Global (alle)",
+    "manageShops": "Läden verwalten\u2026",
+    "categories": "Kategorien",
+    "addCategory": "Kategorie hinzufügen"
+  },
+  "plan": {
+    "listLabel": "Einkaufsliste",
+    "empty": "Deine Liste ist leer."
+  },
+  "signIn": {
+    "title": "Einkaufsliste",
+    "subtitle": "Anmelden, um auf deine gemeinsame Liste zuzugreifen",
+    "continueWithGoogle": "Weiter mit Google",
+    "or": "oder",
+    "email": "E-Mail",
+    "password": "Passwort",
+    "signIn": "Anmelden",
+    "signingIn": "Anmeldung läuft\u2026",
+    "formLabel": "Mit E-Mail anmelden",
+    "errors": {
+      "wrongPassword": "Ungültige E-Mail oder Passwort.",
+      "userNotFound": "Kein Konto mit dieser E-Mail gefunden.",
+      "tooManyRequests": "Zu viele Versuche. Bitte versuche es später erneut.",
+      "invalidEmail": "Bitte gib eine gültige E-Mail-Adresse ein.",
+      "default": "Anmeldung fehlgeschlagen. Bitte versuche es erneut."
+    }
+  },
+  "accessDenied": {
+    "title": "Zugriff verweigert",
+    "message": "Das Konto <strong>{{email}}</strong> hat keine Berechtigung, diese Anwendung zu nutzen.",
+    "messageNoEmail": "Dieses Konto hat keine Berechtigung, diese Anwendung zu nutzen.",
+    "tryDifferent": "Anderes Konto versuchen"
+  },
+  "manageShops": {
+    "title": "Läden verwalten",
+    "goBack": "Zurück",
+    "empty": "Noch keine Läden. Tippe +, um einen hinzuzufügen.",
+    "addShop": "Laden hinzufügen",
+    "deleteShop": "{{name}} löschen",
+    "deleteConfirm": "\"{{name}}\" löschen? Dies kann nicht rückgängig gemacht werden."
+  },
+  "shopNameSheet": {
+    "addTitle": "Laden hinzufügen",
+    "renameTitle": "Laden umbenennen",
+    "shopName": "Ladenname",
+    "nameConflict": "Ein Laden mit diesem Namen existiert bereits",
+    "cancel": "Abbrechen",
+    "add": "Laden hinzufügen",
+    "save": "Speichern"
+  },
+  "settings": {
+    "title": "Einstellungen",
+    "goBack": "Zurück",
+    "appearance": "Darstellung",
+    "darkMode": "Dunkler Modus",
+    "compactMode": "Kompakter Modus",
+    "accessibility": "Barrierefreiheit",
+    "reduceMotion": "Bewegung reduzieren",
+    "highContrast": "Hoher Kontrast",
+    "leftHanded": "Linkshänder-Modus",
+    "languageRegion": "Sprache und Region",
+    "language": "Sprache",
+    "currency": "Währung",
+    "display": "Anzeige",
+    "keepScreenAwake": "Bildschirm aktiv halten",
+    "account": "Konto",
+    "signedInAs": "Angemeldet als",
+    "signOut": "Abmelden"
+  }
+}

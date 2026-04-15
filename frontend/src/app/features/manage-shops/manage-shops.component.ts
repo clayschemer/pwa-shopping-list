@@ -12,6 +12,7 @@ import {
   ShopNameSheetData,
   ShopNameSheetResult,
 } from './shop-name-sheet.component';
+import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
 import type { Shop } from '../../models/shop.model';
 import type { ShopId } from '../../models/ids.model';
 
@@ -21,6 +22,7 @@ import type { ShopId } from '../../models/ids.model';
     MatIconButton,
     MatFabButton,
     MatIcon,
+    TranslocoPipe,
   ],
   templateUrl: './manage-shops.component.html',
   styleUrl: './manage-shops.component.scss',
@@ -30,6 +32,7 @@ export class ManageShopsComponent {
   private readonly store = inject(Store);
   private readonly location = inject(Location);
   private readonly bottomSheet = inject(MatBottomSheet);
+  private readonly transloco = inject(TranslocoService);
 
   readonly shops = toSignal(this.store.select(selectAllShops), { initialValue: [] });
 
@@ -70,8 +73,8 @@ export class ManageShopsComponent {
   }
 
   deleteShop(shop: Shop): void {
-    const confirmed = confirm(`Delete "${shop.name}"? This cannot be undone.`);
-    if (confirmed) {
+    const message = this.transloco.translate('manageShops.deleteConfirm', { name: shop.name });
+    if (confirm(message)) {
       this.store.dispatch(shopsApiActions.deleteShopRequested({ id: shop.id }));
     }
   }

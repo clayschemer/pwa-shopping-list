@@ -6,6 +6,7 @@ import { MatFormField, MatLabel } from '@angular/material/form-field';
 import { MatSelect, MatOption } from '@angular/material/select';
 import { MatIcon } from '@angular/material/icon';
 import { MatDivider } from '@angular/material/divider';
+import { TranslocoPipe } from '@jsverse/transloco';
 import { selectAllShops } from '../../store/shops/shops.selectors';
 import { selectSelectedShopId } from '../../store/ui/ui.selectors';
 import { selectOrderedCategories } from '../../store/selectors/ordered-categories.selectors';
@@ -26,6 +27,7 @@ import type { CategoryId, ShopId } from '../../models/ids.model';
     MatOption,
     MatIcon,
     MatDivider,
+    TranslocoPipe,
   ],
   templateUrl: './nav-drawer.component.html',
   styleUrl: './nav-drawer.component.scss',

@@ -1,7 +1,9 @@
+import '../../../testing/init-testbed';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { TestBed } from '@angular/core/testing';
 import { Router } from '@angular/router';
 import { provideMockStore, MockStore } from '@ngrx/store/testing';
+import { provideTranslocoTesting } from '../../../testing/transloco-testing';
 import { SignInComponent } from './sign-in.component';
 import { selectAuthStatus, selectSignInError, selectIsAuthChecking } from '../../store/account/account.selectors';
 import type { AuthStatus } from '../../store/account/account.reducer';
@@ -14,6 +16,7 @@ describe('SignInComponent', () => {
     router = { navigateByUrl: vi.fn() };
 
     TestBed.configureTestingModule({
+      imports: [provideTranslocoTesting()],
       providers: [
         provideMockStore({
           selectors: [

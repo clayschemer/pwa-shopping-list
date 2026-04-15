@@ -1,6 +1,7 @@
-import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
-import { Router, RouterLink, RouterOutlet } from '@angular/router';
+import { ChangeDetectionStrategy, Component, inject, computed } from '@angular/core';
+import { NavigationEnd, Router, RouterLink, RouterOutlet } from '@angular/router';
 import { toSignal } from '@angular/core/rxjs-interop';
+import { filter, map } from 'rxjs';
 import { Store } from '@ngrx/store';
 import { MatIconButton } from '@angular/material/button';
 import { MatIcon } from '@angular/material/icon';
@@ -9,8 +10,11 @@ import { MatSidenav, MatSidenavContainer, MatSidenavContent } from '@angular/mat
 import { selectIsAuthenticated, selectIsAuthChecking } from './store/account/account.selectors';
 import { selectIsPlanMode, selectIsShopMode, selectNavDrawerOpen, selectSelectedShopId } from './store/ui/ui.selectors';
 import { uiActions } from './store/ui/ui.actions';
+import { TranslocoPipe } from '@jsverse/transloco';
 import { NavDrawerComponent } from './shell/nav-drawer/nav-drawer.component';
 import type { CategoryId } from './models/ids.model';
+
+const FULL_SCREEN_ROUTES = ['/settings', '/manage-shops'];
 
 @Component({
   selector: 'app-root',
@@ -24,6 +28,7 @@ import type { CategoryId } from './models/ids.model';
     MatSidenavContainer,
     MatSidenavContent,
     NavDrawerComponent,
+    TranslocoPipe,
   ],
   templateUrl: './app.html',
   styleUrl: './app.scss',
@@ -56,6 +61,18 @@ export class App {
   private readonly shopId = toSignal(this.store.select(selectSelectedShopId), {
     initialValue: null,
   });
+
+  private readonly currentUrl = toSignal(
+    this.router.events.pipe(
+      filter((e): e is NavigationEnd => e instanceof NavigationEnd),
+      map((e) => e.urlAfterRedirects),
+    ),
+    { initialValue: this.router.url },
+  );
+
+  readonly isFullScreenRoute = computed(() =>
+    FULL_SCREEN_ROUTES.some((r) => this.currentUrl().startsWith(r)),
+  );
 
   openDrawer(): void {
     this.store.dispatch(uiActions.navDrawerOpened());

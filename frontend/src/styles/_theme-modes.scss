@@ -2,6 +2,7 @@
 // See .claude/skills/angular-material3-theming/SKILL.md for full pattern.
 
 @use '@angular/material' as mat;
+@use './theme-colors' as theme;
 
 // ─── LIGHT / DARK ────────────────────────────────────────────────────────────
 // Default: color-scheme: light dark on <html> (set in _theme-base.scss).
@@ -16,22 +17,36 @@ html.theme-dark {
 }
 
 // ─── HIGH CONTRAST ───────────────────────────────────────────────────────────
+// Full palette overrides for AAA contrast ratios.
+// System preference fallback via prefers-contrast: more.
+// Override: add .theme-high-contrast to <body> via ThemeService.
 
 @media (prefers-contrast: more) {
   html {
+    @include theme.high-contrast-overrides(color-scheme);
     @include mat.strong-focus-indicators();
   }
 }
 
 body.theme-high-contrast {
+  @include theme.high-contrast-overrides(color-scheme);
   @include mat.strong-focus-indicators();
 }
 
 // ─── COMPACT DENSITY ─────────────────────────────────────────────────────────
-// density: -2 per DESIGN.md decision.
 
 body.theme-compact {
   @include mat.all-component-densities(-2);
+
+  --app-spacing-section: 0.75rem;
+  --app-spacing-row: 0.375rem;
+  --app-spacing-row-min-height: 2.25rem;
+  --app-spacing-padding-block: 0.25rem;
+  --app-spacing-padding-inline: 0.75rem;
+  --app-line-height-body: 1.25;
+  --app-line-height-heading: 1.15;
+  --app-font-size-body: 0.8125rem;
+  --app-font-size-section-title: 0.75rem;
 }
 
 // ─── REDUCED MOTION ──────────────────────────────────────────────────────────

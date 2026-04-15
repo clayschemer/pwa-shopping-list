@@ -1,14 +1,14 @@
 <div class="app-shop-name-sheet">
   <h3 class="app-shop-name-sheet__title">
     @if (mode === 'add') {
-      Add shop
+      {{ 'shopNameSheet.addTitle' | transloco }}
     } @else {
-      Rename shop
+      {{ 'shopNameSheet.renameTitle' | transloco }}
     }
   </h3>
 
   <mat-form-field class="app-shop-name-sheet__field">
-    <mat-label>Shop name</mat-label>
+    <mat-label>{{ 'shopNameSheet.shopName' | transloco }}</mat-label>
     <input
       matInput
       [ngModel]="name()"
@@ -17,19 +17,19 @@
       cdkFocusInitial
     />
     @if (hasConflict()) {
-      <mat-error>A shop with this name already exists</mat-error>
+      <mat-error>{{ 'shopNameSheet.nameConflict' | transloco }}</mat-error>
     }
   </mat-form-field>
 
   <div class="app-shop-name-sheet__actions">
-    <button mat-button (click)="onCancel()">Cancel</button>
+    <button mat-button (click)="onCancel()">{{ 'shopNameSheet.cancel' | transloco }}</button>
     <button
       mat-flat-button
       color="primary"
       [disabled]="!isValid()"
       (click)="onSubmit()"
     >
-      {{ actionLabel }}
+      {{ actionLabel | transloco }}
     </button>
   </div>
 </div>

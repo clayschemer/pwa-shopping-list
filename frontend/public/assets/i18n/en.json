@@ -1,0 +1,86 @@
+{
+  "app": {
+    "name": "Shopping List",
+    "loading": "Loading application",
+    "plan": "Plan",
+    "shop": "Shop"
+  },
+  "nav": {
+    "openMenu": "Open navigation menu",
+    "viewChecked": "View checked items",
+    "settings": "Settings",
+    "activeSession": "Active session",
+    "global": "Global"
+  },
+  "navDrawer": {
+    "shopLayout": "Current shop layout",
+    "globalAll": "Global (all)",
+    "manageShops": "Manage shops\u2026",
+    "categories": "Categories",
+    "addCategory": "Add category"
+  },
+  "plan": {
+    "listLabel": "Shopping list",
+    "empty": "Your list is empty."
+  },
+  "signIn": {
+    "title": "Shopping List",
+    "subtitle": "Sign in to access your shared list",
+    "continueWithGoogle": "Continue with Google",
+    "or": "or",
+    "email": "Email",
+    "password": "Password",
+    "signIn": "Sign in",
+    "signingIn": "Signing in\u2026",
+    "formLabel": "Sign in with email",
+    "errors": {
+      "wrongPassword": "Invalid email or password.",
+      "userNotFound": "No account found with this email.",
+      "tooManyRequests": "Too many attempts. Please try again later.",
+      "invalidEmail": "Please enter a valid email address.",
+      "default": "Sign-in failed. Please try again."
+    }
+  },
+  "accessDenied": {
+    "title": "Access denied",
+    "message": "The account <strong>{{email}}</strong> does not have permission to use this application.",
+    "messageNoEmail": "This account does not have permission to use this application.",
+    "tryDifferent": "Try a different account"
+  },
+  "manageShops": {
+    "title": "Manage shops",
+    "goBack": "Go back",
+    "empty": "No shops yet. Tap + to add one.",
+    "addShop": "Add shop",
+    "deleteShop": "Delete {{name}}",
+    "deleteConfirm": "Delete \"{{name}}\"? This cannot be undone."
+  },
+  "shopNameSheet": {
+    "addTitle": "Add shop",
+    "renameTitle": "Rename shop",
+    "shopName": "Shop name",
+    "nameConflict": "A shop with this name already exists",
+    "cancel": "Cancel",
+    "add": "Add shop",
+    "save": "Save"
+  },
+  "settings": {
+    "title": "Settings",
+    "goBack": "Go back",
+    "appearance": "Appearance",
+    "darkMode": "Dark mode",
+    "compactMode": "Compact mode",
+    "accessibility": "Accessibility",
+    "reduceMotion": "Reduce motion",
+    "highContrast": "High contrast",
+    "leftHanded": "Left-handed mode",
+    "languageRegion": "Language & Region",
+    "language": "Language",
+    "currency": "Currency",
+    "display": "Display",
+    "keepScreenAwake": "Keep screen awake",
+    "account": "Account",
+    "signedInAs": "Signed in as",
+    "signOut": "Sign out"
+  }
+}

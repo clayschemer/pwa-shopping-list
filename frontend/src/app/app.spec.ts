@@ -4,6 +4,7 @@ import { App } from './app';
 import { provideRouter } from '@angular/router';
 import { provideStore, Store } from '@ngrx/store';
 import { provideEffects } from '@ngrx/effects';
+import { provideTranslocoTesting } from '../testing/transloco-testing';
 import { accountReducer } from './store/account/account.reducer';
 import { uiReducer } from './store/ui/ui.reducer';
 import { categoriesReducer } from './store/categories/categories.reducer';
@@ -13,7 +14,7 @@ import type { UserId, AccountId } from './models/ids.model';
 
 function createTestBed() {
   return TestBed.configureTestingModule({
-    imports: [App],
+    imports: [App, provideTranslocoTesting()],
     providers: [
       provideRouter([]),
       provideStore({

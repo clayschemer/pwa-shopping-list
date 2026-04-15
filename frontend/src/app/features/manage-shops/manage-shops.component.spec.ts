@@ -5,6 +5,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideStore, Store } from '@ngrx/store';
 import { provideRouter } from '@angular/router';
 import { MatBottomSheet } from '@angular/material/bottom-sheet';
+import { provideTranslocoTesting } from '../../../testing/transloco-testing';
 import { ManageShopsComponent } from './manage-shops.component';
 import { shopsReducer } from '../../store/shops/shops.reducer';
 import { uiReducer } from '../../store/ui/ui.reducer';
@@ -30,7 +31,7 @@ describe('ManageShopsComponent', () => {
     bottomSheet = { open: vi.fn().mockReturnValue({ afterDismissed: () => EMPTY }) };
 
     await TestBed.configureTestingModule({
-      imports: [ManageShopsComponent],
+      imports: [ManageShopsComponent, provideTranslocoTesting()],
       providers: [
         provideRouter([]),
         provideStore({

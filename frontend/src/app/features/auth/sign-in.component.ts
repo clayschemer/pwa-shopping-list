@@ -7,6 +7,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinner } from '@angular/material/progress-spinner';
+import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
 import { authActions } from '../../store/account/account.actions';
 import { selectAuthStatus, selectSignInError, selectIsAuthChecking } from '../../store/account/account.selectors';
 
@@ -18,6 +19,7 @@ import { selectAuthStatus, selectSignInError, selectIsAuthChecking } from '../..
     MatInputModule,
     MatIconModule,
     MatProgressSpinner,
+    TranslocoPipe,
   ],
   templateUrl: './sign-in.component.html',
   styleUrl: './sign-in.component.scss',
@@ -26,6 +28,7 @@ import { selectAuthStatus, selectSignInError, selectIsAuthChecking } from '../..
 export class SignInComponent {
   private readonly store = inject(Store);
   private readonly router = inject(Router);
+  private readonly transloco = inject(TranslocoService);
 
   private readonly authStatus = toSignal(this.store.select(selectAuthStatus), {
     initialValue: 'checking' as const,
@@ -63,15 +66,15 @@ export class SignInComponent {
     switch (code) {
       case 'auth/wrong-password':
       case 'auth/invalid-credential':
-        return 'Invalid email or password.';
+        return this.transloco.translate('signIn.errors.wrongPassword');
       case 'auth/user-not-found':
-        return 'No account found with this email.';
+        return this.transloco.translate('signIn.errors.userNotFound');
       case 'auth/too-many-requests':
-        return 'Too many attempts. Please try again later.';
+        return this.transloco.translate('signIn.errors.tooManyRequests');
       case 'auth/invalid-email':
-        return 'Please enter a valid email address.';
+        return this.transloco.translate('signIn.errors.invalidEmail');
       default:
-        return 'Sign-in failed. Please try again.';
+        return this.transloco.translate('signIn.errors.default');
     }
   });
 

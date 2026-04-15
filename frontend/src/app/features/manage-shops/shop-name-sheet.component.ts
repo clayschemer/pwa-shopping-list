@@ -10,6 +10,7 @@ import { MatBottomSheetRef, MAT_BOTTOM_SHEET_DATA } from '@angular/material/bott
 import { MatFormField, MatLabel, MatError } from '@angular/material/form-field';
 import { MatInput } from '@angular/material/input';
 import { MatButton } from '@angular/material/button';
+import { TranslocoPipe } from '@jsverse/transloco';
 
 export interface ShopNameSheetData {
   mode: 'add' | 'rename';
@@ -30,6 +31,7 @@ export interface ShopNameSheetResult {
     MatError,
     MatInput,
     MatButton,
+    TranslocoPipe,
   ],
   templateUrl: './shop-name-sheet.component.html',
   styleUrl: './shop-name-sheet.component.scss',
@@ -62,7 +64,7 @@ export class ShopNameSheetComponent {
     return trimmed.length > 0 && !this.hasConflict();
   });
 
-  readonly actionLabel = this.mode === 'add' ? 'Add shop' : 'Save';
+  readonly actionLabel = this.mode === 'add' ? 'shopNameSheet.add' : 'shopNameSheet.save';
 
   onCancel(): void {
     this.sheetRef.dismiss();

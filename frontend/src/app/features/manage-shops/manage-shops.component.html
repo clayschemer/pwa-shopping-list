@@ -3,12 +3,12 @@
     <button
       mat-icon-button
       class="app-manage-shops__back-btn"
-      aria-label="Go back"
+      [attr.aria-label]="'manageShops.goBack' | transloco"
       (click)="goBack()"
     >
       <mat-icon>arrow_back</mat-icon>
     </button>
-    <h1 class="app-manage-shops__title">Manage shops</h1>
+    <h1 class="app-manage-shops__title">{{ 'manageShops.title' | transloco }}</h1>
   </header>
 
   <div class="app-manage-shops__list">
@@ -23,21 +23,21 @@
         <button
           mat-icon-button
           class="app-manage-shops__delete-btn"
-          [attr.aria-label]="'Delete ' + shop.name"
+          [attr.aria-label]="'manageShops.deleteShop' | transloco: { name: shop.name }"
           (click)="deleteShop(shop)"
         >
           <mat-icon>delete</mat-icon>
         </button>
       </div>
     } @empty {
-      <p class="app-manage-shops__empty">No shops yet. Tap + to add one.</p>
+      <p class="app-manage-shops__empty">{{ 'manageShops.empty' | transloco }}</p>
     }
   </div>
 
   <button
     mat-fab
     class="app-manage-shops__fab"
-    aria-label="Add shop"
+    [attr.aria-label]="'manageShops.addShop' | transloco"
     (click)="openAddSheet()"
   >
     <mat-icon>add</mat-icon>

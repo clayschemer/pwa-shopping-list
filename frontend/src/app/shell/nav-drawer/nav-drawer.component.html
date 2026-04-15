@@ -1,12 +1,12 @@
 <div class="app-nav-drawer">
   <section class="app-nav-drawer__shop-section">
     <mat-form-field class="app-nav-drawer__shop-field">
-      <mat-label>Current shop layout</mat-label>
+      <mat-label>{{ 'navDrawer.shopLayout' | transloco }}</mat-label>
       <mat-select
         [value]="selectedShopId() ?? ''"
         (selectionChange)="onShopChanged($event.value)"
       >
-        <mat-option value="">Global (all)</mat-option>
+        <mat-option value="">{{ 'navDrawer.globalAll' | transloco }}</mat-option>
         @for (shop of shops(); track shop.id) {
           <mat-option [value]="shop.id">{{ shop.name }}</mat-option>
         }
@@ -17,14 +17,14 @@
       class="app-nav-drawer__manage-shops"
       (click)="onManageShops()"
     >
-      Manage shops&hellip;
+      {{ 'navDrawer.manageShops' | transloco }}
     </button>
   </section>
 
   <mat-divider />
 
   <section class="app-nav-drawer__categories-section">
-    <h3 class="app-nav-drawer__categories-heading">Categories</h3>
+    <h3 class="app-nav-drawer__categories-heading">{{ 'navDrawer.categories' | transloco }}</h3>
 
     <div
       cdkDropList
@@ -49,7 +49,7 @@
       (click)="onAddCategory()"
     >
       <mat-icon>add</mat-icon>
-      Add category
+      {{ 'navDrawer.addCategory' | transloco }}
     </button>
   </section>
 </div>

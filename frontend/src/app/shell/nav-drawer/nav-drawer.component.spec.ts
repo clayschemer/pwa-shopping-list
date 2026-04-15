@@ -2,6 +2,7 @@ import '../../../testing/init-testbed';
 import { describe, it, expect, beforeEach } from 'vitest';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideStore, Store } from '@ngrx/store';
+import { provideTranslocoTesting } from '../../../testing/transloco-testing';
 import { NavDrawerComponent } from './nav-drawer.component';
 import { categoriesReducer } from '../../store/categories/categories.reducer';
 import { shopsReducer } from '../../store/shops/shops.reducer';
@@ -34,7 +35,7 @@ describe('NavDrawerComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [NavDrawerComponent],
+      imports: [NavDrawerComponent, provideTranslocoTesting()],
       providers: [
         provideStore({
           categories: categoriesReducer,

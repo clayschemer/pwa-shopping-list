@@ -1,17 +1,17 @@
 <div class="app-access-denied">
-  <h1 class="app-access-denied__title">Access denied</h1>
+  <h1 class="app-access-denied__title">{{ 'accessDenied.title' | transloco }}</h1>
   <p class="app-access-denied__message">
-    The account
     @if (userEmail(); as user) {
-      <strong>{{ user.email }}</strong>
+      <span [innerHTML]="'accessDenied.message' | transloco: { email: user.email }"></span>
+    } @else {
+      {{ 'accessDenied.messageNoEmail' | transloco }}
     }
-    does not have permission to use this application.
   </p>
   <button
     mat-stroked-button
     class="app-access-denied__action"
     (click)="tryDifferentAccount()"
   >
-    Try a different account
+    {{ 'accessDenied.tryDifferent' | transloco }}
   </button>
 </div>

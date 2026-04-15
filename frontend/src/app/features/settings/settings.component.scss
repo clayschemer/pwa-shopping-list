@@ -1,0 +1,95 @@
+:host {
+  display: block;
+}
+
+.app-settings {
+  &__header {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: var(--app-spacing-padding-block) var(--app-spacing-padding-inline);
+  }
+
+  &__title {
+    font-family: 'DM Serif Display', serif;
+    font-size: 1.25rem;
+    font-weight: 400;
+    line-height: var(--app-line-height-heading);
+    margin: 0;
+    color: var(--mat-sys-on-surface);
+  }
+
+  &__body {
+    padding: 0 var(--app-spacing-padding-inline) 2rem;
+  }
+
+  &__section {
+    margin-block-end: var(--app-spacing-section);
+  }
+
+  &__section-title {
+    font-family: 'DM Serif Display', serif;
+    font-size: var(--app-font-size-section-title);
+    font-weight: 400;
+    line-height: var(--app-line-height-heading);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--mat-sys-on-surface-variant);
+    margin: 0 0 var(--app-spacing-row);
+    padding-block-end: 0.25rem;
+    border-block-end: 1px solid var(--mat-sys-outline-variant);
+  }
+
+  &__row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    min-height: var(--app-spacing-row-min-height);
+    padding: var(--app-spacing-padding-block) 0;
+  }
+
+  &__label {
+    font-size: var(--app-font-size-body);
+    line-height: var(--app-line-height-body);
+    color: var(--mat-sys-on-surface);
+  }
+
+  &__email {
+    font-size: var(--app-font-size-section-title);
+    line-height: var(--app-line-height-body);
+    color: var(--mat-sys-on-surface-variant);
+  }
+
+  &__select-field {
+    display: block;
+    margin-block-end: var(--app-spacing-padding-block);
+  }
+
+  &__sign-out-btn {
+    all: unset;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    padding: 0.625rem 1rem;
+    border-radius: 1.25rem;
+    font-size: var(--app-font-size-section-title);
+    font-weight: 500;
+    line-height: var(--app-line-height-body);
+    color: var(--mat-sys-error);
+    border: 1px solid var(--mat-sys-error);
+    margin-block-start: var(--app-spacing-padding-block);
+
+    @media (prefers-reduced-motion: no-preference) {
+      transition: background-color 150ms ease, color 150ms ease;
+    }
+
+    &:hover {
+      background: color-mix(in srgb, var(--mat-sys-error) 8%, transparent);
+    }
+
+    &:focus-visible {
+      outline: 2px solid var(--mat-sys-primary);
+      outline-offset: 2px;
+    }
+  }
+}

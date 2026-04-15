@@ -1,7 +1,7 @@
 <div class="app-sign-in">
   <div class="app-sign-in__header">
-    <h1 class="app-sign-in__title">Shopping List</h1>
-    <p class="app-sign-in__subtitle">Sign in to access your shared list</p>
+    <h1 class="app-sign-in__title">{{ 'signIn.title' | transloco }}</h1>
+    <p class="app-sign-in__subtitle">{{ 'signIn.subtitle' | transloco }}</p>
   </div>
 
   <div class="app-sign-in__actions">
@@ -9,23 +9,23 @@
       mat-raised-button
       class="app-sign-in__google-btn"
       (click)="signInWithGoogle()"
-      aria-label="Continue with Google"
+      [attr.aria-label]="'signIn.continueWithGoogle' | transloco"
     >
       <mat-icon aria-hidden="true">login</mat-icon>
-      Continue with Google
+      {{ 'signIn.continueWithGoogle' | transloco }}
     </button>
 
     <div class="app-sign-in__divider" role="separator">
-      <span class="app-sign-in__divider-text">or</span>
+      <span class="app-sign-in__divider-text">{{ 'signIn.or' | transloco }}</span>
     </div>
 
     <form
       class="app-sign-in__form"
       (submit)="$event.preventDefault(); signInWithEmail()"
-      aria-label="Sign in with email"
+      [attr.aria-label]="'signIn.formLabel' | transloco"
     >
       <mat-form-field class="app-sign-in__field">
-        <mat-label>Email</mat-label>
+        <mat-label>{{ 'signIn.email' | transloco }}</mat-label>
         <input
           matInput
           id="sign-in-email"
@@ -40,7 +40,7 @@
       </mat-form-field>
 
       <mat-form-field class="app-sign-in__field">
-        <mat-label>Password</mat-label>
+        <mat-label>{{ 'signIn.password' | transloco }}</mat-label>
         <input
           matInput
           id="sign-in-password"
@@ -75,7 +75,7 @@
         @if (emailSubmitting() && !signInError()) {
           <mat-spinner diameter="20" />
         } @else {
-          Sign in
+          {{ 'signIn.signIn' | transloco }}
         }
       </button>
     </form>

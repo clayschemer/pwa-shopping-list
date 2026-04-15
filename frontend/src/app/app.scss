@@ -63,7 +63,12 @@
   }
 
   &__content {
-    padding: 0 1rem 5rem;
+    padding: 0 var(--app-spacing-padding-inline) 5rem;
+  }
+
+  &__fullscreen {
+    min-height: 100vh;
+    min-height: 100dvh;
   }
 
   &__loading {

@@ -14,11 +14,13 @@ import { CategoriesEffects } from './store/categories/categories.effects';
 import { shopsReducer } from './store/shops/shops.reducer';
 import { ShopsEffects } from './store/shops/shops.effects';
 import { environment } from '../environments/environment';
+import { provideAppTransloco } from './core/i18n/transloco-config';
 
 export const appConfig: ApplicationConfig = {
   providers: [
     provideBrowserGlobalErrorListeners(),
     provideRouter(routes),
+    ...provideAppTransloco(),
     provideStore({
       account: accountReducer,
       ui: uiReducer,
