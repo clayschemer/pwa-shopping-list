@@ -6,5 +6,8 @@ export const uiActions = createActionGroup({
   events: {
     'Switch To Plan Mode': emptyProps(),
     'Switch To Shop Mode With Shop': props<{ shopId: ShopId | null }>(),
+    'Nav Drawer Opened': emptyProps(),
+    'Nav Drawer Closed': emptyProps(),
+    'Plan Mode Shop Selected': props<{ shopId: ShopId | null }>(),
   },
 });

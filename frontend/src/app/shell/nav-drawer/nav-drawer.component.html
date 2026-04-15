@@ -1,0 +1,55 @@
+<div class="app-nav-drawer">
+  <section class="app-nav-drawer__shop-section">
+    <mat-form-field class="app-nav-drawer__shop-field">
+      <mat-label>Current shop layout</mat-label>
+      <mat-select
+        [value]="selectedShopId() ?? ''"
+        (selectionChange)="onShopChanged($event.value)"
+      >
+        <mat-option value="">Global (all)</mat-option>
+        @for (shop of shops(); track shop.id) {
+          <mat-option [value]="shop.id">{{ shop.name }}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+
+    <button
+      class="app-nav-drawer__manage-shops"
+      (click)="onManageShops()"
+    >
+      Manage shops&hellip;
+    </button>
+  </section>
+
+  <mat-divider />
+
+  <section class="app-nav-drawer__categories-section">
+    <h3 class="app-nav-drawer__categories-heading">Categories</h3>
+
+    <div
+      cdkDropList
+      class="app-nav-drawer__category-list"
+      (cdkDropListDropped)="onCategoryDrop($event)"
+    >
+      @for (category of orderedCategories(); track category.id) {
+        <div cdkDrag class="app-nav-drawer__category-row">
+          <button
+            class="app-nav-drawer__category-name"
+            (click)="onCategoryTap(category.id)"
+          >
+            {{ category.name }}
+          </button>
+          <mat-icon cdkDragHandle class="app-nav-drawer__drag-handle">drag_indicator</mat-icon>
+        </div>
+      }
+    </div>
+
+    <button
+      class="app-nav-drawer__add-category"
+      (click)="onAddCategory()"
+    >
+      <mat-icon>add</mat-icon>
+      Add category
+    </button>
+  </section>
+</div>

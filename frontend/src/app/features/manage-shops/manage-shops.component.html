@@ -1,0 +1,45 @@
+<div class="app-manage-shops">
+  <header class="app-manage-shops__header">
+    <button
+      mat-icon-button
+      class="app-manage-shops__back-btn"
+      aria-label="Go back"
+      (click)="goBack()"
+    >
+      <mat-icon>arrow_back</mat-icon>
+    </button>
+    <h1 class="app-manage-shops__title">Manage shops</h1>
+  </header>
+
+  <div class="app-manage-shops__list">
+    @for (shop of shops(); track shop.id) {
+      <div class="app-manage-shops__shop-row">
+        <button
+          class="app-manage-shops__shop-name"
+          (click)="openRenameSheet(shop)"
+        >
+          {{ shop.name }}
+        </button>
+        <button
+          mat-icon-button
+          class="app-manage-shops__delete-btn"
+          [attr.aria-label]="'Delete ' + shop.name"
+          (click)="deleteShop(shop)"
+        >
+          <mat-icon>delete</mat-icon>
+        </button>
+      </div>
+    } @empty {
+      <p class="app-manage-shops__empty">No shops yet. Tap + to add one.</p>
+    }
+  </div>
+
+  <button
+    mat-fab
+    class="app-manage-shops__fab"
+    aria-label="Add shop"
+    (click)="openAddSheet()"
+  >
+    <mat-icon>add</mat-icon>
+  </button>
+</div>

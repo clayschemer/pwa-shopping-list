@@ -54,6 +54,7 @@ A shared shopping list PWA for two users (a couple). Private by default, may ope
 - **Framework:** Angular 21 SPA (standalone components, no SSR) — Angular 22 upgrade expected May 2026
 - **Fonts:** DM Serif Display + Plus Jakarta Sans (Google Fonts)
 - **PWA:** Offline support is nice-to-have, not a hard requirement
+- **Animations:** Pure CSS only (`transition`, `@keyframes`). **Do not** use `@angular/animations` — it is deprecated. Never install or import `@angular/animations`, `BrowserAnimationsModule`, or `NoopAnimationsModule`.
 
 For Angular component patterns, NgRx structure, service design, Signal Forms, routing, and testing conventions → `.claude/skills/angular/SKILL.md`
 For Material 3 theming, design tokens, dark/light/high-contrast/compact mode setup → `.claude/skills/angular-material3-theming/SKILL.md`

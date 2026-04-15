@@ -1,0 +1,35 @@
+<div class="app-shop-name-sheet">
+  <h3 class="app-shop-name-sheet__title">
+    @if (mode === 'add') {
+      Add shop
+    } @else {
+      Rename shop
+    }
+  </h3>
+
+  <mat-form-field class="app-shop-name-sheet__field">
+    <mat-label>Shop name</mat-label>
+    <input
+      matInput
+      [ngModel]="name()"
+      (ngModelChange)="name.set($event)"
+      (keydown.enter)="onSubmit()"
+      cdkFocusInitial
+    />
+    @if (hasConflict()) {
+      <mat-error>A shop with this name already exists</mat-error>
+    }
+  </mat-form-field>
+
+  <div class="app-shop-name-sheet__actions">
+    <button mat-button (click)="onCancel()">Cancel</button>
+    <button
+      mat-flat-button
+      color="primary"
+      [disabled]="!isValid()"
+      (click)="onSubmit()"
+    >
+      {{ actionLabel }}
+    </button>
+  </div>
+</div>

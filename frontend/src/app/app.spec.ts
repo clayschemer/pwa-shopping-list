@@ -6,6 +6,8 @@ import { provideStore, Store } from '@ngrx/store';
 import { provideEffects } from '@ngrx/effects';
 import { accountReducer } from './store/account/account.reducer';
 import { uiReducer } from './store/ui/ui.reducer';
+import { categoriesReducer } from './store/categories/categories.reducer';
+import { shopsReducer } from './store/shops/shops.reducer';
 import { authActions, accountActions } from './store/account/account.actions';
 import type { UserId, AccountId } from './models/ids.model';
 
@@ -17,6 +19,8 @@ function createTestBed() {
       provideStore({
         account: accountReducer,
         ui: uiReducer,
+        categories: categoriesReducer,
+        shops: shopsReducer,
       }),
       provideEffects([]),
     ],

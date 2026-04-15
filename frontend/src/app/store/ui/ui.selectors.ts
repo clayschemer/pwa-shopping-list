@@ -19,3 +19,8 @@ export const selectIsPlanMode = createSelector(
   selectUiState,
   (state) => state.mode === 'plan',
 );
+
+export const selectNavDrawerOpen = createSelector(
+  selectUiState,
+  (state) => state.navDrawerOpen,
+);

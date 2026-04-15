@@ -1,0 +1,75 @@
+.app-manage-shops {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  min-height: 100dvh;
+
+  &__header {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    background: var(--mat-sys-surface);
+  }
+
+  &__title {
+    margin: 0;
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--mat-sys-on-surface);
+  }
+
+  &__list {
+    display: flex;
+    flex-direction: column;
+    padding: 0.5rem 1rem;
+  }
+
+  &__shop-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    min-height: 3rem;
+    padding: 0.25rem 0;
+    border-bottom: 1px solid var(--mat-sys-outline-variant);
+  }
+
+  &__shop-name {
+    all: unset;
+    cursor: pointer;
+    flex: 1;
+    font-size: 1rem;
+    color: var(--mat-sys-on-surface);
+    padding: 0.75rem 0.25rem;
+
+    &:hover {
+      color: var(--mat-sys-primary);
+    }
+
+    &:focus-visible {
+      outline: 2px solid var(--mat-sys-primary);
+      outline-offset: 2px;
+      border-radius: 0.25rem;
+    }
+  }
+
+  &__delete-btn {
+    color: var(--mat-sys-error);
+  }
+
+  &__empty {
+    text-align: center;
+    color: var(--mat-sys-on-surface-variant);
+    padding: 2rem 1rem;
+    font-size: 0.9375rem;
+  }
+
+  &__fab {
+    position: fixed;
+    bottom: 1.5rem;
+    right: 1.5rem;
+  }
+}

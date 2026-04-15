@@ -5,6 +5,11 @@
 }
 
 .app-root {
+  &__sidenav-container {
+    min-height: 100vh;
+    min-height: 100dvh;
+  }
+
   &__top-bar {
     position: sticky;
     top: 0;
