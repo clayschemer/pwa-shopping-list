@@ -1,0 +1,113 @@
+<form class="app-item-sheet" (ngSubmit)="onSubmit()">
+  <h2 class="app-item-sheet__title">
+    {{ (mode === 'add' ? 'itemSheet.addTitle' : 'itemSheet.editTitle') | transloco }}
+  </h2>
+
+  <mat-form-field class="app-item-sheet__field" appearance="outline">
+    <mat-label>{{ 'itemSheet.name' | transloco }}</mat-label>
+    <input
+      matInput
+      type="text"
+      name="itemName"
+      required
+      autocomplete="off"
+      [ngModel]="name()"
+      (ngModelChange)="name.set($event)"
+    />
+    @if (hasConflict()) {
+      <mat-error>{{ 'itemSheet.nameConflict' | transloco }}</mat-error>
+    }
+  </mat-form-field>
+
+  <mat-form-field class="app-item-sheet__field" appearance="outline">
+    <mat-label>{{ 'itemSheet.description' | transloco }}</mat-label>
+    <input
+      matInput
+      type="text"
+      name="itemDescription"
+      autocomplete="off"
+      [ngModel]="description()"
+      (ngModelChange)="description.set($event)"
+    />
+  </mat-form-field>
+
+  <div class="app-item-sheet__row">
+    <mat-form-field class="app-item-sheet__qty" appearance="outline">
+      <mat-label>{{ 'itemSheet.quantity' | transloco }}</mat-label>
+      <input
+        matInput
+        type="number"
+        min="0"
+        step="any"
+        name="itemQuantity"
+        [ngModel]="quantity()"
+        (ngModelChange)="quantity.set($event === '' ? null : +$event)"
+      />
+    </mat-form-field>
+
+    <mat-form-field class="app-item-sheet__unit" appearance="outline">
+      <mat-label>{{ 'itemSheet.unit' | transloco }}</mat-label>
+      <mat-select
+        [ngModel]="unit()"
+        (ngModelChange)="unit.set($event)"
+        name="itemUnit"
+      >
+        <mat-option [value]="null">{{ 'itemSheet.unitNone' | transloco }}</mat-option>
+        @for (u of units; track u) {
+          <mat-option [value]="u">{{ u }}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+  </div>
+
+  @if (categories.length > 0) {
+    <fieldset class="app-item-sheet__group">
+      <legend class="app-item-sheet__group-label">
+        {{ 'itemSheet.primaryCategory' | transloco }}
+      </legend>
+      <mat-chip-listbox
+        [value]="primaryCategoryId()"
+        (change)="onPrimaryCategoryChange($event.value)"
+        [attr.aria-label]="'itemSheet.primaryCategory' | transloco"
+      >
+        <mat-chip-option [value]="null">
+          {{ 'itemSheet.uncategorised' | transloco }}
+        </mat-chip-option>
+        @for (cat of categories; track cat.id) {
+          <mat-chip-option [value]="cat.id">{{ cat.name }}</mat-chip-option>
+        }
+      </mat-chip-listbox>
+    </fieldset>
+
+    @if (secondaryCategoryOptions().length > 0) {
+      <fieldset class="app-item-sheet__group">
+        <legend class="app-item-sheet__group-label">
+          {{ 'itemSheet.secondaryCategories' | transloco }}
+        </legend>
+        <mat-chip-listbox
+          multiple
+          [value]="secondaryCategoryIds()"
+          (change)="onSecondarySelectionChange($event.value)"
+          [attr.aria-label]="'itemSheet.secondaryCategories' | transloco"
+        >
+          @for (cat of secondaryCategoryOptions(); track cat.id) {
+            <mat-chip-option [value]="cat.id">{{ cat.name }}</mat-chip-option>
+          }
+        </mat-chip-listbox>
+      </fieldset>
+    }
+  }
+
+  <div class="app-item-sheet__actions">
+    <button mat-button type="button" (click)="onCancel()">
+      {{ 'itemSheet.cancel' | transloco }}
+    </button>
+    <button
+      mat-flat-button
+      type="submit"
+      [disabled]="!isValid()"
+    >
+      {{ actionLabel | transloco }}
+    </button>
+  </div>
+</form>

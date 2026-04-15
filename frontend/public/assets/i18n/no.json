@@ -21,7 +21,32 @@
   },
   "plan": {
     "listLabel": "Handleliste",
-    "empty": "Listen din er tom."
+    "empty": "Listen din er tom.",
+    "uncategorised": "Uten kategori",
+    "addItem": "Legg til vare",
+    "removeItem": "Fjern {{name}}",
+    "removeConfirmTitle": "Fjerne vare?",
+    "removeConfirmMessage": "Fjerne «{{name}}» fra listen?",
+    "cancel": "Avbryt",
+    "remove": "Fjern",
+    "ok": "OK",
+    "add": "Legg til"
+  },
+  "itemSheet": {
+    "addTitle": "Legg til vare",
+    "editTitle": "Rediger vare",
+    "name": "Navn",
+    "description": "Beskrivelse",
+    "quantity": "Antall",
+    "unit": "Enhet",
+    "unitNone": "—",
+    "primaryCategory": "Primær kategori",
+    "secondaryCategories": "Vises også i",
+    "uncategorised": "Uten kategori",
+    "nameConflict": "En vare med dette navnet finnes allerede",
+    "cancel": "Avbryt",
+    "add": "Legg til",
+    "save": "Lagre"
   },
   "signIn": {
     "title": "Handleliste",

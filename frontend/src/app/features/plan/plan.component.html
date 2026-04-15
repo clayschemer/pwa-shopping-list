@@ -1,3 +1,53 @@
 <section class="app-plan" [attr.aria-label]="'plan.listLabel' | transloco">
-  <p class="app-plan__empty">{{ 'plan.empty' | transloco }}</p>
+  @if (groups().length === 0) {
+    <p class="app-plan__empty">{{ 'plan.empty' | transloco }}</p>
+  } @else {
+    @for (group of groups(); track group.categoryId ?? '__uncat__') {
+      <section
+        class="app-plan__group"
+        [class.app-plan__group--uncategorised]="group.categoryId === null"
+      >
+        <header class="app-plan__group-header">
+          <h2 class="app-plan__group-title">
+            {{ group.categoryName ?? ('plan.uncategorised' | transloco) }}
+          </h2>
+        </header>
+
+        <ul class="app-plan__items" role="list">
+          @for (item of group.items; track item.id) {
+            <li class="app-plan__item">
+              <button
+                type="button"
+                class="app-plan__item-main"
+                (click)="openEditSheet(item)"
+              >
+                <span class="app-plan__item-name">{{ item.name }}</span>
+                @if (item.quantity !== null || item.unit !== null) {
+                  <span class="app-plan__item-qty">
+                    {{ item.quantity }}{{ item.unit ? ' ' + item.unit : '' }}
+                  </span>
+                }
+                @if (item.description) {
+                  <span class="app-plan__item-description">{{ item.description }}</span>
+                }
+              </button>
+              <button
+                type="button"
+                class="app-plan__item-remove"
+                [attr.aria-label]="'plan.removeItem' | transloco: { name: item.name }"
+                (click)="confirmRemove(item)"
+              >
+                <mat-icon aria-hidden="true">close</mat-icon>
+              </button>
+            </li>
+          }
+        </ul>
+      </section>
+    }
+  }
+
+  <app-add-item-pill
+    [existingNames]="existingNamesList()"
+    (submitted)="onAddRequested($event)"
+  />
 </section>

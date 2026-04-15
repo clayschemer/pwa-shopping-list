@@ -21,7 +21,32 @@
   },
   "plan": {
     "listLabel": "Inköpslista",
-    "empty": "Din lista är tom."
+    "empty": "Din lista är tom.",
+    "uncategorised": "Okategoriserad",
+    "addItem": "Lägg till vara",
+    "removeItem": "Ta bort {{name}}",
+    "removeConfirmTitle": "Ta bort vara?",
+    "removeConfirmMessage": "Ta bort ”{{name}}” från listan?",
+    "cancel": "Avbryt",
+    "remove": "Ta bort",
+    "ok": "OK",
+    "add": "Lägg till"
+  },
+  "itemSheet": {
+    "addTitle": "Lägg till vara",
+    "editTitle": "Redigera vara",
+    "name": "Namn",
+    "description": "Beskrivning",
+    "quantity": "Antal",
+    "unit": "Enhet",
+    "unitNone": "—",
+    "primaryCategory": "Primär kategori",
+    "secondaryCategories": "Visas också i",
+    "uncategorised": "Okategoriserad",
+    "nameConflict": "En vara med detta namn finns redan",
+    "cancel": "Avbryt",
+    "add": "Lägg till",
+    "save": "Spara"
   },
   "signIn": {
     "title": "Inköpslista",

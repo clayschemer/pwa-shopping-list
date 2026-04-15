@@ -21,7 +21,32 @@
   },
   "plan": {
     "listLabel": "Liste de courses",
-    "empty": "Votre liste est vide."
+    "empty": "Votre liste est vide.",
+    "uncategorised": "Sans catégorie",
+    "addItem": "Ajouter un article",
+    "removeItem": "Supprimer {{name}}",
+    "removeConfirmTitle": "Supprimer l'article ?",
+    "removeConfirmMessage": "Supprimer « {{name}} » de la liste ?",
+    "cancel": "Annuler",
+    "remove": "Supprimer",
+    "ok": "OK",
+    "add": "Ajouter"
+  },
+  "itemSheet": {
+    "addTitle": "Ajouter un article",
+    "editTitle": "Modifier l'article",
+    "name": "Nom",
+    "description": "Description",
+    "quantity": "Quantité",
+    "unit": "Unité",
+    "unitNone": "—",
+    "primaryCategory": "Catégorie principale",
+    "secondaryCategories": "Apparaît aussi dans",
+    "uncategorised": "Sans catégorie",
+    "nameConflict": "Un article portant ce nom existe déjà",
+    "cancel": "Annuler",
+    "add": "Ajouter",
+    "save": "Enregistrer"
   },
   "signIn": {
     "title": "Liste de courses",

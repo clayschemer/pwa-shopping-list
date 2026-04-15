@@ -13,6 +13,8 @@ import { categoriesReducer } from './store/categories/categories.reducer';
 import { CategoriesEffects } from './store/categories/categories.effects';
 import { shopsReducer } from './store/shops/shops.reducer';
 import { ShopsEffects } from './store/shops/shops.effects';
+import { itemsReducer } from './store/items/items.reducer';
+import { ItemsEffects } from './store/items/items.effects';
 import { environment } from '../environments/environment';
 import { provideAppTransloco } from './core/i18n/transloco-config';
 
@@ -26,8 +28,9 @@ export const appConfig: ApplicationConfig = {
       ui: uiReducer,
       categories: categoriesReducer,
       shops: shopsReducer,
+      items: itemsReducer,
     }),
-    provideEffects([AccountEffects, CategoriesEffects, ShopsEffects]),
+    provideEffects([AccountEffects, CategoriesEffects, ShopsEffects, ItemsEffects]),
     provideFirebaseApp(() => initializeApp(environment.firebase)),
     provideAuth(() => getAuth()),
     provideFirestore(() => getFirestore()),

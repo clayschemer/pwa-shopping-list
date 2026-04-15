@@ -21,7 +21,32 @@
   },
   "plan": {
     "listLabel": "Einkaufsliste",
-    "empty": "Deine Liste ist leer."
+    "empty": "Deine Liste ist leer.",
+    "uncategorised": "Ohne Kategorie",
+    "addItem": "Artikel hinzufügen",
+    "removeItem": "{{name}} entfernen",
+    "removeConfirmTitle": "Artikel entfernen?",
+    "removeConfirmMessage": "„{{name}}“ aus der Liste entfernen?",
+    "cancel": "Abbrechen",
+    "remove": "Entfernen",
+    "ok": "OK",
+    "add": "Hinzufügen"
+  },
+  "itemSheet": {
+    "addTitle": "Artikel hinzufügen",
+    "editTitle": "Artikel bearbeiten",
+    "name": "Name",
+    "description": "Beschreibung",
+    "quantity": "Menge",
+    "unit": "Einheit",
+    "unitNone": "—",
+    "primaryCategory": "Hauptkategorie",
+    "secondaryCategories": "Erscheint auch in",
+    "uncategorised": "Ohne Kategorie",
+    "nameConflict": "Ein Artikel mit diesem Namen existiert bereits",
+    "cancel": "Abbrechen",
+    "add": "Hinzufügen",
+    "save": "Speichern"
   },
   "signIn": {
     "title": "Einkaufsliste",

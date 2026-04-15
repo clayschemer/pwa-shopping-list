@@ -21,7 +21,32 @@
   },
   "plan": {
     "listLabel": "Shopping list",
-    "empty": "Your list is empty."
+    "empty": "Your list is empty.",
+    "uncategorised": "Uncategorised",
+    "addItem": "Add item",
+    "removeItem": "Remove {{name}}",
+    "removeConfirmTitle": "Remove item?",
+    "removeConfirmMessage": "Remove \"{{name}}\" from the list?",
+    "cancel": "Cancel",
+    "remove": "Remove",
+    "ok": "OK",
+    "add": "Add"
+  },
+  "itemSheet": {
+    "addTitle": "Add item",
+    "editTitle": "Edit item",
+    "name": "Name",
+    "description": "Description",
+    "quantity": "Quantity",
+    "unit": "Unit",
+    "unitNone": "—",
+    "primaryCategory": "Primary category",
+    "secondaryCategories": "Also appears in",
+    "uncategorised": "Uncategorised",
+    "nameConflict": "An item with this name already exists",
+    "cancel": "Cancel",
+    "add": "Add",
+    "save": "Save"
   },
   "signIn": {
     "title": "Shopping List",
