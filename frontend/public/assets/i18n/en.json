@@ -10,7 +10,8 @@
     "viewChecked": "View checked items",
     "settings": "Settings",
     "activeSession": "Active session",
-    "global": "Global"
+    "global": "Global",
+    "sessionActive": "active"
   },
   "navDrawer": {
     "shopLayout": "Current shop layout",
@@ -88,6 +89,30 @@
     "cancel": "Cancel",
     "add": "Add shop",
     "save": "Save"
+  },
+  "shop": {
+    "listLabel": "Shopping list",
+    "empty": "Your list is empty.",
+    "uncategorised": "Uncategorised",
+    "selectTitle": "Where are you shopping?",
+    "global": "No specific shop (global)",
+    "est": "Est.",
+    "tapToUndo": "tap to undo",
+    "checkItem": "Check {{name}}"
+  },
+  "closeSession": {
+    "allDoneTitle": "All done!",
+    "allDoneMessage": "Everything's checked off. Close this session and save the history?",
+    "remainingTitle": "Close session?",
+    "remainingMessage": "There are still unchecked items on your list. Close the session anyway?",
+    "notYet": "Not yet",
+    "keepShopping": "Keep shopping",
+    "close": "Close session"
+  },
+  "undoHistory": {
+    "title": "Checked this session",
+    "empty": "Nothing checked yet.",
+    "uncheck": "Uncheck {{name}}"
   },
   "settings": {
     "title": "Settings",

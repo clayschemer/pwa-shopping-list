@@ -106,6 +106,9 @@ export class ThemeService {
 
     // Reduce motion: null = system (CSS media query handles it), true = force on
     body.classList.toggle('theme-reduce-motion', settings.reduceMotion === true);
+
+    // Left-handed: mirrors shop-mode checkbox column to the leading edge
+    body.classList.toggle('theme-left-handed', settings.leftHanded);
   }
 
   private queryMediaPreference(query: string): boolean {

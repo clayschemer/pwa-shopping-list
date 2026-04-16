@@ -17,3 +17,15 @@ export const selectItemsLoaded = createSelector(
   selectItemsState,
   (state) => state.loaded,
 );
+
+export const selectPendingChecks = createSelector(
+  selectItemsState,
+  (state) => state.pendingChecks,
+);
+
+export const selectVisibleActiveItems = createSelector(
+  selectAllItems,
+  selectPendingChecks,
+  (items, pending) =>
+    items.filter((i) => !i.removed || pending[i.id] !== undefined),
+);

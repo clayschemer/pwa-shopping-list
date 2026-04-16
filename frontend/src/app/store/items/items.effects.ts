@@ -1,7 +1,10 @@
 import { inject, Injectable } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
-import { from, map, switchMap } from 'rxjs';
+import { filter, from, map, mergeMap, of, switchMap, takeUntil, timer } from 'rxjs';
+
+export const CHECK_UNDO_WINDOW_MS = 4000;
 import { itemsActions, itemsApiActions } from './items.actions';
+import { sessionsActions } from '../sessions/sessions.actions';
 import { accountActions } from '../account/account.actions';
 import { ItemApiService } from '../../core/api/item-api.service';
 import type { Item } from '../../models/item.model';
@@ -78,16 +81,35 @@ export class ItemsEffects {
   readonly checkItem$ = createEffect(() =>
     this.actions$.pipe(
       ofType(itemsApiActions.checkItemRequested),
-      switchMap(({ id, sessionId }) =>
+      mergeMap(({ id, sessionId }) =>
         from(this.itemApi.checkItem(id, sessionId)).pipe(
-          map((result) => {
+          mergeMap((result) => {
             if ((result as CheckConflictError).type === 'CHECK_CONFLICT') {
-              return itemsActions.itemCheckConflict({ id });
+              return of(itemsActions.itemCheckConflict({ id }));
             }
-            return itemsActions.itemChecked({
-              item: (result as CheckSuccess).item,
-            });
+            const success = result as CheckSuccess;
+            return of(
+              itemsActions.itemChecked({ item: success.item }),
+              sessionsActions.sessionUpdated({ session: success.session }),
+            );
           }),
+        ),
+      ),
+    ),
+  );
+
+  readonly checkWindow$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(itemsActions.checkItemPending),
+      mergeMap(({ id, sessionId }) =>
+        timer(CHECK_UNDO_WINDOW_MS).pipe(
+          takeUntil(
+            this.actions$.pipe(
+              ofType(itemsActions.checkItemUndoneDuringWindow),
+              filter((a) => a.id === id),
+            ),
+          ),
+          map(() => itemsApiActions.checkItemRequested({ id, sessionId })),
         ),
       ),
     ),

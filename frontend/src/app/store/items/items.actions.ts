@@ -20,6 +20,8 @@ export const itemsActions = createActionGroup({
     'Item Removed': props<{ id: ItemId }>(),
     'Item Checked': props<{ item: Item }>(),
     'Item Unchecked': props<{ id: ItemId }>(),
+    'Check Item Pending': props<{ id: ItemId; sessionId: SessionId }>(),
+    'Check Item Undone During Window': props<{ id: ItemId }>(),
     'Item Check Conflict': props<{ id: ItemId }>(),
     'Item Name Conflict': props<{ name: string }>(),
     'Item Changes Received': props<{ items: Item[]; removed: ItemId[] }>(),

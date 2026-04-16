@@ -1,18 +1,51 @@
-import { ChangeDetectionStrategy, Component, inject, computed } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, computed, effect } from '@angular/core';
 import { NavigationEnd, Router, RouterLink, RouterOutlet } from '@angular/router';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { filter, map } from 'rxjs';
 import { Store } from '@ngrx/store';
 import { MatIconButton } from '@angular/material/button';
 import { MatIcon } from '@angular/material/icon';
+import { MatBadge } from '@angular/material/badge';
 import { MatProgressSpinner } from '@angular/material/progress-spinner';
 import { MatSidenav, MatSidenavContainer, MatSidenavContent } from '@angular/material/sidenav';
-import { selectIsAuthenticated, selectIsAuthChecking } from './store/account/account.selectors';
-import { selectIsPlanMode, selectIsShopMode, selectNavDrawerOpen, selectSelectedShopId } from './store/ui/ui.selectors';
-import { uiActions } from './store/ui/ui.actions';
+import { MatBottomSheet } from '@angular/material/bottom-sheet';
+import { MatDialog } from '@angular/material/dialog';
 import { TranslocoPipe } from '@jsverse/transloco';
+import { selectIsAuthenticated, selectIsAuthChecking } from './store/account/account.selectors';
+import {
+  selectIsPlanMode,
+  selectIsShopMode,
+  selectNavDrawerOpen,
+  selectSelectedShopId,
+} from './store/ui/ui.selectors';
+import { selectAllShops, selectShopEntities } from './store/shops/shops.selectors';
+import { selectActiveSessionForCurrentUser } from './store/sessions/sessions.selectors';
+import { selectActiveSessionTotal } from './store/selectors/grouped-shop-list.selectors';
+import {
+  selectAllItems,
+  selectItemEntities,
+} from './store/items/items.selectors';
+import { uiActions } from './store/ui/ui.actions';
+import { sessionsApiActions } from './store/sessions/sessions.actions';
+import { itemsApiActions } from './store/items/items.actions';
 import { NavDrawerComponent } from './shell/nav-drawer/nav-drawer.component';
-import type { CategoryId } from './models/ids.model';
+import {
+  ShopSelectSheetComponent,
+  ShopSelectData,
+  ShopSelectResult,
+} from './features/shop/shop-select-sheet.component';
+import {
+  CloseSessionDialogComponent,
+  CloseSessionData,
+} from './features/shop/close-session-dialog.component';
+import {
+  UndoHistorySheetComponent,
+  UndoHistoryData,
+} from './features/shop/undo-history-sheet.component';
+import { MoneyPipe } from './core/format/money.pipe';
+import type { CategoryId, ItemId, UserId } from './models/ids.model';
+import type { Item } from './models/item.model';
+import type { User } from './models/user.model';
 
 const FULL_SCREEN_ROUTES = ['/settings', '/manage-shops'];
 
@@ -23,12 +56,14 @@ const FULL_SCREEN_ROUTES = ['/settings', '/manage-shops'];
     RouterLink,
     MatIconButton,
     MatIcon,
+    MatBadge,
     MatProgressSpinner,
     MatSidenav,
     MatSidenavContainer,
     MatSidenavContent,
     NavDrawerComponent,
     TranslocoPipe,
+    MoneyPipe,
   ],
   templateUrl: './app.html',
   styleUrl: './app.scss',
@@ -37,6 +72,8 @@ const FULL_SCREEN_ROUTES = ['/settings', '/manage-shops'];
 export class App {
   private readonly store = inject(Store);
   private readonly router = inject(Router);
+  private readonly bottomSheet = inject(MatBottomSheet);
+  private readonly dialog = inject(MatDialog);
 
   readonly isAuthenticated = toSignal(this.store.select(selectIsAuthenticated), {
     initialValue: false,
@@ -62,6 +99,43 @@ export class App {
     initialValue: null,
   });
 
+  private readonly shops = toSignal(this.store.select(selectAllShops), {
+    initialValue: [],
+  });
+
+  private readonly shopEntities = toSignal(this.store.select(selectShopEntities), {
+    initialValue: {},
+  });
+
+  readonly activeSession = toSignal(
+    this.store.select(selectActiveSessionForCurrentUser),
+    { initialValue: null },
+  );
+
+  readonly sessionTotal = toSignal(
+    this.store.select(selectActiveSessionTotal),
+    { initialValue: 0 },
+  );
+
+  private readonly allItems = toSignal(this.store.select(selectAllItems), {
+    initialValue: [],
+  });
+
+  private readonly itemEntities = toSignal(
+    this.store.select(selectItemEntities),
+    { initialValue: {} },
+  );
+
+  readonly checkedCount = computed(
+    () => this.activeSession()?.checkedItems.length ?? 0,
+  );
+
+  readonly sessionShopName = computed(() => {
+    const id = this.activeSession()?.shopId;
+    if (!id) return null;
+    return this.shopEntities()[id]?.name ?? null;
+  });
+
   private readonly currentUrl = toSignal(
     this.router.events.pipe(
       filter((e): e is NavigationEnd => e instanceof NavigationEnd),
@@ -74,6 +148,18 @@ export class App {
     FULL_SCREEN_ROUTES.some((r) => this.currentUrl().startsWith(r)),
   );
 
+  constructor() {
+    effect(() => {
+      const shopMode = this.isShopMode();
+      const url = this.currentUrl();
+      if (shopMode && !url.startsWith('/shop')) {
+        this.router.navigateByUrl('/shop');
+      } else if (!shopMode && url.startsWith('/shop')) {
+        this.router.navigateByUrl('/');
+      }
+    });
+  }
+
   openDrawer(): void {
     this.store.dispatch(uiActions.navDrawerOpened());
   }
@@ -82,9 +168,8 @@ export class App {
     this.store.dispatch(uiActions.navDrawerClosed());
   }
 
-  onCategorySelected(categoryId: CategoryId): void {
+  onCategorySelected(_categoryId: CategoryId): void {
     this.store.dispatch(uiActions.navDrawerClosed());
-    // TODO: scroll to category section
   }
 
   onManageShops(): void {
@@ -94,7 +179,6 @@ export class App {
 
   onAddCategory(): void {
     this.store.dispatch(uiActions.navDrawerClosed());
-    // TODO: open add category sheet
   }
 
   switchToPlan(): void {
@@ -102,6 +186,68 @@ export class App {
   }
 
   switchToShop(): void {
-    this.store.dispatch(uiActions.switchToShopModeWithShop({ shopId: this.shopId() }));
+    const shops = this.shops();
+    if (shops.length === 0) {
+      this.store.dispatch(uiActions.switchToShopModeWithShop({ shopId: null }));
+      return;
+    }
+    const ref = this.bottomSheet.open<
+      ShopSelectSheetComponent,
+      ShopSelectData,
+      ShopSelectResult
+    >(ShopSelectSheetComponent, { data: { shops } });
+    ref.afterDismissed().subscribe((result) => {
+      if (!result) return;
+      this.store.dispatch(
+        uiActions.switchToShopModeWithShop({ shopId: result.shopId }),
+      );
+    });
+  }
+
+  onSessionPillClicked(): void {
+    const session = this.activeSession();
+    if (!session) return;
+    const activeItemCount = this.allItems().filter((i) => !i.removed).length;
+    const ref = this.dialog.open<
+      CloseSessionDialogComponent,
+      CloseSessionData,
+      boolean
+    >(CloseSessionDialogComponent, {
+      data: { allChecked: activeItemCount === 0 },
+    });
+    ref.afterClosed().subscribe((confirmed) => {
+      if (confirmed) {
+        this.store.dispatch(
+          sessionsApiActions.closeSessionRequested({ sessionId: session.id }),
+        );
+      }
+    });
+  }
+
+  onOpenUndoHistory(): void {
+    const session = this.activeSession();
+    if (!session) return;
+    const itemsById = this.itemEntities() as Record<ItemId, Item>;
+    const usersById: Record<UserId, User> = {};
+    const ref = this.bottomSheet.open<
+      UndoHistorySheetComponent,
+      UndoHistoryData,
+      ItemId
+    >(UndoHistorySheetComponent, {
+      data: {
+        checkedItems: session.checkedItems,
+        itemsById,
+        usersById,
+      },
+    });
+    ref.afterDismissed().subscribe((itemId) => {
+      if (!itemId) return;
+      this.store.dispatch(
+        itemsApiActions.uncheckItemRequested({
+          id: itemId,
+          sessionId: session.id,
+        }),
+      );
+    });
   }
 }
