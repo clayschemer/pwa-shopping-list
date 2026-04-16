@@ -1,0 +1,121 @@
+{
+  "app": {
+    "name": "Handleliste",
+    "loading": "Laster applikasjon",
+    "plan": "Planlegg",
+    "shop": "Handle"
+  },
+  "nav": {
+    "openMenu": "Åpne navigasjonsmeny",
+    "viewChecked": "Vis avkryssede varer",
+    "settings": "Innstillinger",
+    "activeSession": "Aktiv økt",
+    "global": "Global"
+  },
+  "navDrawer": {
+    "shopLayout": "Nåværende butikkoppsett",
+    "globalAll": "Global (alle)",
+    "manageShops": "Administrer butikker\u2026",
+    "viewHistory": "Historikk\u2026",
+    "categories": "Kategorier",
+    "addCategory": "Legg til kategori"
+  },
+  "history": {
+    "title": "Handlehistorikk",
+    "goBack": "Gå tilbake",
+    "loading": "Laster historikk",
+    "empty": "Ingen fullførte økter ennå.",
+    "itemCount": "{{count}} varer",
+    "noChecked": "Ingen varer avkrysset",
+    "unknownItem": "Slettet vare"
+  },
+  "plan": {
+    "listLabel": "Handleliste",
+    "empty": "Listen din er tom.",
+    "uncategorised": "Uten kategori",
+    "addItem": "Legg til vare",
+    "removeItem": "Fjern {{name}}",
+    "removeConfirmTitle": "Fjerne vare?",
+    "removeConfirmMessage": "Fjerne «{{name}}» fra listen?",
+    "cancel": "Avbryt",
+    "remove": "Fjern",
+    "ok": "OK",
+    "add": "Legg til"
+  },
+  "itemSheet": {
+    "addTitle": "Legg til vare",
+    "editTitle": "Rediger vare",
+    "name": "Navn",
+    "description": "Beskrivelse",
+    "quantity": "Antall",
+    "unit": "Enhet",
+    "unitNone": "—",
+    "primaryCategory": "Primær kategori",
+    "secondaryCategories": "Vises også i",
+    "uncategorised": "Uten kategori",
+    "nameConflict": "En vare med dette navnet finnes allerede",
+    "cancel": "Avbryt",
+    "add": "Legg til",
+    "save": "Lagre"
+  },
+  "signIn": {
+    "title": "Handleliste",
+    "subtitle": "Logg inn for å få tilgang til din delte liste",
+    "continueWithGoogle": "Fortsett med Google",
+    "or": "eller",
+    "email": "E-post",
+    "password": "Passord",
+    "signIn": "Logg inn",
+    "signingIn": "Logger inn\u2026",
+    "formLabel": "Logg inn med e-post",
+    "errors": {
+      "wrongPassword": "Ugyldig e-post eller passord.",
+      "userNotFound": "Ingen konto funnet med denne e-posten.",
+      "tooManyRequests": "For mange forsøk. Prøv igjen senere.",
+      "invalidEmail": "Vennligst oppgi en gyldig e-postadresse.",
+      "default": "Innlogging mislyktes. Prøv igjen."
+    }
+  },
+  "accessDenied": {
+    "title": "Tilgang nektet",
+    "message": "Kontoen <strong>{{email}}</strong> har ikke tilgang til denne applikasjonen.",
+    "messageNoEmail": "Denne kontoen har ikke tilgang til denne applikasjonen.",
+    "tryDifferent": "Prøv en annen konto"
+  },
+  "manageShops": {
+    "title": "Administrer butikker",
+    "goBack": "Gå tilbake",
+    "empty": "Ingen butikker ennå. Trykk + for å legge til en.",
+    "addShop": "Legg til butikk",
+    "deleteShop": "Slett {{name}}",
+    "deleteConfirm": "Slette \"{{name}}\"? Dette kan ikke angres."
+  },
+  "shopNameSheet": {
+    "addTitle": "Legg til butikk",
+    "renameTitle": "Gi nytt navn til butikk",
+    "shopName": "Butikknavn",
+    "nameConflict": "En butikk med dette navnet finnes allerede",
+    "cancel": "Avbryt",
+    "add": "Legg til butikk",
+    "save": "Lagre"
+  },
+  "settings": {
+    "title": "Innstillinger",
+    "goBack": "Gå tilbake",
+    "appearance": "Utseende",
+    "darkMode": "Mørk modus",
+    "compactMode": "Kompakt modus",
+    "accessibility": "Tilgjengelighet",
+    "reduceMotion": "Reduser bevegelse",
+    "highContrast": "Høy kontrast",
+    "leftHanded": "Venstrehendt modus",
+    "languageRegion": "Språk og region",
+    "language": "Språk",
+    "currency": "Valuta",
+    "display": "Visning",
+    "keepScreenAwake": "Hold skjermen på",
+    "account": "Konto",
+    "signedInAs": "Logget inn som",
+    "signOut": "Logg ut"
+  }
+}

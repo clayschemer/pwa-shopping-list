@@ -1,0 +1,121 @@
+{
+  "app": {
+    "name": "Liste de courses",
+    "loading": "Chargement de l'application",
+    "plan": "Planifier",
+    "shop": "Courses"
+  },
+  "nav": {
+    "openMenu": "Ouvrir le menu de navigation",
+    "viewChecked": "Voir les articles cochés",
+    "settings": "Paramètres",
+    "activeSession": "Session active",
+    "global": "Global"
+  },
+  "navDrawer": {
+    "shopLayout": "Disposition du magasin actuel",
+    "globalAll": "Global (tous)",
+    "manageShops": "Gérer les magasins\u2026",
+    "viewHistory": "Historique\u2026",
+    "categories": "Catégories",
+    "addCategory": "Ajouter une catégorie"
+  },
+  "history": {
+    "title": "Historique des courses",
+    "goBack": "Retour",
+    "loading": "Chargement de l'historique",
+    "empty": "Aucune session terminée.",
+    "itemCount": "{{count}} articles",
+    "noChecked": "Aucun article coché",
+    "unknownItem": "Article supprimé"
+  },
+  "plan": {
+    "listLabel": "Liste de courses",
+    "empty": "Votre liste est vide.",
+    "uncategorised": "Sans catégorie",
+    "addItem": "Ajouter un article",
+    "removeItem": "Supprimer {{name}}",
+    "removeConfirmTitle": "Supprimer l'article ?",
+    "removeConfirmMessage": "Supprimer « {{name}} » de la liste ?",
+    "cancel": "Annuler",
+    "remove": "Supprimer",
+    "ok": "OK",
+    "add": "Ajouter"
+  },
+  "itemSheet": {
+    "addTitle": "Ajouter un article",
+    "editTitle": "Modifier l'article",
+    "name": "Nom",
+    "description": "Description",
+    "quantity": "Quantité",
+    "unit": "Unité",
+    "unitNone": "—",
+    "primaryCategory": "Catégorie principale",
+    "secondaryCategories": "Apparaît aussi dans",
+    "uncategorised": "Sans catégorie",
+    "nameConflict": "Un article portant ce nom existe déjà",
+    "cancel": "Annuler",
+    "add": "Ajouter",
+    "save": "Enregistrer"
+  },
+  "signIn": {
+    "title": "Liste de courses",
+    "subtitle": "Connectez-vous pour accéder à votre liste partagée",
+    "continueWithGoogle": "Continuer avec Google",
+    "or": "ou",
+    "email": "E-mail",
+    "password": "Mot de passe",
+    "signIn": "Se connecter",
+    "signingIn": "Connexion en cours\u2026",
+    "formLabel": "Se connecter par e-mail",
+    "errors": {
+      "wrongPassword": "E-mail ou mot de passe invalide.",
+      "userNotFound": "Aucun compte trouvé avec cet e-mail.",
+      "tooManyRequests": "Trop de tentatives. Veuillez réessayer plus tard.",
+      "invalidEmail": "Veuillez saisir une adresse e-mail valide.",
+      "default": "La connexion a échoué. Veuillez réessayer."
+    }
+  },
+  "accessDenied": {
+    "title": "Accès refusé",
+    "message": "Le compte <strong>{{email}}</strong> n'a pas l'autorisation d'utiliser cette application.",
+    "messageNoEmail": "Ce compte n'a pas l'autorisation d'utiliser cette application.",
+    "tryDifferent": "Essayer un autre compte"
+  },
+  "manageShops": {
+    "title": "Gérer les magasins",
+    "goBack": "Retour",
+    "empty": "Aucun magasin pour le moment. Appuyez sur + pour en ajouter un.",
+    "addShop": "Ajouter un magasin",
+    "deleteShop": "Supprimer {{name}}",
+    "deleteConfirm": "Supprimer \"{{name}}\" ? Cette action est irréversible."
+  },
+  "shopNameSheet": {
+    "addTitle": "Ajouter un magasin",
+    "renameTitle": "Renommer le magasin",
+    "shopName": "Nom du magasin",
+    "nameConflict": "Un magasin avec ce nom existe déjà",
+    "cancel": "Annuler",
+    "add": "Ajouter un magasin",
+    "save": "Enregistrer"
+  },
+  "settings": {
+    "title": "Paramètres",
+    "goBack": "Retour",
+    "appearance": "Apparence",
+    "darkMode": "Mode sombre",
+    "compactMode": "Mode compact",
+    "accessibility": "Accessibilité",
+    "reduceMotion": "Réduire les animations",
+    "highContrast": "Contraste élevé",
+    "leftHanded": "Mode gaucher",
+    "languageRegion": "Langue et région",
+    "language": "Langue",
+    "currency": "Devise",
+    "display": "Affichage",
+    "keepScreenAwake": "Garder l'écran allumé",
+    "account": "Compte",
+    "signedInAs": "Connecté en tant que",
+    "signOut": "Se déconnecter"
+  }
+}

@@ -1,0 +1,133 @@
+.app-shop {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  padding: 0.5rem 1rem 6rem;
+
+  &__empty {
+    text-align: center;
+    padding: 3rem 1rem;
+    color: var(--mat-sys-on-surface-variant);
+  }
+
+  &__group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+
+    &--uncategorised {
+      .app-shop__group-title {
+        color: var(--mat-sys-on-surface-variant);
+        opacity: 0.75;
+      }
+    }
+  }
+
+  &__group-header {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 0.5rem;
+    padding: 0.5rem 0.25rem 0.25rem;
+    border-bottom: 1px solid var(--mat-sys-outline-variant);
+  }
+
+  &__group-title {
+    margin: 0;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--mat-sys-on-surface-variant);
+  }
+
+  &__group-totals {
+    display: flex;
+    gap: 0.75rem;
+    font-size: 0.8125rem;
+    color: var(--mat-sys-on-surface-variant);
+  }
+
+  &__group-session {
+    color: var(--mat-sys-secondary);
+    font-weight: 600;
+  }
+
+  &__items {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+  }
+
+  &__item {
+    display: flex;
+    align-items: center;
+    min-height: 2.75rem;
+    gap: 0.5rem;
+    border-bottom: 1px solid var(--mat-sys-outline-variant);
+
+    &--pending,
+    &--checked {
+      opacity: 0.42;
+
+      .app-shop__item-name {
+        text-decoration: line-through;
+      }
+    }
+  }
+
+  &__item-main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 0.125rem;
+    padding: 0.75rem 0.25rem;
+  }
+
+  &__item-name {
+    font-size: 1rem;
+  }
+
+  &__item-description {
+    font-size: 0.8125rem;
+    color: var(--mat-sys-on-surface-variant);
+    font-style: italic;
+  }
+
+  &__item-meta {
+    display: flex;
+    gap: 0.5rem;
+    font-size: 0.8125rem;
+    color: var(--mat-sys-on-surface-variant);
+  }
+
+  &__item-undo-label {
+    color: var(--mat-sys-primary);
+    font-weight: 500;
+  }
+
+  &__item-check {
+    all: unset;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 3.5rem;
+    min-height: 3rem;
+    color: var(--mat-sys-primary);
+
+    &:focus-visible {
+      outline: 2px solid var(--mat-sys-primary);
+      outline-offset: 2px;
+      border-radius: 0.25rem;
+    }
+  }
+}
+
+:host-context(body.theme-left-handed) {
+  .app-shop__item {
+    flex-direction: row-reverse;
+  }
+}

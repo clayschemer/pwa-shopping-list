@@ -1,0 +1,72 @@
+<section class="app-shop" [attr.aria-label]="'shop.listLabel' | transloco">
+  @if (groups().length === 0) {
+    <p class="app-shop__empty">{{ 'shop.empty' | transloco }}</p>
+  } @else {
+    @for (group of groups(); track group.categoryId ?? '__uncat__') {
+      <section
+        class="app-shop__group"
+        [class.app-shop__group--uncategorised]="group.categoryId === null"
+      >
+        <header class="app-shop__group-header">
+          <h2 class="app-shop__group-title">
+            {{ group.categoryName ?? ('shop.uncategorised' | transloco) }}
+          </h2>
+          <div class="app-shop__group-totals">
+            @if (group.estTotal > 0) {
+              <span class="app-shop__group-est">
+                {{ 'shop.est' | transloco }} {{ group.estTotal | money }}
+              </span>
+            }
+            @if (group.sessionCheckedTotal > 0) {
+              <span class="app-shop__group-session">
+                ✓ {{ group.sessionCheckedTotal | money }}
+              </span>
+            }
+          </div>
+        </header>
+
+        <ul class="app-shop__items" role="list">
+          @for (item of group.items; track item.id) {
+            <li
+              class="app-shop__item"
+              [class.app-shop__item--pending]="isPending(item.id)"
+              [class.app-shop__item--checked]="isChecked(item.id)"
+            >
+              <div class="app-shop__item-main">
+                <span class="app-shop__item-name">{{ item.name }}</span>
+                @if (item.description) {
+                  <span class="app-shop__item-description">{{ item.description }}</span>
+                }
+                <span class="app-shop__item-meta">
+                  @if (item.quantity !== null || item.unit !== null) {
+                    <span class="app-shop__item-qty">
+                      {{ item.quantity }}{{ item.unit ? ' ' + item.unit : '' }}
+                    </span>
+                  }
+                  @if (isPending(item.id)) {
+                    <span class="app-shop__item-undo-label">
+                      {{ 'shop.tapToUndo' | transloco }}
+                    </span>
+                  } @else if (item.price !== null) {
+                    <span class="app-shop__item-price">{{ item.price | money }}</span>
+                  }
+                </span>
+              </div>
+              <button
+                type="button"
+                class="app-shop__item-check"
+                [attr.aria-label]="'shop.checkItem' | transloco: { name: item.name }"
+                [attr.aria-pressed]="isChecked(item.id) || isPending(item.id)"
+                (click)="onToggleCheck(item)"
+              >
+                <mat-icon aria-hidden="true">
+                  {{ isChecked(item.id) || isPending(item.id) ? 'check_box' : 'check_box_outline_blank' }}
+                </mat-icon>
+              </button>
+            </li>
+          }
+        </ul>
+      </section>
+    }
+  }
+</section>

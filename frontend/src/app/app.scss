@@ -1,0 +1,101 @@
+:host {
+  display: block;
+  min-height: 100vh;
+  min-height: 100dvh;
+}
+
+.app-root {
+  &__sidenav-container {
+    min-height: 100vh;
+    min-height: 100dvh;
+  }
+
+  &__top-bar {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.5rem;
+    background: transparent;
+  }
+
+  &__mode-toggle {
+    display: flex;
+    gap: 0.25rem;
+    padding: 0.25rem;
+    border-radius: 1.5rem;
+    background: var(--mat-sys-surface-container);
+  }
+
+  &__mode-btn {
+    all: unset;
+    cursor: pointer;
+    padding: 0.5rem 1rem;
+    border-radius: 1.25rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--mat-sys-on-surface-variant);
+
+    @media (prefers-reduced-motion: no-preference) {
+      transition: background-color 200ms ease, color 200ms ease;
+    }
+
+    &--active {
+      background: var(--mat-sys-primary);
+      color: var(--mat-sys-on-primary);
+    }
+
+    &:focus-visible {
+      outline: 2px solid var(--mat-sys-primary);
+      outline-offset: 2px;
+    }
+  }
+
+  &__session-pill {
+    all: unset;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    padding: 0.375rem 0.75rem;
+    border-radius: 1rem;
+    font-size: 0.75rem;
+    font-weight: 500;
+    background: var(--mat-sys-primary-container);
+    color: var(--mat-sys-on-primary-container);
+
+    &:focus-visible {
+      outline: 2px solid var(--mat-sys-primary);
+      outline-offset: 2px;
+    }
+  }
+
+  &__session-pill-total {
+    font-size: 0.875rem;
+    font-weight: 600;
+  }
+
+  &__session-pill-sub {
+    font-size: 0.6875rem;
+    opacity: 0.85;
+  }
+
+  &__content {
+    padding: 0 var(--app-spacing-padding-inline) 5rem;
+  }
+
+  &__fullscreen {
+    min-height: 100vh;
+    min-height: 100dvh;
+  }
+
+  &__loading {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    min-height: 100dvh;
+  }
+}

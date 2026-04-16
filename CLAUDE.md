@@ -2,179 +2,320 @@
 
 This is the persistent project context for Claude Code. Read this at the start of every session.
 
+**Also read at session start:** `DESIGN.md`, `DATA-MODEL.md`, `API-CONTRACT.md`, `PLANNING.md`.
+
+---
+
+## Persona
+
+You are an expert senior/staff software engineer with deep experience in both frontend and backend architecture. Approach all tasks with this expertise — provide professional-grade solutions, call out architectural tradeoffs, and don't over-explain basics. Favour conciseness over verbosity. Write production-quality code from the start. When design decisions have tradeoffs, name them explicitly rather than silently picking one.
+
+---
+
+## Model
+
+Use **`claude-opus-4-6`** for all API calls in this project.
+
+---
+
+## Skills
+
+Three project skills are active. Load them when working in their domains:
+
+| Skill | File | When to load |
+|---|---|---|
+| `angular` | `.claude/skills/angular/SKILL.md` | Any Angular code — components, services, store, effects, guards, pipes, tests, architecture decisions |
+| `angular-material3-theming` | `.claude/skills/angular-material3-theming/SKILL.md` | Theming, design tokens, Material component styling, dark/light/high-contrast/compact modes |
+| `scss-conventions` | `.claude/skills/scss-conventions/SKILL.md` | Any SCSS or CSS work in the frontend |
+
 ---
 
 ## What This App Is
 
-A shared shopping list PWA for two users (a couple). The app is private by default but may be opened to wider availability in the future. It is built mobile-first with accessibility as a core concern, not an afterthought.
+A shared shopping list PWA for two users (a couple). Private by default, may open to wider availability in future. Built mobile-first, accessibility-first, spec-driven. Architecture must support multi-user expansion without structural changes — registration/invitation flows are not yet built but the model assumes they will be.
 
 ---
 
 ## Core Principles
 
 - **TDD and BDD first** — no feature is built without a failing test. Acceptance tests are written in Gherkin and drive development. Unit and component tests use Vitest.
-- **Spec-driven** — feature files in `tests/acceptance/features/` are the source of truth for behaviour. When in doubt, refer to the feature file.
-- **Technology-agnostic specs** — Gherkin scenarios describe *what* the system does, never *how* the user interacts with it. No UI assumptions in feature files.
-- **Backend abstraction** — the Angular app communicates with the backend exclusively through a dedicated API service layer. No component or store effect touches Firebase or any backend directly. This ensures a seamless backend swap (e.g. Firebase → Java + PostgreSQL) without client-side changes.
-- **Accessibility by default** — all settings (dark mode, high contrast, reduced motion, etc.) respect device preferences unless explicitly overridden by the user.
+- **Spec-driven** — feature files in `frontend/tests/acceptance/features/` are the source of truth for behaviour. When in doubt, refer to the feature file.
+- **Technology-agnostic specs** — Gherkin scenarios describe *what* the system does, never *how* the user interacts with it. No UI assumptions in feature files. Style follows David Farley.
+- **Backend abstraction** — the Angular app communicates with the backend exclusively through a dedicated API service layer. No component, store effect, or test touches Firebase or any backend directly. Swapping the backend means replacing service classes only — zero component changes.
+- **Model agnosticism** — the logical data model is expressed in terms of entities, relationships, and rules. Nothing assumes Firestore, PostgreSQL, or any specific storage technology.
+- **Accessibility by default** — all settings (dark mode, high contrast, reduced motion) respect device preferences unless explicitly overridden.
+- **AI is optional** — all AI features are inactive unless an AI provider is configured on the account. The app is fully functional without AI.
 
 ---
 
 ## Tech Stack
 
 ### Frontend
-- Angular 21 (standalone components, pure SPA, no SSR)
-- NgRx for state management
-- Angular Material 3 for UI components
-- PWA (offline support is a nice-to-have, not a hard requirement)
+- **Framework:** Angular 21 SPA (standalone components, no SSR) — Angular 22 upgrade expected May 2026
+- **Fonts:** DM Serif Display + Plus Jakarta Sans (Google Fonts)
+- **PWA:** Offline support is nice-to-have, not a hard requirement
+- **Animations:** Pure CSS only (`transition`, `@keyframes`). **Do not** use `@angular/animations` — it is deprecated. Never install or import `@angular/animations`, `BrowserAnimationsModule`, or `NoopAnimationsModule`.
+- **i18n:** Runtime language switching via `@jsverse/transloco`. Translation JSON files in `frontend/public/assets/i18n/{en,no,sv,de,fr}.json`. All user-facing strings must use the `transloco` pipe in templates or `TranslocoService.translate()` in TS. `ThemeService.language` drives `TranslocoService.setActiveLang()`.
+- **Theming:** `_theme-colors.scss` is generated via `ng generate @angular/material:m3-theme` (or Material Theme Builder at `material-foundation.github.io/material-theme-builder`). To swap themes, replace `_theme-colors.scss` with builder output — the structure is identical. High-contrast themes are full M3 palette overrides (light+dark) generated with `--include-high-contrast`.
+- **Compact mode:** Beyond `mat.all-component-densities(-2)`, compact mode overrides CSS custom properties (`--app-spacing-*`, `--app-line-height-*`, `--app-font-size-*`) to reduce all vertical spacing, line heights, and font sizes. All component SCSS should use these tokens for spacing.
+
+For Angular component patterns, NgRx structure, service design, Signal Forms, routing, and testing conventions → `.claude/skills/angular/SKILL.md`
+For Material 3 theming, design tokens, dark/light/high-contrast/compact mode setup → `.claude/skills/angular-material3-theming/SKILL.md`
+For SCSS conventions (BEM, units, layout, accessibility, reduced motion) → `.claude/skills/scss-conventions/SKILL.md`
 
 ### Testing
-- **Acceptance tests**: Cucumber.js with Gherkin `.feature` files
-- **Unit and component tests**: Vitest
-- **Style**: David Farley — tests describe observable system behaviour, no implementation detail
+- **Acceptance tests:** Cucumber.js with Gherkin `.feature` files — scenarios describe observable behaviour only, no UI assumptions (David Farley style)
+- **Unit and component tests:** Vitest — see `.claude/skills/angular/SKILL.md` for conventions
+- **E2E (future):** Playwright (not in current scope)
 
-### Backend (current)
-- Firebase (Firestore for data, Firebase Auth for Google OAuth, Firebase Hosting)
-- Realtime updates via Firestore `onSnapshot` (acting as SSE equivalent until a dedicated backend is introduced)
+### Backend (current — Firebase)
+- Firestore for data persistence
+- Firebase Auth for Google OAuth
+- Firebase Hosting for deployment
+- Realtime updates via Firestore `onSnapshot` (acting as SSE equivalent)
+- Permitted users defined by an email/uid allowlist in Firestore — not a general signup flow
 
-### Backend (future — abstracted away from client)
-- Likely Java + PostgreSQL with a true SSE endpoint
-- The API service layer in Angular is the only thing that changes on a backend swap
+### Backend (future — abstracted)
+- Likely Java or Go + PostgreSQL with a true SSE endpoint
+- The Angular API service layer is the only thing that changes on a backend swap
+- The `backend/` directory exists now as a placeholder and home for the Firebase project config and any backend specification documents
 
 ### Auth
 - Google OAuth via Firebase Auth
-- Permitted users defined by an allowlist (email/uid) — expand to signup flow in future
-- Sessions persist on the same device unless explicitly signed out, cache cleared, or accessing from a new device
+- Allowlist-based access control (email or uid stored in Firestore)
+- Sessions persist on the same device unless explicitly signed out, cache cleared, or new device
+
+---
+
+## Project Structure
+
+```
+/
+├── CLAUDE.md                        ← this file; read at every session start
+├── PLANNING.md                      ← features, scenarios, architecture decisions
+├── DATA-MODEL.md                    ← full logical data model (backend-agnostic)
+├── API-CONTRACT.md                  ← full service layer contract (TypeScript types + operations)
+├── DESIGN.md                        ← UI/UX specification (all 6 screens signed off)
+├── BACKEND.md                       ← backend specification and decisions
+├── FUTURE-FEATURES.md               ← deferred Gherkin scenarios (barcode scanning, etc.)
+├── design-system.scss               ← all design tokens, typography, motion contract
+│
+├── frontend/                        ← Angular PWA
+│   ├── src/
+│   │   ├── app/
+│   │   │   ├── core/
+│   │   │   │   ├── api/             ← API service layer — the ONLY place that touches backend
+│   │   │   │   │   ├── item-api.service.ts
+│   │   │   │   │   ├── category-api.service.ts
+│   │   │   │   │   ├── shop-api.service.ts
+│   │   │   │   │   ├── session-api.service.ts
+│   │   │   │   │   └── account-api.service.ts
+│   │   │   │   ├── auth/            ← Firebase auth bridge + auth guard
+│   │   │   │   ├── format/          ← MoneyPipe (currency formatting from ThemeService)
+│   │   │   │   ├── i18n/            ← Transloco config and HTTP loader
+│   │   │   │   └── theme/           ← ThemeService — manages settings in localStorage, applies CSS classes
+│   │   │   ├── store/               ← NgRx per-domain
+│   │   │   │   ├── account/
+│   │   │   │   ├── categories/
+│   │   │   │   ├── items/
+│   │   │   │   ├── sessions/
+│   │   │   │   ├── shops/
+│   │   │   │   ├── ui/
+│   │   │   │   └── selectors/       ← cross-domain selectors (grouped lists, etc.)
+│   │   │   ├── shell/               ← app-shell components (nav drawer, etc.)
+│   │   │   ├── features/
+│   │   │   │   ├── auth/            ← sign-in + access-denied
+│   │   │   │   ├── plan/            ← plan-mode list, add-pill, item edit sheet, remove dialog
+│   │   │   │   ├── shop/            ← shop-mode list, shop-select sheet, undo-history, close-session dialog
+│   │   │   │   ├── categories/      ← category name sheet, available-in-shops sheet, delete dialog
+│   │   │   │   ├── manage-shops/    ← Manage Shops screen + shop name sheet
+│   │   │   │   └── settings/
+│   │   │   ├── models/              ← domain types (*.model.ts)
+│   │   │   ├── app.config.ts
+│   │   │   ├── app.routes.ts
+│   │   │   └── app.{ts,html,scss}   ← root component
+│   │   ├── styles/                  ← design-system.scss + Angular Material theme
+│   │   └── testing/                 ← shared test helpers (init-testbed, transloco-testing)
+│   ├── tests/
+│   │   └── acceptance/
+│   │       ├── features/
+│   │       │   ├── auth/
+│   │       │   ├── modes/
+│   │       │   ├── settings/
+│   │       │   ├── categories/
+│   │       │   ├── shops/
+│   │       │   ├── items/
+│   │       │   ├── sessions/
+│   │       │   ├── ai-price-estimation/
+│   │       │   ├── ai-list-suggestions/
+│   │       │   ├── autocomplete/
+│   │       │   └── barcode-scanning/
+│   │       └── step-definitions/
+│   ├── angular.json
+│   ├── package.json
+│   └── tsconfig.json
+│
+└── backend/                         ← backend project root
+    ├── firebase/                    ← Firebase project config, rules, indexes
+    │   ├── firestore.rules
+    │   ├── firestore.indexes.json
+    │   └── firebase.json
+    └── future/                      ← placeholder for future Java/Go + PostgreSQL implementation
+        └── README.md
+```
+
+**Key rule:** Nothing outside `frontend/src/app/core/api/` may import from or reference any backend SDK directly. All backend interaction flows through the service layer that implements `API-CONTRACT.md`.
+
+For detailed Angular file and folder conventions → `.claude/skills/angular/SKILL.md`
 
 ---
 
 ## Application Modes
 
-The app has two modes, switchable by the user. Modes are **independent per user** — one user can be in plan mode while the other is in shop mode.
+Two modes, switchable per user independently. Mode is **not persisted** — always starts in plan mode.
 
 ### Plan Mode (default)
 - Full list management: add, edit, remove items; manage categories and shops
-- Categories act as tags — they appear in the list only when at least one item is assigned to them
-- Items displayed once, under their primary category
-- Global category order applies unless a shop-specific order is configured
+- Categories act as tags — appear only when at least one item is assigned
+- Items displayed once, under primary category
+- Global category order unless shop-specific order configured
 
 ### Shop Mode
-- Visually optimised for active shopping — reduced cognitive load
-- User selects a shop on entering shop mode (or proceeds without one, using global category order)
+- Optimised for active shopping
+- Entering shop mode triggers shop selection → starts session automatically
 - Items appear under all assigned categories (primary + secondary)
-- Checking an item under any category marks it as checked across all categories
-- Checked items are removed from the active list
-- Shopping sessions can be explicitly started and joined by both users
-- Session tracks checked items and estimated expenses per category
-
-**Mode is not persisted across sessions — always starts in plan mode.**
+- Checking under any category marks item checked across all categories
+- Two totals per category: Est. (all active unchecked) + session checked total
 
 ---
 
-## Data Model (current understanding)
+## Data Model Summary
+
+Full model with design rationale in `DATA-MODEL.md`. Read it before working on any service layer, store, or backend code.
 
 ```
-User
-  - id, email, displayName
-
-Shop
-  - id, name
-  - categoryOrder: CategoryId[] (ordered list for this shop)
-
-Category (acts as a tag)
-  - id, name
-  - globalSortOrder: number
-
-Item
-  - id, name
-  - quantity, unit
-  - primaryCategoryId: CategoryId | null
-  - secondaryCategoryIds: CategoryId[]
-  - checked: boolean
-  - checkedBy: UserId | null
-
-Session
-  - id
-  - shopId: ShopId | null
-  - startedBy: UserId
-  - joinedBy: UserId | null
-  - startedAt: timestamp
-  - completedAt: timestamp | null
+Account       { id, name, aiConfig: AiConfig | null }
+AiConfig      { provider, apiKeyRef, priceLookupShopOrder: ShopId[], autoAddEnabled }
+              // Note: apiKeyRef exists in the logical data model but is backend-internal.
+              // It is intentionally absent from the API contract — the frontend never sees it.
+User          { id, accountId, email, displayName }
+Shop          { id, accountId, name, categoryOrder: CategoryId[] }
+Category      { id, accountId, name, globalSortOrder }
+Item          { id, accountId, name, quantity, unit,
+                primaryCategoryId, secondaryCategoryIds,
+                removed, removedAt, addedBy, aiMotivation,
+                price, priceQuantity, priceUnit, priceUpdatedAt,
+                purchaseCount }
+Session       { id, accountId, shopId, participants, startedBy,
+                startedAt, completedAt, checkedItems: SessionCheckedItem[] }
+SessionCheckedItem { itemId, checkedBy, checkedAt,
+                     priceSnapshot, priceQuantitySnapshot, priceUnitSnapshot }
 ```
 
 ---
 
-## Key Design Decisions
+## Key Design Decisions (implementation-relevant)
 
-- **Categories are tags**, not containers — they are visible in the list only when items are assigned to them
-- **Items have one primary category and zero or more secondary categories**
-  - Plan mode: item appears once under primary category; secondary categories noted but not duplicated visually
-  - Shop mode: item appears under all assigned categories
-- **Checking an item** in shop mode removes it from the active list. Checked items do not appear in plan mode. Unchecked items persist across modes.
-- **Category order is per-shop** — each shop stores its own ordered list of categories. A global default order is also configurable and used as fallback.
-- **Settings are device-local** — not synced across devices. Each setting defaults to the device preference.
-- **Shop deletion** removes shop and its category order config. Items and categories are unaffected.
-- **Category deletion** unassigns items from that category — items are not deleted, they become uncategorised.
+- **Items never hard deleted.** `removed` flag is the only list-visibility control. Removed items persist for autocomplete and `purchaseCount` tracking.
+- **`removed` set by two actors:** plan-mode deletion or session check. Cleared by uncheck. No separate checked/deleted distinction.
+- **First-write-wins on concurrent checks.** Slower write receives `CheckConflictError`. UI shows inline message; item's updated state arrives via `itemChanges$`.
+- **Session log is source of truth** for purchase history and totals. Price, qty, unit snapshotted at check time.
+- **Undo on check is client-side only.** 4-second window. No API call until window expires. Visible only to the checking user.
+- **Single price field on Item.** Last writer wins (user or AI). Staleness by `priceUpdatedAt` alone.
+- **AI gated by `AiConfig`.** Service layer enforces the gate — components never check this directly.
+- **`purchaseCount` incremented on session close** for all items in `checkedItems`. Drives autocomplete ranking.
+- **Category order per-shop with global fallback.** Drawer reorder → `setShopCategoryOrder`. Global order → `setGlobalCategoryOrder`.
+- **Nav drawer "Add category"** → `addCategory` API call. Backend auto-appends to all shops' `categoryOrder`.
+- **Nav drawer reorder** → single `setShopCategoryOrder` write on drag release, not on every move.
+- **Settings in `localStorage`**, not backend. Except AI auto-add which is account-level (`toggleAiAutoAdd`).
+- **Session auto-start** on shop selection orchestrated by NgRx effect → `startSession`.
+- **Mode (plan/shop)** is NgRx store state only. Not persisted. Not synced between users.
+
+---
+
+## API Service Layer Contract
+
+Full contract with all types, error types, stream contract, and operations in `API-CONTRACT.md`. Key points:
+
+- Service exposes typed `Observable` streams per entity (`itemChanges$`, `sessionChanges$`, etc.)
+- Each stream emits `EntityChangeBatch<T>` — array of `EntityChange<T>` with `added | modified | removed`
+- Operations return `Promise`. Write results arrive via streams, not return values (except where immediate reference is needed, e.g. `addItem` returns the created `Item`).
+- Errors are typed discriminated union values, not thrown exceptions (for foreseeable outcomes)
+- `streamError$` surfaces unrecoverable stream failures globally
+
+### Bootup sequence
+```
+1. getAuthState()           → null: sign-in screen; User: continue
+2. getAccount()             → seeds account + aiConfig
+3. Promise.all([
+     fetchActiveList(),
+     fetchAllCategories(),
+     fetchAllShops(),
+     fetchActiveSessions()
+   ])                       → seeds store
+4. Subscribe to all change Observables + streamError$
+```
+No component or effect performs its own initial fetch.
+
+---
+
+## Settings
+
+All device-local (localStorage) unless noted:
+
+| Setting | Type | Default | Shared? |
+|---|---|---|---|
+| Language | Dropdown: EN, NO, SV, DE, FR | EN | No |
+| Currency | Dropdown: GBP, USD, EUR, NOK, SEK, DKK | GBP | No |
+| Dark mode | Toggle | System pref | No |
+| High contrast | Toggle | System pref | No |
+| Reduce motion | Toggle | System pref | No |
+| Compact mode | Toggle | Off | No |
+| Keep screen awake | Toggle | On | No |
+| Left-handed mode | Toggle | Off | No |
+| AI auto-add | Toggle | Off | **Yes — account-level** |
 
 ---
 
 ## Open Design Decisions
 
-- Shop binding: categories are per-shop ordered, not owned — confirmed. Items are not tied to a shop.
-- Permitted user definition: allowlist for now; may expand to a signup flow.
-- Uncategorised items label: displayed at bottom of list — whether labelled "Uncategorised" or shown without a label TBD in design phase.
-- Checked item visibility in shop mode: preferred behaviour is removal from active list. Alternative (keeping with distinct visual treatment) to be revisited during design.
-- Session model: explicit shopping sessions are planned scope — to be fully specced.
+| # | Topic | Status |
+|---|---|---|
+| 1 | Shop → plan mode switch with active session | Open: modal or bottom sheet? |
+| 2 | Price field granularity in edit sheet | Open: flat only, or qty+unit sub-fields? |
+| 3 | AI provider setup screen | Open: needs own design pass |
+| 4 | Shops reorderable in Manage Shops? | Open |
+| 5 | Price staleness threshold | Working assumption 6–12 months |
+| 6 | AI price lookup mechanics | Beyond shop priority order — TBD |
+| 7 | AI suggestion motivation refresh | Existing motivation reused on re-suggestion; update deferred |
 
 ---
 
-## Planned Scope (not yet specced)
+## Implementation Status
 
-- **AI price estimation** — fetch indicative market price per item; show subtotal per category and session total while shopping
-- **AI frequency tracking** — track how often items are bought; suggest or auto-add frequent items
-- **Autocomplete on item add** — suggest previously added items; pre-fill category, quantity, unit from history
-- **Barcode scanning** — AI-assisted matching of scanned product to existing list item by descriptive quality (ignoring brand/size)
-- **Shopping sessions** — explicit session model with start, join, and close; session history used for frequency tracking and expense summaries
-- **Signup flow** — if app is opened to general availability
+Built (test-first, behind the API service layer):
 
----
+- Auth: Firebase Google OAuth, allowlist gate via `getAccount()`, sign-in / access-denied screens, route guard, session restore loading state
+- App shell: top bar with mode toggle, nav drawer, full-screen routes for Settings / Manage Shops / History, runtime i18n + theme service + compact / high-contrast / left-handed / reduced-motion modes
+- Items: store + plan-mode list, add-pill flow, edit sheet, remove confirm dialog
+- Shops: store + Manage Shops screen with add / rename / delete sheets
+- Categories: store + plan-mode header ⋯ menu (rename / available-in-shops / delete), nav-drawer drag reorder dispatches `setShopCategoryOrder` per shop or `setGlobalCategoryOrder` when "Global" is selected, add-category sheet from drawer
+- Sessions + shop mode: session API + store, auto-start on shop select, shop-mode list with grouped Est. and session totals, 4 s client-side undo window, undo-history sheet, close-session dialog, 30-min inactivity reminder dialog (close session or keep shopping)
+- Session history: `/history` route loads completed sessions via `fetchSessionHistory`, expansion panels show shop, completed-at, total, and per-item snapshots
+- PWA shell: `@angular/service-worker` with `ngsw-config.json`, `manifest.webmanifest`, default icon set under `frontend/public/icons/`, hosting headers configured for SW + manifest in `backend/firebase/firebase.json`
 
-## Project Structure (to be scaffolded)
+Backend status: All API services (Auth, Item, Category, Shop, Session, Account, Users) are wired to Firestore through the `core/api/` layer. Each entity exposes a real `EntityChangeBatch<T>` stream via `snapshotChanges` (see `change-stream.ts`). `StreamErrorService` surfaces unrecoverable stream failures globally. Firestore security rules in `backend/firebase/firestore.rules` enforce the `accounts/{accountId}/...` subcollection layout via an `isMember()` check.
 
-```
-/
-├── CLAUDE.md
-├── PLANNING.md
-├── src/
-│   └── app/
-│       ├── core/
-│       │   ├── api/          ← API service layer (only place aware of backend)
-│       │   ├── auth/
-│       │   └── store/        ← NgRx root state
-│       ├── features/
-│       │   ├── list/
-│       │   ├── categories/
-│       │   ├── shops/
-│       │   └── settings/
-│       └── shared/
-└── tests/
-    └── acceptance/
-        ├── features/
-        │   ├── auth/
-        │   ├── modes/
-        │   ├── settings/
-        │   ├── categories/
-        │   ├── shops/
-        │   └── items/
-        └── step-definitions/
-```
+Deployment: GitHub Actions workflow (`.github/workflows/deploy.yml`) runs Vitest + Cucumber on every push/PR to `develop`/`main`, then deploys `develop` → GitHub Pages and `main` → cPanel via FTPS. Firestore rules and indexes deploy separately via `firebase deploy --only firestore:rules,firestore:indexes` from `backend/firebase/`. Firebase Hosting config exists in `firebase.json` as a fallback path but is not part of the active pipeline.
+
+Acceptance: Gherkin `.feature` files under `frontend/tests/acceptance/features/` cover auth, modes, settings, categories, shops, items, sessions, autocomplete, AI price estimation, AI list suggestions, and barcode scanning. Step definitions are written for all non-AI / non-barcode features and pass.
 
 ---
 
-## First Tasks for Claude Code
+## Planned Scope (not yet specced — do not implement)
 
-1. Scaffold the Angular PWA with the folder structure above
-2. Install and configure: NgRx, Angular Material 3, Cucumber.js, Vitest
-3. Generate feature files from `PLANNING.md`
-4. Set up Firebase connection behind the API service layer
-5. Implement auth feature (Google OAuth) — test-first
+- Signup / invitation flow for general availability
+- AI provider configuration UI (S4 link — TBD design pass)
+- Broader AI analytics (basket analysis, spend trends, price drift, co-occurrence)
+- Barcode scanning
+- Shop → plan mode transition with active session (open design question)

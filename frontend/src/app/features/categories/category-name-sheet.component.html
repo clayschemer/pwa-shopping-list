@@ -1,0 +1,37 @@
+<div class="app-category-name-sheet">
+  <h3 class="app-category-name-sheet__title">
+    @if (mode === 'add') {
+      {{ 'categoryNameSheet.addTitle' | transloco }}
+    } @else {
+      {{ 'categoryNameSheet.renameTitle' | transloco }}
+    }
+  </h3>
+
+  <mat-form-field class="app-category-name-sheet__field">
+    <mat-label>{{ 'categoryNameSheet.categoryName' | transloco }}</mat-label>
+    <input
+      matInput
+      [ngModel]="name()"
+      (ngModelChange)="name.set($event)"
+      (keydown.enter)="onSubmit()"
+      cdkFocusInitial
+    />
+    @if (hasConflict()) {
+      <mat-error>{{ 'categoryNameSheet.nameConflict' | transloco }}</mat-error>
+    }
+  </mat-form-field>
+
+  <div class="app-category-name-sheet__actions">
+    <button mat-button (click)="onCancel()">
+      {{ 'categoryNameSheet.cancel' | transloco }}
+    </button>
+    <button
+      mat-flat-button
+      color="primary"
+      [disabled]="!isValid()"
+      (click)="onSubmit()"
+    >
+      {{ actionLabel | transloco }}
+    </button>
+  </div>
+</div>

@@ -1,0 +1,29 @@
+.app-access-denied {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  min-height: 100dvh;
+  padding: 1.5rem;
+  text-align: center;
+  background: var(--mat-sys-surface);
+
+  &__title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--mat-sys-on-surface);
+    margin: 0;
+  }
+
+  &__message {
+    font-size: 1rem;
+    color: var(--mat-sys-on-surface-variant);
+    margin: 1rem 0 2rem;
+    max-width: 22rem;
+  }
+
+  &__action {
+    min-height: 2.75rem;
+  }
+}

@@ -1,0 +1,114 @@
+@if (isAuthenticated()) {
+  @if (isFullScreenRoute()) {
+    <main class="app-root__fullscreen">
+      <router-outlet />
+    </main>
+  } @else {
+    <mat-sidenav-container class="app-root__sidenav-container">
+      <mat-sidenav
+        [opened]="navDrawerOpen()"
+        mode="over"
+        (closed)="onDrawerClosed()"
+      >
+        <app-nav-drawer
+          (categorySelected)="onCategorySelected($event)"
+          (manageShops)="onManageShops()"
+          (addCategory)="onAddCategory()"
+          (viewHistory)="onViewHistory()"
+        />
+      </mat-sidenav>
+
+      <mat-sidenav-content>
+        <header class="app-root__top-bar" [class.app-root__top-bar--shop]="isShopMode()">
+          @if (isPlanMode()) {
+            <button
+              mat-icon-button
+              class="app-root__menu-btn"
+              [attr.aria-label]="'nav.openMenu' | transloco"
+              (click)="openDrawer()"
+            >
+              <mat-icon>menu</mat-icon>
+            </button>
+          } @else {
+            <button
+              mat-icon-button
+              class="app-root__undo-btn"
+              [attr.aria-label]="'nav.viewChecked' | transloco"
+              (click)="onOpenUndoHistory()"
+            >
+              <mat-icon
+                [matBadge]="checkedCount() > 0 ? checkedCount() : null"
+                matBadgeSize="small"
+                matBadgeColor="primary"
+                >undo</mat-icon
+              >
+            </button>
+          }
+
+          <nav class="app-root__mode-toggle" aria-label="Mode selection">
+            <button
+              class="app-root__mode-btn"
+              [class.app-root__mode-btn--active]="isPlanMode()"
+              (click)="switchToPlan()"
+              [attr.aria-current]="isPlanMode() ? 'page' : null"
+            >
+              {{ 'app.plan' | transloco }}
+            </button>
+            <button
+              class="app-root__mode-btn"
+              [class.app-root__mode-btn--active]="isShopMode()"
+              (click)="switchToShop()"
+              [attr.aria-current]="isShopMode() ? 'page' : null"
+            >
+              {{ 'app.shop' | transloco }}
+            </button>
+          </nav>
+
+          @if (isPlanMode()) {
+            <a
+              mat-icon-button
+              class="app-root__settings-btn"
+              routerLink="/settings"
+              [attr.aria-label]="'nav.settings' | transloco"
+            >
+              <mat-icon>settings</mat-icon>
+            </a>
+          } @else {
+            <button
+              type="button"
+              class="app-root__session-pill"
+              [attr.aria-label]="'nav.activeSession' | transloco"
+              (click)="onSessionPillClicked()"
+            >
+              @if (sessionTotal() > 0) {
+                <span class="app-root__session-pill-total">
+                  {{ sessionTotal() | money }}
+                </span>
+                <span class="app-root__session-pill-sub">
+                  {{ sessionShopName() ?? ('nav.global' | transloco) }}
+                </span>
+              } @else {
+                <span class="app-root__session-pill-total">
+                  {{ sessionShopName() ?? ('nav.global' | transloco) }}
+                </span>
+                <span class="app-root__session-pill-sub">
+                  {{ 'nav.sessionActive' | transloco }}
+                </span>
+              }
+            </button>
+          }
+        </header>
+
+        <main class="app-root__content">
+          <router-outlet />
+        </main>
+      </mat-sidenav-content>
+    </mat-sidenav-container>
+  }
+} @else if (isAuthChecking()) {
+  <div class="app-root__loading" role="status" [attr.aria-label]="'app.loading' | transloco">
+    <mat-spinner diameter="48" />
+  </div>
+} @else {
+  <router-outlet />
+}

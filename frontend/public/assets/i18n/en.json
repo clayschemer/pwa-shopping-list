@@ -1,0 +1,179 @@
+{
+  "app": {
+    "name": "Shopping List",
+    "loading": "Loading application",
+    "plan": "Plan",
+    "shop": "Shop"
+  },
+  "nav": {
+    "openMenu": "Open navigation menu",
+    "viewChecked": "View checked items",
+    "settings": "Settings",
+    "activeSession": "Active session",
+    "global": "Global",
+    "sessionActive": "active"
+  },
+  "navDrawer": {
+    "shopLayout": "Current shop layout",
+    "globalAll": "Global (all)",
+    "manageShops": "Manage shops\u2026",
+    "viewHistory": "History\u2026",
+    "categories": "Categories",
+    "addCategory": "Add category"
+  },
+  "history": {
+    "title": "Shopping history",
+    "goBack": "Go back",
+    "loading": "Loading history",
+    "empty": "No completed sessions yet.",
+    "itemCount": "{{count}} items",
+    "noChecked": "No items checked",
+    "unknownItem": "Deleted item"
+  },
+  "plan": {
+    "listLabel": "Shopping list",
+    "empty": "Your list is empty.",
+    "uncategorised": "Uncategorised",
+    "addItem": "Add item",
+    "removeItem": "Remove {{name}}",
+    "removeConfirmTitle": "Remove item?",
+    "removeConfirmMessage": "Remove \"{{name}}\" from the list?",
+    "cancel": "Cancel",
+    "remove": "Remove",
+    "ok": "OK",
+    "add": "Add"
+  },
+  "itemSheet": {
+    "addTitle": "Add item",
+    "editTitle": "Edit item",
+    "name": "Name",
+    "description": "Description",
+    "quantity": "Quantity",
+    "unit": "Unit",
+    "unitNone": "—",
+    "primaryCategory": "Primary category",
+    "secondaryCategories": "Also appears in",
+    "uncategorised": "Uncategorised",
+    "nameConflict": "An item with this name already exists",
+    "cancel": "Cancel",
+    "add": "Add",
+    "save": "Save"
+  },
+  "signIn": {
+    "title": "Shopping List",
+    "subtitle": "Sign in to access your shared list",
+    "continueWithGoogle": "Continue with Google",
+    "or": "or",
+    "email": "Email",
+    "password": "Password",
+    "signIn": "Sign in",
+    "signingIn": "Signing in\u2026",
+    "formLabel": "Sign in with email",
+    "errors": {
+      "wrongPassword": "Invalid email or password.",
+      "userNotFound": "No account found with this email.",
+      "tooManyRequests": "Too many attempts. Please try again later.",
+      "invalidEmail": "Please enter a valid email address.",
+      "default": "Sign-in failed. Please try again."
+    }
+  },
+  "accessDenied": {
+    "title": "Access denied",
+    "message": "The account <strong>{{email}}</strong> does not have permission to use this application.",
+    "messageNoEmail": "This account does not have permission to use this application.",
+    "tryDifferent": "Try a different account"
+  },
+  "manageShops": {
+    "title": "Manage shops",
+    "goBack": "Go back",
+    "empty": "No shops yet. Tap + to add one.",
+    "addShop": "Add shop",
+    "deleteShop": "Delete {{name}}",
+    "deleteConfirm": "Delete \"{{name}}\"? This cannot be undone."
+  },
+  "shopNameSheet": {
+    "addTitle": "Add shop",
+    "renameTitle": "Rename shop",
+    "shopName": "Shop name",
+    "nameConflict": "A shop with this name already exists",
+    "cancel": "Cancel",
+    "add": "Add shop",
+    "save": "Save"
+  },
+  "categoryNameSheet": {
+    "addTitle": "Add category",
+    "renameTitle": "Rename category",
+    "categoryName": "Category name",
+    "nameConflict": "A category with this name already exists",
+    "cancel": "Cancel",
+    "add": "Add category",
+    "save": "Save"
+  },
+  "categoryMenu": {
+    "open": "Category options for {{name}}",
+    "rename": "Rename",
+    "availableInShops": "Available in shops\u2026",
+    "delete": "Delete category"
+  },
+  "availableInShops": {
+    "title": "Available in shops",
+    "subtitle": "{{name}}",
+    "empty": "No shops configured.",
+    "done": "Done"
+  },
+  "deleteCategory": {
+    "title": "Delete category?",
+    "message": "Items in \"{{name}}\" will become uncategorised. They will not be removed from your list.",
+    "cancel": "Cancel",
+    "delete": "Delete"
+  },
+  "shop": {
+    "listLabel": "Shopping list",
+    "empty": "Your list is empty.",
+    "uncategorised": "Uncategorised",
+    "selectTitle": "Where are you shopping?",
+    "global": "No specific shop (global)",
+    "est": "Est.",
+    "tapToUndo": "tap to undo",
+    "checkItem": "Check {{name}}"
+  },
+  "closeSession": {
+    "allDoneTitle": "All done!",
+    "allDoneMessage": "Everything's checked off. Close this session and save the history?",
+    "remainingTitle": "Close session?",
+    "remainingMessage": "There are still unchecked items on your list. Close the session anyway?",
+    "notYet": "Not yet",
+    "keepShopping": "Keep shopping",
+    "close": "Close session"
+  },
+  "undoHistory": {
+    "title": "Checked this session",
+    "empty": "Nothing checked yet.",
+    "uncheck": "Uncheck {{name}}"
+  },
+  "inactivityReminder": {
+    "title": "Still shopping?",
+    "message": "Your session has been idle for a while. Close it now or keep going?",
+    "keepShopping": "Keep shopping",
+    "close": "Close session"
+  },
+  "settings": {
+    "title": "Settings",
+    "goBack": "Go back",
+    "appearance": "Appearance",
+    "darkMode": "Dark mode",
+    "compactMode": "Compact mode",
+    "accessibility": "Accessibility",
+    "reduceMotion": "Reduce motion",
+    "highContrast": "High contrast",
+    "leftHanded": "Left-handed mode",
+    "languageRegion": "Language & Region",
+    "language": "Language",
+    "currency": "Currency",
+    "display": "Display",
+    "keepScreenAwake": "Keep screen awake",
+    "account": "Account",
+    "signedInAs": "Signed in as",
+    "signOut": "Sign out"
+  }
+}

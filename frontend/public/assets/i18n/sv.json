@@ -1,0 +1,121 @@
+{
+  "app": {
+    "name": "Inköpslista",
+    "loading": "Laddar applikation",
+    "plan": "Planera",
+    "shop": "Handla"
+  },
+  "nav": {
+    "openMenu": "Öppna navigationsmeny",
+    "viewChecked": "Visa avbockade varor",
+    "settings": "Inställningar",
+    "activeSession": "Aktiv session",
+    "global": "Global"
+  },
+  "navDrawer": {
+    "shopLayout": "Aktuell butikslayout",
+    "globalAll": "Global (alla)",
+    "manageShops": "Hantera butiker\u2026",
+    "viewHistory": "Historik\u2026",
+    "categories": "Kategorier",
+    "addCategory": "Lägg till kategori"
+  },
+  "history": {
+    "title": "Köphistorik",
+    "goBack": "Tillbaka",
+    "loading": "Laddar historik",
+    "empty": "Inga avslutade sessioner ännu.",
+    "itemCount": "{{count}} varor",
+    "noChecked": "Inga avbockade varor",
+    "unknownItem": "Borttagen vara"
+  },
+  "plan": {
+    "listLabel": "Inköpslista",
+    "empty": "Din lista är tom.",
+    "uncategorised": "Okategoriserad",
+    "addItem": "Lägg till vara",
+    "removeItem": "Ta bort {{name}}",
+    "removeConfirmTitle": "Ta bort vara?",
+    "removeConfirmMessage": "Ta bort ”{{name}}” från listan?",
+    "cancel": "Avbryt",
+    "remove": "Ta bort",
+    "ok": "OK",
+    "add": "Lägg till"
+  },
+  "itemSheet": {
+    "addTitle": "Lägg till vara",
+    "editTitle": "Redigera vara",
+    "name": "Namn",
+    "description": "Beskrivning",
+    "quantity": "Antal",
+    "unit": "Enhet",
+    "unitNone": "—",
+    "primaryCategory": "Primär kategori",
+    "secondaryCategories": "Visas också i",
+    "uncategorised": "Okategoriserad",
+    "nameConflict": "En vara med detta namn finns redan",
+    "cancel": "Avbryt",
+    "add": "Lägg till",
+    "save": "Spara"
+  },
+  "signIn": {
+    "title": "Inköpslista",
+    "subtitle": "Logga in för att komma åt din delade lista",
+    "continueWithGoogle": "Fortsätt med Google",
+    "or": "eller",
+    "email": "E-post",
+    "password": "Lösenord",
+    "signIn": "Logga in",
+    "signingIn": "Loggar in\u2026",
+    "formLabel": "Logga in med e-post",
+    "errors": {
+      "wrongPassword": "Ogiltig e-post eller lösenord.",
+      "userNotFound": "Inget konto hittades med denna e-post.",
+      "tooManyRequests": "För många försök. Försök igen senare.",
+      "invalidEmail": "Ange en giltig e-postadress.",
+      "default": "Inloggningen misslyckades. Försök igen."
+    }
+  },
+  "accessDenied": {
+    "title": "Åtkomst nekad",
+    "message": "Kontot <strong>{{email}}</strong> har inte behörighet att använda denna applikation.",
+    "messageNoEmail": "Detta konto har inte behörighet att använda denna applikation.",
+    "tryDifferent": "Prova ett annat konto"
+  },
+  "manageShops": {
+    "title": "Hantera butiker",
+    "goBack": "Gå tillbaka",
+    "empty": "Inga butiker ännu. Tryck + för att lägga till en.",
+    "addShop": "Lägg till butik",
+    "deleteShop": "Ta bort {{name}}",
+    "deleteConfirm": "Ta bort \"{{name}}\"? Detta kan inte ångras."
+  },
+  "shopNameSheet": {
+    "addTitle": "Lägg till butik",
+    "renameTitle": "Byt namn på butik",
+    "shopName": "Butiksnamn",
+    "nameConflict": "En butik med detta namn finns redan",
+    "cancel": "Avbryt",
+    "add": "Lägg till butik",
+    "save": "Spara"
+  },
+  "settings": {
+    "title": "Inställningar",
+    "goBack": "Gå tillbaka",
+    "appearance": "Utseende",
+    "darkMode": "Mörkt läge",
+    "compactMode": "Kompakt läge",
+    "accessibility": "Tillgänglighet",
+    "reduceMotion": "Minska rörelse",
+    "highContrast": "Hög kontrast",
+    "leftHanded": "Vänsterhänt läge",
+    "languageRegion": "Språk och region",
+    "language": "Språk",
+    "currency": "Valuta",
+    "display": "Visning",
+    "keepScreenAwake": "Håll skärmen på",
+    "account": "Konto",
+    "signedInAs": "Inloggad som",
+    "signOut": "Logga ut"
+  }
+}

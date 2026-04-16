@@ -1,0 +1,124 @@
+<header class="app-settings__header">
+  <button
+    mat-icon-button
+    class="app-settings__back-btn"
+    [attr.aria-label]="'settings.goBack' | transloco"
+    (click)="goBack()"
+  >
+    <mat-icon>arrow_back</mat-icon>
+  </button>
+  <h1 class="app-settings__title">{{ 'settings.title' | transloco }}</h1>
+</header>
+
+<div class="app-settings__body">
+  <!-- Appearance -->
+  <section class="app-settings__section">
+    <h2 class="app-settings__section-title">{{ 'settings.appearance' | transloco }}</h2>
+
+    <div class="app-settings__row">
+      <span class="app-settings__label">{{ 'settings.darkMode' | transloco }}</span>
+      <mat-slide-toggle
+        [checked]="settings().darkMode === true"
+        (change)="onDarkModeToggle($event.checked)"
+      />
+    </div>
+
+    <div class="app-settings__row">
+      <span class="app-settings__label">{{ 'settings.compactMode' | transloco }}</span>
+      <mat-slide-toggle
+        [checked]="settings().compact"
+        (change)="onCompactToggle($event.checked)"
+      />
+    </div>
+  </section>
+
+  <!-- Accessibility -->
+  <section class="app-settings__section">
+    <h2 class="app-settings__section-title">{{ 'settings.accessibility' | transloco }}</h2>
+
+    <div class="app-settings__row">
+      <span class="app-settings__label">{{ 'settings.reduceMotion' | transloco }}</span>
+      <mat-slide-toggle
+        [checked]="settings().reduceMotion === true"
+        (change)="onReduceMotionToggle($event.checked)"
+      />
+    </div>
+
+    <div class="app-settings__row">
+      <span class="app-settings__label">{{ 'settings.highContrast' | transloco }}</span>
+      <mat-slide-toggle
+        [checked]="settings().highContrast === true"
+        (change)="onHighContrastToggle($event.checked)"
+      />
+    </div>
+
+    <div class="app-settings__row">
+      <span class="app-settings__label">{{ 'settings.leftHanded' | transloco }}</span>
+      <mat-slide-toggle
+        [checked]="settings().leftHanded"
+        (change)="onLeftHandedToggle($event.checked)"
+      />
+    </div>
+  </section>
+
+  <!-- Language & Region -->
+  <section class="app-settings__section">
+    <h2 class="app-settings__section-title">{{ 'settings.languageRegion' | transloco }}</h2>
+
+    <mat-form-field class="app-settings__select-field">
+      <mat-label>{{ 'settings.language' | transloco }}</mat-label>
+      <mat-select
+        [value]="settings().language"
+        (selectionChange)="onLanguageChange($event.value)"
+      >
+        @for (lang of languages; track lang) {
+          <mat-option [value]="lang">{{ lang }}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+
+    <mat-form-field class="app-settings__select-field">
+      <mat-label>{{ 'settings.currency' | transloco }}</mat-label>
+      <mat-select
+        [value]="settings().currency"
+        (selectionChange)="onCurrencyChange($event.value)"
+      >
+        @for (cur of currencies; track cur) {
+          <mat-option [value]="cur">{{ cur }}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+  </section>
+
+  <!-- Display -->
+  <section class="app-settings__section">
+    <h2 class="app-settings__section-title">{{ 'settings.display' | transloco }}</h2>
+
+    <div class="app-settings__row">
+      <span class="app-settings__label">{{ 'settings.keepScreenAwake' | transloco }}</span>
+      <mat-slide-toggle
+        [checked]="settings().keepScreenAwake"
+        (change)="onKeepScreenAwakeToggle($event.checked)"
+      />
+    </div>
+  </section>
+
+  <!-- Account -->
+  <section class="app-settings__section">
+    <h2 class="app-settings__section-title">{{ 'settings.account' | transloco }}</h2>
+
+    @if (user(); as u) {
+      <div class="app-settings__row">
+        <span class="app-settings__label">{{ 'settings.signedInAs' | transloco }}</span>
+        <span class="app-settings__email">{{ u.email }}</span>
+      </div>
+    }
+
+    <button
+      class="app-settings__sign-out-btn"
+      (click)="signOut()"
+    >
+      {{ 'settings.signOut' | transloco }}
+    </button>
+  </section>
+</div>

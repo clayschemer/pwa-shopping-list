@@ -1,0 +1,64 @@
+.undo-history-sheet {
+  padding: 1rem;
+
+  &__title {
+    margin: 0 0 0.75rem;
+    font-size: 1rem;
+    font-weight: 600;
+  }
+
+  &__empty {
+    padding: 2rem 0;
+    text-align: center;
+    color: var(--mat-sys-on-surface-variant);
+  }
+
+  &__list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+  }
+
+  &__entry {
+    border-bottom: 1px solid var(--mat-sys-outline-variant);
+  }
+
+  &__uncheck {
+    all: unset;
+    cursor: pointer;
+    display: grid;
+    grid-template-columns: 2rem 1fr auto;
+    gap: 0.75rem;
+    align-items: center;
+    width: 100%;
+    min-height: 3rem;
+    padding: 0.5rem 0.25rem;
+    color: var(--mat-sys-on-surface);
+
+    &:focus-visible {
+      outline: 2px solid var(--mat-sys-primary);
+      outline-offset: 2px;
+      border-radius: 0.25rem;
+    }
+  }
+
+  &__initials {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2rem;
+    height: 2rem;
+    border-radius: 50%;
+    background: var(--mat-sys-secondary-container);
+    color: var(--mat-sys-on-secondary-container);
+    font-size: 0.75rem;
+    font-weight: 600;
+  }
+
+  &__price {
+    font-size: 0.875rem;
+    color: var(--mat-sys-on-surface-variant);
+  }
+}

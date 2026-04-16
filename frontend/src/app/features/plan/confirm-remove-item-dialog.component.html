@@ -1,0 +1,12 @@
+<h2 mat-dialog-title>{{ 'plan.removeConfirmTitle' | transloco }}</h2>
+<mat-dialog-content>
+  <p>{{ 'plan.removeConfirmMessage' | transloco: { name: data.name } }}</p>
+</mat-dialog-content>
+<mat-dialog-actions align="end">
+  <button mat-button (click)="onCancel()">
+    {{ 'plan.cancel' | transloco }}
+  </button>
+  <button mat-flat-button color="warn" (click)="onConfirm()">
+    {{ 'plan.remove' | transloco }}
+  </button>
+</mat-dialog-actions>

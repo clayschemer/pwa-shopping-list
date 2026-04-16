@@ -1,0 +1,132 @@
+.app-plan {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  padding: 0.5rem 1rem 6rem;
+
+  &__empty {
+    text-align: center;
+    padding: 3rem 1rem;
+    font-size: 1rem;
+    color: var(--mat-sys-on-surface-variant);
+  }
+
+  &__group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+
+    &--uncategorised {
+      .app-plan__group-title {
+        color: var(--mat-sys-on-surface-variant);
+        opacity: 0.75;
+      }
+    }
+  }
+
+  &__group-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+    padding: 0.5rem 0.25rem 0.25rem;
+    border-bottom: 1px solid var(--mat-sys-outline-variant);
+  }
+
+  &__group-title {
+    margin: 0;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--mat-sys-on-surface-variant);
+  }
+
+  &__group-meta {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+  }
+
+  &__group-total {
+    font-size: 0.8125rem;
+    color: var(--mat-sys-on-surface-variant);
+  }
+
+  &__group-menu-btn {
+    color: var(--mat-sys-on-surface-variant);
+  }
+
+  &__items {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+  }
+
+  &__item {
+    display: flex;
+    align-items: center;
+    min-height: 2.75rem;
+    gap: 0.5rem;
+    border-bottom: 1px solid var(--mat-sys-outline-variant);
+  }
+
+  &__item-main {
+    all: unset;
+    cursor: pointer;
+    flex: 1;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 0.5rem;
+    padding: 0.75rem 0.25rem;
+    color: var(--mat-sys-on-surface);
+    min-height: 2.75rem;
+    box-sizing: border-box;
+
+    &:focus-visible {
+      outline: 2px solid var(--mat-sys-primary);
+      outline-offset: 2px;
+      border-radius: 0.25rem;
+    }
+  }
+
+  &__item-name {
+    font-size: 1rem;
+  }
+
+  &__item-qty {
+    font-size: 0.875rem;
+    color: var(--mat-sys-on-surface-variant);
+  }
+
+  &__item-description {
+    flex-basis: 100%;
+    font-size: 0.8125rem;
+    color: var(--mat-sys-on-surface-variant);
+  }
+
+  &__item-remove {
+    all: unset;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.75rem;
+    height: 2.75rem;
+    color: var(--mat-sys-on-surface-variant);
+    border-radius: 50%;
+
+    &:hover {
+      color: var(--mat-sys-error);
+    }
+
+    &:focus-visible {
+      outline: 2px solid var(--mat-sys-primary);
+      outline-offset: 2px;
+    }
+  }
+
+}

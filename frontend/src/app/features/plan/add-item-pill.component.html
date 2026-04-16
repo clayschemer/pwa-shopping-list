@@ -1,0 +1,90 @@
+@if (stage() === 'collapsed') {
+  <button
+    mat-fab
+    type="button"
+    class="app-add-item-pill__fab"
+    [attr.aria-label]="'plan.addItem' | transloco"
+    (click)="open()"
+  >
+    <mat-icon>add</mat-icon>
+  </button>
+} @else {
+  <div class="app-add-item-pill" role="dialog" [attr.aria-label]="'plan.addItem' | transloco">
+    @if (suggestions().length > 0) {
+      <ul class="app-add-item-pill__suggestions" role="listbox">
+        @for (suggestion of suggestions(); track suggestion.id) {
+          <li class="app-add-item-pill__suggestion" role="option">
+            <button
+              type="button"
+              class="app-add-item-pill__suggestion-btn"
+              (click)="applySuggestion(suggestion)"
+            >
+              <span class="app-add-item-pill__suggestion-name">{{ suggestion.name }}</span>
+              @if (suggestion.quantity !== null || suggestion.unit !== null) {
+                <span class="app-add-item-pill__suggestion-qty">
+                  {{ suggestion.quantity }}{{ suggestion.unit ? ' ' + suggestion.unit : '' }}
+                </span>
+              }
+            </button>
+          </li>
+        }
+      </ul>
+    }
+
+    <form class="app-add-item-pill__bar" (ngSubmit)="stage() === 'name' ? confirmName() : submit()">
+      @if (stage() === 'name') {
+        <input
+          #nameInput
+          class="app-add-item-pill__input"
+          type="text"
+          name="itemName"
+          autocomplete="off"
+          [attr.aria-label]="'itemSheet.name' | transloco"
+          [attr.aria-invalid]="hasConflict()"
+          [ngModel]="name()"
+          (ngModelChange)="name.set($event)"
+        />
+        @if (hasConflict()) {
+          <span class="app-add-item-pill__error" role="alert">
+            {{ 'itemSheet.nameConflict' | transloco }}
+          </span>
+        }
+        <button
+          type="submit"
+          class="app-add-item-pill__ok"
+          [disabled]="!nameValid()"
+        >
+          {{ 'plan.ok' | transloco }}
+        </button>
+      } @else {
+        <span class="app-add-item-pill__name-badge">{{ name() }}</span>
+        <input
+          #qtyInput
+          class="app-add-item-pill__qty"
+          type="number"
+          min="0"
+          step="any"
+          name="itemQty"
+          [attr.aria-label]="'itemSheet.quantity' | transloco"
+          [ngModel]="quantity()"
+          (ngModelChange)="quantity.set($event === '' || $event === null ? null : +$event)"
+        />
+        <select
+          class="app-add-item-pill__unit"
+          name="itemUnit"
+          [attr.aria-label]="'itemSheet.unit' | transloco"
+          [ngModel]="unit()"
+          (ngModelChange)="unit.set($event === '' ? null : $event)"
+        >
+          <option [ngValue]="null">{{ 'itemSheet.unitNone' | transloco }}</option>
+          @for (u of units; track u) {
+            <option [ngValue]="u">{{ u }}</option>
+          }
+        </select>
+        <button type="submit" class="app-add-item-pill__add">
+          {{ 'plan.add' | transloco }}
+        </button>
+      }
+    </form>
+  </div>
+}
