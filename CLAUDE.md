@@ -96,6 +96,8 @@ For SCSS conventions (BEM, units, layout, accessibility, reduced motion) → `.c
 ├── DATA-MODEL.md                    ← full logical data model (backend-agnostic)
 ├── API-CONTRACT.md                  ← full service layer contract (TypeScript types + operations)
 ├── DESIGN.md                        ← UI/UX specification (all 6 screens signed off)
+├── BACKEND.md                       ← backend specification and decisions
+├── FUTURE-FEATURES.md               ← deferred Gherkin scenarios (barcode scanning, etc.)
 ├── design-system.scss               ← all design tokens, typography, motion contract
 │
 ├── frontend/                        ← Angular PWA
@@ -108,20 +110,32 @@ For SCSS conventions (BEM, units, layout, accessibility, reduced motion) → `.c
 │   │   │   │   │   ├── shop-api.service.ts
 │   │   │   │   │   ├── session-api.service.ts
 │   │   │   │   │   └── account-api.service.ts
-│   │   │   │   ├── auth/
+│   │   │   │   ├── auth/            ← Firebase auth bridge + auth guard
+│   │   │   │   ├── format/          ← MoneyPipe (currency formatting from ThemeService)
 │   │   │   │   ├── i18n/            ← Transloco config and HTTP loader
-│   │   │   │   ├── theme/           ← ThemeService — manages settings in localStorage, applies CSS classes
-│   │   │   │   └── stream/          ← change-stream.service.ts
-│   │   │   ├── store/               ← NgRx per-domain (items/, categories/, shops/, sessions/, account/, ui/)
+│   │   │   │   └── theme/           ← ThemeService — manages settings in localStorage, applies CSS classes
+│   │   │   ├── store/               ← NgRx per-domain
+│   │   │   │   ├── account/
+│   │   │   │   ├── categories/
+│   │   │   │   ├── items/
+│   │   │   │   ├── sessions/
+│   │   │   │   ├── shops/
+│   │   │   │   ├── ui/
+│   │   │   │   └── selectors/       ← cross-domain selectors (grouped lists, etc.)
+│   │   │   ├── shell/               ← app-shell components (nav drawer, etc.)
 │   │   │   ├── features/
-│   │   │   │   ├── auth/
-│   │   │   │   ├── plan/
-│   │   │   │   ├── shop/
-│   │   │   │   ├── settings/
-│   │   │   │   └── shared/          ← shared presentational components (no store access)
+│   │   │   │   ├── auth/            ← sign-in + access-denied
+│   │   │   │   ├── plan/            ← plan-mode list, add-pill, item edit sheet, remove dialog
+│   │   │   │   ├── shop/            ← shop-mode list, shop-select sheet, undo-history, close-session dialog
+│   │   │   │   ├── categories/      ← category name sheet, available-in-shops sheet, delete dialog
+│   │   │   │   ├── manage-shops/    ← Manage Shops screen + shop name sheet
+│   │   │   │   └── settings/
 │   │   │   ├── models/              ← domain types (*.model.ts)
-│   │   │   └── app.config.ts
-│   │   └── styles/                  ← design-system.scss + Angular Material theme
+│   │   │   ├── app.config.ts
+│   │   │   ├── app.routes.ts
+│   │   │   └── app.{ts,html,scss}   ← root component
+│   │   ├── styles/                  ← design-system.scss + Angular Material theme
+│   │   └── testing/                 ← shared test helpers (init-testbed, transloco-testing)
 │   ├── tests/
 │   │   └── acceptance/
 │   │       ├── features/
@@ -142,7 +156,6 @@ For SCSS conventions (BEM, units, layout, accessibility, reduced motion) → `.c
 │   └── tsconfig.json
 │
 └── backend/                         ← backend project root
-    ├── BACKEND.md                   ← backend specification and decisions
     ├── firebase/                    ← Firebase project config, rules, indexes
     │   ├── firestore.rules
     │   ├── firestore.indexes.json
@@ -278,13 +291,20 @@ All device-local (localStorage) unless noted:
 
 ---
 
-## First Tasks for Claude Code
+## Implementation Status
 
-1. Scaffold project structure (`frontend/` + `backend/`) as defined above
-2. Install and configure: NgRx, Angular Material 3, Cucumber.js, Vitest
-3. Generate all feature files from `PLANNING.md`
-4. Implement Firebase backend behind the API service layer
-5. Implement auth feature (Google OAuth) — test-first
+Built (test-first, behind the API service layer):
+
+- Auth: Firebase Google OAuth, allowlist gate via `getAccount()`, sign-in / access-denied screens, route guard, session restore loading state
+- App shell: top bar with mode toggle, nav drawer, full-screen routes for Settings / Manage Shops, runtime i18n + theme service + compact / high-contrast / left-handed / reduced-motion modes
+- Items: store + plan-mode list, add-pill flow, edit sheet, remove confirm dialog
+- Shops: store + Manage Shops screen with add / rename / delete sheets
+- Categories: store + plan-mode header ⋯ menu (rename / available-in-shops / delete), nav-drawer drag reorder dispatches `setShopCategoryOrder` per shop or `setGlobalCategoryOrder` when "Global" is selected, add-category sheet from drawer
+- Sessions + shop mode: session API + store, auto-start on shop select, shop-mode list with grouped Est. and session totals, 4 s client-side undo window, undo-history sheet, close-session dialog
+
+Backend status: Auth uses real Firebase. Item / Category / Shop / Session API services are still in-memory stubs in `frontend/src/app/core/api/`. Wiring them to Firestore (and the change-stream contract from `API-CONTRACT.md`) is the next backend slice.
+
+Acceptance: Gherkin `.feature` files exist under `frontend/tests/acceptance/features/`. Step definitions for sessions / modes / shop-mode items / categories are not yet written — explicit follow-up.
 
 ---
 

@@ -12,6 +12,23 @@ A private shared shopping list PWA for two users. Mobile-first, accessibility-fi
 
 ---
 
+## Implementation Status
+
+Built (test-first, behind the API service layer):
+
+- Auth: Firebase Google OAuth, allowlist gate via `getAccount()`, sign-in / access-denied screens, route guard, session restore loading state
+- App shell: top bar with mode toggle, nav drawer, full-screen routes for Settings / Manage Shops, runtime i18n + theme service + compact / high-contrast / left-handed / reduced-motion modes
+- Items: store + plan-mode list, add-pill flow, edit sheet, remove confirm dialog
+- Shops: store + Manage Shops screen with add / rename / delete sheets
+- Categories: store + plan-mode header ⋯ menu (rename / available-in-shops / delete), nav-drawer drag reorder dispatches `setShopCategoryOrder` per shop or `setGlobalCategoryOrder` when "Global" is selected, add-category sheet from drawer
+- Sessions + shop mode: session API + store, auto-start on shop select, shop-mode list with grouped Est. and session totals, 4 s client-side undo window, undo-history sheet, close-session dialog
+
+Backend status: Auth uses real Firebase. Item / Category / Shop / Session API services are still in-memory stubs in `frontend/src/app/core/api/`. Wiring them to Firestore (and the change-stream contract from `API-CONTRACT.md`) is the next backend slice.
+
+Acceptance: Gherkin `.feature` files exist under `frontend/tests/acceptance/features/`. Step definitions for sessions / modes / shop-mode items / categories are not yet written — explicit follow-up.
+
+---
+
 ## Architecture
 
 ### Project Structure
@@ -23,6 +40,8 @@ A private shared shopping list PWA for two users. Mobile-first, accessibility-fi
 ├── DATA-MODEL.md        ← logical data model (backend-agnostic)
 ├── API-CONTRACT.md      ← service layer contract (types + operations)
 ├── DESIGN.md            ← UI/UX spec (all 6 screens signed off)
+├── BACKEND.md           ← backend specification and decisions
+├── FUTURE-FEATURES.md   ← deferred Gherkin scenarios (barcode scanning, etc.)
 ├── design-system.scss   ← design token specification (colours, typography, spacing, motion)
 │
 ├── frontend/            ← Angular PWA
@@ -35,18 +54,25 @@ A private shared shopping list PWA for two users. Mobile-first, accessibility-fi
 │   │   │   │   │   ├── shop-api.service.ts
 │   │   │   │   │   ├── session-api.service.ts
 │   │   │   │   │   └── account-api.service.ts
-│   │   │   │   ├── auth/
-│   │   │   │   └── stream/          ← change-stream.service.ts
-│   │   │   ├── store/               ← NgRx per-domain (items/, categories/, shops/, sessions/, account/, ui/)
+│   │   │   │   ├── auth/            ← Firebase auth bridge + auth guard
+│   │   │   │   ├── format/          ← MoneyPipe (currency formatting)
+│   │   │   │   ├── i18n/            ← Transloco config + HTTP loader
+│   │   │   │   └── theme/           ← ThemeService (settings, CSS classes)
+│   │   │   ├── store/               ← NgRx: account/, categories/, items/, sessions/, shops/, ui/, selectors/
+│   │   │   ├── shell/               ← app-shell components (nav-drawer, etc.)
 │   │   │   ├── features/
-│   │   │   │   ├── auth/
-│   │   │   │   ├── plan/
-│   │   │   │   ├── shop/
-│   │   │   │   ├── settings/
-│   │   │   │   └── shared/          ← shared presentational components (no store access)
+│   │   │   │   ├── auth/            ← sign-in + access-denied
+│   │   │   │   ├── plan/            ← plan-mode list, add-pill, item edit sheet
+│   │   │   │   ├── shop/            ← shop-mode list + session sheets/dialogs
+│   │   │   │   ├── categories/      ← category sheets + delete dialog
+│   │   │   │   ├── manage-shops/    ← Manage Shops screen
+│   │   │   │   └── settings/
 │   │   │   ├── models/              ← domain types (*.model.ts)
-│   │   │   └── app.config.ts
-│   │   └── styles/                  ← Angular Material theme (_theme-*.scss)
+│   │   │   ├── app.config.ts
+│   │   │   ├── app.routes.ts
+│   │   │   └── app.{ts,html,scss}
+│   │   ├── styles/                  ← Angular Material theme (_theme-*.scss) + design-system.scss
+│   │   └── testing/                 ← shared test helpers
 │   ├── tests/
 │   │   └── acceptance/
 │   │       ├── features/            ← Gherkin feature files (source of truth for behaviour)
@@ -67,7 +93,6 @@ A private shared shopping list PWA for two users. Mobile-first, accessibility-fi
 │   └── tsconfig.json
 │
 └── backend/             ← backend project root
-    ├── BACKEND.md       ← backend spec and decisions
     ├── firebase/        ← Firebase config, Firestore rules + indexes
     └── future/          ← placeholder for Java/Go + PostgreSQL implementation
 ```
