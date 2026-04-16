@@ -9,6 +9,7 @@ export interface PlanListGroup {
   categoryId: CategoryId | null; // null = uncategorised bucket
   categoryName: string | null;
   items: Item[];
+  estTotal: number; // sum of price for active items; 0 means hidden in UI
 }
 
 export const UNCATEGORISED_KEY = null;
@@ -40,6 +41,7 @@ export const selectGroupedPlanList = createSelector(
           categoryId: cat.id,
           categoryName: cat.name,
           items: [...bucket].sort((a, b) => a.name.localeCompare(b.name)),
+          estTotal: sumPrices(bucket),
         });
       }
     }
@@ -51,9 +53,20 @@ export const selectGroupedPlanList = createSelector(
         items: [...uncategorised].sort((a, b) =>
           a.name.localeCompare(b.name),
         ),
+        estTotal: 0,
       });
     }
 
     return groups;
   },
 );
+
+function sumPrices(items: Item[]): number {
+  let total = 0;
+  for (const item of items) {
+    if (typeof item.price === 'number') {
+      total += item.price;
+    }
+  }
+  return total;
+}

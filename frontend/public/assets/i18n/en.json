@@ -90,6 +90,33 @@
     "add": "Add shop",
     "save": "Save"
   },
+  "categoryNameSheet": {
+    "addTitle": "Add category",
+    "renameTitle": "Rename category",
+    "categoryName": "Category name",
+    "nameConflict": "A category with this name already exists",
+    "cancel": "Cancel",
+    "add": "Add category",
+    "save": "Save"
+  },
+  "categoryMenu": {
+    "open": "Category options for {{name}}",
+    "rename": "Rename",
+    "availableInShops": "Available in shops\u2026",
+    "delete": "Delete category"
+  },
+  "availableInShops": {
+    "title": "Available in shops",
+    "subtitle": "{{name}}",
+    "empty": "No shops configured.",
+    "done": "Done"
+  },
+  "deleteCategory": {
+    "title": "Delete category?",
+    "message": "Items in \"{{name}}\" will become uncategorised. They will not be removed from your list.",
+    "cancel": "Cancel",
+    "delete": "Delete"
+  },
   "shop": {
     "listLabel": "Shopping list",
     "empty": "Your list is empty.",

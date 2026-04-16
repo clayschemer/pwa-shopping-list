@@ -7,6 +7,7 @@ import { selectGroupedShopList } from '../../store/selectors/grouped-shop-list.s
 import { selectActiveSessionForCurrentUser } from '../../store/sessions/sessions.selectors';
 import { selectPendingChecks } from '../../store/items/items.selectors';
 import { itemsActions, itemsApiActions } from '../../store/items/items.actions';
+import type { PendingCheck } from '../../store/items/items.reducer';
 import { MoneyPipe } from '../../core/format/money.pipe';
 import type { Item } from '../../models/item.model';
 import type { ItemId } from '../../models/ids.model';
@@ -31,7 +32,7 @@ export class ShopComponent {
   );
 
   readonly pendingChecks = toSignal(this.store.select(selectPendingChecks), {
-    initialValue: {} as Record<ItemId, unknown>,
+    initialValue: {} as Record<ItemId, PendingCheck>,
   });
 
   readonly checkedItemIds = computed(() => {

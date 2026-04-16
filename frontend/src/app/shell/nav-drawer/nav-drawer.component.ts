@@ -12,6 +12,7 @@ import { selectSelectedShopId } from '../../store/ui/ui.selectors';
 import { selectOrderedCategories } from '../../store/selectors/ordered-categories.selectors';
 import { uiActions } from '../../store/ui/ui.actions';
 import { shopsApiActions } from '../../store/shops/shops.actions';
+import { categoriesApiActions } from '../../store/categories/categories.actions';
 import type { Category } from '../../models/category.model';
 import type { CategoryId, ShopId } from '../../models/ids.model';
 
@@ -61,6 +62,8 @@ export class NavDrawerComponent {
     const shopId = this.selectedShopId();
     if (shopId) {
       this.store.dispatch(shopsApiActions.setShopCategoryOrderRequested({ shopId, orderedIds }));
+    } else {
+      this.store.dispatch(categoriesApiActions.setGlobalCategoryOrderRequested({ orderedIds }));
     }
   }
 

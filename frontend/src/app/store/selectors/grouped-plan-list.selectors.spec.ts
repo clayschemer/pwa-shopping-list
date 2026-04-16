@@ -86,4 +86,21 @@ describe('selectGroupedPlanList', () => {
     const groups = selectGroupedPlanList.projector([], [cat('c1', 'Produce')]);
     expect(groups).toEqual([]);
   });
+
+  it('sums prices into estTotal per category', () => {
+    const a = { ...item('i1', 'Apples', 'c1'), price: 1.5 };
+    const b = { ...item('i2', 'Bananas', 'c1'), price: 0.8 };
+    const c = { ...item('i3', 'Cherries', 'c1'), price: null };
+    const groups = selectGroupedPlanList.projector(
+      [a, b, c] as Item[],
+      [cat('c1', 'Produce')],
+    );
+    expect(groups[0]!.estTotal).toBeCloseTo(2.3);
+  });
+
+  it('sets estTotal to 0 for the uncategorised group', () => {
+    const items = [{ ...item('i1', 'Loose', null), price: 5 }] as Item[];
+    const groups = selectGroupedPlanList.projector(items, []);
+    expect(groups[0]!.estTotal).toBe(0);
+  });
 });

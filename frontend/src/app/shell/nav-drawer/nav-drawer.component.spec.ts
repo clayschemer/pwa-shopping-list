@@ -1,5 +1,5 @@
 import '../../../testing/init-testbed';
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideStore, Store } from '@ngrx/store';
 import { provideTranslocoTesting } from '../../../testing/transloco-testing';
@@ -7,8 +7,8 @@ import { NavDrawerComponent } from './nav-drawer.component';
 import { categoriesReducer } from '../../store/categories/categories.reducer';
 import { shopsReducer } from '../../store/shops/shops.reducer';
 import { uiReducer } from '../../store/ui/ui.reducer';
-import { categoriesActions } from '../../store/categories/categories.actions';
-import { shopsActions } from '../../store/shops/shops.actions';
+import { categoriesActions, categoriesApiActions } from '../../store/categories/categories.actions';
+import { shopsActions, shopsApiActions } from '../../store/shops/shops.actions';
 import { uiActions } from '../../store/ui/ui.actions';
 import type { Category } from '../../models/category.model';
 import type { Shop } from '../../models/shop.model';
@@ -130,5 +130,40 @@ describe('NavDrawerComponent', () => {
     btn.click();
 
     expect(emitted).toBe(true);
+  });
+
+  it('dispatches setGlobalCategoryOrder on drop when no shop selected', () => {
+    const dispatchSpy = vi.spyOn(store, 'dispatch');
+
+    component.onCategoryDrop({
+      previousIndex: 0,
+      currentIndex: 2,
+      item: { data: undefined },
+    } as never);
+
+    expect(dispatchSpy).toHaveBeenCalledWith(
+      categoriesApiActions.setGlobalCategoryOrderRequested({
+        orderedIds: ['c2', 'c3', 'c1'] as CategoryId[],
+      }),
+    );
+  });
+
+  it('dispatches setShopCategoryOrder on drop when a shop is selected', () => {
+    store.dispatch(uiActions.planModeShopSelected({ shopId: 's1' as ShopId }));
+    fixture.detectChanges();
+    const dispatchSpy = vi.spyOn(store, 'dispatch');
+
+    component.onCategoryDrop({
+      previousIndex: 0,
+      currentIndex: 2,
+      item: { data: undefined },
+    } as never);
+
+    expect(dispatchSpy).toHaveBeenCalledWith(
+      shopsApiActions.setShopCategoryOrderRequested({
+        shopId: 's1' as ShopId,
+        orderedIds: ['c2', 'c3', 'c1'] as CategoryId[],
+      }),
+    );
   });
 });

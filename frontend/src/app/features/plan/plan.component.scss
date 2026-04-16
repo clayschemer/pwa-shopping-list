@@ -26,8 +26,9 @@
 
   &__group-header {
     display: flex;
-    align-items: baseline;
+    align-items: center;
     justify-content: space-between;
+    gap: 0.5rem;
     padding: 0.5rem 0.25rem 0.25rem;
     border-bottom: 1px solid var(--mat-sys-outline-variant);
   }
@@ -38,6 +39,21 @@
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.05em;
+    color: var(--mat-sys-on-surface-variant);
+  }
+
+  &__group-meta {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+  }
+
+  &__group-total {
+    font-size: 0.8125rem;
+    color: var(--mat-sys-on-surface-variant);
+  }
+
+  &__group-menu-btn {
     color: var(--mat-sys-on-surface-variant);
   }
 

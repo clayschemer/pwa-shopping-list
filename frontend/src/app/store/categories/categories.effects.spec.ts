@@ -23,6 +23,9 @@ describe('CategoriesEffects', () => {
   let categoryApi: {
     fetchAllCategories: ReturnType<typeof vi.fn>;
     addCategory: ReturnType<typeof vi.fn>;
+    renameCategory: ReturnType<typeof vi.fn>;
+    deleteCategory: ReturnType<typeof vi.fn>;
+    setGlobalCategoryOrder: ReturnType<typeof vi.fn>;
     setShopCategoryOrder: ReturnType<typeof vi.fn>;
   };
 
@@ -31,6 +34,9 @@ describe('CategoriesEffects', () => {
     categoryApi = {
       fetchAllCategories: vi.fn(),
       addCategory: vi.fn(),
+      renameCategory: vi.fn(),
+      deleteCategory: vi.fn(),
+      setGlobalCategoryOrder: vi.fn(),
       setShopCategoryOrder: vi.fn(),
     };
 
@@ -86,6 +92,90 @@ describe('CategoriesEffects', () => {
           expect(categoryApi.addCategory).toHaveBeenCalledWith('Bakery');
           expect(results).toEqual([
             categoriesActions.categoryAdded({ category: newCat }),
+          ]);
+          resolve();
+        });
+      });
+    });
+  });
+
+  describe('renameCategory$', () => {
+    it('dispatches categoryRenamed on successful rename', () => {
+      categoryApi.renameCategory.mockResolvedValue(undefined);
+
+      const results: unknown[] = [];
+      effects.renameCategory$.subscribe((action) => results.push(action));
+
+      actions$.next(
+        categoriesApiActions.renameCategoryRequested({
+          id: 'c1' as CategoryId,
+          name: 'Fresh Produce',
+        }),
+      );
+
+      return new Promise<void>((resolve) => {
+        setTimeout(() => {
+          expect(categoryApi.renameCategory).toHaveBeenCalledWith(
+            'c1',
+            'Fresh Produce',
+          );
+          expect(results).toHaveLength(1);
+          const action = results[0] as ReturnType<
+            typeof categoriesActions.categoryRenamed
+          >;
+          expect(action.type).toBe(categoriesActions.categoryRenamed.type);
+          expect(action.category.id).toBe('c1');
+          expect(action.category.name).toBe('Fresh Produce');
+          resolve();
+        });
+      });
+    });
+  });
+
+  describe('deleteCategory$', () => {
+    it('dispatches categoryDeleted on successful delete', () => {
+      categoryApi.deleteCategory.mockResolvedValue(undefined);
+
+      const results: unknown[] = [];
+      effects.deleteCategory$.subscribe((action) => results.push(action));
+
+      actions$.next(
+        categoriesApiActions.deleteCategoryRequested({ id: 'c1' as CategoryId }),
+      );
+
+      return new Promise<void>((resolve) => {
+        setTimeout(() => {
+          expect(categoryApi.deleteCategory).toHaveBeenCalledWith('c1');
+          expect(results).toEqual([
+            categoriesActions.categoryDeleted({ id: 'c1' as CategoryId }),
+          ]);
+          resolve();
+        });
+      });
+    });
+  });
+
+  describe('setGlobalCategoryOrder$', () => {
+    it('dispatches globalCategoryOrderSet on successful update', () => {
+      categoryApi.setGlobalCategoryOrder.mockResolvedValue(undefined);
+      const orderedIds = ['c2', 'c1'] as CategoryId[];
+
+      const results: unknown[] = [];
+      effects.setGlobalCategoryOrder$.subscribe((action) =>
+        results.push(action),
+      );
+
+      actions$.next(
+        categoriesApiActions.setGlobalCategoryOrderRequested({ orderedIds }),
+      );
+
+      return new Promise<void>((resolve) => {
+        setTimeout(() => {
+          expect(categoryApi.setGlobalCategoryOrder).toHaveBeenCalledWith(
+            orderedIds,
+          );
+          expect(results).toEqual([
+            categoriesActions.globalCategoryOrderSet({ orderedIds }),
           ]);
           resolve();
         });

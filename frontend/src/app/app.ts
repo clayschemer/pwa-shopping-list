@@ -25,9 +25,11 @@ import {
   selectAllItems,
   selectItemEntities,
 } from './store/items/items.selectors';
+import { selectAllCategories } from './store/categories/categories.selectors';
 import { uiActions } from './store/ui/ui.actions';
 import { sessionsApiActions } from './store/sessions/sessions.actions';
 import { itemsApiActions } from './store/items/items.actions';
+import { categoriesApiActions } from './store/categories/categories.actions';
 import { NavDrawerComponent } from './shell/nav-drawer/nav-drawer.component';
 import {
   ShopSelectSheetComponent,
@@ -42,10 +44,17 @@ import {
   UndoHistorySheetComponent,
   UndoHistoryData,
 } from './features/shop/undo-history-sheet.component';
+import {
+  CategoryNameSheetComponent,
+  CategoryNameSheetData,
+  CategoryNameSheetResult,
+} from './features/categories/category-name-sheet.component';
 import { MoneyPipe } from './core/format/money.pipe';
 import type { CategoryId, ItemId, UserId } from './models/ids.model';
 import type { Item } from './models/item.model';
+import type { Shop } from './models/shop.model';
 import type { User } from './models/user.model';
+import type { Dictionary } from '@ngrx/entity';
 
 const FULL_SCREEN_ROUTES = ['/settings', '/manage-shops'];
 
@@ -104,7 +113,7 @@ export class App {
   });
 
   private readonly shopEntities = toSignal(this.store.select(selectShopEntities), {
-    initialValue: {},
+    initialValue: {} as Dictionary<Shop>,
   });
 
   readonly activeSession = toSignal(
@@ -124,6 +133,11 @@ export class App {
   private readonly itemEntities = toSignal(
     this.store.select(selectItemEntities),
     { initialValue: {} },
+  );
+
+  private readonly categories = toSignal(
+    this.store.select(selectAllCategories),
+    { initialValue: [] },
   );
 
   readonly checkedCount = computed(
@@ -179,6 +193,23 @@ export class App {
 
   onAddCategory(): void {
     this.store.dispatch(uiActions.navDrawerClosed());
+    const ref = this.bottomSheet.open<
+      CategoryNameSheetComponent,
+      CategoryNameSheetData,
+      CategoryNameSheetResult
+    >(CategoryNameSheetComponent, {
+      data: {
+        mode: 'add',
+        currentName: '',
+        existingNames: this.categories().map((c) => c.name),
+      },
+    });
+    ref.afterDismissed().subscribe((result) => {
+      if (!result) return;
+      this.store.dispatch(
+        categoriesApiActions.addCategoryRequested({ name: result.name }),
+      );
+    });
   }
 
   switchToPlan(): void {

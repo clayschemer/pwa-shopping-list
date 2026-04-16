@@ -11,6 +11,35 @@
           <h2 class="app-plan__group-title">
             {{ group.categoryName ?? ('plan.uncategorised' | transloco) }}
           </h2>
+          <div class="app-plan__group-meta">
+            @if (group.estTotal > 0) {
+              <span class="app-plan__group-total">
+                {{ group.estTotal | money }}
+              </span>
+            }
+            @if (group.categoryId !== null && group.categoryName !== null) {
+              <button
+                mat-icon-button
+                type="button"
+                class="app-plan__group-menu-btn"
+                [attr.aria-label]="'categoryMenu.open' | transloco: { name: group.categoryName }"
+                [matMenuTriggerFor]="categoryMenu"
+              >
+                <mat-icon>more_vert</mat-icon>
+              </button>
+              <mat-menu #categoryMenu="matMenu">
+                <button mat-menu-item (click)="openRenameCategory(group)">
+                  {{ 'categoryMenu.rename' | transloco }}
+                </button>
+                <button mat-menu-item (click)="openAvailableInShops(group)">
+                  {{ 'categoryMenu.availableInShops' | transloco }}
+                </button>
+                <button mat-menu-item (click)="confirmDeleteCategory(group)">
+                  {{ 'categoryMenu.delete' | transloco }}
+                </button>
+              </mat-menu>
+            }
+          </div>
         </header>
 
         <ul class="app-plan__items" role="list">
