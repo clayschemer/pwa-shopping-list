@@ -16,8 +16,18 @@
     "shopLayout": "Aktuell butikslayout",
     "globalAll": "Global (alla)",
     "manageShops": "Hantera butiker\u2026",
+    "viewHistory": "Historik\u2026",
     "categories": "Kategorier",
     "addCategory": "Lägg till kategori"
+  },
+  "history": {
+    "title": "Köphistorik",
+    "goBack": "Tillbaka",
+    "loading": "Laddar historik",
+    "empty": "Inga avslutade sessioner ännu.",
+    "itemCount": "{{count}} varor",
+    "noChecked": "Inga avbockade varor",
+    "unknownItem": "Borttagen vara"
   },
   "plan": {
     "listLabel": "Inköpslista",

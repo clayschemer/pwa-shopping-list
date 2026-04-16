@@ -16,8 +16,18 @@
     "shopLayout": "Aktuelle Ladenaufteilung",
     "globalAll": "Global (alle)",
     "manageShops": "Läden verwalten\u2026",
+    "viewHistory": "Verlauf\u2026",
     "categories": "Kategorien",
     "addCategory": "Kategorie hinzufügen"
+  },
+  "history": {
+    "title": "Einkaufsverlauf",
+    "goBack": "Zurück",
+    "loading": "Verlauf wird geladen",
+    "empty": "Noch keine abgeschlossenen Sitzungen.",
+    "itemCount": "{{count}} Artikel",
+    "noChecked": "Keine Artikel abgehakt",
+    "unknownItem": "Gelöschter Artikel"
   },
   "plan": {
     "listLabel": "Einkaufsliste",

@@ -15,6 +15,8 @@ export const sessionsActions = createActionGroup({
       sessions: Session[];
       removed: SessionId[];
     }>(),
+    'Session Inactive': props<{ sessionId: SessionId }>(),
+    'Session Inactivity Dismissed': props<{ sessionId: SessionId }>(),
   },
 });
 

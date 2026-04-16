@@ -16,8 +16,18 @@
     "shopLayout": "Nåværende butikkoppsett",
     "globalAll": "Global (alle)",
     "manageShops": "Administrer butikker\u2026",
+    "viewHistory": "Historikk\u2026",
     "categories": "Kategorier",
     "addCategory": "Legg til kategori"
+  },
+  "history": {
+    "title": "Handlehistorikk",
+    "goBack": "Gå tilbake",
+    "loading": "Laster historikk",
+    "empty": "Ingen fullførte økter ennå.",
+    "itemCount": "{{count}} varer",
+    "noChecked": "Ingen varer avkrysset",
+    "unknownItem": "Slettet vare"
   },
   "plan": {
     "listLabel": "Handleliste",

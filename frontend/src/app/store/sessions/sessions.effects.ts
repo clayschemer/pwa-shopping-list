@@ -1,14 +1,18 @@
 import { inject, Injectable } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
-import { filter, from, map, switchMap, take, withLatestFrom } from 'rxjs';
+import { EMPTY, filter, from, map, switchMap, take, timer } from 'rxjs';
 import { sessionsActions, sessionsApiActions } from './sessions.actions';
 import { selectActiveSessionForCurrentUser } from './sessions.selectors';
 import { accountActions } from '../account/account.actions';
 import { uiActions } from '../ui/ui.actions';
+import { itemsActions } from '../items/items.actions';
 import { SessionApiService } from '../../core/api/session-api.service';
 import type { Session } from '../../models/session.model';
+import type { SessionId } from '../../models/ids.model';
 import type { NotFoundError, SessionConflictError } from '../../models/errors.model';
+
+export const SESSION_INACTIVITY_MS = 30 * 60 * 1000;
 
 @Injectable()
 export class SessionsEffects {
@@ -22,6 +26,25 @@ export class SessionsEffects {
       switchMap(() =>
         from(this.sessionApi.fetchActiveSessions()).pipe(
           map((sessions) => sessionsActions.sessionsLoaded({ sessions })),
+        ),
+      ),
+    ),
+  );
+
+  readonly watchSessionChanges$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(accountActions.accountLoaded),
+      switchMap(() =>
+        this.sessionApi.sessionChanges$().pipe(
+          map((batch) => {
+            const sessions: Session[] = batch
+              .filter((c) => c.changeType !== 'removed')
+              .map((c) => c.entity);
+            const removed: SessionId[] = batch
+              .filter((c) => c.changeType === 'removed')
+              .map((c) => c.entity.id);
+            return sessionsActions.sessionChangesReceived({ sessions, removed });
+          }),
         ),
       ),
     ),
@@ -89,6 +112,41 @@ export class SessionsEffects {
     this.actions$.pipe(
       ofType(sessionsActions.sessionClosed),
       map(() => uiActions.switchToPlanMode()),
+    ),
+  );
+
+  readonly inactivityTimer$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(
+        sessionsActions.sessionStarted,
+        sessionsActions.sessionJoined,
+        sessionsActions.sessionUpdated,
+        sessionsActions.sessionInactivityDismissed,
+        itemsActions.checkItemPending,
+        itemsActions.checkItemUndoneDuringWindow,
+      ),
+      switchMap(() =>
+        this.store.select(selectActiveSessionForCurrentUser).pipe(
+          take(1),
+          switchMap((session) => {
+            if (!session) return EMPTY;
+            const lastActivity =
+              session.checkedItems.length > 0
+                ? Math.max(
+                    session.startedAt,
+                    ...session.checkedItems.map((c) => c.checkedAt),
+                  )
+                : session.startedAt;
+            const elapsed = Date.now() - lastActivity;
+            const delay = Math.max(0, SESSION_INACTIVITY_MS - elapsed);
+            return timer(delay).pipe(
+              map(() =>
+                sessionsActions.sessionInactive({ sessionId: session.id }),
+              ),
+            );
+          }),
+        ),
+      ),
     ),
   );
 }

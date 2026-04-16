@@ -5,6 +5,7 @@ import { categoriesActions, categoriesApiActions } from './categories.actions';
 import { accountActions } from '../account/account.actions';
 import { CategoryApiService } from '../../core/api/category-api.service';
 import type { Category } from '../../models/category.model';
+import type { CategoryId } from '../../models/ids.model';
 import type { NameConflictError } from '../../models/errors.model';
 
 @Injectable()
@@ -18,6 +19,25 @@ export class CategoriesEffects {
       switchMap(() =>
         from(this.categoryApi.fetchAllCategories()).pipe(
           map((categories) => categoriesActions.categoriesLoaded({ categories })),
+        ),
+      ),
+    ),
+  );
+
+  readonly watchCategoryChanges$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(accountActions.accountLoaded),
+      switchMap(() =>
+        this.categoryApi.categoryChanges$().pipe(
+          map((batch) => {
+            const categories: Category[] = batch
+              .filter((c) => c.changeType !== 'removed')
+              .map((c) => c.entity);
+            const removed: CategoryId[] = batch
+              .filter((c) => c.changeType === 'removed')
+              .map((c) => c.entity.id);
+            return categoriesActions.categoryChangesReceived({ categories, removed });
+          }),
         ),
       ),
     ),

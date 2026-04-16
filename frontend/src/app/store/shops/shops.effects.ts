@@ -5,6 +5,7 @@ import { shopsActions, shopsApiActions } from './shops.actions';
 import { accountActions } from '../account/account.actions';
 import { ShopApiService } from '../../core/api/shop-api.service';
 import type { Shop } from '../../models/shop.model';
+import type { ShopId } from '../../models/ids.model';
 import type { NameConflictError } from '../../models/errors.model';
 
 @Injectable()
@@ -18,6 +19,25 @@ export class ShopsEffects {
       switchMap(() =>
         from(this.shopApi.fetchAllShops()).pipe(
           map((shops) => shopsActions.shopsLoaded({ shops })),
+        ),
+      ),
+    ),
+  );
+
+  readonly watchShopChanges$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(accountActions.accountLoaded),
+      switchMap(() =>
+        this.shopApi.shopChanges$().pipe(
+          map((batch) => {
+            const shops: Shop[] = batch
+              .filter((c) => c.changeType !== 'removed')
+              .map((c) => c.entity);
+            const removed: ShopId[] = batch
+              .filter((c) => c.changeType === 'removed')
+              .map((c) => c.entity.id);
+            return shopsActions.shopChangesReceived({ shops, removed });
+          }),
         ),
       ),
     ),

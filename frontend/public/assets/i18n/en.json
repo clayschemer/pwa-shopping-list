@@ -17,8 +17,18 @@
     "shopLayout": "Current shop layout",
     "globalAll": "Global (all)",
     "manageShops": "Manage shops\u2026",
+    "viewHistory": "History\u2026",
     "categories": "Categories",
     "addCategory": "Add category"
+  },
+  "history": {
+    "title": "Shopping history",
+    "goBack": "Go back",
+    "loading": "Loading history",
+    "empty": "No completed sessions yet.",
+    "itemCount": "{{count}} items",
+    "noChecked": "No items checked",
+    "unknownItem": "Deleted item"
   },
   "plan": {
     "listLabel": "Shopping list",
@@ -140,6 +150,12 @@
     "title": "Checked this session",
     "empty": "Nothing checked yet.",
     "uncheck": "Uncheck {{name}}"
+  },
+  "inactivityReminder": {
+    "title": "Still shopping?",
+    "message": "Your session has been idle for a while. Close it now or keep going?",
+    "keepShopping": "Keep shopping",
+    "close": "Close session"
   },
   "settings": {
     "title": "Settings",

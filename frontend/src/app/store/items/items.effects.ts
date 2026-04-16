@@ -8,6 +8,7 @@ import { sessionsActions } from '../sessions/sessions.actions';
 import { accountActions } from '../account/account.actions';
 import { ItemApiService } from '../../core/api/item-api.service';
 import type { Item } from '../../models/item.model';
+import type { ItemId } from '../../models/ids.model';
 import type {
   CheckConflictError,
   NameConflictError,
@@ -26,6 +27,25 @@ export class ItemsEffects {
       switchMap(() =>
         from(this.itemApi.fetchActiveList()).pipe(
           map((items) => itemsActions.itemsLoaded({ items })),
+        ),
+      ),
+    ),
+  );
+
+  readonly watchItemChanges$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(accountActions.accountLoaded),
+      switchMap(() =>
+        this.itemApi.itemChanges$().pipe(
+          map((batch) => {
+            const items: Item[] = batch
+              .filter((c) => c.changeType !== 'removed')
+              .map((c) => c.entity);
+            const removed: ItemId[] = batch
+              .filter((c) => c.changeType === 'removed')
+              .map((c) => c.entity.id);
+            return itemsActions.itemChangesReceived({ items, removed });
+          }),
         ),
       ),
     ),

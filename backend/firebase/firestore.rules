@@ -6,10 +6,11 @@ service cloud.firestore {
     // Uses get() — one extra read per rule evaluation, cached within a request.
     function isMember(accountId) {
       return request.auth != null
+        && exists(/databases/$(database)/documents/users/$(request.auth.uid))
         && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.accountId == accountId;
     }
 
-    // Users can read their own document (needed by getAccount() to resolve accountId).
+    // Allowlist document. Users can read their own to resolve their accountId.
     // Write is admin-only — allowlist management is out of scope for the app.
     match /users/{userId} {
       allow read: if request.auth != null && request.auth.uid == userId;
@@ -19,9 +20,16 @@ service cloud.firestore {
     // Account document itself — readable by members (needed by getAccount()).
     match /accounts/{accountId} {
       allow read: if isMember(accountId);
-      allow write: if false; // Account creation is admin-only
+      // Account members can update aiConfig via updateAiConfig / toggleAiAutoAdd.
+      // Admin creates the account doc.
+      allow update: if isMember(accountId);
+      allow create, delete: if false;
 
-      // All sub-collections are fully accessible by account members.
+      // Shared roster of account members — readable by all account members.
+      match /users/{userId} {
+        allow read, write: if isMember(accountId);
+      }
+
       match /categories/{categoryId} {
         allow read, write: if isMember(accountId);
       }

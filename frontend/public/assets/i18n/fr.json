@@ -16,8 +16,18 @@
     "shopLayout": "Disposition du magasin actuel",
     "globalAll": "Global (tous)",
     "manageShops": "Gérer les magasins\u2026",
+    "viewHistory": "Historique\u2026",
     "categories": "Catégories",
     "addCategory": "Ajouter une catégorie"
+  },
+  "history": {
+    "title": "Historique des courses",
+    "goBack": "Retour",
+    "loading": "Chargement de l'historique",
+    "empty": "Aucune session terminée.",
+    "itemCount": "{{count}} articles",
+    "noChecked": "Aucun article coché",
+    "unknownItem": "Article supprimé"
   },
   "plan": {
     "listLabel": "Liste de courses",

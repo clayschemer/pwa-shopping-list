@@ -1,7 +1,8 @@
-import { ChangeDetectionStrategy, Component, inject, computed, effect } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, inject, computed, effect } from '@angular/core';
 import { NavigationEnd, Router, RouterLink, RouterOutlet } from '@angular/router';
-import { toSignal } from '@angular/core/rxjs-interop';
+import { toSignal, takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { filter, map } from 'rxjs';
+import { Actions, ofType } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
 import { MatIconButton } from '@angular/material/button';
 import { MatIcon } from '@angular/material/icon';
@@ -27,7 +28,7 @@ import {
 } from './store/items/items.selectors';
 import { selectAllCategories } from './store/categories/categories.selectors';
 import { uiActions } from './store/ui/ui.actions';
-import { sessionsApiActions } from './store/sessions/sessions.actions';
+import { sessionsActions, sessionsApiActions } from './store/sessions/sessions.actions';
 import { itemsApiActions } from './store/items/items.actions';
 import { categoriesApiActions } from './store/categories/categories.actions';
 import { NavDrawerComponent } from './shell/nav-drawer/nav-drawer.component';
@@ -45,18 +46,22 @@ import {
   UndoHistoryData,
 } from './features/shop/undo-history-sheet.component';
 import {
+  InactivityReminderDialogComponent,
+  InactivityReminderResult,
+} from './features/shop/inactivity-reminder-dialog.component';
+import {
   CategoryNameSheetComponent,
   CategoryNameSheetData,
   CategoryNameSheetResult,
 } from './features/categories/category-name-sheet.component';
 import { MoneyPipe } from './core/format/money.pipe';
-import type { CategoryId, ItemId, UserId } from './models/ids.model';
+import type { CategoryId, ItemId, SessionId, UserId } from './models/ids.model';
 import type { Item } from './models/item.model';
 import type { Shop } from './models/shop.model';
 import type { User } from './models/user.model';
 import type { Dictionary } from '@ngrx/entity';
 
-const FULL_SCREEN_ROUTES = ['/settings', '/manage-shops'];
+const FULL_SCREEN_ROUTES = ['/settings', '/manage-shops', '/history'];
 
 @Component({
   selector: 'app-root',
@@ -83,6 +88,9 @@ export class App {
   private readonly router = inject(Router);
   private readonly bottomSheet = inject(MatBottomSheet);
   private readonly dialog = inject(MatDialog);
+  private readonly actions$ = inject(Actions);
+  private readonly destroyRef = inject(DestroyRef);
+  private inactivityDialogOpen = false;
 
   readonly isAuthenticated = toSignal(this.store.select(selectIsAuthenticated), {
     initialValue: false,
@@ -172,6 +180,35 @@ export class App {
         this.router.navigateByUrl('/');
       }
     });
+
+    this.actions$
+      .pipe(
+        ofType(sessionsActions.sessionInactive),
+        takeUntilDestroyed(this.destroyRef),
+      )
+      .subscribe(({ sessionId }) => this.openInactivityReminder(sessionId));
+  }
+
+  private openInactivityReminder(sessionId: SessionId): void {
+    if (this.inactivityDialogOpen) return;
+    this.inactivityDialogOpen = true;
+    const ref = this.dialog.open<
+      InactivityReminderDialogComponent,
+      void,
+      InactivityReminderResult
+    >(InactivityReminderDialogComponent);
+    ref.afterClosed().subscribe((result) => {
+      this.inactivityDialogOpen = false;
+      if (result === 'close') {
+        this.store.dispatch(
+          sessionsApiActions.closeSessionRequested({ sessionId }),
+        );
+      } else {
+        this.store.dispatch(
+          sessionsActions.sessionInactivityDismissed({ sessionId }),
+        );
+      }
+    });
   }
 
   openDrawer(): void {
@@ -189,6 +226,11 @@ export class App {
   onManageShops(): void {
     this.store.dispatch(uiActions.navDrawerClosed());
     this.router.navigateByUrl('/manage-shops');
+  }
+
+  onViewHistory(): void {
+    this.store.dispatch(uiActions.navDrawerClosed());
+    this.router.navigateByUrl('/history');
   }
 
   onAddCategory(): void {

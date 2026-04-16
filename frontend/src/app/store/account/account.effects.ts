@@ -1,8 +1,9 @@
 import { inject, Injectable } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
-import { catchError, defer, from, map, of, switchMap, tap } from 'rxjs';
+import { catchError, defer, from, map, of, switchMap } from 'rxjs';
 import { authActions, accountActions } from './account.actions';
 import { AccountApiService } from '../../core/api/account-api.service';
+import { StreamErrorService } from '../../core/api/stream-error.service';
 import type { Account } from '../../models/account.model';
 import type { AccessDeniedError, AuthError } from '../../models/errors.model';
 
@@ -10,6 +11,21 @@ import type { AccessDeniedError, AuthError } from '../../models/errors.model';
 export class AccountEffects {
   private readonly actions$ = inject(Actions);
   private readonly accountApi = inject(AccountApiService);
+  private readonly streamError = inject(StreamErrorService);
+
+  readonly watchStreamErrors$ = createEffect(() =>
+    this.streamError.stream$.pipe(
+      map((err) => {
+        if (err.type === 'AUTH_REVOKED') {
+          return accountActions.streamAuthRevoked();
+        }
+        if (err.type === 'ACCOUNT_NOT_FOUND') {
+          return accountActions.streamAccountNotFound();
+        }
+        return accountActions.streamFailed({ message: err.message });
+      }),
+    ),
+  );
 
   /** Subscribe to Firebase auth state on app init. */
   readonly watchAuthState$ = createEffect(() =>

@@ -296,15 +296,19 @@ All device-local (localStorage) unless noted:
 Built (test-first, behind the API service layer):
 
 - Auth: Firebase Google OAuth, allowlist gate via `getAccount()`, sign-in / access-denied screens, route guard, session restore loading state
-- App shell: top bar with mode toggle, nav drawer, full-screen routes for Settings / Manage Shops, runtime i18n + theme service + compact / high-contrast / left-handed / reduced-motion modes
+- App shell: top bar with mode toggle, nav drawer, full-screen routes for Settings / Manage Shops / History, runtime i18n + theme service + compact / high-contrast / left-handed / reduced-motion modes
 - Items: store + plan-mode list, add-pill flow, edit sheet, remove confirm dialog
 - Shops: store + Manage Shops screen with add / rename / delete sheets
 - Categories: store + plan-mode header ⋯ menu (rename / available-in-shops / delete), nav-drawer drag reorder dispatches `setShopCategoryOrder` per shop or `setGlobalCategoryOrder` when "Global" is selected, add-category sheet from drawer
-- Sessions + shop mode: session API + store, auto-start on shop select, shop-mode list with grouped Est. and session totals, 4 s client-side undo window, undo-history sheet, close-session dialog
+- Sessions + shop mode: session API + store, auto-start on shop select, shop-mode list with grouped Est. and session totals, 4 s client-side undo window, undo-history sheet, close-session dialog, 30-min inactivity reminder dialog (close session or keep shopping)
+- Session history: `/history` route loads completed sessions via `fetchSessionHistory`, expansion panels show shop, completed-at, total, and per-item snapshots
+- PWA shell: `@angular/service-worker` with `ngsw-config.json`, `manifest.webmanifest`, default icon set under `frontend/public/icons/`, hosting headers configured for SW + manifest in `backend/firebase/firebase.json`
 
-Backend status: Auth uses real Firebase. Item / Category / Shop / Session API services are still in-memory stubs in `frontend/src/app/core/api/`. Wiring them to Firestore (and the change-stream contract from `API-CONTRACT.md`) is the next backend slice.
+Backend status: All API services (Auth, Item, Category, Shop, Session, Account, Users) are wired to Firestore through the `core/api/` layer. Each entity exposes a real `EntityChangeBatch<T>` stream via `snapshotChanges` (see `change-stream.ts`). `StreamErrorService` surfaces unrecoverable stream failures globally. Firestore security rules in `backend/firebase/firestore.rules` enforce the `accounts/{accountId}/...` subcollection layout via an `isMember()` check.
 
-Acceptance: Gherkin `.feature` files exist under `frontend/tests/acceptance/features/`. Step definitions for sessions / modes / shop-mode items / categories are not yet written — explicit follow-up.
+Deployment: GitHub Actions workflow (`.github/workflows/deploy.yml`) runs Vitest + Cucumber on every push/PR to `develop`/`main`, then deploys `develop` → GitHub Pages and `main` → cPanel via FTPS. Firestore rules and indexes deploy separately via `firebase deploy --only firestore:rules,firestore:indexes` from `backend/firebase/`. Firebase Hosting config exists in `firebase.json` as a fallback path but is not part of the active pipeline.
+
+Acceptance: Gherkin `.feature` files under `frontend/tests/acceptance/features/` cover auth, modes, settings, categories, shops, items, sessions, autocomplete, AI price estimation, AI list suggestions, and barcode scanning. Step definitions are written for all non-AI / non-barcode features and pass.
 
 ---
 

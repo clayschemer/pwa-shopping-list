@@ -1,0 +1,59 @@
+<div class="app-history">
+  <header class="app-history__header">
+    <button
+      mat-icon-button
+      class="app-history__back-btn"
+      [attr.aria-label]="'history.goBack' | transloco"
+      (click)="goBack()"
+    >
+      <mat-icon>arrow_back</mat-icon>
+    </button>
+    <h1 class="app-history__title">{{ 'history.title' | transloco }}</h1>
+  </header>
+
+  @if (loading()) {
+    <div class="app-history__loading" role="status" [attr.aria-label]="'history.loading' | transloco">
+      <mat-spinner diameter="36" />
+    </div>
+  } @else if (rows().length === 0) {
+    <p class="app-history__empty">{{ 'history.empty' | transloco }}</p>
+  } @else {
+    <mat-accordion class="app-history__list" multi>
+      @for (row of rows(); track row.id) {
+        <mat-expansion-panel class="app-history__panel">
+          <mat-expansion-panel-header class="app-history__panel-header">
+            <mat-panel-title class="app-history__panel-title">
+              <span class="app-history__shop">{{ row.shopName }}</span>
+              <span class="app-history__date">{{ row.completedAt | date: 'MMM d, y HH:mm' }}</span>
+            </mat-panel-title>
+            <mat-panel-description class="app-history__panel-desc">
+              <span class="app-history__total">{{ row.total | money }}</span>
+              <span class="app-history__count">
+                {{ 'history.itemCount' | transloco: { count: row.itemCount } }}
+              </span>
+            </mat-panel-description>
+          </mat-expansion-panel-header>
+
+          <ul class="app-history__items">
+            @for (item of row.items; track $index) {
+              <li class="app-history__item">
+                <span class="app-history__item-name">{{ item.name }}</span>
+                @if (item.priceSnapshot !== null) {
+                  <span class="app-history__item-price">
+                    {{ item.priceSnapshot | money }}
+                  </span>
+                } @else {
+                  <span class="app-history__item-price app-history__item-price--empty">—</span>
+                }
+              </li>
+            } @empty {
+              <li class="app-history__item app-history__item--empty">
+                {{ 'history.noChecked' | transloco }}
+              </li>
+            }
+          </ul>
+        </mat-expansion-panel>
+      }
+    </mat-accordion>
+  }
+</div>

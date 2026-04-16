@@ -3,13 +3,20 @@ import { authActions, accountActions } from './account.actions';
 import type { User } from '../../models/user.model';
 import type { Account } from '../../models/account.model';
 
-export type AuthStatus = 'checking' | 'loading' | 'authenticated' | 'unauthenticated' | 'access_denied';
+export type AuthStatus =
+  | 'checking'
+  | 'loading'
+  | 'authenticated'
+  | 'unauthenticated'
+  | 'access_denied'
+  | 'stream_failed';
 
 export interface AccountState {
   status: AuthStatus;
   user: User | null;
   account: Account | null;
   signInError: string | null;
+  streamError: string | null;
 }
 
 export const initialAccountState: AccountState = {
@@ -17,6 +24,7 @@ export const initialAccountState: AccountState = {
   user: null,
   account: null,
   signInError: null,
+  streamError: null,
 };
 
 export const accountReducer = createReducer(
@@ -35,6 +43,7 @@ export const accountReducer = createReducer(
     user: null,
     account: null,
     signInError: null,
+    streamError: null,
   })),
 
   on(accountActions.accountLoaded, (state, { account }) => ({
@@ -59,5 +68,25 @@ export const accountReducer = createReducer(
     user: null,
     account: null,
     signInError: null,
+    streamError: null,
+  })),
+
+  on(accountActions.streamAuthRevoked, (state) => ({
+    ...state,
+    status: 'unauthenticated' as const,
+    user: null,
+    account: null,
+  })),
+
+  on(accountActions.streamAccountNotFound, (state) => ({
+    ...state,
+    status: 'access_denied' as const,
+    account: null,
+  })),
+
+  on(accountActions.streamFailed, (state, { message }) => ({
+    ...state,
+    status: 'stream_failed' as const,
+    streamError: message,
   })),
 );
