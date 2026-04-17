@@ -101,6 +101,16 @@
         (change)="onKeepScreenAwakeToggle($event.checked)"
       />
     </div>
+
+    @if (pwaInstall.canInstall()) {
+      <button
+        class="app-settings__install-btn"
+        (click)="installApp()"
+      >
+        <mat-icon>install_mobile</mat-icon>
+        {{ 'settings.installApp' | transloco }}
+      </button>
+    }
   </section>
 
   <!-- Account -->

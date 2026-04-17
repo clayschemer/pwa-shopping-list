@@ -10,7 +10,8 @@
     "viewChecked": "Abgehakte Artikel anzeigen",
     "settings": "Einstellungen",
     "activeSession": "Aktive Sitzung",
-    "global": "Global"
+    "global": "Global",
+    "sessionActive": "aktiv"
   },
   "navDrawer": {
     "shopLayout": "Aktuelle Ladenaufteilung",
@@ -99,6 +100,63 @@
     "add": "Laden hinzufügen",
     "save": "Speichern"
   },
+  "categoryNameSheet": {
+    "addTitle": "Kategorie hinzufügen",
+    "renameTitle": "Kategorie umbenennen",
+    "categoryName": "Kategoriename",
+    "nameConflict": "Eine Kategorie mit diesem Namen existiert bereits",
+    "cancel": "Abbrechen",
+    "add": "Kategorie hinzufügen",
+    "save": "Speichern"
+  },
+  "categoryMenu": {
+    "open": "Kategorieoptionen für {{name}}",
+    "rename": "Umbenennen",
+    "availableInShops": "Verfügbar in Läden\u2026",
+    "delete": "Kategorie löschen"
+  },
+  "availableInShops": {
+    "title": "Verfügbar in Läden",
+    "subtitle": "{{name}}",
+    "empty": "Keine Läden konfiguriert.",
+    "done": "Fertig"
+  },
+  "deleteCategory": {
+    "title": "Kategorie löschen?",
+    "message": "Artikel in \u201E{{name}}\u201C werden unkategorisiert. Sie werden nicht aus der Liste entfernt.",
+    "cancel": "Abbrechen",
+    "delete": "Löschen"
+  },
+  "shop": {
+    "listLabel": "Einkaufsliste",
+    "empty": "Deine Liste ist leer.",
+    "uncategorised": "Ohne Kategorie",
+    "selectTitle": "Wo kaufst du ein?",
+    "global": "Kein bestimmter Laden (global)",
+    "est": "Gesch.",
+    "tapToUndo": "Zum Rückgängigmachen tippen",
+    "checkItem": "{{name}} abhaken"
+  },
+  "closeSession": {
+    "allDoneTitle": "Alles erledigt!",
+    "allDoneMessage": "Alles abgehakt. Sitzung beenden und Verlauf speichern?",
+    "remainingTitle": "Sitzung beenden?",
+    "remainingMessage": "Es gibt noch nicht abgehakte Artikel auf der Liste. Trotzdem beenden?",
+    "notYet": "Noch nicht",
+    "keepShopping": "Weiter einkaufen",
+    "close": "Sitzung beenden"
+  },
+  "undoHistory": {
+    "title": "Diese Sitzung abgehakt",
+    "empty": "Noch nichts abgehakt.",
+    "uncheck": "{{name}} wieder abhaken"
+  },
+  "inactivityReminder": {
+    "title": "Kaufst du noch ein?",
+    "message": "Deine Sitzung war eine Weile inaktiv. Jetzt beenden oder weitermachen?",
+    "keepShopping": "Weiter einkaufen",
+    "close": "Sitzung beenden"
+  },
   "settings": {
     "title": "Einstellungen",
     "goBack": "Zurück",
@@ -114,6 +172,7 @@
     "currency": "Währung",
     "display": "Anzeige",
     "keepScreenAwake": "Bildschirm aktiv halten",
+    "installApp": "Auf diesem Gerät installieren",
     "account": "Konto",
     "signedInAs": "Angemeldet als",
     "signOut": "Abmelden"

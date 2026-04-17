@@ -172,6 +172,7 @@
     "currency": "Currency",
     "display": "Display",
     "keepScreenAwake": "Keep screen awake",
+    "installApp": "Install on this device",
     "account": "Account",
     "signedInAs": "Signed in as",
     "signOut": "Sign out"

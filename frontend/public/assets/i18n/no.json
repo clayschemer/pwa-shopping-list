@@ -10,7 +10,8 @@
     "viewChecked": "Vis avkryssede varer",
     "settings": "Innstillinger",
     "activeSession": "Aktiv økt",
-    "global": "Global"
+    "global": "Global",
+    "sessionActive": "aktiv"
   },
   "navDrawer": {
     "shopLayout": "Nåværende butikkoppsett",
@@ -99,6 +100,63 @@
     "add": "Legg til butikk",
     "save": "Lagre"
   },
+  "categoryNameSheet": {
+    "addTitle": "Legg til kategori",
+    "renameTitle": "Gi nytt navn til kategori",
+    "categoryName": "Kategorinavn",
+    "nameConflict": "En kategori med dette navnet finnes allerede",
+    "cancel": "Avbryt",
+    "add": "Legg til kategori",
+    "save": "Lagre"
+  },
+  "categoryMenu": {
+    "open": "Kategorialternativer for {{name}}",
+    "rename": "Gi nytt navn",
+    "availableInShops": "Tilgjengelig i butikker\u2026",
+    "delete": "Slett kategori"
+  },
+  "availableInShops": {
+    "title": "Tilgjengelig i butikker",
+    "subtitle": "{{name}}",
+    "empty": "Ingen butikker konfigurert.",
+    "done": "Ferdig"
+  },
+  "deleteCategory": {
+    "title": "Slette kategori?",
+    "message": "Varer i «{{name}}» blir uten kategori. De fjernes ikke fra listen.",
+    "cancel": "Avbryt",
+    "delete": "Slett"
+  },
+  "shop": {
+    "listLabel": "Handleliste",
+    "empty": "Listen din er tom.",
+    "uncategorised": "Uten kategori",
+    "selectTitle": "Hvor handler du?",
+    "global": "Ingen bestemt butikk (global)",
+    "est": "Est.",
+    "tapToUndo": "trykk for å angre",
+    "checkItem": "Kryss av {{name}}"
+  },
+  "closeSession": {
+    "allDoneTitle": "Ferdig!",
+    "allDoneMessage": "Alt er krysset av. Avslutte økten og lagre historikken?",
+    "remainingTitle": "Avslutte økt?",
+    "remainingMessage": "Det er fortsatt uavkryssede varer på listen. Avslutte likevel?",
+    "notYet": "Ikke ennå",
+    "keepShopping": "Fortsett å handle",
+    "close": "Avslutt økt"
+  },
+  "undoHistory": {
+    "title": "Krysset av denne økten",
+    "empty": "Ingenting krysset av ennå.",
+    "uncheck": "Fjern avkryssing av {{name}}"
+  },
+  "inactivityReminder": {
+    "title": "Handler du fortsatt?",
+    "message": "Økten har vært inaktiv en stund. Avslutte nå eller fortsette?",
+    "keepShopping": "Fortsett å handle",
+    "close": "Avslutt økt"
+  },
   "settings": {
     "title": "Innstillinger",
     "goBack": "Gå tilbake",
@@ -114,6 +172,7 @@
     "currency": "Valuta",
     "display": "Visning",
     "keepScreenAwake": "Hold skjermen på",
+    "installApp": "Installer på denne enheten",
     "account": "Konto",
     "signedInAs": "Logget inn som",
     "signOut": "Logg ut"

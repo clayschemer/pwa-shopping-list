@@ -18,7 +18,9 @@
     align-items: center;
     justify-content: space-between;
     padding: 0.5rem;
-    background: transparent;
+    background: color-mix(in srgb, var(--mat-sys-surface) 85%, transparent);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
   }
 
   &__mode-toggle {

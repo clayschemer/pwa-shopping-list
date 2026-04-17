@@ -10,6 +10,7 @@ import { MatSelect, MatSelectChange } from '@angular/material/select';
 import { MatOption } from '@angular/material/core';
 import { TranslocoPipe } from '@jsverse/transloco';
 import { ThemeService, Language, Currency } from '../../core/theme/theme.service';
+import { PwaInstallService } from '../../core/pwa/pwa-install.service';
 import { selectCurrentUser } from '../../store/account/account.selectors';
 import { authActions } from '../../store/account/account.actions';
 
@@ -33,6 +34,7 @@ export class SettingsComponent {
   private readonly store = inject(Store);
   private readonly location = inject(Location);
   private readonly themeService = inject(ThemeService);
+  readonly pwaInstall = inject(PwaInstallService);
 
   readonly settings = this.themeService.settings;
   readonly user = toSignal(this.store.select(selectCurrentUser));
@@ -78,5 +80,9 @@ export class SettingsComponent {
 
   signOut(): void {
     this.store.dispatch(authActions.signOutRequested());
+  }
+
+  installApp(): void {
+    this.pwaInstall.install();
   }
 }
