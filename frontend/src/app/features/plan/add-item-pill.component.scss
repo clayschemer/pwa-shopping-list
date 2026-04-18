@@ -1,14 +1,11 @@
 :host {
   position: fixed;
   right: 1.5rem;
-  bottom: calc(1.5rem + var(--app-keyboard-inset, 0px));
+  bottom: 1.5rem;
   z-index: 20;
   display: flex;
   justify-content: flex-end;
 
-  @media (prefers-reduced-motion: no-preference) {
-    transition: bottom 100ms ease-out;
-  }
 }
 
 .app-add-item-pill {

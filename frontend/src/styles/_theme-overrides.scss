@@ -12,17 +12,3 @@
 //   ));
 // }
 
-// Push bottom sheets above the virtual keyboard on mobile.
-// CDK sets height via inline style, so height:auto is needed for bottom to take effect.
-.cdk-global-overlay-wrapper:has(.mat-bottom-sheet-panel) {
-  height: auto !important;
-  top: 0 !important;
-  bottom: var(--app-keyboard-inset, 0px) !important;
-}
-
-// Ensure dialog overlays also clear the keyboard
-.cdk-global-overlay-wrapper:has(.mat-mdc-dialog-panel) {
-  height: auto !important;
-  top: 0 !important;
-  bottom: var(--app-keyboard-inset, 0px) !important;
-}
