@@ -37,6 +37,9 @@ export class SettingsComponent {
   readonly pwaInstall = inject(PwaInstallService);
 
   readonly settings = this.themeService.settings;
+  readonly effectiveDarkMode = this.themeService.effectiveDarkMode;
+  readonly effectiveReduceMotion = this.themeService.effectiveReduceMotion;
+  readonly effectiveHighContrast = this.themeService.effectiveHighContrast;
   readonly user = toSignal(this.store.select(selectCurrentUser));
 
   readonly languages: Language[] = ['EN', 'NO', 'SV', 'DE', 'FR'];

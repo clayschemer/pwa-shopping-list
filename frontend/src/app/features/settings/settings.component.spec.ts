@@ -28,7 +28,13 @@ describe('SettingsComponent', () => {
   let fixture: ComponentFixture<SettingsComponent>;
   let component: SettingsComponent;
   let store: Store;
-  let themeService: { settings: ReturnType<typeof vi.fn>; update: ReturnType<typeof vi.fn>; effectiveDarkMode: ReturnType<typeof vi.fn> };
+  let themeService: {
+    settings: ReturnType<typeof vi.fn>;
+    update: ReturnType<typeof vi.fn>;
+    effectiveDarkMode: ReturnType<typeof vi.fn>;
+    effectiveReduceMotion: ReturnType<typeof vi.fn>;
+    effectiveHighContrast: ReturnType<typeof vi.fn>;
+  };
 
   beforeEach(async () => {
     localStorage.clear();
@@ -37,6 +43,8 @@ describe('SettingsComponent', () => {
       settings: vi.fn().mockReturnValue({ ...DEFAULT_SETTINGS }),
       update: vi.fn(),
       effectiveDarkMode: vi.fn().mockReturnValue(false),
+      effectiveReduceMotion: vi.fn().mockReturnValue(false),
+      effectiveHighContrast: vi.fn().mockReturnValue(false),
     };
 
     await TestBed.configureTestingModule({
@@ -162,6 +170,52 @@ describe('SettingsComponent', () => {
   it('calls themeService.update when currency is changed', () => {
     component.onCurrencyChange('EUR');
     expect(themeService.update).toHaveBeenCalledWith({ currency: 'EUR' });
+  });
+
+  describe('toggles reflect effective system state', () => {
+    it('dark mode toggle reflects effective state when system prefers dark', () => {
+      themeService.settings.mockReturnValue({ ...DEFAULT_SETTINGS, darkMode: null });
+      themeService.effectiveDarkMode.mockReturnValue(true);
+      fixture.detectChanges();
+
+      const el: HTMLElement = fixture.nativeElement;
+      const appearanceSection = el.querySelectorAll('.app-settings__section')[0];
+      const toggleBtn = appearanceSection.querySelector('mat-slide-toggle button[role="switch"]') as HTMLElement;
+      expect(toggleBtn.getAttribute('aria-checked')).toBe('true');
+    });
+
+    it('dark mode toggle reflects effective state when system prefers light', () => {
+      themeService.settings.mockReturnValue({ ...DEFAULT_SETTINGS, darkMode: null });
+      themeService.effectiveDarkMode.mockReturnValue(false);
+      fixture.detectChanges();
+
+      const el: HTMLElement = fixture.nativeElement;
+      const appearanceSection = el.querySelectorAll('.app-settings__section')[0];
+      const toggleBtn = appearanceSection.querySelector('mat-slide-toggle button[role="switch"]') as HTMLElement;
+      expect(toggleBtn.getAttribute('aria-checked')).toBe('false');
+    });
+
+    it('reduce motion toggle reflects effective state when system prefers reduced motion', () => {
+      themeService.settings.mockReturnValue({ ...DEFAULT_SETTINGS, reduceMotion: null });
+      themeService.effectiveReduceMotion.mockReturnValue(true);
+      fixture.detectChanges();
+
+      const el: HTMLElement = fixture.nativeElement;
+      const accessibilitySection = el.querySelectorAll('.app-settings__section')[1];
+      const toggleBtns = accessibilitySection.querySelectorAll('mat-slide-toggle button[role="switch"]');
+      expect(toggleBtns[0].getAttribute('aria-checked')).toBe('true');
+    });
+
+    it('high contrast toggle reflects effective state when system prefers high contrast', () => {
+      themeService.settings.mockReturnValue({ ...DEFAULT_SETTINGS, highContrast: null });
+      themeService.effectiveHighContrast.mockReturnValue(true);
+      fixture.detectChanges();
+
+      const el: HTMLElement = fixture.nativeElement;
+      const accessibilitySection = el.querySelectorAll('.app-settings__section')[1];
+      const toggleBtns = accessibilitySection.querySelectorAll('mat-slide-toggle button[role="switch"]');
+      expect(toggleBtns[1].getAttribute('aria-checked')).toBe('true');
+    });
   });
 
   it('dispatches signOut action on sign out', () => {

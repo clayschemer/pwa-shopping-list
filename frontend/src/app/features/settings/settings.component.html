@@ -18,7 +18,7 @@
     <div class="app-settings__row">
       <span class="app-settings__label">{{ 'settings.darkMode' | transloco }}</span>
       <mat-slide-toggle
-        [checked]="settings().darkMode === true"
+        [checked]="effectiveDarkMode()"
         (change)="onDarkModeToggle($event.checked)"
       />
     </div>
@@ -39,7 +39,7 @@
     <div class="app-settings__row">
       <span class="app-settings__label">{{ 'settings.reduceMotion' | transloco }}</span>
       <mat-slide-toggle
-        [checked]="settings().reduceMotion === true"
+        [checked]="effectiveReduceMotion()"
         (change)="onReduceMotionToggle($event.checked)"
       />
     </div>
@@ -47,7 +47,7 @@
     <div class="app-settings__row">
       <span class="app-settings__label">{{ 'settings.highContrast' | transloco }}</span>
       <mat-slide-toggle
-        [checked]="settings().highContrast === true"
+        [checked]="effectiveHighContrast()"
         (change)="onHighContrastToggle($event.checked)"
       />
     </div>
