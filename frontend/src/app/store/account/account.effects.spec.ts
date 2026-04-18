@@ -7,7 +7,10 @@ import { AccountEffects } from './account.effects';
 import { authActions, accountActions } from './account.actions';
 import { AccountApiService } from '../../core/api/account-api.service';
 import type { Account } from '../../models/account.model';
-import type { AccessDeniedError } from '../../models/errors.model';
+import type {
+  AccessDeniedError,
+  PendingVerificationError,
+} from '../../models/errors.model';
 import type { AccountId, UserId } from '../../models/ids.model';
 import type { User } from '../../models/user.model';
 
@@ -87,6 +90,23 @@ describe('AccountEffects', () => {
       return new Promise<void>((resolve) => {
         setTimeout(() => {
           expect(results).toEqual([accountActions.accessDenied()]);
+          resolve();
+        });
+      });
+    });
+
+    it('dispatches pendingVerification when getAccount returns PENDING_VERIFICATION', () => {
+      const pending: PendingVerificationError = { type: 'PENDING_VERIFICATION' };
+      accountApi.getAccount.mockResolvedValue(pending);
+
+      const results: unknown[] = [];
+      effects.loadAccount$.subscribe((action) => results.push(action));
+
+      actions$.next(authActions.authStateResolved({ user: mockUser }));
+
+      return new Promise<void>((resolve) => {
+        setTimeout(() => {
+          expect(results).toEqual([accountActions.pendingVerification()]);
           resolve();
         });
       });

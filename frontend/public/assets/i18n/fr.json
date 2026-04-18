@@ -83,6 +83,13 @@
     "messageNoEmail": "Ce compte n'a pas l'autorisation d'utiliser cette application.",
     "tryDifferent": "Essayer un autre compte"
   },
+  "pendingVerification": {
+    "title": "En attente d'approbation",
+    "message": "Le compte <strong>{{email}}</strong> attend l'approbation du propriétaire de la liste. Vous aurez accès dès qu'il sera vérifié.",
+    "messageNoEmail": "Votre compte attend l'approbation du propriétaire de la liste. Vous aurez accès dès qu'il sera vérifié.",
+    "reload": "J'ai été approuvé — recharger",
+    "switchAccount": "Utiliser un autre compte"
+  },
   "manageShops": {
     "title": "Gérer les magasins",
     "goBack": "Retour",

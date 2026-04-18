@@ -20,6 +20,7 @@ export const accountActions = createActionGroup({
   events: {
     'Account Loaded': props<{ account: Account }>(),
     'Access Denied': emptyProps(),
+    'Pending Verification': emptyProps(),
     'Stream Auth Revoked': emptyProps(),
     'Stream Account Not Found': emptyProps(),
     'Stream Failed': props<{ message: string }>(),

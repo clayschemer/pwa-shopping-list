@@ -44,10 +44,21 @@ A person with access to the account. Multiple users can belong to the same accou
 ```
 User
   - id
-  - accountId: AccountId
+  - accountId: AccountId                ← set by admin when approving a pending user
   - email
   - displayName
+  - verified: boolean                   ← optional; absent on legacy records (treated as verified),
+                                          self-written as false on first sign-in, flipped to true by admin
+  - createdAt: timestamp                ← optional; self-written on pending registration
 ```
+
+**Verification lifecycle.** On first Google sign-in the user's own client writes
+`/users/{uid}` with `verified: false` and no `accountId`. The account owner
+(admin) then flips `verified: true` and sets `accountId` in the Firebase
+console. Until both are in place the user sees a pending-verification screen and
+has no read access to anything beyond their own `/users/{uid}` doc. Records
+missing the `verified` field are treated as verified so existing hand-created
+allowlist entries keep working without migration.
 
 ### Shop
 A named place to shop. Stores the category order and exclusions specific to that shop.

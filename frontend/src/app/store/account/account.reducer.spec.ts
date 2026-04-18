@@ -68,6 +68,20 @@ describe('accountReducer', () => {
     expect(state.user).toEqual(mockUser);
   });
 
+  it('transitions to pending_verification on pendingVerification', () => {
+    const loadingState = accountReducer(
+      initialAccountState,
+      authActions.authStateResolved({ user: mockUser }),
+    );
+    const state = accountReducer(
+      loadingState,
+      accountActions.pendingVerification(),
+    );
+    expect(state.status).toBe('pending_verification');
+    expect(state.account).toBeNull();
+    expect(state.user).toEqual(mockUser);
+  });
+
   it('transitions to unauthenticated on signedOut', () => {
     const authState = accountReducer(
       initialAccountState,

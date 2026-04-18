@@ -2,19 +2,32 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    // A user belongs to accountId if their /users/{uid} doc says so.
-    // Uses get() — one extra read per rule evaluation, cached within a request.
+    // A user belongs to accountId if their /users/{uid} doc says so
+    // AND the doc is not explicitly unverified. Legacy docs without the
+    // `verified` field are treated as verified (no migration required).
     function isMember(accountId) {
       return request.auth != null
         && exists(/databases/$(database)/documents/users/$(request.auth.uid))
-        && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.accountId == accountId;
+        && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.accountId == accountId
+        && (!('verified' in get(/databases/$(database)/documents/users/$(request.auth.uid)).data)
+            || get(/databases/$(database)/documents/users/$(request.auth.uid)).data.verified == true);
     }
 
-    // Allowlist document. Users can read their own to resolve their accountId.
-    // Write is admin-only — allowlist management is out of scope for the app.
+    // Allowlist document.
+    // - Read: users read their own doc to resolve accountId / verified status.
+    // - Create: a signed-in user may create their OWN pending doc with
+    //   verified:false and no accountId, carrying only the fields
+    //   the client is allowed to set. Admin then flips verified and sets
+    //   accountId via the Firebase console.
+    // - Update/Delete: admin-only.
     match /users/{userId} {
       allow read: if request.auth != null && request.auth.uid == userId;
-      allow write: if false;
+      allow create: if request.auth != null
+        && request.auth.uid == userId
+        && request.resource.data.verified == false
+        && !('accountId' in request.resource.data)
+        && request.resource.data.keys().hasOnly(['verified', 'email', 'displayName', 'createdAt']);
+      allow update, delete: if false;
     }
 
     // Account document itself — readable by members (needed by getAccount()).

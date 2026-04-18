@@ -83,6 +83,13 @@
     "messageNoEmail": "Detta konto har inte behörighet att använda denna applikation.",
     "tryDifferent": "Prova ett annat konto"
   },
+  "pendingVerification": {
+    "title": "Väntar på godkännande",
+    "message": "Kontot <strong>{{email}}</strong> väntar på godkännande från listägaren. Du får åtkomst så snart det verifieras.",
+    "messageNoEmail": "Ditt konto väntar på godkännande från listägaren. Du får åtkomst så snart det verifieras.",
+    "reload": "Jag har godkänts — ladda om",
+    "switchAccount": "Använd ett annat konto"
+  },
   "manageShops": {
     "title": "Hantera butiker",
     "goBack": "Gå tillbaka",

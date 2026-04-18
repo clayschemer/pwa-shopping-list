@@ -83,6 +83,13 @@
     "messageNoEmail": "This account does not have permission to use this application.",
     "tryDifferent": "Try a different account"
   },
+  "pendingVerification": {
+    "title": "Waiting for approval",
+    "message": "The account <strong>{{email}}</strong> is awaiting approval from the list owner. You'll get access as soon as they verify it.",
+    "messageNoEmail": "Your account is awaiting approval from the list owner. You'll get access as soon as they verify it.",
+    "reload": "I've been approved — reload",
+    "switchAccount": "Use a different account"
+  },
   "manageShops": {
     "title": "Manage shops",
     "goBack": "Go back",

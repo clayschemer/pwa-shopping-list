@@ -83,6 +83,13 @@
     "messageNoEmail": "Dieses Konto hat keine Berechtigung, diese Anwendung zu nutzen.",
     "tryDifferent": "Anderes Konto versuchen"
   },
+  "pendingVerification": {
+    "title": "Warte auf Freigabe",
+    "message": "Das Konto <strong>{{email}}</strong> wartet auf die Freigabe durch den Listeninhaber. Du erhältst Zugriff, sobald es verifiziert ist.",
+    "messageNoEmail": "Dein Konto wartet auf die Freigabe durch den Listeninhaber. Du erhältst Zugriff, sobald es verifiziert ist.",
+    "reload": "Ich bin freigegeben — neu laden",
+    "switchAccount": "Anderes Konto verwenden"
+  },
   "manageShops": {
     "title": "Läden verwalten",
     "goBack": "Zurück",

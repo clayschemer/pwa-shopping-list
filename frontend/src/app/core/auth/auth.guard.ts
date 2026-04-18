@@ -22,6 +22,9 @@ export const authGuard: CanActivateFn = () => {
       if (status === 'access_denied') {
         return router.createUrlTree(['/access-denied']);
       }
+      if (status === 'pending_verification') {
+        return router.createUrlTree(['/pending-verification']);
+      }
       return router.createUrlTree(['/sign-in']);
     }),
   );

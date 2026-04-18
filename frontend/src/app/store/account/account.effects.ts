@@ -5,7 +5,11 @@ import { authActions, accountActions } from './account.actions';
 import { AccountApiService } from '../../core/api/account-api.service';
 import { StreamErrorService } from '../../core/api/stream-error.service';
 import type { Account } from '../../models/account.model';
-import type { AccessDeniedError, AuthError } from '../../models/errors.model';
+import type {
+  AccessDeniedError,
+  AuthError,
+  PendingVerificationError,
+} from '../../models/errors.model';
 
 @Injectable()
 export class AccountEffects {
@@ -44,11 +48,16 @@ export class AccountEffects {
       ofType(authActions.authStateResolved),
       switchMap(() =>
         from(this.accountApi.getAccount()).pipe(
-          map((result) =>
-            (result as AccessDeniedError).type === 'ACCESS_DENIED'
-              ? accountActions.accessDenied()
-              : accountActions.accountLoaded({ account: result as Account }),
-          ),
+          map((result) => {
+            const tag = (result as AccessDeniedError | PendingVerificationError).type;
+            if (tag === 'ACCESS_DENIED') {
+              return accountActions.accessDenied();
+            }
+            if (tag === 'PENDING_VERIFICATION') {
+              return accountActions.pendingVerification();
+            }
+            return accountActions.accountLoaded({ account: result as Account });
+          }),
           catchError(() => of(accountActions.accessDenied())),
         ),
       ),

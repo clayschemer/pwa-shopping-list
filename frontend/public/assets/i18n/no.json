@@ -83,6 +83,13 @@
     "messageNoEmail": "Denne kontoen har ikke tilgang til denne applikasjonen.",
     "tryDifferent": "Prøv en annen konto"
   },
+  "pendingVerification": {
+    "title": "Venter på godkjenning",
+    "message": "Kontoen <strong>{{email}}</strong> venter på godkjenning fra listeeieren. Du får tilgang så snart den er verifisert.",
+    "messageNoEmail": "Kontoen din venter på godkjenning fra listeeieren. Du får tilgang så snart den er verifisert.",
+    "reload": "Jeg er godkjent — last på nytt",
+    "switchAccount": "Bruk en annen konto"
+  },
   "manageShops": {
     "title": "Administrer butikker",
     "goBack": "Gå tilbake",

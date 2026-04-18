@@ -49,6 +49,8 @@ export class SignInComponent {
         this.router.navigateByUrl('/');
       } else if (status === 'access_denied') {
         this.router.navigateByUrl('/access-denied');
+      } else if (status === 'pending_verification') {
+        this.router.navigateByUrl('/pending-verification');
       }
     });
   }

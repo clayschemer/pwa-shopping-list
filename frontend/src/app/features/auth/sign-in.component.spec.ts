@@ -55,6 +55,16 @@ describe('SignInComponent', () => {
     expect(router.navigateByUrl).toHaveBeenCalledWith('/access-denied');
   });
 
+  it('redirects to /pending-verification when auth status becomes pending_verification', () => {
+    setup('unauthenticated');
+
+    store.overrideSelector(selectAuthStatus, 'pending_verification');
+    store.refreshState();
+    TestBed.flushEffects();
+
+    expect(router.navigateByUrl).toHaveBeenCalledWith('/pending-verification');
+  });
+
   it('does not redirect while status is checking or loading', () => {
     setup('checking');
 

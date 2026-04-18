@@ -295,7 +295,7 @@ All device-local (localStorage) unless noted:
 
 Built (test-first, behind the API service layer):
 
-- Auth: Firebase Google OAuth, allowlist gate via `getAccount()`, sign-in / access-denied screens, route guard, session restore loading state
+- Auth: Firebase Google OAuth, allowlist gate via `getAccount()`, sign-in / access-denied / pending-verification screens, route guard, session restore loading state. First-time Google sign-in self-registers a `/users/{uid}` doc with `verified: false` and routes to `/pending-verification`; admin flips `verified` and sets `accountId` in the Firebase console to grant access. Legacy docs without the `verified` field are treated as verified.
 - App shell: top bar with mode toggle, nav drawer, full-screen routes for Settings / Manage Shops / History, runtime i18n + theme service + compact / high-contrast / left-handed / reduced-motion modes
 - Items: store + plan-mode list, add-pill flow, edit sheet, remove confirm dialog
 - Shops: store + Manage Shops screen with add / rename / delete sheets
