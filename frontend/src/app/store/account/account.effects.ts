@@ -1,6 +1,7 @@
 import { inject, Injectable } from '@angular/core';
+import { Router } from '@angular/router';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
-import { catchError, defer, from, map, of, switchMap } from 'rxjs';
+import { catchError, defer, from, map, of, switchMap, tap } from 'rxjs';
 import { authActions, accountActions } from './account.actions';
 import { AccountApiService } from '../../core/api/account-api.service';
 import { StreamErrorService } from '../../core/api/stream-error.service';
@@ -15,6 +16,7 @@ import type {
 export class AccountEffects {
   private readonly actions$ = inject(Actions);
   private readonly accountApi = inject(AccountApiService);
+  private readonly router = inject(Router);
   private readonly streamError = inject(StreamErrorService);
 
   readonly watchStreamErrors$ = createEffect(() =>
@@ -103,5 +105,15 @@ export class AccountEffects {
         ),
       ),
     ),
+  );
+
+  /** Navigate to sign-in after sign out completes. */
+  readonly navigateOnSignOut$ = createEffect(
+    () =>
+      this.actions$.pipe(
+        ofType(authActions.signedOut),
+        tap(() => this.router.navigateByUrl('/sign-in')),
+      ),
+    { dispatch: false },
   );
 }

@@ -1,6 +1,7 @@
 import '../../../testing/init-testbed';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { TestBed } from '@angular/core/testing';
+import { Router } from '@angular/router';
 import { provideMockActions } from '@ngrx/effects/testing';
 import { Observable, of, Subject } from 'rxjs';
 import { AccountEffects } from './account.effects';
@@ -36,6 +37,7 @@ describe('AccountEffects', () => {
     signInWithGoogle: ReturnType<typeof vi.fn>;
     signOut: ReturnType<typeof vi.fn>;
   };
+  let router: { navigateByUrl: ReturnType<typeof vi.fn> };
 
   beforeEach(() => {
     actions$ = new Subject();
@@ -45,12 +47,14 @@ describe('AccountEffects', () => {
       signInWithGoogle: vi.fn(),
       signOut: vi.fn(),
     };
+    router = { navigateByUrl: vi.fn() };
 
     TestBed.configureTestingModule({
       providers: [
         AccountEffects,
         provideMockActions(() => actions$),
         { provide: AccountApiService, useValue: accountApi },
+        { provide: Router, useValue: router },
       ],
     });
 
@@ -170,6 +174,16 @@ describe('AccountEffects', () => {
         authActions.authStateEmpty(),
         authActions.authStateResolved({ user: mockUser }),
       ]);
+    });
+  });
+
+  describe('navigateOnSignOut$', () => {
+    it('navigates to /sign-in when signedOut is dispatched', () => {
+      effects.navigateOnSignOut$.subscribe();
+
+      actions$.next(authActions.signedOut());
+
+      expect(router.navigateByUrl).toHaveBeenCalledWith('/sign-in');
     });
   });
 });
