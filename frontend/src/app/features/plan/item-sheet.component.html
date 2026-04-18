@@ -54,7 +54,7 @@
       >
         <mat-option [value]="null">{{ 'itemSheet.unitNone' | transloco }}</mat-option>
         @for (u of units; track u) {
-          <mat-option [value]="u">{{ u }}</mat-option>
+          <mat-option [value]="u">{{ 'units.' + u | transloco }}</mat-option>
         }
       </mat-select>
     </mat-form-field>

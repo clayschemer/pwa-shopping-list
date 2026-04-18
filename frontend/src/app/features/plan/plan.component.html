@@ -53,7 +53,7 @@
                 <span class="app-plan__item-name">{{ item.name }}</span>
                 @if (item.quantity !== null || item.unit !== null) {
                   <span class="app-plan__item-qty">
-                    {{ item.quantity }}{{ item.unit ? ' ' + item.unit : '' }}
+                    {{ item.quantity }}{{ item.unit ? ' ' + ('units.' + item.unit | transloco) : '' }}
                   </span>
                 }
                 @if (item.description) {

@@ -22,7 +22,7 @@
               <span class="app-add-item-pill__suggestion-name">{{ suggestion.name }}</span>
               @if (suggestion.quantity !== null || suggestion.unit !== null) {
                 <span class="app-add-item-pill__suggestion-qty">
-                  {{ suggestion.quantity }}{{ suggestion.unit ? ' ' + suggestion.unit : '' }}
+                  {{ suggestion.quantity }}{{ suggestion.unit ? ' ' + ('units.' + suggestion.unit | transloco) : '' }}
                 </span>
               }
             </button>
@@ -78,7 +78,7 @@
         >
           <option [ngValue]="null">{{ 'itemSheet.unitNone' | transloco }}</option>
           @for (u of units; track u) {
-            <option [ngValue]="u">{{ u }}</option>
+            <option [ngValue]="u">{{ 'units.' + u | transloco }}</option>
           }
         </select>
         <button type="submit" class="app-add-item-pill__add">

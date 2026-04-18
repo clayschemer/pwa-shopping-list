@@ -4,13 +4,12 @@ service cloud.firestore {
 
     // A user belongs to accountId if their /users/{uid} doc says so
     // AND the doc is not explicitly unverified. Legacy docs without the
-    // `verified` field are treated as verified (no migration required).
+    // `verified` field are treated as verified (default true, no migration).
     function isMember(accountId) {
       return request.auth != null
         && exists(/databases/$(database)/documents/users/$(request.auth.uid))
         && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.accountId == accountId
-        && (!('verified' in get(/databases/$(database)/documents/users/$(request.auth.uid)).data)
-            || get(/databases/$(database)/documents/users/$(request.auth.uid)).data.verified == true);
+        && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.get('verified', true) == true;
     }
 
     // Allowlist document.
