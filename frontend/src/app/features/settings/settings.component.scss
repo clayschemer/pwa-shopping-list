@@ -46,6 +46,14 @@
     justify-content: space-between;
     min-height: var(--app-spacing-row-min-height);
     padding: var(--app-spacing-padding-block) 0;
+
+    mat-slide-toggle {
+      width: 100%;
+
+      --mat-slide-toggle-label-text-size: var(--app-font-size-body);
+      --mat-slide-toggle-label-text-line-height: var(--app-line-height-body);
+      --mat-slide-toggle-label-text-color: var(--mat-sys-on-surface);
+    }
   }
 
   &__label {

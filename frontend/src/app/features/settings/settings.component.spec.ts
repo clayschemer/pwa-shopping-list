@@ -218,6 +218,32 @@ describe('SettingsComponent', () => {
     });
   });
 
+  describe('toggle accessible labels', () => {
+    it('dark mode toggle has an accessible label', () => {
+      const el: HTMLElement = fixture.nativeElement;
+      const toggle = el.querySelectorAll('mat-slide-toggle')[0];
+      const label = toggle.querySelector('label');
+      expect(label).toBeTruthy();
+      expect(label!.textContent!.trim()).toBe('Dark mode');
+    });
+
+    it('reduce motion toggle has an accessible label', () => {
+      const el: HTMLElement = fixture.nativeElement;
+      const toggle = el.querySelectorAll('mat-slide-toggle')[2];
+      const label = toggle.querySelector('label');
+      expect(label).toBeTruthy();
+      expect(label!.textContent!.trim()).toBe('Reduce motion');
+    });
+
+    it('keep screen awake toggle has an accessible label', () => {
+      const el: HTMLElement = fixture.nativeElement;
+      const toggle = el.querySelectorAll('mat-slide-toggle')[5];
+      const label = toggle.querySelector('label');
+      expect(label).toBeTruthy();
+      expect(label!.textContent!.trim()).toBe('Keep screen awake');
+    });
+  });
+
   it('dispatches signOut action on sign out', () => {
     const dispatchSpy = vi.spyOn(store, 'dispatch');
     component.signOut();
