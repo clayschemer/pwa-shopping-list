@@ -77,7 +77,7 @@
           (ngModelChange)="unit.set($event === '' ? null : $event)"
         >
           <option [ngValue]="null">{{ 'itemSheet.unitNone' | transloco }}</option>
-          @for (u of units; track u) {
+          @for (u of units(); track u) {
             <option [ngValue]="u">{{ 'units.' + u | transloco }}</option>
           }
         </select>

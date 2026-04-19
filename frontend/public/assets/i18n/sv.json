@@ -188,7 +188,11 @@
     "tbsp": "msk",
     "cup": "kopp",
     "oz": "oz",
-    "lb": "lb"
+    "lb": "lb",
+    "fl oz": "fl oz",
+    "pt": "pt",
+    "qt": "qt",
+    "gal": "gal"
   },
   "settings": {
     "title": "Inställningar",

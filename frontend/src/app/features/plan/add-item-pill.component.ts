@@ -16,7 +16,8 @@ import { MatIcon } from '@angular/material/icon';
 import { MatFabButton } from '@angular/material/button';
 import { TranslocoPipe } from '@jsverse/transloco';
 import { AutocompleteService } from '../../core/api/autocomplete.service';
-import { ITEM_UNITS } from './item-units';
+import { getSelectableUnits } from './item-units';
+import { ThemeService } from '../../core/theme/theme.service';
 import type { AutocompleteItem } from '../../models/autocomplete.model';
 import type { CategoryId } from '../../models/ids.model';
 
@@ -39,6 +40,7 @@ type Stage = 'collapsed' | 'name' | 'qty';
 export class AddItemPillComponent {
   private readonly host = inject(ElementRef<HTMLElement>);
   private readonly autocomplete = inject(AutocompleteService);
+  private readonly theme = inject(ThemeService);
 
   readonly existingNames = input.required<string[]>();
   readonly submitted = output<AddItemRequest>();
@@ -48,7 +50,7 @@ export class AddItemPillComponent {
   readonly quantity = signal<number | null>(null);
   readonly unit = signal<string | null>(null);
   private primaryCategoryId: CategoryId | null = null;
-  readonly units = ITEM_UNITS;
+  readonly units = computed(() => getSelectableUnits(this.theme.settings().language));
 
   private readonly suggestionsVersion = signal(0);
 

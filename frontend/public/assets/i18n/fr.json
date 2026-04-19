@@ -188,7 +188,11 @@
     "tbsp": "c. à s.",
     "cup": "tasse",
     "oz": "oz",
-    "lb": "lb"
+    "lb": "lb",
+    "fl oz": "fl oz",
+    "pt": "pt",
+    "qt": "qt",
+    "gal": "gal"
   },
   "settings": {
     "title": "Paramètres",
