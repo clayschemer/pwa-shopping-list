@@ -38,4 +38,15 @@
       color: var(--mat-sys-on-surface-variant);
     }
   }
+
+  &__label {
+    display: flex;
+    flex-direction: column;
+  }
+
+  &__active-indicator {
+    font-size: 0.75rem;
+    color: var(--mat-sys-secondary);
+    line-height: 1.2;
+  }
 }

@@ -62,15 +62,27 @@ export class SessionApiService {
   ): Promise<Session | SessionConflictError> {
     const { accountId, userId } = this.context.require();
     return runInInjectionContext(this.injector, async () => {
+      // Start-or-join: query for an existing active session at this shop
       const existing = await getDocs(
         query(
           paths.sessions(this.db, accountId),
           where('completedAt', '==', null),
-          where('participants', 'array-contains', userId),
+          where('shopId', '==', shopId),
         ),
       );
+
       if (!existing.empty) {
-        return { type: 'SESSION_CONFLICT' };
+        // Join the existing session if not already a participant
+        const existingDoc = existing.docs[0];
+        const session = mapSession(existingDoc, accountId);
+        if (!session.participants.includes(userId as UserId)) {
+          const ref = paths.sessionDoc(this.db, accountId, session.id);
+          await runTransaction(this.db, async (tx) => {
+            tx.update(ref, { participants: arrayUnion(userId) });
+          });
+          session.participants = [...session.participants, userId as UserId];
+        }
+        return session;
       }
 
       const startedAt = Date.now();

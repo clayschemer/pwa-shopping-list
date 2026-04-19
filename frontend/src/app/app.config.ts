@@ -25,6 +25,7 @@ import { sessionsReducer } from './store/sessions/sessions.reducer';
 import { SessionsEffects } from './store/sessions/sessions.effects';
 import { usersReducer } from './store/users/users.reducer';
 import { UsersEffects } from './store/users/users.effects';
+import { ReconnectEffects } from './store/reconnect/reconnect.effects';
 import { environment } from '../environments/environment';
 import { provideAppTransloco } from './core/i18n/transloco-config';
 
@@ -56,6 +57,7 @@ export const appConfig: ApplicationConfig = {
       ItemsEffects,
       SessionsEffects,
       UsersEffects,
+      ReconnectEffects,
     ]),
     provideFirebaseApp(() => initializeApp(environment.firebase)),
     provideAuth(() => {

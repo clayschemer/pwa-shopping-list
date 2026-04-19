@@ -142,7 +142,8 @@
     "global": "Kein bestimmter Laden (global)",
     "est": "Gesch.",
     "tapToUndo": "Zum Rückgängigmachen tippen",
-    "checkItem": "{{name}} abhaken"
+    "checkItem": "{{name}} abhaken",
+    "activeSession": "Aktive Sitzung"
   },
   "closeSession": {
     "allDoneTitle": "Alles erledigt!",

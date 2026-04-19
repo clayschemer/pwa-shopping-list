@@ -7,6 +7,7 @@ import type { ShopId } from '../../models/ids.model';
 
 export interface ShopSelectData {
   shops: Shop[];
+  activeSessionShopIds: Set<ShopId | null>;
 }
 
 export type ShopSelectResult = { shopId: ShopId | null };
@@ -23,6 +24,10 @@ export class ShopSelectSheetComponent {
     MatBottomSheetRef,
   );
   readonly data = inject<ShopSelectData>(MAT_BOTTOM_SHEET_DATA);
+
+  hasActiveSession(shopId: ShopId | null): boolean {
+    return this.data.activeSessionShopIds.has(shopId);
+  }
 
   choose(shopId: ShopId | null): void {
     this.ref.dismiss({ shopId });

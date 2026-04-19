@@ -142,7 +142,8 @@
     "global": "No specific shop (global)",
     "est": "Est.",
     "tapToUndo": "tap to undo",
-    "checkItem": "Check {{name}}"
+    "checkItem": "Check {{name}}",
+    "activeSession": "Active session"
   },
   "closeSession": {
     "allDoneTitle": "All done!",

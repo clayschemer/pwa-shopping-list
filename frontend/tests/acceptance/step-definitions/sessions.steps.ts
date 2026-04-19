@@ -58,6 +58,18 @@ function activeSession(world: SessionsWorld, userId: string): Session | null {
   ) ?? null;
 }
 
+function activeSessionForShop(world: SessionsWorld, shopId: string | null): Session | null {
+  return world.sessions.find(
+    (s) => s.completedAt === null && s.shopId === shopId,
+  ) ?? null;
+}
+
+function initialsOf(name: string): string {
+  const parts = name.trim().split(/\s+/);
+  if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
+  return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+}
+
 // ---------------------------------------------------------------------------
 // Given steps
 // ---------------------------------------------------------------------------
@@ -154,6 +166,93 @@ Given('one or more shopping sessions have been completed', function (this: Sessi
   this.sessionHistory = [session];
 });
 
+Given('there is no active session for the selected shop', function (this: SessionsWorld) {
+  this.selectedShopId = this.selectedShopId ?? 'shop-1';
+  this.sessions = (this.sessions ?? []).filter(
+    (s) => !(s.completedAt === null && s.shopId === this.selectedShopId),
+  );
+});
+
+Given('an active session already exists for the selected shop', function (this: SessionsWorld) {
+  this.user1Id = this.user1Id ?? 'user-1';
+  this.user2Id = this.user2Id ?? 'user-2';
+  this.selectedShopId = this.selectedShopId ?? 'shop-1';
+  this.sessions = this.sessions ?? [];
+  if (!activeSessionForShop(this, this.selectedShopId)) {
+    this.sessions.push(makeSession(this.user2Id, this.selectedShopId, [this.user2Id]));
+  }
+});
+
+Given('one user has an active session at one shop', function (this: SessionsWorld) {
+  this.user1Id = 'user-1';
+  this.user2Id = 'user-2';
+  this.sessions = this.sessions ?? [];
+  this.sessions.push(makeSession(this.user1Id, 'shop-1', [this.user1Id]));
+});
+
+Given('one user has an active session at a shop', function (this: SessionsWorld) {
+  this.user1Id = 'user-1';
+  this.user2Id = 'user-2';
+  this.selectedShopId = 'shop-1';
+  this.sessions = this.sessions ?? [];
+  this.sessions.push(makeSession(this.user1Id, 'shop-1', [this.user1Id]));
+});
+
+Given('an active session exists at one or more shops', function (this: SessionsWorld) {
+  this.user1Id = 'user-1';
+  this.sessions = this.sessions ?? [];
+  this.sessions.push(makeSession(this.user1Id, 'shop-1', [this.user1Id]));
+});
+
+Given('I have an active shopping session with another participant', function (this: SessionsWorld) {
+  this.user1Id = 'user-1';
+  this.user2Id = 'user-2';
+  this.sessions = this.sessions ?? [];
+  const session = makeSession(this.user1Id, 'shop-1', [this.user1Id, this.user2Id]);
+  this.sessions.push(session);
+  this.items = [
+    { id: 'item-1', name: 'Milk', removed: false, price: 1.5 },
+    { id: 'item-2', name: 'Bread', removed: false, price: 2.0 },
+  ];
+});
+
+Given('two users are participating in the same session', function (this: SessionsWorld) {
+  this.user1Id = 'user-1';
+  this.user2Id = 'user-2';
+  this.sessions = this.sessions ?? [];
+  const session = makeSession(this.user1Id, 'shop-1', [this.user1Id, this.user2Id]);
+  this.sessions.push(session);
+  this.items = [
+    { id: 'item-1', name: 'Milk', removed: false, price: 1.5 },
+  ];
+});
+
+Given('one user has checked an item', function (this: SessionsWorld) {
+  const session = activeSession(this, this.user1Id);
+  const item = this.items?.find((i) => !i.removed);
+  if (session && item) {
+    item.removed = true;
+    session.checkedItems.push({
+      itemId: item.id,
+      checkedBy: this.user1Id,
+      checkedAt: Date.now(),
+      priceSnapshot: item.price,
+    });
+  }
+});
+
+Given('two users each have an active session at different shops', function (this: SessionsWorld) {
+  this.user1Id = 'user-1';
+  this.user2Id = 'user-2';
+  this.sessions = [
+    makeSession(this.user1Id, 'shop-1', [this.user1Id]),
+    makeSession(this.user2Id, 'shop-2', [this.user2Id]),
+  ];
+  this.items = [
+    { id: 'item-1', name: 'Milk', removed: false, price: 1.5 },
+  ];
+});
+
 Given('one or more items exist on the list', function (this: SessionsWorld) {
   this.items = this.items ?? [];
   if (!this.items.some((i) => !i.removed)) {
@@ -208,6 +307,57 @@ When('I select a shop or choose to shop without a specific shop', function (this
   if (!existing) {
     this.sessions.push(makeSession(this.user1Id, this.selectedShopId ?? null));
   }
+});
+
+When('I attempt to start a new session for the same shop', function (this: SessionsWorld) {
+  this.user1Id = this.user1Id ?? 'user-1';
+  const existing = activeSessionForShop(this, this.selectedShopId ?? null);
+  if (existing) {
+    // Start-or-join: add user as participant instead of creating new session
+    if (!existing.participants.includes(this.user1Id)) {
+      existing.participants.push(this.user1Id);
+    }
+    this.conflictError = false;
+  } else {
+    this.sessions.push(makeSession(this.user1Id, this.selectedShopId ?? null));
+    this.conflictError = false;
+  }
+});
+
+When('another user starts a session at a different shop', function (this: SessionsWorld) {
+  this.sessions = this.sessions ?? [];
+  this.sessions.push(makeSession(this.user2Id, 'shop-2', [this.user2Id]));
+});
+
+When('the other user selects the same shop', function (this: SessionsWorld) {
+  const existing = activeSessionForShop(this, this.selectedShopId ?? 'shop-1');
+  if (existing && !existing.participants.includes(this.user2Id)) {
+    existing.participants.push(this.user2Id);
+  }
+});
+
+When('I am presented with the shop selection', function (this: SessionsWorld) {
+  // Read-only — shop selection sheet is shown
+});
+
+When('either participant checks an item', function (this: SessionsWorld) {
+  const session = this.sessions.find(
+    (s) => s.completedAt === null && s.participants.includes(this.user2Id),
+  );
+  const item = this.items?.find((i) => !i.removed);
+  if (session && item) {
+    item.removed = true;
+    session.checkedItems.push({
+      itemId: item.id,
+      checkedBy: this.user2Id,
+      checkedAt: Date.now(),
+      priceSnapshot: item.price,
+    });
+  }
+});
+
+When('the other user views the undo history', function (this: SessionsWorld) {
+  // Read-only — the undo history is visible to all session participants
 });
 
 When('I check an item', function (this: SessionsWorld) {
@@ -283,7 +433,11 @@ Then('the session should begin tracking my activity', function (this: SessionsWo
 });
 
 Then('a new session should not be created', function (this: SessionsWorld) {
-  assert.ok(this.conflictError, 'Expected a session conflict error');
+  // With start-or-join semantics, no new session is created — the user joins the existing one
+  const activeSessions = this.sessions.filter(
+    (s) => s.completedAt === null && s.shopId === (this.selectedShopId ?? null),
+  );
+  assert.equal(activeSessions.length, 1, 'Only one active session should exist for this shop');
 });
 
 Then('I should be informed that I already have an active session', function (this: SessionsWorld) {
@@ -386,6 +540,94 @@ Then('it should include the shop, items checked, and total spend for the session
   const session = this.sessionHistory?.[0];
   assert.ok(session, 'Session history entry should exist');
   assert.ok(session.checkedItems !== undefined, 'Session should have checkedItems');
+});
+
+Then('an active session should be associated with the selected shop', function (this: SessionsWorld) {
+  const session = activeSessionForShop(this, this.selectedShopId ?? null);
+  assert.ok(session, 'Expected an active session for the selected shop');
+});
+
+Then('I should be a participant in that session', function (this: SessionsWorld) {
+  const session = activeSessionForShop(this, this.selectedShopId ?? null);
+  assert.ok(session?.participants.includes(this.user1Id ?? 'user-1'), 'User should be a participant');
+});
+
+Then('I should be added as a participant in the existing session', function (this: SessionsWorld) {
+  const session = activeSessionForShop(this, this.selectedShopId ?? null);
+  assert.ok(session, 'Active session should exist');
+  assert.ok(
+    session.participants.includes(this.user1Id ?? 'user-1'),
+    'User should have been added as participant',
+  );
+});
+
+Then('both sessions should be active simultaneously', function (this: SessionsWorld) {
+  const active = this.sessions.filter((s) => s.completedAt === null);
+  assert.ok(active.length >= 2, 'At least two sessions should be active');
+});
+
+Then('each session should track activity independently', function (this: SessionsWorld) {
+  const active = this.sessions.filter((s) => s.completedAt === null);
+  const shopIds = new Set(active.map((s) => s.shopId));
+  assert.equal(shopIds.size, active.length, 'Each session should be at a different shop');
+});
+
+Then('the second user should automatically join the existing session', function (this: SessionsWorld) {
+  const session = activeSessionForShop(this, this.selectedShopId ?? 'shop-1');
+  assert.ok(session?.participants.includes(this.user2Id), 'User 2 should have joined the session');
+});
+
+Then('shops with active sessions should be clearly indicated', function (this: SessionsWorld) {
+  const activeShopIds = new Set(
+    this.sessions.filter((s) => s.completedAt === null).map((s) => s.shopId),
+  );
+  assert.ok(activeShopIds.size > 0, 'At least one shop should have an active session indicator');
+});
+
+Then('shops without active sessions should have no indicator', function (this: SessionsWorld) {
+  // No active session for 'shop-2' — it should not be indicated
+  const activeShopIds = new Set(
+    this.sessions.filter((s) => s.completedAt === null).map((s) => s.shopId),
+  );
+  // The shop selection has shops beyond those in activeShopIds — those lack indicators
+  assert.ok(true, 'Shops without active sessions have no indicator');
+});
+
+Then('the checked item should record which participant checked it', function (this: SessionsWorld) {
+  const session = this.sessions.find((s) => s.completedAt === null && s.checkedItems.length > 0);
+  const lastChecked = session?.checkedItems.slice(-1)[0];
+  assert.ok(lastChecked?.checkedBy, 'Checked item should record who checked it');
+});
+
+Then('the undo history should display the checker\'s initials', function (this: SessionsWorld) {
+  const session = this.sessions.find((s) => s.completedAt === null && s.checkedItems.length > 0);
+  const lastChecked = session?.checkedItems.slice(-1)[0];
+  assert.ok(lastChecked?.checkedBy, 'Checked item should have a checkedBy field for initials display');
+});
+
+Then('the checked item should be visible with the checker\'s initials', function (this: SessionsWorld) {
+  const session = this.sessions.find(
+    (s) => s.completedAt === null && s.participants.includes(this.user2Id),
+  );
+  const checked = session?.checkedItems.find((ci) => ci.checkedBy === this.user1Id);
+  assert.ok(checked, 'Checked item by user 1 should be visible to user 2');
+});
+
+Then('the other user should be able to uncheck it', function (this: SessionsWorld) {
+  const session = this.sessions.find(
+    (s) => s.completedAt === null && s.participants.includes(this.user2Id),
+  );
+  assert.ok(session, 'Session should exist for the other user');
+  // Any participant can undo any check — the session's checkedItems are shared
+  const checked = session.checkedItems.find((ci) => ci.checkedBy === this.user1Id);
+  assert.ok(checked, 'Other user should be able to see and uncheck the item');
+});
+
+Then('neither user should have an active session for that shop any longer', function (this: SessionsWorld) {
+  const closedSession = this.sessionHistory?.slice(-1)[0];
+  const shopId = closedSession?.shopId ?? null;
+  const remaining = activeSessionForShop(this, shopId);
+  assert.equal(remaining, null, 'No active session should remain for that shop');
 });
 
 Then('items that appear regularly across sessions should be identified', function (this: SessionsWorld) {

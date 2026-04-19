@@ -1,7 +1,7 @@
 import { createSelector } from '@ngrx/store';
 import { selectVisibleActiveItems } from '../items/items.selectors';
 import { selectOrderedCategories } from './ordered-categories.selectors';
-import { selectActiveSessionForCurrentUser } from '../sessions/sessions.selectors';
+import { selectActiveSessionForCurrentShop } from '../sessions/sessions.selectors';
 import { selectShopEntities } from '../shops/shops.selectors';
 import { selectSelectedShopId } from '../ui/ui.selectors';
 import type { Item } from '../../models/item.model';
@@ -18,7 +18,7 @@ export interface ShopListGroup {
 export const selectGroupedShopList = createSelector(
   selectVisibleActiveItems,
   selectOrderedCategories,
-  selectActiveSessionForCurrentUser,
+  selectActiveSessionForCurrentShop,
   selectShopEntities,
   selectSelectedShopId,
   (items, categories, activeSession, shopEntities, selectedShopId): ShopListGroup[] => {
@@ -100,7 +100,7 @@ export const selectGroupedShopList = createSelector(
 );
 
 export const selectActiveSessionTotal = createSelector(
-  selectActiveSessionForCurrentUser,
+  selectActiveSessionForCurrentShop,
   (session) => {
     if (!session) return 0;
     return session.checkedItems.reduce(

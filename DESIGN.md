@@ -224,7 +224,9 @@ New category is automatically added to all existing shops' category orders (appe
 Switching to shop mode automatically triggers a shop selection sheet. No separate action needed.
 
 Sheet contains: list of configured shops + "No specific shop (global)" option.
-Tapping any option starts the session immediately.
+Each shop row shows an **active session indicator** when a session is already in progress at that shop — a secondary line reading "Active session" in the secondary colour, visible to both users. This lets the user see at a glance which shops have ongoing sessions.
+
+Tapping any option starts or joins the session immediately. If an active session already exists for the selected shop, the user joins it automatically — no separate prompt.
 
 **If no shops are configured:** sheet is skipped, global session starts automatically.
 

@@ -206,7 +206,9 @@ CheckConflictError {
 SessionConflictError {
   type: 'SESSION_CONFLICT'
 }
-// The user already has an active session. A new one cannot be started.
+// An active session for this shopId already exists on the account and could
+// not be joined due to a race condition. Normal flow uses start-or-join
+// semantics and should not hit this error.
 
 NotFoundError {
   type:       'NOT_FOUND'
@@ -675,14 +677,16 @@ Errors:  none
 
 #### startSession
 ```
-Intent:  Start a new shopping session for the current user.
-         The session is automatically associated with the current user as
-         startedBy and initial participant. A user can have at most one
-         active session at a time.
-         The new Session arrives via sessionChanges$ as a batch of one.
+Intent:  Start or join a shopping session for the given shop.
+         At most one active session per shopId per account. If an active
+         session already exists for this shopId on the account, the current
+         user is added as a participant and the existing session is returned.
+         If no active session exists, a new one is created with the current
+         user as startedBy and initial participant.
+         The new or updated Session arrives via sessionChanges$ as a batch of one.
 Input:   shopId: ShopId | null    // null = shopping without a specific shop
 Output:  Session
-Errors:  SessionConflictError
+Errors:  SessionConflictError     // edge case only — race condition on concurrent creates
 ```
 
 #### joinSession
@@ -813,8 +817,10 @@ The following concerns are intentionally outside this contract:
   not persisted; resets to plan mode on every app start.
 - **Settings** (dark mode, language, etc.) — device-local; stored in local storage;
   not synced between users or devices.
-- **Checked item undo window** — client-side only; visible only to the checking user;
-  4-second window. Does not involve the API.
+- **Checked item undo window** — the 4-second pending window is client-side only,
+  visible only to the checking user, and does not involve the API. The committed
+  undo history (session's `checkedItems`) is shared across all session participants
+  and any participant can undo any check via `uncheckItem`.
 - **Session auto-start on shop selection** — orchestrated by an NgRx effect that calls
   `startSession` when the user selects a shop in shop mode. The contract provides
   `startSession`; the triggering logic is a store concern.

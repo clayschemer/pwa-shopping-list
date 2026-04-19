@@ -142,7 +142,8 @@
     "global": "Ingen bestemt butikk (global)",
     "est": "Est.",
     "tapToUndo": "trykk for å angre",
-    "checkItem": "Kryss av {{name}}"
+    "checkItem": "Kryss av {{name}}",
+    "activeSession": "Aktiv økt"
   },
   "closeSession": {
     "allDoneTitle": "Ferdig!",

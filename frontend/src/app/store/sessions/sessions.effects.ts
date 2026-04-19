@@ -1,9 +1,9 @@
 import { inject, Injectable } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
-import { EMPTY, filter, from, map, switchMap, take, timer } from 'rxjs';
+import { EMPTY, filter, from, map, switchMap, take, tap, timer } from 'rxjs';
 import { sessionsActions, sessionsApiActions } from './sessions.actions';
-import { selectActiveSessionForCurrentUser } from './sessions.selectors';
+import { selectActiveSessionForCurrentShop } from './sessions.selectors';
 import { accountActions } from '../account/account.actions';
 import { uiActions } from '../ui/ui.actions';
 import { itemsActions } from '../items/items.actions';
@@ -19,6 +19,7 @@ export class SessionsEffects {
   private readonly actions$ = inject(Actions);
   private readonly store = inject(Store);
   private readonly sessionApi = inject(SessionApiService);
+  private lastActivityOverride: number | null = null;
 
   readonly fetchActiveSessions$ = createEffect(() =>
     this.actions$.pipe(
@@ -53,13 +54,7 @@ export class SessionsEffects {
   readonly autoStartOnShopSelected$ = createEffect(() =>
     this.actions$.pipe(
       ofType(uiActions.switchToShopModeWithShop),
-      switchMap(({ shopId }) =>
-        this.store.select(selectActiveSessionForCurrentUser).pipe(
-          take(1),
-          filter((existing) => existing === null),
-          map(() => sessionsApiActions.startSessionRequested({ shopId })),
-        ),
-      ),
+      map(({ shopId }) => sessionsApiActions.startSessionRequested({ shopId })),
     ),
   );
 
@@ -125,18 +120,29 @@ export class SessionsEffects {
         itemsActions.checkItemPending,
         itemsActions.checkItemUndoneDuringWindow,
       ),
+      tap((action) => {
+        // Treat dismissal as fresh activity so the timer resets to a full 30 min
+        if (action.type === sessionsActions.sessionInactivityDismissed.type) {
+          this.lastActivityOverride = Date.now();
+        } else {
+          this.lastActivityOverride = null;
+        }
+      }),
       switchMap(() =>
-        this.store.select(selectActiveSessionForCurrentUser).pipe(
+        this.store.select(selectActiveSessionForCurrentShop).pipe(
           take(1),
           switchMap((session) => {
             if (!session) return EMPTY;
-            const lastActivity =
+            const sessionActivity =
               session.checkedItems.length > 0
                 ? Math.max(
                     session.startedAt,
                     ...session.checkedItems.map((c) => c.checkedAt),
                   )
                 : session.startedAt;
+            const lastActivity = this.lastActivityOverride
+              ? Math.max(sessionActivity, this.lastActivityOverride)
+              : sessionActivity;
             const elapsed = Date.now() - lastActivity;
             const delay = Math.max(0, SESSION_INACTIVITY_MS - elapsed);
             return timer(delay).pipe(
