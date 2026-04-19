@@ -25,6 +25,10 @@ export interface AccessDeniedError {
   type: 'ACCESS_DENIED';
 }
 
+export interface PendingVerificationError {
+  type: 'PENDING_VERIFICATION';
+}
+
 export interface AuthError {
   type: 'AUTH_FAILED';
   code: string;

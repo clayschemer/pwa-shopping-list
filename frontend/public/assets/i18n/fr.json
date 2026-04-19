@@ -10,7 +10,8 @@
     "viewChecked": "Voir les articles cochés",
     "settings": "Paramètres",
     "activeSession": "Session active",
-    "global": "Global"
+    "global": "Global",
+    "sessionActive": "active"
   },
   "navDrawer": {
     "shopLayout": "Disposition du magasin actuel",
@@ -82,6 +83,13 @@
     "messageNoEmail": "Ce compte n'a pas l'autorisation d'utiliser cette application.",
     "tryDifferent": "Essayer un autre compte"
   },
+  "pendingVerification": {
+    "title": "En attente d'approbation",
+    "message": "Le compte <strong>{{email}}</strong> attend l'approbation du propriétaire de la liste. Vous aurez accès dès qu'il sera vérifié.",
+    "messageNoEmail": "Votre compte attend l'approbation du propriétaire de la liste. Vous aurez accès dès qu'il sera vérifié.",
+    "reload": "J'ai été approuvé — recharger",
+    "switchAccount": "Utiliser un autre compte"
+  },
   "manageShops": {
     "title": "Gérer les magasins",
     "goBack": "Retour",
@@ -99,6 +107,93 @@
     "add": "Ajouter un magasin",
     "save": "Enregistrer"
   },
+  "categoryNameSheet": {
+    "addTitle": "Ajouter une catégorie",
+    "renameTitle": "Renommer la catégorie",
+    "categoryName": "Nom de la catégorie",
+    "nameConflict": "Une catégorie portant ce nom existe déjà",
+    "cancel": "Annuler",
+    "add": "Ajouter la catégorie",
+    "save": "Enregistrer"
+  },
+  "categoryMenu": {
+    "open": "Options de catégorie pour {{name}}",
+    "rename": "Renommer",
+    "availableInShops": "Disponible dans les magasins\u2026",
+    "delete": "Supprimer la catégorie"
+  },
+  "availableInShops": {
+    "title": "Disponible dans les magasins",
+    "subtitle": "{{name}}",
+    "empty": "Aucun magasin configuré.",
+    "done": "Terminé"
+  },
+  "deleteCategory": {
+    "title": "Supprimer la catégorie ?",
+    "message": "Les articles dans « {{name}} » seront sans catégorie. Ils ne seront pas supprimés de la liste.",
+    "cancel": "Annuler",
+    "delete": "Supprimer"
+  },
+  "shop": {
+    "listLabel": "Liste de courses",
+    "empty": "Votre liste est vide.",
+    "uncategorised": "Sans catégorie",
+    "selectTitle": "Où faites-vous vos courses ?",
+    "global": "Pas de magasin spécifique (global)",
+    "est": "Est.",
+    "tapToUndo": "appuyez pour annuler",
+    "checkItem": "Cocher {{name}}"
+  },
+  "closeSession": {
+    "allDoneTitle": "Terminé !",
+    "allDoneMessage": "Tout est coché. Fermer la session et sauvegarder l'historique ?",
+    "remainingTitle": "Fermer la session ?",
+    "remainingMessage": "Il reste des articles non cochés sur votre liste. Fermer quand même ?",
+    "notYet": "Pas encore",
+    "keepShopping": "Continuer les courses",
+    "close": "Fermer la session"
+  },
+  "undoHistory": {
+    "title": "Cochés cette session",
+    "empty": "Rien coché pour le moment.",
+    "uncheck": "Décocher {{name}}"
+  },
+  "inactivityReminder": {
+    "title": "Toujours en courses ?",
+    "message": "Votre session est inactive depuis un moment. Fermer maintenant ou continuer ?",
+    "keepShopping": "Continuer les courses",
+    "close": "Fermer la session"
+  },
+  "units": {
+    "pcs": "pcs",
+    "g": "g",
+    "kg": "kg",
+    "mg": "mg",
+    "ml": "ml",
+    "L": "L",
+    "cl": "cl",
+    "bag": "sachet",
+    "pack": "paquet",
+    "box": "boîte",
+    "can": "boîte",
+    "bottle": "bouteille",
+    "jar": "bocal",
+    "carton": "brique",
+    "bunch": "botte",
+    "head": "tête",
+    "loaf": "pain",
+    "slice": "tranche",
+    "sheet": "feuille",
+    "tsp": "c. à c.",
+    "tbsp": "c. à s.",
+    "cup": "tasse",
+    "oz": "oz",
+    "lb": "lb",
+    "fl oz": "fl oz",
+    "pt": "pt",
+    "qt": "qt",
+    "gal": "gal"
+  },
   "settings": {
     "title": "Paramètres",
     "goBack": "Retour",
@@ -114,6 +209,7 @@
     "currency": "Devise",
     "display": "Affichage",
     "keepScreenAwake": "Garder l'écran allumé",
+    "installApp": "Installer sur cet appareil",
     "account": "Compte",
     "signedInAs": "Connecté en tant que",
     "signOut": "Se déconnecter"

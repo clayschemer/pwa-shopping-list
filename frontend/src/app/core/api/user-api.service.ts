@@ -3,10 +3,11 @@ import { Observable } from 'rxjs';
 import {
   Firestore,
   getDocs,
+  updateDoc,
   QueryDocumentSnapshot,
 } from '@angular/fire/firestore';
 import type { User } from '../../models/user.model';
-import type { AccountId, UserId } from '../../models/ids.model';
+import type { AccountId, ShopId, UserId } from '../../models/ids.model';
 import { AccountContext } from './account-context';
 import { StreamErrorService } from './stream-error.service';
 import { paths } from './firestore-paths';
@@ -35,6 +36,15 @@ export class UserApiService {
       getDocs(paths.members(this.db, accountId)),
     );
     return snap.docs.map((d) => mapUser(d, accountId));
+  }
+
+  async setSelectedShopId(shopId: ShopId | null): Promise<void> {
+    const { accountId, userId } = this.context.require();
+    await runInInjectionContext(this.injector, () =>
+      updateDoc(paths.memberDoc(this.db, accountId, userId), {
+        selectedShopId: shopId,
+      }),
+    );
   }
 
   userChanges$(): Observable<EntityChangeBatch<User>> {

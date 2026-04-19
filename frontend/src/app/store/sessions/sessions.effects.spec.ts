@@ -68,7 +68,7 @@ describe('SessionsEffects', () => {
     api.fetchActiveSessions.mockResolvedValue([mockSession]);
     const results: unknown[] = [];
     effects.fetchActiveSessions$.subscribe((a) => results.push(a));
-    actions$.next(accountActions.accountLoaded({ account: mockAccount }));
+    actions$.next(accountActions.accountLoaded({ account: mockAccount, selectedShopId: null }));
     await flush();
     expect(results).toEqual([
       sessionsActions.sessionsLoaded({ sessions: [mockSession] }),

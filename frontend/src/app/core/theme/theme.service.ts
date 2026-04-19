@@ -17,6 +17,16 @@ export interface AppSettings {
   keepScreenAwake: boolean;
 }
 
+const LANGUAGE_MAP: Record<string, Language> = {
+  en: 'EN',
+  no: 'NO',
+  nb: 'NO',
+  nn: 'NO',
+  sv: 'SV',
+  de: 'DE',
+  fr: 'FR',
+};
+
 const DEFAULT_SETTINGS: AppSettings = {
   darkMode: null,
   compact: false,
@@ -56,11 +66,13 @@ export class ThemeService {
 
   constructor() {
     this.applyThemeClasses(this._settings());
+    this.setHtmlLang(this._settings().language);
     this.transloco.setActiveLang(this._settings().language.toLowerCase());
 
     effect(() => {
-      const lang = this._settings().language.toLowerCase();
-      this.transloco.setActiveLang(lang);
+      const lang = this._settings().language;
+      this.setHtmlLang(lang);
+      this.transloco.setActiveLang(lang.toLowerCase());
     });
   }
 
@@ -69,17 +81,25 @@ export class ThemeService {
     this._settings.set(next);
     this.persistSettings(next);
     this.applyThemeClasses(next);
+    this.setHtmlLang(next.language);
   }
 
   private loadSettings(): AppSettings {
     try {
       const raw = localStorage.getItem(SETTINGS_STORAGE_KEY);
-      if (!raw) return { ...DEFAULT_SETTINGS };
+      if (!raw) return { ...DEFAULT_SETTINGS, language: this.detectBrowserLanguage() };
       const parsed = JSON.parse(raw);
       return { ...DEFAULT_SETTINGS, ...parsed };
     } catch {
-      return { ...DEFAULT_SETTINGS };
+      return { ...DEFAULT_SETTINGS, language: this.detectBrowserLanguage() };
     }
+  }
+
+  private detectBrowserLanguage(): Language {
+    const browserLang = navigator?.language;
+    if (!browserLang) return 'EN';
+    const primary = browserLang.split('-')[0].toLowerCase();
+    return LANGUAGE_MAP[primary] ?? 'EN';
   }
 
   private persistSettings(settings: AppSettings): void {
@@ -109,6 +129,10 @@ export class ThemeService {
 
     // Left-handed: mirrors shop-mode checkbox column to the leading edge
     body.classList.toggle('theme-left-handed', settings.leftHanded);
+  }
+
+  private setHtmlLang(language: Language): void {
+    this.document.documentElement.lang = language.toLowerCase();
   }
 
   private queryMediaPreference(query: string): boolean {

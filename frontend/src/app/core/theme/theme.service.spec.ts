@@ -186,6 +186,99 @@ describe('ThemeService', () => {
     });
   });
 
+  describe('html lang attribute', () => {
+    it('should set html lang attribute on init', () => {
+      expect(document.documentElement.lang).toBe('en');
+    });
+
+    it('should update html lang attribute when language changes', () => {
+      service.update({ language: 'SV' });
+      expect(document.documentElement.lang).toBe('sv');
+    });
+
+    it('should set html lang from detected browser language on first load', () => {
+      localStorage.clear();
+      Object.defineProperty(navigator, 'language', { value: 'de-DE', configurable: true });
+
+      TestBed.resetTestingModule();
+      configureTestBed();
+      TestBed.inject(ThemeService);
+      expect(document.documentElement.lang).toBe('de');
+    });
+  });
+
+  describe('system language detection', () => {
+    it('should detect browser language and map to supported language on first load', () => {
+      localStorage.clear();
+      Object.defineProperty(navigator, 'language', { value: 'sv-SE', configurable: true });
+
+      TestBed.resetTestingModule();
+      configureTestBed();
+      const newService = TestBed.inject(ThemeService);
+      expect(newService.settings().language).toBe('SV');
+    });
+
+    it('should detect Norwegian Bokmål (nb) as NO', () => {
+      localStorage.clear();
+      Object.defineProperty(navigator, 'language', { value: 'nb-NO', configurable: true });
+
+      TestBed.resetTestingModule();
+      configureTestBed();
+      const newService = TestBed.inject(ThemeService);
+      expect(newService.settings().language).toBe('NO');
+    });
+
+    it('should detect Norwegian Nynorsk (nn) as NO', () => {
+      localStorage.clear();
+      Object.defineProperty(navigator, 'language', { value: 'nn-NO', configurable: true });
+
+      TestBed.resetTestingModule();
+      configureTestBed();
+      const newService = TestBed.inject(ThemeService);
+      expect(newService.settings().language).toBe('NO');
+    });
+
+    it('should fall back to EN for unsupported browser language', () => {
+      localStorage.clear();
+      Object.defineProperty(navigator, 'language', { value: 'ja-JP', configurable: true });
+
+      TestBed.resetTestingModule();
+      configureTestBed();
+      const newService = TestBed.inject(ThemeService);
+      expect(newService.settings().language).toBe('EN');
+    });
+
+    it('should detect German (de-DE) as DE', () => {
+      localStorage.clear();
+      Object.defineProperty(navigator, 'language', { value: 'de-DE', configurable: true });
+
+      TestBed.resetTestingModule();
+      configureTestBed();
+      const newService = TestBed.inject(ThemeService);
+      expect(newService.settings().language).toBe('DE');
+    });
+
+    it('should detect French (fr-FR) as FR', () => {
+      localStorage.clear();
+      Object.defineProperty(navigator, 'language', { value: 'fr', configurable: true });
+
+      TestBed.resetTestingModule();
+      configureTestBed();
+      const newService = TestBed.inject(ThemeService);
+      expect(newService.settings().language).toBe('FR');
+    });
+
+    it('should not override stored language with browser language', () => {
+      localStorage.setItem(SETTINGS_STORAGE_KEY, JSON.stringify({ language: 'DE' }));
+      Object.defineProperty(navigator, 'language', { value: 'fr', configurable: true });
+
+      TestBed.resetTestingModule();
+      configureTestBed();
+      const newService = TestBed.inject(ThemeService);
+      expect(newService.settings().language).toBe('DE');
+    });
+  });
+
   describe('update method', () => {
     it('should merge partial updates', () => {
       service.update({ language: 'DE' });

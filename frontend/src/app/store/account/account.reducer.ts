@@ -9,6 +9,7 @@ export type AuthStatus =
   | 'authenticated'
   | 'unauthenticated'
   | 'access_denied'
+  | 'pending_verification'
   | 'stream_failed';
 
 export interface AccountState {
@@ -55,6 +56,12 @@ export const accountReducer = createReducer(
   on(accountActions.accessDenied, (state) => ({
     ...state,
     status: 'access_denied' as const,
+    account: null,
+  })),
+
+  on(accountActions.pendingVerification, (state) => ({
+    ...state,
+    status: 'pending_verification' as const,
     account: null,
   })),
 

@@ -13,6 +13,13 @@ export const routes: Routes = [
       import('./features/auth/access-denied.component').then((m) => m.AccessDeniedComponent),
   },
   {
+    path: 'pending-verification',
+    loadComponent: () =>
+      import('./features/auth/pending-verification.component').then(
+        (m) => m.PendingVerificationComponent,
+      ),
+  },
+  {
     path: '',
     canActivate: [authGuard],
     children: [

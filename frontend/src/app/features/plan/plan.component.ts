@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, ElementRef, computed, inject } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { Store } from '@ngrx/store';
 import { MatBottomSheet } from '@angular/material/bottom-sheet';
@@ -65,6 +65,7 @@ export class PlanComponent {
   private readonly store = inject(Store);
   private readonly bottomSheet = inject(MatBottomSheet);
   private readonly dialog = inject(MatDialog);
+  private readonly host = inject(ElementRef<HTMLElement>);
 
   readonly groups = toSignal(this.store.select(selectGroupedPlanList), {
     initialValue: [],
@@ -98,6 +99,23 @@ export class PlanComponent {
         secondaryCategoryIds: [],
       }),
     );
+    this.scrollToItemAfterRender(req.name);
+  }
+
+  private scrollToItemAfterRender(name: string): void {
+    setTimeout(() => {
+      const el = this.host.nativeElement;
+      const buttons = el.querySelectorAll('.app-plan__item-name');
+      for (const btn of buttons) {
+        if (btn.textContent?.trim() === name) {
+          btn.closest('.app-plan__item')?.scrollIntoView({
+            behavior: 'smooth',
+            block: 'center',
+          });
+          return;
+        }
+      }
+    }, 300);
   }
 
   openEditSheet(item: Item): void {

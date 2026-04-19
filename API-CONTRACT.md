@@ -219,6 +219,13 @@ AccessDeniedError {
 }
 // User authenticated successfully but is not permitted to access this account.
 
+PendingVerificationError {
+  type: 'PENDING_VERIFICATION'
+}
+// User authenticated successfully, has a pending /users/{uid} record, but has
+// not yet been verified by the account owner. The user sees a pending-verification
+// screen. Approval is a manual admin step (flip `verified` and set `accountId`).
+
 AiUnavailableError {
   type: 'AI_UNAVAILABLE'
 }
@@ -377,11 +384,14 @@ Errors:  none (stream; unrecoverable failures surface via streamError$)
 ```
 Intent:  Fetch the current account record once, on app init.
          Subsequent changes arrive via accountChanges$.
-         Returns AccessDeniedError if the authenticated user is not on the account
-         allowlist — this is the authorisation check, separate from authentication.
+         Also gates access: on first call for a new Google user the service
+         self-registers a pending /users/{uid} record and returns
+         PendingVerificationError until an admin flips the verified flag
+         and assigns an accountId.
 Input:   none
 Output:  Account
-Errors:  AccessDeniedError
+Errors:  AccessDeniedError            — no Firebase user, or unrecoverable failure
+         PendingVerificationError     — user exists but is awaiting admin approval
 ```
 
 #### updateAiConfig
@@ -417,6 +427,17 @@ Intent:  Fetch all users belonging to the current account once, on app init.
 Input:   none
 Output:  User[]
 Errors:  none
+```
+
+#### setSelectedShopId
+```
+Intent:  Persist the user's selected shop for the nav-drawer category-order view.
+         Fire-and-forget — the store is updated locally first; this write is
+         purely for cross-session persistence.
+         Called on plan-mode shop change and shop-mode entry.
+Input:   shopId: ShopId | null   (null = global / no shop)
+Output:  void (Promise)
+Errors:  none (best-effort write)
 ```
 
 ---

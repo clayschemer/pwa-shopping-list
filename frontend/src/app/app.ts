@@ -1,9 +1,11 @@
-import { ChangeDetectionStrategy, Component, DestroyRef, inject, computed, effect } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, NgZone, inject, computed, effect } from '@angular/core';
+import { Title } from '@angular/platform-browser';
 import { NavigationEnd, Router, RouterLink, RouterOutlet } from '@angular/router';
 import { toSignal, takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { filter, map } from 'rxjs';
 import { Actions, ofType } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
+import { TranslocoService } from '@jsverse/transloco';
 import { MatIconButton } from '@angular/material/button';
 import { MatIcon } from '@angular/material/icon';
 import { MatBadge } from '@angular/material/badge';
@@ -54,6 +56,7 @@ import {
   CategoryNameSheetData,
   CategoryNameSheetResult,
 } from './features/categories/category-name-sheet.component';
+import { ThemeService } from './core/theme/theme.service';
 import { MoneyPipe } from './core/format/money.pipe';
 import type { CategoryId, ItemId, SessionId, UserId } from './models/ids.model';
 import type { Item } from './models/item.model';
@@ -62,6 +65,17 @@ import type { User } from './models/user.model';
 import type { Dictionary } from '@ngrx/entity';
 
 const FULL_SCREEN_ROUTES = ['/settings', '/manage-shops', '/history'];
+
+const ROUTE_TITLE_KEYS: Record<string, string> = {
+  '/': '',
+  '/shop': '',
+  '/settings': 'settings.title',
+  '/manage-shops': 'manageShops.title',
+  '/history': 'history.title',
+  '/sign-in': 'signIn.title',
+  '/access-denied': 'accessDenied.title',
+  '/pending-verification': 'pendingVerification.title',
+};
 
 @Component({
   selector: 'app-root',
@@ -86,10 +100,14 @@ const FULL_SCREEN_ROUTES = ['/settings', '/manage-shops', '/history'];
 export class App {
   private readonly store = inject(Store);
   private readonly router = inject(Router);
+  private readonly titleService = inject(Title);
+  private readonly transloco = inject(TranslocoService);
+  private readonly themeService = inject(ThemeService);
   private readonly bottomSheet = inject(MatBottomSheet);
   private readonly dialog = inject(MatDialog);
   private readonly actions$ = inject(Actions);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly zone = inject(NgZone);
   private inactivityDialogOpen = false;
 
   readonly isAuthenticated = toSignal(this.store.select(selectIsAuthenticated), {
@@ -181,12 +199,52 @@ export class App {
       }
     });
 
+    this.router.events
+      .pipe(
+        filter((e): e is NavigationEnd => e instanceof NavigationEnd),
+        takeUntilDestroyed(this.destroyRef),
+      )
+      .subscribe((e) => this.updatePageTitle(e.urlAfterRedirects));
+    this.transloco.selectTranslate('app.name')
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(() => this.updatePageTitle(this.router.url));
+
     this.actions$
       .pipe(
         ofType(sessionsActions.sessionInactive),
         takeUntilDestroyed(this.destroyRef),
       )
       .subscribe(({ sessionId }) => this.openInactivityReminder(sessionId));
+
+    this.initKeyboardInsetListener();
+  }
+
+  private initKeyboardInsetListener(): void {
+    const vv = window.visualViewport;
+    if (!vv) return;
+    this.zone.runOutsideAngular(() => {
+      const update = () => {
+        const inset = window.innerHeight - vv.height;
+        document.documentElement.style.setProperty(
+          '--app-keyboard-inset',
+          `${Math.max(0, inset)}px`,
+        );
+      };
+      update();
+      vv.addEventListener('resize', update);
+      vv.addEventListener('scroll', update);
+    });
+  }
+
+  private updatePageTitle(url: string): void {
+    const appName = this.transloco.translate('app.name');
+    const titleKey = ROUTE_TITLE_KEYS[url];
+    if (titleKey) {
+      const pageTitle = this.transloco.translate(titleKey);
+      this.titleService.setTitle(`${pageTitle} — ${appName}`);
+    } else {
+      this.titleService.setTitle(appName);
+    }
   }
 
   private openInactivityReminder(sessionId: SessionId): void {
@@ -323,4 +381,5 @@ export class App {
       );
     });
   }
+
 }

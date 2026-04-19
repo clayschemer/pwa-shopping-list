@@ -10,7 +10,8 @@
     "viewChecked": "Visa avbockade varor",
     "settings": "Inställningar",
     "activeSession": "Aktiv session",
-    "global": "Global"
+    "global": "Global",
+    "sessionActive": "aktiv"
   },
   "navDrawer": {
     "shopLayout": "Aktuell butikslayout",
@@ -82,6 +83,13 @@
     "messageNoEmail": "Detta konto har inte behörighet att använda denna applikation.",
     "tryDifferent": "Prova ett annat konto"
   },
+  "pendingVerification": {
+    "title": "Väntar på godkännande",
+    "message": "Kontot <strong>{{email}}</strong> väntar på godkännande från listägaren. Du får åtkomst så snart det verifieras.",
+    "messageNoEmail": "Ditt konto väntar på godkännande från listägaren. Du får åtkomst så snart det verifieras.",
+    "reload": "Jag har godkänts — ladda om",
+    "switchAccount": "Använd ett annat konto"
+  },
   "manageShops": {
     "title": "Hantera butiker",
     "goBack": "Gå tillbaka",
@@ -99,6 +107,93 @@
     "add": "Lägg till butik",
     "save": "Spara"
   },
+  "categoryNameSheet": {
+    "addTitle": "Lägg till kategori",
+    "renameTitle": "Byt namn på kategori",
+    "categoryName": "Kategorinamn",
+    "nameConflict": "En kategori med detta namn finns redan",
+    "cancel": "Avbryt",
+    "add": "Lägg till kategori",
+    "save": "Spara"
+  },
+  "categoryMenu": {
+    "open": "Kategorialternativ för {{name}}",
+    "rename": "Byt namn",
+    "availableInShops": "Tillgänglig i butiker\u2026",
+    "delete": "Ta bort kategori"
+  },
+  "availableInShops": {
+    "title": "Tillgänglig i butiker",
+    "subtitle": "{{name}}",
+    "empty": "Inga butiker konfigurerade.",
+    "done": "Klar"
+  },
+  "deleteCategory": {
+    "title": "Ta bort kategori?",
+    "message": "Varor i \u201c{{name}}\u201d blir okategoriserade. De tas inte bort från listan.",
+    "cancel": "Avbryt",
+    "delete": "Ta bort"
+  },
+  "shop": {
+    "listLabel": "Inköpslista",
+    "empty": "Din lista är tom.",
+    "uncategorised": "Okategoriserad",
+    "selectTitle": "Var handlar du?",
+    "global": "Ingen specifik butik (global)",
+    "est": "Ber.",
+    "tapToUndo": "tryck för att ångra",
+    "checkItem": "Bocka av {{name}}"
+  },
+  "closeSession": {
+    "allDoneTitle": "Klart!",
+    "allDoneMessage": "Allt är avbockat. Avsluta sessionen och spara historiken?",
+    "remainingTitle": "Avsluta session?",
+    "remainingMessage": "Det finns fortfarande obockade varor på listan. Avsluta ändå?",
+    "notYet": "Inte ännu",
+    "keepShopping": "Fortsätt handla",
+    "close": "Avsluta session"
+  },
+  "undoHistory": {
+    "title": "Avbockade denna session",
+    "empty": "Inget avbockat ännu.",
+    "uncheck": "Ångra avbockning av {{name}}"
+  },
+  "inactivityReminder": {
+    "title": "Handlar du fortfarande?",
+    "message": "Din session har varit inaktiv ett tag. Avsluta nu eller fortsätt?",
+    "keepShopping": "Fortsätt handla",
+    "close": "Avsluta session"
+  },
+  "units": {
+    "pcs": "st",
+    "g": "g",
+    "kg": "kg",
+    "mg": "mg",
+    "ml": "ml",
+    "L": "L",
+    "cl": "cl",
+    "bag": "påse",
+    "pack": "förp",
+    "box": "låda",
+    "can": "burk",
+    "bottle": "flaska",
+    "jar": "burk",
+    "carton": "kartong",
+    "bunch": "bunt",
+    "head": "huvud",
+    "loaf": "limpa",
+    "slice": "skiva",
+    "sheet": "ark",
+    "tsp": "tsk",
+    "tbsp": "msk",
+    "cup": "kopp",
+    "oz": "oz",
+    "lb": "lb",
+    "fl oz": "fl oz",
+    "pt": "pt",
+    "qt": "qt",
+    "gal": "gal"
+  },
   "settings": {
     "title": "Inställningar",
     "goBack": "Gå tillbaka",
@@ -114,6 +209,7 @@
     "currency": "Valuta",
     "display": "Visning",
     "keepScreenAwake": "Håll skärmen på",
+    "installApp": "Installera på denna enhet",
     "account": "Konto",
     "signedInAs": "Inloggad som",
     "signOut": "Logga ut"

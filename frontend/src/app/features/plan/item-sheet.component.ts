@@ -19,7 +19,8 @@ import { MatButton } from '@angular/material/button';
 import { TranslocoPipe } from '@jsverse/transloco';
 import type { Category } from '../../models/category.model';
 import type { CategoryId } from '../../models/ids.model';
-import { ITEM_UNITS } from './item-units';
+import { getSelectableUnits } from './item-units';
+import { ThemeService } from '../../core/theme/theme.service';
 
 export interface ItemSheetData {
   mode: 'add' | 'edit';
@@ -64,10 +65,11 @@ export interface ItemSheetResult {
 export class ItemSheetComponent {
   private readonly sheetRef = inject(MatBottomSheetRef<ItemSheetComponent>);
   private readonly data = inject<ItemSheetData>(MAT_BOTTOM_SHEET_DATA);
+  private readonly theme = inject(ThemeService);
 
   readonly mode = this.data.mode;
   readonly categories = this.data.categories;
-  readonly units = ITEM_UNITS;
+  readonly units = computed(() => getSelectableUnits(this.theme.settings().language));
 
   readonly name = signal(this.data.currentName);
   readonly description = signal(this.data.currentDescription ?? '');

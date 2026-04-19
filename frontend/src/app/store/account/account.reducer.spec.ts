@@ -50,7 +50,7 @@ describe('accountReducer', () => {
     );
     const state = accountReducer(
       loadingState,
-      accountActions.accountLoaded({ account: mockAccount }),
+      accountActions.accountLoaded({ account: mockAccount, selectedShopId: null }),
     );
     expect(state.status).toBe('authenticated');
     expect(state.account).toEqual(mockAccount);
@@ -64,6 +64,20 @@ describe('accountReducer', () => {
     );
     const state = accountReducer(loadingState, accountActions.accessDenied());
     expect(state.status).toBe('access_denied');
+    expect(state.account).toBeNull();
+    expect(state.user).toEqual(mockUser);
+  });
+
+  it('transitions to pending_verification on pendingVerification', () => {
+    const loadingState = accountReducer(
+      initialAccountState,
+      authActions.authStateResolved({ user: mockUser }),
+    );
+    const state = accountReducer(
+      loadingState,
+      accountActions.pendingVerification(),
+    );
+    expect(state.status).toBe('pending_verification');
     expect(state.account).toBeNull();
     expect(state.user).toEqual(mockUser);
   });

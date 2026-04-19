@@ -8,12 +8,22 @@ import {
   signInWithPopup,
   signOut as firebaseSignOut,
 } from '@angular/fire/auth';
-import { Firestore, doc, getDoc, setDoc } from '@angular/fire/firestore';
+import {
+  Firestore,
+  doc,
+  getDoc,
+  serverTimestamp,
+  setDoc,
+} from '@angular/fire/firestore';
 import { Observable, from, switchMap } from 'rxjs';
 import type { User } from '../../models/user.model';
 import type { Account } from '../../models/account.model';
-import type { AccessDeniedError, AuthError } from '../../models/errors.model';
-import type { AccountId, UserId } from '../../models/ids.model';
+import type {
+  AccessDeniedError,
+  AuthError,
+  PendingVerificationError,
+} from '../../models/errors.model';
+import type { AccountId, ShopId, UserId } from '../../models/ids.model';
 import { AccountContext } from './account-context';
 import { paths } from './firestore-paths';
 
@@ -85,11 +95,20 @@ export class AccountApiService {
 
   /**
    * Resolve the account for the current user via the /users/{uid} allowlist.
-   * Populates AccountContext on success. Mirrors the authenticated user into
-   * the account's member roster so displayName/email are visible to the other
-   * participant.
+   *
+   * Branches:
+   *  - No Firebase user           → ACCESS_DENIED
+   *  - No /users/{uid} doc        → self-register with verified:false, return PENDING_VERIFICATION
+   *  - doc with verified === false → PENDING_VERIFICATION
+   *  - doc verified (true or absent for legacy) + accountId resolvable → Account
+   *  - doc verified but accountId missing/unresolvable → PENDING_VERIFICATION
+   *    (admin flipped the flag but hasn't set accountId yet)
    */
-  async getAccount(): Promise<Account | AccessDeniedError> {
+  async getAccount(): Promise<
+    | { account: Account; selectedShopId: ShopId | null }
+    | AccessDeniedError
+    | PendingVerificationError
+  > {
     const firebaseUser = this.auth.currentUser;
     if (!firebaseUser) {
       return { type: 'ACCESS_DENIED' };
@@ -101,39 +120,63 @@ export class AccountApiService {
         const userSnap = await getDoc(userRef);
 
         if (!userSnap.exists()) {
-          return { type: 'ACCESS_DENIED' } satisfies AccessDeniedError;
+          await setDoc(userRef, {
+            verified: false,
+            email: firebaseUser.email ?? '',
+            displayName: firebaseUser.displayName ?? firebaseUser.email ?? '',
+            createdAt: serverTimestamp(),
+          });
+          return { type: 'PENDING_VERIFICATION' } satisfies PendingVerificationError;
         }
 
-        const accountId = userSnap.data()['accountId'] as AccountId;
+        const userData = userSnap.data();
+        const verified = userData['verified'];
+        // Legacy docs without the field are treated as verified.
+        if (verified === false) {
+          return { type: 'PENDING_VERIFICATION' } satisfies PendingVerificationError;
+        }
+
+        const accountId = userData['accountId'] as AccountId | undefined;
+        if (!accountId) {
+          return { type: 'PENDING_VERIFICATION' } satisfies PendingVerificationError;
+        }
+
         const accountRef = doc(this.firestore, 'accounts', accountId);
         const accountSnap = await getDoc(accountRef);
 
         if (!accountSnap.exists()) {
-          return { type: 'ACCESS_DENIED' } satisfies AccessDeniedError;
+          return { type: 'PENDING_VERIFICATION' } satisfies PendingVerificationError;
         }
 
         this.context.set(accountId, firebaseUser.uid as UserId);
 
         // Mirror this user into the account roster for display resolution.
         // Tolerated best-effort — failure here should not block sign-in.
+        let selectedShopId: ShopId | null = null;
         try {
+          const memberRef = paths.memberDoc(this.firestore, accountId, firebaseUser.uid);
           await setDoc(
-            paths.memberDoc(this.firestore, accountId, firebaseUser.uid),
+            memberRef,
             {
               email: firebaseUser.email ?? '',
               displayName: firebaseUser.displayName ?? firebaseUser.email ?? '',
             },
             { merge: true },
           );
+          const memberSnap = await getDoc(memberRef);
+          selectedShopId = (memberSnap.data()?.['selectedShopId'] ?? null) as ShopId | null;
         } catch {
           // ignore — roster population is a nice-to-have
         }
 
         const accountData = accountSnap.data();
         return {
-          id: accountId,
-          name: accountData['name'] ?? '',
-          aiConfig: accountData['aiConfig'] ?? null,
+          account: {
+            id: accountId,
+            name: accountData['name'] ?? '',
+            aiConfig: accountData['aiConfig'] ?? null,
+          },
+          selectedShopId,
         };
       } catch {
         return { type: 'ACCESS_DENIED' };

@@ -11,3 +11,12 @@
 //     filled-container-color: var(--mat-sys-primary),
 //   ));
 // }
+
+// Constrain the CDK overlay container to the area above the virtual keyboard
+// on mobile. --app-keyboard-inset is set by App.initKeyboardInsetListener
+// from the VisualViewport API. Shrinking the container from the bottom
+// pushes all overlays (bottom sheets, dialogs, menus) above the keyboard.
+.cdk-overlay-container {
+  height: calc(100% - var(--app-keyboard-inset, 0px)) !important;
+}
+

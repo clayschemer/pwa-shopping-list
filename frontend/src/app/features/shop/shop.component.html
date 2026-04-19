@@ -40,7 +40,7 @@
                 <span class="app-shop__item-meta">
                   @if (item.quantity !== null || item.unit !== null) {
                     <span class="app-shop__item-qty">
-                      {{ item.quantity }}{{ item.unit ? ' ' + item.unit : '' }}
+                      {{ item.quantity }}{{ item.unit ? ' ' + ('units.' + item.unit | transloco) : '' }}
                     </span>
                   }
                   @if (isPending(item.id)) {

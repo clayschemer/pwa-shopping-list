@@ -1,13 +1,17 @@
 import '../../../testing/init-testbed';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { TestBed } from '@angular/core/testing';
+import { Router } from '@angular/router';
 import { provideMockActions } from '@ngrx/effects/testing';
 import { Observable, of, Subject } from 'rxjs';
 import { AccountEffects } from './account.effects';
 import { authActions, accountActions } from './account.actions';
 import { AccountApiService } from '../../core/api/account-api.service';
 import type { Account } from '../../models/account.model';
-import type { AccessDeniedError } from '../../models/errors.model';
+import type {
+  AccessDeniedError,
+  PendingVerificationError,
+} from '../../models/errors.model';
 import type { AccountId, UserId } from '../../models/ids.model';
 import type { User } from '../../models/user.model';
 
@@ -33,6 +37,7 @@ describe('AccountEffects', () => {
     signInWithGoogle: ReturnType<typeof vi.fn>;
     signOut: ReturnType<typeof vi.fn>;
   };
+  let router: { navigateByUrl: ReturnType<typeof vi.fn> };
 
   beforeEach(() => {
     actions$ = new Subject();
@@ -42,12 +47,14 @@ describe('AccountEffects', () => {
       signInWithGoogle: vi.fn(),
       signOut: vi.fn(),
     };
+    router = { navigateByUrl: vi.fn() };
 
     TestBed.configureTestingModule({
       providers: [
         AccountEffects,
         provideMockActions(() => actions$),
         { provide: AccountApiService, useValue: accountApi },
+        { provide: Router, useValue: router },
       ],
     });
 
@@ -56,7 +63,7 @@ describe('AccountEffects', () => {
 
   describe('loadAccount$', () => {
     it('dispatches accountLoaded when getAccount returns an account', () => {
-      accountApi.getAccount.mockResolvedValue(mockAccount);
+      accountApi.getAccount.mockResolvedValue({ account: mockAccount, selectedShopId: null });
 
       const results: unknown[] = [];
       effects.loadAccount$.subscribe((action) => results.push(action));
@@ -68,7 +75,7 @@ describe('AccountEffects', () => {
         setTimeout(() => {
           expect(accountApi.getAccount).toHaveBeenCalled();
           expect(results).toEqual([
-            accountActions.accountLoaded({ account: mockAccount }),
+            accountActions.accountLoaded({ account: mockAccount, selectedShopId: null }),
           ]);
           resolve();
         });
@@ -87,6 +94,23 @@ describe('AccountEffects', () => {
       return new Promise<void>((resolve) => {
         setTimeout(() => {
           expect(results).toEqual([accountActions.accessDenied()]);
+          resolve();
+        });
+      });
+    });
+
+    it('dispatches pendingVerification when getAccount returns PENDING_VERIFICATION', () => {
+      const pending: PendingVerificationError = { type: 'PENDING_VERIFICATION' };
+      accountApi.getAccount.mockResolvedValue(pending);
+
+      const results: unknown[] = [];
+      effects.loadAccount$.subscribe((action) => results.push(action));
+
+      actions$.next(authActions.authStateResolved({ user: mockUser }));
+
+      return new Promise<void>((resolve) => {
+        setTimeout(() => {
+          expect(results).toEqual([accountActions.pendingVerification()]);
           resolve();
         });
       });
@@ -150,6 +174,16 @@ describe('AccountEffects', () => {
         authActions.authStateEmpty(),
         authActions.authStateResolved({ user: mockUser }),
       ]);
+    });
+  });
+
+  describe('navigateOnSignOut$', () => {
+    it('navigates to /sign-in when signedOut is dispatched', () => {
+      effects.navigateOnSignOut$.subscribe();
+
+      actions$.next(authActions.signedOut());
+
+      expect(router.navigateByUrl).toHaveBeenCalledWith('/sign-in');
     });
   });
 });

@@ -1,16 +1,23 @@
 import { inject, Injectable } from '@angular/core';
+import { Router } from '@angular/router';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
-import { catchError, defer, from, map, of, switchMap } from 'rxjs';
+import { catchError, defer, from, map, of, switchMap, tap } from 'rxjs';
 import { authActions, accountActions } from './account.actions';
 import { AccountApiService } from '../../core/api/account-api.service';
 import { StreamErrorService } from '../../core/api/stream-error.service';
 import type { Account } from '../../models/account.model';
-import type { AccessDeniedError, AuthError } from '../../models/errors.model';
+import type { ShopId } from '../../models/ids.model';
+import type {
+  AccessDeniedError,
+  AuthError,
+  PendingVerificationError,
+} from '../../models/errors.model';
 
 @Injectable()
 export class AccountEffects {
   private readonly actions$ = inject(Actions);
   private readonly accountApi = inject(AccountApiService);
+  private readonly router = inject(Router);
   private readonly streamError = inject(StreamErrorService);
 
   readonly watchStreamErrors$ = createEffect(() =>
@@ -44,11 +51,20 @@ export class AccountEffects {
       ofType(authActions.authStateResolved),
       switchMap(() =>
         from(this.accountApi.getAccount()).pipe(
-          map((result) =>
-            (result as AccessDeniedError).type === 'ACCESS_DENIED'
-              ? accountActions.accessDenied()
-              : accountActions.accountLoaded({ account: result as Account }),
-          ),
+          map((result) => {
+            const tag = (result as AccessDeniedError | PendingVerificationError).type;
+            if (tag === 'ACCESS_DENIED') {
+              return accountActions.accessDenied();
+            }
+            if (tag === 'PENDING_VERIFICATION') {
+              return accountActions.pendingVerification();
+            }
+            const { account, selectedShopId } = result as {
+              account: Account;
+              selectedShopId: ShopId | null;
+            };
+            return accountActions.accountLoaded({ account, selectedShopId });
+          }),
           catchError(() => of(accountActions.accessDenied())),
         ),
       ),
@@ -94,5 +110,15 @@ export class AccountEffects {
         ),
       ),
     ),
+  );
+
+  /** Navigate to sign-in after sign out completes. */
+  readonly navigateOnSignOut$ = createEffect(
+    () =>
+      this.actions$.pipe(
+        ofType(authActions.signedOut),
+        tap(() => this.router.navigateByUrl('/sign-in')),
+      ),
+    { dispatch: false },
   );
 }

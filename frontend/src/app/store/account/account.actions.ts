@@ -1,6 +1,7 @@
 import { createActionGroup, emptyProps, props } from '@ngrx/store';
 import type { User } from '../../models/user.model';
 import type { Account } from '../../models/account.model';
+import type { ShopId } from '../../models/ids.model';
 
 export const authActions = createActionGroup({
   source: 'Auth',
@@ -18,8 +19,9 @@ export const authActions = createActionGroup({
 export const accountActions = createActionGroup({
   source: 'Account',
   events: {
-    'Account Loaded': props<{ account: Account }>(),
+    'Account Loaded': props<{ account: Account; selectedShopId: ShopId | null }>(),
     'Access Denied': emptyProps(),
+    'Pending Verification': emptyProps(),
     'Stream Auth Revoked': emptyProps(),
     'Stream Account Not Found': emptyProps(),
     'Stream Failed': props<{ message: string }>(),

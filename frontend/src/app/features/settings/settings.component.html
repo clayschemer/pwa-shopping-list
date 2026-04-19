@@ -16,19 +16,19 @@
     <h2 class="app-settings__section-title">{{ 'settings.appearance' | transloco }}</h2>
 
     <div class="app-settings__row">
-      <span class="app-settings__label">{{ 'settings.darkMode' | transloco }}</span>
       <mat-slide-toggle
-        [checked]="settings().darkMode === true"
+        [checked]="effectiveDarkMode()"
         (change)="onDarkModeToggle($event.checked)"
-      />
+        labelPosition="before"
+      >{{ 'settings.darkMode' | transloco }}</mat-slide-toggle>
     </div>
 
     <div class="app-settings__row">
-      <span class="app-settings__label">{{ 'settings.compactMode' | transloco }}</span>
       <mat-slide-toggle
         [checked]="settings().compact"
         (change)="onCompactToggle($event.checked)"
-      />
+        labelPosition="before"
+      >{{ 'settings.compactMode' | transloco }}</mat-slide-toggle>
     </div>
   </section>
 
@@ -37,27 +37,27 @@
     <h2 class="app-settings__section-title">{{ 'settings.accessibility' | transloco }}</h2>
 
     <div class="app-settings__row">
-      <span class="app-settings__label">{{ 'settings.reduceMotion' | transloco }}</span>
       <mat-slide-toggle
-        [checked]="settings().reduceMotion === true"
+        [checked]="effectiveReduceMotion()"
         (change)="onReduceMotionToggle($event.checked)"
-      />
+        labelPosition="before"
+      >{{ 'settings.reduceMotion' | transloco }}</mat-slide-toggle>
     </div>
 
     <div class="app-settings__row">
-      <span class="app-settings__label">{{ 'settings.highContrast' | transloco }}</span>
       <mat-slide-toggle
-        [checked]="settings().highContrast === true"
+        [checked]="effectiveHighContrast()"
         (change)="onHighContrastToggle($event.checked)"
-      />
+        labelPosition="before"
+      >{{ 'settings.highContrast' | transloco }}</mat-slide-toggle>
     </div>
 
     <div class="app-settings__row">
-      <span class="app-settings__label">{{ 'settings.leftHanded' | transloco }}</span>
       <mat-slide-toggle
         [checked]="settings().leftHanded"
         (change)="onLeftHandedToggle($event.checked)"
-      />
+        labelPosition="before"
+      >{{ 'settings.leftHanded' | transloco }}</mat-slide-toggle>
     </div>
   </section>
 
@@ -72,7 +72,7 @@
         (selectionChange)="onLanguageChange($event.value)"
       >
         @for (lang of languages; track lang) {
-          <mat-option [value]="lang">{{ lang }}</mat-option>
+          <mat-option [value]="lang">{{ languageLabels[lang] }} ({{ lang }})</mat-option>
         }
       </mat-select>
     </mat-form-field>
@@ -95,12 +95,22 @@
     <h2 class="app-settings__section-title">{{ 'settings.display' | transloco }}</h2>
 
     <div class="app-settings__row">
-      <span class="app-settings__label">{{ 'settings.keepScreenAwake' | transloco }}</span>
       <mat-slide-toggle
         [checked]="settings().keepScreenAwake"
         (change)="onKeepScreenAwakeToggle($event.checked)"
-      />
+        labelPosition="before"
+      >{{ 'settings.keepScreenAwake' | transloco }}</mat-slide-toggle>
     </div>
+
+    @if (pwaInstall.canInstall()) {
+      <button
+        class="app-settings__install-btn"
+        (click)="installApp()"
+      >
+        <mat-icon>install_mobile</mat-icon>
+        {{ 'settings.installApp' | transloco }}
+      </button>
+    }
   </section>
 
   <!-- Account -->

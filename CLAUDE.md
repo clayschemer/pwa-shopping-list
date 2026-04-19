@@ -228,6 +228,7 @@ SessionCheckedItem { itemId, checkedBy, checkedAt,
 - **Nav drawer "Add category"** → `addCategory` API call. Backend auto-appends to all shops' `categoryOrder`.
 - **Nav drawer reorder** → single `setShopCategoryOrder` write on drag release, not on every move.
 - **Settings in `localStorage`**, not backend. Except AI auto-add which is account-level (`toggleAiAutoAdd`).
+- **Selected shop persisted per-user** on the account member doc (`selectedShopId`). Seeded on boot from `getAccount()`. Updated fire-and-forget on plan-mode shop change and shop-mode entry. Reset to null (global) on shop deletion.
 - **Session auto-start** on shop selection orchestrated by NgRx effect → `startSession`.
 - **Mode (plan/shop)** is NgRx store state only. Not persisted. Not synced between users.
 
@@ -295,7 +296,7 @@ All device-local (localStorage) unless noted:
 
 Built (test-first, behind the API service layer):
 
-- Auth: Firebase Google OAuth, allowlist gate via `getAccount()`, sign-in / access-denied screens, route guard, session restore loading state
+- Auth: Firebase Google OAuth, allowlist gate via `getAccount()`, sign-in / access-denied / pending-verification screens, route guard, session restore loading state. First-time Google sign-in self-registers a `/users/{uid}` doc with `verified: false` and routes to `/pending-verification`; admin flips `verified` and sets `accountId` in the Firebase console to grant access. Legacy docs without the `verified` field are treated as verified.
 - App shell: top bar with mode toggle, nav drawer, full-screen routes for Settings / Manage Shops / History, runtime i18n + theme service + compact / high-contrast / left-handed / reduced-motion modes
 - Items: store + plan-mode list, add-pill flow, edit sheet, remove confirm dialog
 - Shops: store + Manage Shops screen with add / rename / delete sheets
