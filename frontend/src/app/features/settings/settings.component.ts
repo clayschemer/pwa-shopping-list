@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, ViewEncapsulation } from '@angular/core';
 import { Location } from '@angular/common';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { Store } from '@ngrx/store';
@@ -13,6 +13,7 @@ import { ThemeService, Language, Currency } from '../../core/theme/theme.service
 import { PwaInstallService } from '../../core/pwa/pwa-install.service';
 import { selectCurrentUser } from '../../store/account/account.selectors';
 import { authActions } from '../../store/account/account.actions';
+import { V } from '@angular/cdk/keycodes';
 
 @Component({
   selector: 'app-settings',
@@ -29,6 +30,7 @@ import { authActions } from '../../store/account/account.actions';
   templateUrl: './settings.component.html',
   styleUrl: './settings.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
+  encapsulation: ViewEncapsulation.None,
 })
 export class SettingsComponent {
   private readonly store = inject(Store);

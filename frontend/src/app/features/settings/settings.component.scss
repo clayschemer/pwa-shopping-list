@@ -25,6 +25,8 @@
 
   &__section {
     margin-block-end: var(--app-spacing-section);
+    border: 1px solid var(--mat-sys-outline-variant);
+    border-radius: 0.5rem;
   }
 
   &__section-title {
@@ -35,8 +37,8 @@
     text-transform: uppercase;
     letter-spacing: 0.05em;
     color: var(--mat-sys-on-surface-variant);
-    margin: 0 0 var(--app-spacing-row);
-    padding-block-end: 0.25rem;
+    margin: 0;
+    padding: 0.5rem;
     border-block-end: 1px solid var(--mat-sys-outline-variant);
   }
 
@@ -45,7 +47,7 @@
     align-items: center;
     justify-content: space-between;
     min-height: var(--app-spacing-row-min-height);
-    padding: var(--app-spacing-padding-block) 0;
+    padding: 0 0.5rem;
 
     mat-slide-toggle {
       width: 100%;
@@ -53,6 +55,15 @@
       --mat-slide-toggle-label-text-size: var(--app-font-size-body);
       --mat-slide-toggle-label-text-line-height: var(--app-line-height-body);
       --mat-slide-toggle-label-text-color: var(--mat-sys-on-surface);
+    }
+
+    .mat-internal-form-field {
+      width: 100%;
+    }
+
+    .mdc-form-field--align-end > label {
+      margin-left: 0;
+      margin-right: auto;
     }
   }
 
@@ -89,7 +100,9 @@
     margin-block-start: var(--app-spacing-padding-block);
 
     @media (prefers-reduced-motion: no-preference) {
-      transition: background-color 150ms ease, color 150ms ease;
+      transition:
+        background-color 150ms ease,
+        color 150ms ease;
     }
 
     &:hover {
@@ -123,7 +136,9 @@
     margin-block-start: var(--app-spacing-padding-block);
 
     @media (prefers-reduced-motion: no-preference) {
-      transition: background-color 150ms ease, color 150ms ease;
+      transition:
+        background-color 150ms ease,
+        color 150ms ease;
     }
 
     &:hover {
