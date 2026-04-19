@@ -50,7 +50,7 @@ describe('accountReducer', () => {
     );
     const state = accountReducer(
       loadingState,
-      accountActions.accountLoaded({ account: mockAccount }),
+      accountActions.accountLoaded({ account: mockAccount, selectedShopId: null }),
     );
     expect(state.status).toBe('authenticated');
     expect(state.account).toEqual(mockAccount);

@@ -6,6 +6,7 @@ import { authActions, accountActions } from './account.actions';
 import { AccountApiService } from '../../core/api/account-api.service';
 import { StreamErrorService } from '../../core/api/stream-error.service';
 import type { Account } from '../../models/account.model';
+import type { ShopId } from '../../models/ids.model';
 import type {
   AccessDeniedError,
   AuthError,
@@ -58,7 +59,11 @@ export class AccountEffects {
             if (tag === 'PENDING_VERIFICATION') {
               return accountActions.pendingVerification();
             }
-            return accountActions.accountLoaded({ account: result as Account });
+            const { account, selectedShopId } = result as {
+              account: Account;
+              selectedShopId: ShopId | null;
+            };
+            return accountActions.accountLoaded({ account, selectedShopId });
           }),
           catchError(() => of(accountActions.accessDenied())),
         ),

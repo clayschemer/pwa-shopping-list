@@ -47,6 +47,9 @@ User
   - accountId: AccountId                ← set by admin when approving a pending user
   - email
   - displayName
+  - selectedShopId: ShopId | null       ← persisted on the account member doc; drives nav-drawer
+                                          shop selection on reload; updated on shop-mode entry
+                                          and plan-mode shop change; reset to null on shop deletion
   - verified: boolean                   ← optional; absent on legacy records (treated as verified),
                                           self-written as false on first sign-in, flipped to true by admin
   - createdAt: timestamp                ← optional; self-written on pending registration

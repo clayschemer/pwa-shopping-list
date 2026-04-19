@@ -1,7 +1,10 @@
 import { describe, it, expect } from 'vitest';
 import { uiReducer, initialUiState } from './ui.reducer';
 import { uiActions } from './ui.actions';
-import type { ShopId } from '../../models/ids.model';
+import { accountActions } from '../account/account.actions';
+import { shopsActions } from '../shops/shops.actions';
+import type { Account } from '../../models/account.model';
+import type { AccountId, ShopId } from '../../models/ids.model';
 
 describe('uiReducer', () => {
   it('starts in plan mode with no shop selected', () => {
@@ -71,6 +74,60 @@ describe('uiReducer', () => {
     const state = uiReducer(
       withShop,
       uiActions.planModeShopSelected({ shopId: null }),
+    );
+    expect(state.selectedShopId).toBeNull();
+  });
+
+  it('seeds selectedShopId from accountLoaded', () => {
+    const account: Account = { id: 'a1' as AccountId, name: 'Test', aiConfig: null };
+    const state = uiReducer(
+      undefined,
+      accountActions.accountLoaded({ account, selectedShopId: 'shop-2' as ShopId }),
+    );
+    expect(state.selectedShopId).toBe('shop-2');
+  });
+
+  it('seeds selectedShopId as null from accountLoaded when no shop persisted', () => {
+    const account: Account = { id: 'a1' as AccountId, name: 'Test', aiConfig: null };
+    const state = uiReducer(
+      undefined,
+      accountActions.accountLoaded({ account, selectedShopId: null }),
+    );
+    expect(state.selectedShopId).toBeNull();
+  });
+
+  it('resets selectedShopId to null when that shop is deleted', () => {
+    const withShop = uiReducer(
+      undefined,
+      uiActions.planModeShopSelected({ shopId: 'shop-1' as ShopId }),
+    );
+    const state = uiReducer(
+      withShop,
+      shopsActions.shopDeleted({ id: 'shop-1' as ShopId }),
+    );
+    expect(state.selectedShopId).toBeNull();
+  });
+
+  it('keeps selectedShopId when a different shop is deleted', () => {
+    const withShop = uiReducer(
+      undefined,
+      uiActions.planModeShopSelected({ shopId: 'shop-1' as ShopId }),
+    );
+    const state = uiReducer(
+      withShop,
+      shopsActions.shopDeleted({ id: 'shop-2' as ShopId }),
+    );
+    expect(state.selectedShopId).toBe('shop-1');
+  });
+
+  it('resets selectedShopId when shop is removed via stream changes', () => {
+    const withShop = uiReducer(
+      undefined,
+      uiActions.planModeShopSelected({ shopId: 'shop-1' as ShopId }),
+    );
+    const state = uiReducer(
+      withShop,
+      shopsActions.shopChangesReceived({ shops: [], removed: ['shop-1' as ShopId] }),
     );
     expect(state.selectedShopId).toBeNull();
   });

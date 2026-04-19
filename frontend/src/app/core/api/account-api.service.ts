@@ -23,7 +23,7 @@ import type {
   AuthError,
   PendingVerificationError,
 } from '../../models/errors.model';
-import type { AccountId, UserId } from '../../models/ids.model';
+import type { AccountId, ShopId, UserId } from '../../models/ids.model';
 import { AccountContext } from './account-context';
 import { paths } from './firestore-paths';
 
@@ -105,7 +105,9 @@ export class AccountApiService {
    *    (admin flipped the flag but hasn't set accountId yet)
    */
   async getAccount(): Promise<
-    Account | AccessDeniedError | PendingVerificationError
+    | { account: Account; selectedShopId: ShopId | null }
+    | AccessDeniedError
+    | PendingVerificationError
   > {
     const firebaseUser = this.auth.currentUser;
     if (!firebaseUser) {
@@ -150,24 +152,31 @@ export class AccountApiService {
 
         // Mirror this user into the account roster for display resolution.
         // Tolerated best-effort — failure here should not block sign-in.
+        let selectedShopId: ShopId | null = null;
         try {
+          const memberRef = paths.memberDoc(this.firestore, accountId, firebaseUser.uid);
           await setDoc(
-            paths.memberDoc(this.firestore, accountId, firebaseUser.uid),
+            memberRef,
             {
               email: firebaseUser.email ?? '',
               displayName: firebaseUser.displayName ?? firebaseUser.email ?? '',
             },
             { merge: true },
           );
+          const memberSnap = await getDoc(memberRef);
+          selectedShopId = (memberSnap.data()?.['selectedShopId'] ?? null) as ShopId | null;
         } catch {
           // ignore — roster population is a nice-to-have
         }
 
         const accountData = accountSnap.data();
         return {
-          id: accountId,
-          name: accountData['name'] ?? '',
-          aiConfig: accountData['aiConfig'] ?? null,
+          account: {
+            id: accountId,
+            name: accountData['name'] ?? '',
+            aiConfig: accountData['aiConfig'] ?? null,
+          },
+          selectedShopId,
         };
       } catch {
         return { type: 'ACCESS_DENIED' };

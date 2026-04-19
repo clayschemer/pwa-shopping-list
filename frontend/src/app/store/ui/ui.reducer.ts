@@ -1,5 +1,7 @@
 import { createReducer, on } from '@ngrx/store';
 import { uiActions } from './ui.actions';
+import { accountActions } from '../account/account.actions';
+import { shopsActions } from '../shops/shops.actions';
 import type { ShopId } from '../../models/ids.model';
 
 export interface UiState {
@@ -43,4 +45,21 @@ export const uiReducer = createReducer(
     ...state,
     selectedShopId: shopId,
   })),
+
+  on(accountActions.accountLoaded, (state, { selectedShopId }) => ({
+    ...state,
+    selectedShopId,
+  })),
+
+  on(shopsActions.shopDeleted, (state, { id }) =>
+    state.selectedShopId === id
+      ? { ...state, selectedShopId: null }
+      : state,
+  ),
+
+  on(shopsActions.shopChangesReceived, (state, { removed }) =>
+    state.selectedShopId && removed.includes(state.selectedShopId)
+      ? { ...state, selectedShopId: null }
+      : state,
+  ),
 );

@@ -56,7 +56,7 @@ describe('ShopsEffects', () => {
       const results: unknown[] = [];
       effects.fetchAllShops$.subscribe((action) => results.push(action));
 
-      actions$.next(accountActions.accountLoaded({ account: mockAccount }));
+      actions$.next(accountActions.accountLoaded({ account: mockAccount, selectedShopId: null }));
 
       return new Promise<void>((resolve) => {
         setTimeout(() => {

@@ -70,7 +70,7 @@ describe('ItemsEffects', () => {
     itemApi.fetchActiveList.mockResolvedValue([mockItem]);
     const results: unknown[] = [];
     effects.fetchActiveList$.subscribe((a) => results.push(a));
-    actions$.next(accountActions.accountLoaded({ account: mockAccount }));
+    actions$.next(accountActions.accountLoaded({ account: mockAccount, selectedShopId: null }));
     await flush();
     expect(results).toEqual([itemsActions.itemsLoaded({ items: [mockItem] })]);
   });

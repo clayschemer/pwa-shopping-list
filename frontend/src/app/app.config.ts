@@ -14,6 +14,7 @@ import { routes } from './app.routes';
 import { accountReducer } from './store/account/account.reducer';
 import { AccountEffects } from './store/account/account.effects';
 import { uiReducer } from './store/ui/ui.reducer';
+import { UiEffects } from './store/ui/ui.effects';
 import { categoriesReducer } from './store/categories/categories.reducer';
 import { CategoriesEffects } from './store/categories/categories.effects';
 import { shopsReducer } from './store/shops/shops.reducer';
@@ -49,6 +50,7 @@ export const appConfig: ApplicationConfig = {
     }),
     provideEffects([
       AccountEffects,
+      UiEffects,
       CategoriesEffects,
       ShopsEffects,
       ItemsEffects,

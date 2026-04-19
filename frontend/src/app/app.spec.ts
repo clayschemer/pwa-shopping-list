@@ -91,6 +91,7 @@ describe('App', () => {
         name: 'Test Account',
         aiConfig: null,
       },
+      selectedShopId: null,
     }));
 
     const fixture = TestBed.createComponent(App);

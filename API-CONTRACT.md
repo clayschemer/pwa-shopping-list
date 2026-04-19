@@ -429,6 +429,17 @@ Output:  User[]
 Errors:  none
 ```
 
+#### setSelectedShopId
+```
+Intent:  Persist the user's selected shop for the nav-drawer category-order view.
+         Fire-and-forget — the store is updated locally first; this write is
+         purely for cross-session persistence.
+         Called on plan-mode shop change and shop-mode entry.
+Input:   shopId: ShopId | null   (null = global / no shop)
+Output:  void (Promise)
+Errors:  none (best-effort write)
+```
+
 ---
 
 ### 5.4 Items

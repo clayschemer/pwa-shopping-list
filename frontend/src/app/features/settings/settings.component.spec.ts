@@ -74,6 +74,7 @@ describe('SettingsComponent', () => {
         name: 'Test Account',
         aiConfig: null,
       },
+      selectedShopId: null,
     }));
 
     fixture = TestBed.createComponent(SettingsComponent);

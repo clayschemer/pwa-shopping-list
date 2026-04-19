@@ -228,6 +228,7 @@ SessionCheckedItem { itemId, checkedBy, checkedAt,
 - **Nav drawer "Add category"** → `addCategory` API call. Backend auto-appends to all shops' `categoryOrder`.
 - **Nav drawer reorder** → single `setShopCategoryOrder` write on drag release, not on every move.
 - **Settings in `localStorage`**, not backend. Except AI auto-add which is account-level (`toggleAiAutoAdd`).
+- **Selected shop persisted per-user** on the account member doc (`selectedShopId`). Seeded on boot from `getAccount()`. Updated fire-and-forget on plan-mode shop change and shop-mode entry. Reset to null (global) on shop deletion.
 - **Session auto-start** on shop selection orchestrated by NgRx effect → `startSession`.
 - **Mode (plan/shop)** is NgRx store state only. Not persisted. Not synced between users.
 

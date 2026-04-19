@@ -63,7 +63,7 @@ describe('AccountEffects', () => {
 
   describe('loadAccount$', () => {
     it('dispatches accountLoaded when getAccount returns an account', () => {
-      accountApi.getAccount.mockResolvedValue(mockAccount);
+      accountApi.getAccount.mockResolvedValue({ account: mockAccount, selectedShopId: null });
 
       const results: unknown[] = [];
       effects.loadAccount$.subscribe((action) => results.push(action));
@@ -75,7 +75,7 @@ describe('AccountEffects', () => {
         setTimeout(() => {
           expect(accountApi.getAccount).toHaveBeenCalled();
           expect(results).toEqual([
-            accountActions.accountLoaded({ account: mockAccount }),
+            accountActions.accountLoaded({ account: mockAccount, selectedShopId: null }),
           ]);
           resolve();
         });
