@@ -119,7 +119,7 @@ Item
 - Price staleness is determined by `priceUpdatedAt` alone. Working assumption is a 6-12 month refresh window; exact threshold is an open decision.
 
 ### Session
-Represents one user's active or completed shopping trip. Each user can have at most one active session at a time.
+Represents an active or completed shopping trip at a specific shop. At most one active session per shopId per account — multiple shops may have concurrent active sessions. Users shopping at the same shop share a single session.
 
 ```
 Session
@@ -148,8 +148,9 @@ SessionCheckedItem
 
 **Notes on Session:**
 
+- At most one active session per `shopId` per account. When a second user selects the same shop, they join the existing session automatically.
 - `participants` starts with `startedBy` and grows as other users join. Designed for multiple users; currently a two-user product.
-- `checkedItems` is the source of truth for session totals and purchase history. An item appearing here means it was physically picked up in this session.
+- `checkedItems` is the source of truth for session totals and purchase history. An item appearing here means it was physically picked up in this session. The committed undo history is visible to all session participants.
 - Price snapshots are recorded at the moment of checking so that session history remains accurate even if prices change later.
 - On session completion, `purchaseCount` is incremented on each item that appears in `checkedItems`.
 
@@ -177,7 +178,7 @@ These are computed from stored data, not stored themselves.
 2. The winning write sets `Item.removed = true` and `Item.removedAt = now`
 3. A `SessionCheckedItem` entry is added to the checking user's active session with a price snapshot
 4. The slower user receives a graceful error indicating the item was already removed
-5. The undo action (brief window, shop mode only) is client-side only — visible only to the user who performed the check
+5. The undo action has two layers: a 4-second pending window (client-side only, visible only to the checking user) and the committed undo history (shared, visible to all session participants)
 
 ### Unchecking an item
 1. Removes the `SessionCheckedItem` entry from the session log
@@ -195,10 +196,11 @@ These are computed from stored data, not stored themselves.
 - **Session checked total** — running checkout bill for this session only. Drops when an item is unchecked. Unaffected by the other user's session activity.
 
 ### Concurrent sessions
-- Two users can have independent active sessions simultaneously
+- At most one active session per shop per account. Two users at the same shop share a session; two users at different shops have independent sessions.
 - Checked state (`Item.removed`) is shared and real-time — checking in one session removes the item for all users
-- Session totals are per-session and independent
-- The category total drops when an item is checked in any session (it's gone from the list)
+- Session totals are per-session and independent — each shop's session has its own running total
+- The category total (estimated) drops when an item is checked in any session (it's gone from the list)
+- The committed undo history for a session is shared across all participants; any participant can undo any check
 
 ---
 

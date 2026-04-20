@@ -142,7 +142,8 @@
     "global": "Pas de magasin spécifique (global)",
     "est": "Est.",
     "tapToUndo": "appuyez pour annuler",
-    "checkItem": "Cocher {{name}}"
+    "checkItem": "Cocher {{name}}",
+    "activeSession": "Session active"
   },
   "closeSession": {
     "allDoneTitle": "Terminé !",

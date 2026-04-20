@@ -1,6 +1,7 @@
 import { createFeatureSelector, createSelector } from '@ngrx/store';
 import { sessionsAdapter, SessionsState } from './sessions.reducer';
-import { selectCurrentUser } from '../account/account.selectors';
+import { selectSelectedShopId } from '../ui/ui.selectors';
+import type { ShopId } from '../../models/ids.model';
 
 export const selectSessionsState = createFeatureSelector<SessionsState>('sessions');
 
@@ -17,15 +18,16 @@ export const selectActiveSessions = createSelector(selectAllSessions, (sessions)
   sessions.filter((s) => s.completedAt === null),
 );
 
-export const selectActiveSessionForCurrentUser = createSelector(
+export const selectActiveSessionForCurrentShop = createSelector(
   selectActiveSessions,
-  selectCurrentUser,
-  (sessions, user) => {
-    if (!user) return null;
-    return (
-      sessions.find((s) => s.participants.includes(user.id)) ?? null
-    );
-  },
+  selectSelectedShopId,
+  (sessions, shopId) =>
+    sessions.find((s) => s.shopId === shopId) ?? null,
+);
+
+export const selectShopsWithActiveSessions = createSelector(
+  selectActiveSessions,
+  (sessions) => new Set<ShopId | null>(sessions.map((s) => s.shopId)),
 );
 
 export const selectSessionsLoaded = createSelector(

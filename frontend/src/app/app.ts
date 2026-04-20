@@ -22,7 +22,8 @@ import {
   selectSelectedShopId,
 } from './store/ui/ui.selectors';
 import { selectAllShops, selectShopEntities } from './store/shops/shops.selectors';
-import { selectActiveSessionForCurrentUser } from './store/sessions/sessions.selectors';
+import { selectActiveSessionForCurrentShop, selectShopsWithActiveSessions } from './store/sessions/sessions.selectors';
+import { selectUserEntities } from './store/users/users.selectors';
 import { selectActiveSessionTotal } from './store/selectors/grouped-shop-list.selectors';
 import {
   selectAllItems,
@@ -143,7 +144,7 @@ export class App {
   });
 
   readonly activeSession = toSignal(
-    this.store.select(selectActiveSessionForCurrentUser),
+    this.store.select(selectActiveSessionForCurrentShop),
     { initialValue: null },
   );
 
@@ -164,6 +165,16 @@ export class App {
   private readonly categories = toSignal(
     this.store.select(selectAllCategories),
     { initialValue: [] },
+  );
+
+  private readonly activeSessionShopIds = toSignal(
+    this.store.select(selectShopsWithActiveSessions),
+    { initialValue: new Set<import('./models/ids.model').ShopId | null>() },
+  );
+
+  private readonly userEntities = toSignal(
+    this.store.select(selectUserEntities),
+    { initialValue: {} as Dictionary<User> },
   );
 
   readonly checkedCount = computed(
@@ -326,7 +337,7 @@ export class App {
       ShopSelectSheetComponent,
       ShopSelectData,
       ShopSelectResult
-    >(ShopSelectSheetComponent, { data: { shops } });
+    >(ShopSelectSheetComponent, { data: { shops, activeSessionShopIds: this.activeSessionShopIds() } });
     ref.afterDismissed().subscribe((result) => {
       if (!result) return;
       this.store.dispatch(
@@ -359,7 +370,7 @@ export class App {
     const session = this.activeSession();
     if (!session) return;
     const itemsById = this.itemEntities() as Record<ItemId, Item>;
-    const usersById: Record<UserId, User> = {};
+    const usersById = this.userEntities() as Record<UserId, User>;
     const ref = this.bottomSheet.open<
       UndoHistorySheetComponent,
       UndoHistoryData,

@@ -8,7 +8,7 @@ import { SessionsEffects } from './sessions.effects';
 import { sessionsActions, sessionsApiActions } from './sessions.actions';
 import { accountActions } from '../account/account.actions';
 import { uiActions } from '../ui/ui.actions';
-import { selectActiveSessionForCurrentUser } from './sessions.selectors';
+import { selectActiveSessionForCurrentShop } from './sessions.selectors';
 import { SessionApiService } from '../../core/api/session-api.service';
 import type { Session } from '../../models/session.model';
 import type {
@@ -75,8 +75,7 @@ describe('SessionsEffects', () => {
     ]);
   });
 
-  it('auto-starts a session on shop-mode switch when no active session exists', async () => {
-    store.overrideSelector(selectActiveSessionForCurrentUser, null);
+  it('always dispatches startSessionRequested on shop-mode switch', async () => {
     const results: unknown[] = [];
     effects.autoStartOnShopSelected$.subscribe((a) => results.push(a));
     actions$.next(
@@ -88,18 +87,7 @@ describe('SessionsEffects', () => {
     ]);
   });
 
-  it('does not auto-start when an active session already exists', async () => {
-    store.overrideSelector(selectActiveSessionForCurrentUser, mockSession);
-    const results: unknown[] = [];
-    effects.autoStartOnShopSelected$.subscribe((a) => results.push(a));
-    actions$.next(
-      uiActions.switchToShopModeWithShop({ shopId: 'shop-1' as ShopId }),
-    );
-    await flush();
-    expect(results).toEqual([]);
-  });
-
-  it('dispatches sessionStarted on successful startSession', async () => {
+  it('dispatches sessionStarted on successful startSession (new or joined)', async () => {
     api.startSession.mockResolvedValue(mockSession);
     const results: unknown[] = [];
     effects.startSession$.subscribe((a) => results.push(a));
@@ -134,6 +122,34 @@ describe('SessionsEffects', () => {
     expect(results).toEqual([
       sessionsActions.sessionClosed({ id: 's1' as SessionId }),
     ]);
+  });
+
+  // Bug regression: after dismissing inactivity dialog, timer re-fires immediately
+  // because session timestamps are all stale (>30 min ago). The effect must treat
+  // dismissal as fresh activity and wait a full 30 min before firing again.
+  it('does not re-fire inactivity immediately after dismissal', async () => {
+    const staleSession: Session = {
+      ...mockSession,
+      startedAt: Date.now() - 60 * 60 * 1000, // 60 min ago
+      checkedItems: [],
+    };
+    store.overrideSelector(selectActiveSessionForCurrentShop, staleSession);
+
+    const results: unknown[] = [];
+    effects.inactivityTimer$.subscribe((a) => results.push(a));
+
+    // Simulate dismissing the inactivity dialog (user chose "continue")
+    actions$.next(
+      sessionsActions.sessionInactivityDismissed({
+        sessionId: 's1' as SessionId,
+      }),
+    );
+
+    // Give any synchronous/immediate timer a chance to fire
+    await new Promise<void>((r) => setTimeout(r, 100));
+
+    // The timer should NOT have fired immediately — it should wait ~30 min
+    expect(results).toEqual([]);
   });
 
   it('switches back to plan mode after a session closes', async () => {

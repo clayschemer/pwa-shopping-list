@@ -220,7 +220,8 @@ SessionCheckedItem { itemId, checkedBy, checkedAt,
 - **`removed` set by two actors:** plan-mode deletion or session check. Cleared by uncheck. No separate checked/deleted distinction.
 - **First-write-wins on concurrent checks.** Slower write receives `CheckConflictError`. UI shows inline message; item's updated state arrives via `itemChanges$`.
 - **Session log is source of truth** for purchase history and totals. Price, qty, unit snapshotted at check time.
-- **Undo on check is client-side only.** 4-second window. No API call until window expires. Visible only to the checking user.
+- **One active session per shop per account.** Users at the same shop share a session via start-or-join semantics. Users at different shops have independent sessions.
+- **Undo on check has two layers.** 4-second pending window is client-side only (visible only to the checking user). Committed undo history (`session.checkedItems`) is shared — any participant can undo any check.
 - **Single price field on Item.** Last writer wins (user or AI). Staleness by `priceUpdatedAt` alone.
 - **AI gated by `AiConfig`.** Service layer enforces the gate — components never check this directly.
 - **`purchaseCount` incremented on session close** for all items in `checkedItems`. Drives autocomplete ranking.
@@ -229,7 +230,7 @@ SessionCheckedItem { itemId, checkedBy, checkedAt,
 - **Nav drawer reorder** → single `setShopCategoryOrder` write on drag release, not on every move.
 - **Settings in `localStorage`**, not backend. Except AI auto-add which is account-level (`toggleAiAutoAdd`).
 - **Selected shop persisted per-user** on the account member doc (`selectedShopId`). Seeded on boot from `getAccount()`. Updated fire-and-forget on plan-mode shop change and shop-mode entry. Reset to null (global) on shop deletion.
-- **Session auto-start** on shop selection orchestrated by NgRx effect → `startSession`.
+- **Session auto-start/join** on shop selection orchestrated by NgRx effect → `startSession` (start-or-join semantics).
 - **Mode (plan/shop)** is NgRx store state only. Not persisted. Not synced between users.
 
 ---

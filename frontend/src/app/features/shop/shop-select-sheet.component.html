@@ -9,7 +9,14 @@
           (click)="choose(shop.id)"
         >
           <mat-icon aria-hidden="true">storefront</mat-icon>
-          <span>{{ shop.name }}</span>
+          <div class="shop-select-sheet__label">
+            <span>{{ shop.name }}</span>
+            @if (hasActiveSession(shop.id)) {
+              <span class="shop-select-sheet__active-indicator">
+                {{ 'shop.activeSession' | transloco }}
+              </span>
+            }
+          </div>
         </button>
       </li>
     }
@@ -20,7 +27,14 @@
         (click)="choose(null)"
       >
         <mat-icon aria-hidden="true">public</mat-icon>
-        <span>{{ 'shop.global' | transloco }}</span>
+        <div class="shop-select-sheet__label">
+          <span>{{ 'shop.global' | transloco }}</span>
+          @if (hasActiveSession(null)) {
+            <span class="shop-select-sheet__active-indicator">
+              {{ 'shop.activeSession' | transloco }}
+            </span>
+          }
+        </div>
       </button>
     </li>
   </ul>

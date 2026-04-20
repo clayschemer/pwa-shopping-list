@@ -142,7 +142,8 @@
     "global": "Ingen specifik butik (global)",
     "est": "Ber.",
     "tapToUndo": "tryck för att ångra",
-    "checkItem": "Bocka av {{name}}"
+    "checkItem": "Bocka av {{name}}",
+    "activeSession": "Aktiv session"
   },
   "closeSession": {
     "allDoneTitle": "Klart!",
