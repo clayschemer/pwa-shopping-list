@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, DestroyRef, NgZone, inject, computed, effect } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, inject, computed, effect } from '@angular/core';
 import { Title } from '@angular/platform-browser';
 import { NavigationEnd, Router, RouterLink, RouterOutlet } from '@angular/router';
 import { toSignal, takeUntilDestroyed } from '@angular/core/rxjs-interop';
@@ -108,7 +108,6 @@ export class App {
   private readonly dialog = inject(MatDialog);
   private readonly actions$ = inject(Actions);
   private readonly destroyRef = inject(DestroyRef);
-  private readonly zone = inject(NgZone);
   private inactivityDialogOpen = false;
 
   readonly isAuthenticated = toSignal(this.store.select(selectIsAuthenticated), {
@@ -227,24 +226,6 @@ export class App {
       )
       .subscribe(({ sessionId }) => this.openInactivityReminder(sessionId));
 
-    this.initKeyboardInsetListener();
-  }
-
-  private initKeyboardInsetListener(): void {
-    const vv = window.visualViewport;
-    if (!vv) return;
-    this.zone.runOutsideAngular(() => {
-      const update = () => {
-        const inset = window.innerHeight - vv.height;
-        document.documentElement.style.setProperty(
-          '--app-keyboard-inset',
-          `${Math.max(0, inset)}px`,
-        );
-      };
-      update();
-      vv.addEventListener('resize', update);
-      vv.addEventListener('scroll', update);
-    });
   }
 
   private updatePageTitle(url: string): void {
