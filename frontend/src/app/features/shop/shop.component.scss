@@ -36,7 +36,7 @@
 
   &__group-title {
     margin: 0;
-    font-size: 0.75rem;
+    font-size: var(--app-font-size-section-title);
     font-weight: 500;
     text-transform: uppercase;
     letter-spacing: 0.05em;

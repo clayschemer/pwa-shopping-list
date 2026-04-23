@@ -24,20 +24,19 @@
 
   &__section {
     margin-block-end: var(--app-spacing-section);
-    border: 1px solid var(--mat-sys-outline-variant);
+    background: var(--mat-sys-surface-container);
     border-radius: 0.5rem;
   }
 
   &__section-title {
     font-size: var(--app-font-size-section-title);
-    font-weight: 400;
-    line-height: var(--app-line-height-heading);
+    font-weight: 500;
     text-transform: uppercase;
     letter-spacing: 0.05em;
-    color: var(--mat-sys-on-surface-variant);
+    color: var(--mat-sys-on-surface);
+
     margin: 0;
     padding: 0.5rem;
-    border-block-end: 1px solid var(--mat-sys-outline-variant);
   }
 
   &__row {
