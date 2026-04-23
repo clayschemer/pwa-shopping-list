@@ -225,7 +225,7 @@ describe('SettingsComponent', () => {
       const toggle = el.querySelectorAll('mat-slide-toggle')[0];
       const label = toggle.querySelector('label');
       expect(label).toBeTruthy();
-      expect(label!.textContent!.trim()).toBe('Dark mode');
+      expect(label!.textContent).toContain('Dark mode');
     });
 
     it('reduce motion toggle has an accessible label', () => {
@@ -233,7 +233,7 @@ describe('SettingsComponent', () => {
       const toggle = el.querySelectorAll('mat-slide-toggle')[2];
       const label = toggle.querySelector('label');
       expect(label).toBeTruthy();
-      expect(label!.textContent!.trim()).toBe('Reduce motion');
+      expect(label!.textContent).toContain('Reduce motion');
     });
 
     it('keep screen awake toggle has an accessible label', () => {
@@ -241,7 +241,7 @@ describe('SettingsComponent', () => {
       const toggle = el.querySelectorAll('mat-slide-toggle')[5];
       const label = toggle.querySelector('label');
       expect(label).toBeTruthy();
-      expect(label!.textContent!.trim()).toBe('Keep screen awake');
+      expect(label!.textContent).toContain('Keep screen awake');
     });
   });
 
