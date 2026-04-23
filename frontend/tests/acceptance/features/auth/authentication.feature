@@ -43,3 +43,10 @@ Feature: Authentication
     Given I am authenticated on one device
     When I access the application from a different device or a fresh session
     Then I should be required to authenticate again
+
+  Scenario: Authentication session expires while using the application
+    Given I am authenticated
+    And I have access to the shopping list
+    When my authentication session expires or is revoked
+    Then I should no longer have access to the shopping list
+    And I should be required to authenticate again

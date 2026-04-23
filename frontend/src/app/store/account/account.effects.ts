@@ -121,4 +121,14 @@ export class AccountEffects {
       ),
     { dispatch: false },
   );
+
+  /** Navigate to sign-in when auth session expires or is revoked mid-use. */
+  readonly navigateOnAuthLost$ = createEffect(
+    () =>
+      this.actions$.pipe(
+        ofType(authActions.authStateEmpty, accountActions.streamAuthRevoked),
+        tap(() => this.router.navigateByUrl('/sign-in')),
+      ),
+    { dispatch: false },
+  );
 }

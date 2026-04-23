@@ -186,4 +186,22 @@ describe('AccountEffects', () => {
       expect(router.navigateByUrl).toHaveBeenCalledWith('/sign-in');
     });
   });
+
+  describe('navigateOnAuthLost$', () => {
+    it('navigates to /sign-in when auth state becomes empty', () => {
+      effects.navigateOnAuthLost$.subscribe();
+
+      actions$.next(authActions.authStateEmpty());
+
+      expect(router.navigateByUrl).toHaveBeenCalledWith('/sign-in');
+    });
+
+    it('navigates to /sign-in when stream auth is revoked', () => {
+      effects.navigateOnAuthLost$.subscribe();
+
+      actions$.next(accountActions.streamAuthRevoked());
+
+      expect(router.navigateByUrl).toHaveBeenCalledWith('/sign-in');
+    });
+  });
 });
