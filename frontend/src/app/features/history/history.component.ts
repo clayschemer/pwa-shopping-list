@@ -82,7 +82,7 @@ export class HistoryComponent implements OnInit {
     const items = this.itemEntities();
     const globalLabel = this.transloco.translate('nav.global');
     const unknownItem = this.transloco.translate('history.unknownItem');
-    return sessions.map((s) => ({
+    return sessions.filter((s) => s.checkedItems.length > 0).map((s) => ({
       id: s.id,
       shopName: s.shopId ? shops[s.shopId]?.name ?? globalLabel : globalLabel,
       completedAt: s.completedAt ?? 0,

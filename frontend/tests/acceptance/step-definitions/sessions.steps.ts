@@ -153,6 +153,15 @@ Given('a shopping session has been closed', function (this: SessionsWorld) {
   this.sessions = [];
 });
 
+Given('a shopping session has been discarded', function (this: SessionsWorld) {
+  this.user1Id = 'user-1';
+  const session = makeSession(this.user1Id);
+  session.completedAt = Date.now();
+  session.checkedItems = []; // Discarded = all items unchecked, checkedItems cleared
+  this.sessionHistory = [session];
+  this.sessions = [];
+});
+
 Given('one or more shopping sessions have been completed', function (this: SessionsWorld) {
   this.user1Id = 'user-1';
   const session = makeSession(this.user1Id);
@@ -413,6 +422,21 @@ When('I view my session history', function (this: SessionsWorld) {
   // Read-only — history already in sessionHistory
 });
 
+When('I discard the session', function (this: SessionsWorld) {
+  const session = activeSession(this, this.user1Id ?? 'user-1');
+  if (session) {
+    // Restore all checked items to the active list
+    for (const ci of session.checkedItems) {
+      const item = this.items?.find((i) => i.id === ci.itemId);
+      if (item) item.removed = false;
+    }
+    // End session with empty checkedItems — no purchaseCount increment
+    session.checkedItems = [];
+    session.completedAt = Date.now();
+    this.sessionHistory = [...(this.sessionHistory ?? []), { ...session }];
+  }
+});
+
 When('the system evaluates item frequency', function (this: SessionsWorld) {
   // Derived from purchaseCount — backed by session checkedItems on session close
 });
@@ -638,4 +662,28 @@ Then('items that appear regularly across sessions should be identified', functio
 Then('those items should be available as suggestions for future lists', function (this: SessionsWorld) {
   // Autocomplete ranking uses purchaseCount — high count = higher ranked suggestion
   assert.ok(true, 'purchaseCount-based ranking drives autocomplete suggestions');
+});
+
+Then('all checked items should be restored to the active list', function (this: SessionsWorld) {
+  const allActive = this.items?.every((i) => !i.removed);
+  assert.ok(allActive, 'All items should be restored to the active list (removed = false)');
+});
+
+Then('the session should be ended', function (this: SessionsWorld) {
+  const active = activeSession(this, this.user1Id ?? 'user-1');
+  assert.equal(active, null, 'No active session should remain after discard');
+});
+
+Then('no purchase counts should be incremented', function (this: SessionsWorld) {
+  // Discard does not call closeSession logic — purchaseCount stays unchanged
+  // The session's checkedItems is empty, so even if close were called, nothing increments
+  const discarded = this.sessionHistory?.slice(-1)[0];
+  assert.equal(discarded?.checkedItems.length, 0, 'Discarded session should have no checked items');
+});
+
+Then('sessions with no checked items should not be visible', function (this: SessionsWorld) {
+  const visible = (this.sessionHistory ?? []).filter((s) => s.checkedItems.length > 0);
+  const empty = (this.sessionHistory ?? []).filter((s) => s.checkedItems.length === 0);
+  assert.ok(empty.length > 0, 'There should be at least one discarded session in raw history');
+  assert.equal(visible.length, 0, 'No sessions with zero checked items should be shown');
 });

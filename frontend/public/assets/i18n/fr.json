@@ -152,7 +152,8 @@
     "remainingMessage": "Il reste des articles non cochés sur votre liste. Fermer quand même ?",
     "notYet": "Pas encore",
     "keepShopping": "Continuer les courses",
-    "close": "Fermer la session"
+    "close": "Fermer la session",
+    "discard": "Abandonner"
   },
   "undoHistory": {
     "title": "Cochés cette session",
@@ -163,6 +164,7 @@
     "title": "Toujours en courses ?",
     "message": "Votre session est inactive depuis un moment. Fermer maintenant ou continuer ?",
     "keepShopping": "Continuer les courses",
+    "discard": "Abandonner",
     "close": "Fermer la session"
   },
   "units": {

@@ -152,7 +152,8 @@
     "remainingMessage": "Det finns fortfarande obockade varor på listan. Avsluta ändå?",
     "notYet": "Inte ännu",
     "keepShopping": "Fortsätt handla",
-    "close": "Avsluta session"
+    "close": "Avsluta session",
+    "discard": "Förkasta"
   },
   "undoHistory": {
     "title": "Avbockade denna session",
@@ -163,6 +164,7 @@
     "title": "Handlar du fortfarande?",
     "message": "Din session har varit inaktiv ett tag. Avsluta nu eller fortsätt?",
     "keepShopping": "Fortsätt handla",
+    "discard": "Förkasta",
     "close": "Avsluta session"
   },
   "units": {

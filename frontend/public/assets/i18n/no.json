@@ -152,7 +152,8 @@
     "remainingMessage": "Det er fortsatt uavkryssede varer på listen. Avslutte likevel?",
     "notYet": "Ikke ennå",
     "keepShopping": "Fortsett å handle",
-    "close": "Avslutt økt"
+    "close": "Avslutt økt",
+    "discard": "Forkast"
   },
   "undoHistory": {
     "title": "Krysset av denne økten",
@@ -163,6 +164,7 @@
     "title": "Handler du fortsatt?",
     "message": "Økten har vært inaktiv en stund. Avslutte nå eller fortsette?",
     "keepShopping": "Fortsett å handle",
+    "discard": "Forkast",
     "close": "Avslutt økt"
   },
   "units": {

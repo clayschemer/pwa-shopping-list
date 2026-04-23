@@ -5,7 +5,7 @@ import { Store } from '@ngrx/store';
 import { MatIconButton } from '@angular/material/button';
 import { MatIcon } from '@angular/material/icon';
 import { MatSlideToggle, MatSlideToggleChange } from '@angular/material/slide-toggle';
-import { MatFormField, MatLabel } from '@angular/material/form-field';
+import { MatFormField, MatLabel, MatPrefix } from '@angular/material/form-field';
 import { MatSelect, MatSelectChange } from '@angular/material/select';
 import { MatOption } from '@angular/material/core';
 import { TranslocoPipe } from '@jsverse/transloco';
@@ -23,6 +23,7 @@ import { V } from '@angular/cdk/keycodes';
     MatSlideToggle,
     MatFormField,
     MatLabel,
+    MatPrefix,
     MatSelect,
     MatOption,
     TranslocoPipe,

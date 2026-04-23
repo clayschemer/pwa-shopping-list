@@ -10,6 +10,7 @@ export const sessionsActions = createActionGroup({
     'Session Start Conflict': emptyProps(),
     'Session Joined': props<{ session: Session }>(),
     'Session Closed': props<{ id: SessionId }>(),
+    'Session Discarded': props<{ id: SessionId }>(),
     'Session Updated': props<{ session: Session }>(),
     'Session Changes Received': props<{
       sessions: Session[];
@@ -27,5 +28,6 @@ export const sessionsApiActions = createActionGroup({
     'Start Session Requested': props<{ shopId: ShopId | null }>(),
     'Join Session Requested': props<{ sessionId: SessionId }>(),
     'Close Session Requested': props<{ sessionId: SessionId }>(),
+    'Discard Session Requested': props<{ sessionId: SessionId }>(),
   },
 });

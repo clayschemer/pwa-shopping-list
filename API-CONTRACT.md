@@ -711,6 +711,21 @@ Output:  void
 Errors:  NotFoundError
 ```
 
+#### discardSession
+```
+Intent:  Discard an active session. Ends the session without saving purchase history.
+         All checked items are restored to the active list (removed = false, removedAt = null).
+         The session's checkedItems are cleared. completedAt is set to the current time.
+         purchaseCount is NOT incremented on any item.
+         Sessions with zero checkedItems are excluded from history views.
+         The completed Session arrives via sessionChanges$ as a batch of one.
+         All Items whose removed flag was cleared arrive via itemChanges$
+         as a single batch.
+Input:   sessionId: SessionId
+Output:  void
+Errors:  NotFoundError
+```
+
 ---
 
 ### 5.8 Autocomplete

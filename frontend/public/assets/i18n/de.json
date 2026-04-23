@@ -152,7 +152,8 @@
     "remainingMessage": "Es gibt noch nicht abgehakte Artikel auf der Liste. Trotzdem beenden?",
     "notYet": "Noch nicht",
     "keepShopping": "Weiter einkaufen",
-    "close": "Sitzung beenden"
+    "close": "Sitzung beenden",
+    "discard": "Verwerfen"
   },
   "undoHistory": {
     "title": "Diese Sitzung abgehakt",
@@ -163,6 +164,7 @@
     "title": "Kaufst du noch ein?",
     "message": "Deine Sitzung war eine Weile inaktiv. Jetzt beenden oder weitermachen?",
     "keepShopping": "Weiter einkaufen",
+    "discard": "Verwerfen",
     "close": "Sitzung beenden"
   },
   "units": {

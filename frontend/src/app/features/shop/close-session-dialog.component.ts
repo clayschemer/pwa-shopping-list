@@ -1,6 +1,5 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import {
-  MatDialogRef,
   MAT_DIALOG_DATA,
   MatDialogTitle,
   MatDialogContent,
@@ -13,6 +12,8 @@ import { TranslocoPipe } from '@jsverse/transloco';
 export interface CloseSessionData {
   allChecked: boolean;
 }
+
+export type CloseSessionResult = 'close' | 'discard';
 
 @Component({
   selector: 'app-close-session-dialog',
@@ -50,7 +51,10 @@ export interface CloseSessionData {
           ) | transloco
         }}
       </button>
-      <button mat-button color="primary" [mat-dialog-close]="true">
+      <button mat-button color="warn" [mat-dialog-close]="'discard'">
+        {{ 'closeSession.discard' | transloco }}
+      </button>
+      <button mat-button color="primary" [mat-dialog-close]="'close'">
         {{ 'closeSession.close' | transloco }}
       </button>
     </mat-dialog-actions>

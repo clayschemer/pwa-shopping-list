@@ -7,6 +7,7 @@ import {
   getDocs,
   query,
   runTransaction,
+  updateDoc,
   where,
   writeBatch,
   arrayUnion,
@@ -169,6 +170,50 @@ export class SessionApiService {
         if (!itemSnap.exists()) continue;
         const current = (itemSnap.data()['purchaseCount'] ?? 0) as number;
         batch.update(ref, { purchaseCount: current + 1 });
+      }
+      await batch.commit();
+      return;
+    });
+  }
+
+  async discardSession(id: SessionId): Promise<void | NotFoundError> {
+    const { accountId } = this.context.require();
+    return runInInjectionContext(this.injector, async () => {
+      const sessionRef = paths.sessionDoc(this.db, accountId, id);
+
+      // Read the session to get the checked items before discarding
+      let checkedItemIds: string[];
+      try {
+        const snap = await runTransaction(this.db, async (tx) => {
+          const s = await tx.get(sessionRef);
+          if (!s.exists()) throw new Error('NOT_FOUND');
+          const data = s.data();
+          if (data['completedAt'] !== null) return null; // already completed
+          const checked = (data['checkedItems'] ?? []) as { itemId: string }[];
+          // Clear checkedItems and set completedAt in one transaction
+          tx.update(sessionRef, {
+            checkedItems: [],
+            completedAt: Date.now(),
+          });
+          return checked.map((c) => c.itemId);
+        });
+        if (snap === null) return; // already completed — nothing to do
+        checkedItemIds = Array.from(new Set(snap));
+      } catch (err) {
+        if ((err as Error).message === 'NOT_FOUND') {
+          return { type: 'NOT_FOUND', entityKind: 'session', id };
+        }
+        throw err;
+      }
+
+      // Restore all checked items (set removed = false, removedAt = null)
+      if (checkedItemIds.length === 0) return;
+      const batch = writeBatch(this.db);
+      for (const itemId of checkedItemIds) {
+        const ref = paths.itemDoc(this.db, accountId, itemId);
+        const itemSnap = await getDoc(ref);
+        if (!itemSnap.exists()) continue;
+        batch.update(ref, { removed: false, removedAt: null });
       }
       await batch.commit();
       return;

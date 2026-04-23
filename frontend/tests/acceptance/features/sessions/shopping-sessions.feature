@@ -101,6 +101,19 @@ Feature: Shopping Sessions
     Then the completed session should be visible
     And it should include the shop, items checked, and total spend for the session
 
+  Scenario: Discarding a session unchecks all items and ends the session
+    Given I have an active shopping session
+    And I have checked one or more items
+    When I discard the session
+    Then all checked items should be restored to the active list
+    And the session should be ended
+    And no purchase counts should be incremented
+
+  Scenario: Discarded sessions do not appear in history
+    Given a shopping session has been discarded
+    When I view my session history
+    Then sessions with no checked items should not be visible
+
   Scenario: Session history informs frequency tracking
     Given one or more shopping sessions have been completed
     When the system evaluates item frequency

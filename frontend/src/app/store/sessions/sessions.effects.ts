@@ -103,9 +103,20 @@ export class SessionsEffects {
     ),
   );
 
+  readonly discardSession$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(sessionsApiActions.discardSessionRequested),
+      switchMap(({ sessionId }) =>
+        from(this.sessionApi.discardSession(sessionId)).pipe(
+          map(() => sessionsActions.sessionDiscarded({ id: sessionId })),
+        ),
+      ),
+    ),
+  );
+
   readonly leaveShopModeOnClose$ = createEffect(() =>
     this.actions$.pipe(
-      ofType(sessionsActions.sessionClosed),
+      ofType(sessionsActions.sessionClosed, sessionsActions.sessionDiscarded),
       map(() => uiActions.switchToPlanMode()),
     ),
   );

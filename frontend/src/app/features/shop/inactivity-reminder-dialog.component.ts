@@ -8,7 +8,7 @@ import {
 import { MatButton } from '@angular/material/button';
 import { TranslocoPipe } from '@jsverse/transloco';
 
-export type InactivityReminderResult = 'close' | 'continue';
+export type InactivityReminderResult = 'close' | 'discard' | 'continue';
 
 @Component({
   selector: 'app-inactivity-reminder-dialog',

@@ -43,6 +43,7 @@ import {
 import {
   CloseSessionDialogComponent,
   CloseSessionData,
+  CloseSessionResult,
 } from './features/shop/close-session-dialog.component';
 import {
   UndoHistorySheetComponent,
@@ -253,6 +254,10 @@ export class App {
         this.store.dispatch(
           sessionsApiActions.closeSessionRequested({ sessionId }),
         );
+      } else if (result === 'discard') {
+        this.store.dispatch(
+          sessionsApiActions.discardSessionRequested({ sessionId }),
+        );
       } else {
         this.store.dispatch(
           sessionsActions.sessionInactivityDismissed({ sessionId }),
@@ -334,14 +339,18 @@ export class App {
     const ref = this.dialog.open<
       CloseSessionDialogComponent,
       CloseSessionData,
-      boolean
+      CloseSessionResult
     >(CloseSessionDialogComponent, {
       data: { allChecked: activeItemCount === 0 },
     });
-    ref.afterClosed().subscribe((confirmed) => {
-      if (confirmed) {
+    ref.afterClosed().subscribe((result) => {
+      if (result === 'close') {
         this.store.dispatch(
           sessionsApiActions.closeSessionRequested({ sessionId: session.id }),
+        );
+      } else if (result === 'discard') {
+        this.store.dispatch(
+          sessionsApiActions.discardSessionRequested({ sessionId: session.id }),
         );
       }
     });

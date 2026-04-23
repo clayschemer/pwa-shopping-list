@@ -152,7 +152,8 @@
     "remainingMessage": "There are still unchecked items on your list. Close the session anyway?",
     "notYet": "Not yet",
     "keepShopping": "Keep shopping",
-    "close": "Close session"
+    "close": "Close session",
+    "discard": "Discard"
   },
   "undoHistory": {
     "title": "Checked this session",
@@ -163,6 +164,7 @@
     "title": "Still shopping?",
     "message": "Your session has been idle for a while. Close it now or keep going?",
     "keepShopping": "Keep shopping",
+    "discard": "Discard",
     "close": "Close session"
   },
   "units": {

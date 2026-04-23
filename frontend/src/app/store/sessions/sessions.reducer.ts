@@ -38,6 +38,10 @@ export const sessionsReducer = createReducer(
     sessionsAdapter.removeOne(id, state),
   ),
 
+  on(sessionsActions.sessionDiscarded, (state, { id }) =>
+    sessionsAdapter.removeOne(id, state),
+  ),
+
   on(sessionsActions.sessionChangesReceived, (state, { sessions, removed }) => {
     const afterRemove = sessionsAdapter.removeMany(removed, state);
     return sessionsAdapter.upsertMany(sessions, afterRemove);
