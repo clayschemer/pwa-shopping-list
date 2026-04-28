@@ -17,23 +17,29 @@
 
     <div class="app-settings__row">
       <div class="app-settings__row-item">
-        <mat-slide-toggle
-          [checked]="effectiveDarkMode()"
-          (change)="onDarkModeToggle($event.checked)"
-          labelPosition="before"
-          ><mat-icon class="app-settings__row-icon">dark_mode</mat-icon>{{ 'settings.darkMode' | transloco }}</mat-slide-toggle
-        >
+        <div class="app-settings__row-content">
+          <mat-slide-toggle
+            [checked]="effectiveDarkMode()"
+            (change)="onDarkModeToggle($event.checked)"
+            labelPosition="before"
+            ><mat-icon class="app-settings__row-icon">dark_mode</mat-icon>{{ 'settings.darkMode' | transloco }}</mat-slide-toggle
+          >
+          <p class="app-settings__hint">{{ 'settings.darkModeHint' | transloco }}</p>
+        </div>
       </div>
     </div>
 
     <div class="app-settings__row">
       <div class="app-settings__row-item">
-        <mat-slide-toggle
-          [checked]="settings().compact"
-          (change)="onCompactToggle($event.checked)"
-          labelPosition="before"
-          ><mat-icon class="app-settings__row-icon">density_small</mat-icon>{{ 'settings.compactMode' | transloco }}</mat-slide-toggle
-        >
+        <div class="app-settings__row-content">
+          <mat-slide-toggle
+            [checked]="settings().compact"
+            (change)="onCompactToggle($event.checked)"
+            labelPosition="before"
+            ><mat-icon class="app-settings__row-icon">density_small</mat-icon>{{ 'settings.compactMode' | transloco }}</mat-slide-toggle
+          >
+          <p class="app-settings__hint">{{ 'settings.compactModeHint' | transloco }}</p>
+        </div>
       </div>
     </div>
   </section>
@@ -44,34 +50,43 @@
 
     <div class="app-settings__row">
       <div class="app-settings__row-item">
-        <mat-slide-toggle
-          [checked]="effectiveReduceMotion()"
-          (change)="onReduceMotionToggle($event.checked)"
-          labelPosition="before"
-          ><mat-icon class="app-settings__row-icon">motion_photos_off</mat-icon>{{ 'settings.reduceMotion' | transloco }}</mat-slide-toggle
-        >
+        <div class="app-settings__row-content">
+          <mat-slide-toggle
+            [checked]="effectiveReduceMotion()"
+            (change)="onReduceMotionToggle($event.checked)"
+            labelPosition="before"
+            ><mat-icon class="app-settings__row-icon">motion_photos_off</mat-icon>{{ 'settings.reduceMotion' | transloco }}</mat-slide-toggle
+          >
+          <p class="app-settings__hint">{{ 'settings.reduceMotionHint' | transloco }}</p>
+        </div>
       </div>
     </div>
 
     <div class="app-settings__row">
       <div class="app-settings__row-item">
-        <mat-slide-toggle
-          [checked]="effectiveHighContrast()"
-          (change)="onHighContrastToggle($event.checked)"
-          labelPosition="before"
-          ><mat-icon class="app-settings__row-icon">contrast</mat-icon>{{ 'settings.highContrast' | transloco }}</mat-slide-toggle
-        >
+        <div class="app-settings__row-content">
+          <mat-slide-toggle
+            [checked]="effectiveHighContrast()"
+            (change)="onHighContrastToggle($event.checked)"
+            labelPosition="before"
+            ><mat-icon class="app-settings__row-icon">contrast</mat-icon>{{ 'settings.highContrast' | transloco }}</mat-slide-toggle
+          >
+          <p class="app-settings__hint">{{ 'settings.highContrastHint' | transloco }}</p>
+        </div>
       </div>
     </div>
 
     <div class="app-settings__row">
       <div class="app-settings__row-item">
-        <mat-slide-toggle
-          [checked]="settings().leftHanded"
-          (change)="onLeftHandedToggle($event.checked)"
-          labelPosition="before"
-          ><mat-icon class="app-settings__row-icon">back_hand</mat-icon>{{ 'settings.leftHanded' | transloco }}</mat-slide-toggle
-        >
+        <div class="app-settings__row-content">
+          <mat-slide-toggle
+            [checked]="settings().leftHanded"
+            (change)="onLeftHandedToggle($event.checked)"
+            labelPosition="before"
+            ><mat-icon class="app-settings__row-icon">back_hand</mat-icon>{{ 'settings.leftHanded' | transloco }}</mat-slide-toggle
+          >
+          <p class="app-settings__hint">{{ 'settings.leftHandedHint' | transloco }}</p>
+        </div>
       </div>
     </div>
   </section>
@@ -82,35 +97,41 @@
 
     <div class="app-settings__row">
       <div class="app-settings__row-item">
-        <mat-form-field class="app-settings__select-field">
-          <mat-icon matPrefix class="app-settings__row-icon">language</mat-icon>
-          <mat-label>{{ 'settings.language' | transloco }}</mat-label>
-          <mat-select
-            [value]="settings().language"
-            (selectionChange)="onLanguageChange($event.value)"
-          >
-            @for (lang of languages; track lang) {
-              <mat-option [value]="lang">{{ languageLabels[lang] }} ({{ lang }})</mat-option>
-            }
-          </mat-select>
-        </mat-form-field>
+        <div class="app-settings__row-content">
+          <mat-form-field class="app-settings__select-field">
+            <mat-icon matPrefix class="app-settings__row-icon">language</mat-icon>
+            <mat-label>{{ 'settings.language' | transloco }}</mat-label>
+            <mat-select
+              [value]="settings().language"
+              (selectionChange)="onLanguageChange($event.value)"
+            >
+              @for (lang of languages; track lang) {
+                <mat-option [value]="lang">{{ languageLabels[lang] }} ({{ lang }})</mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+          <p class="app-settings__hint">{{ 'settings.languageHint' | transloco }}</p>
+        </div>
       </div>
     </div>
 
     <div class="app-settings__row">
       <div class="app-settings__row-item">
-        <mat-form-field class="app-settings__select-field">
-          <mat-icon matPrefix class="app-settings__row-icon">payments</mat-icon>
-          <mat-label>{{ 'settings.currency' | transloco }}</mat-label>
-          <mat-select
-            [value]="settings().currency"
-            (selectionChange)="onCurrencyChange($event.value)"
-          >
-            @for (cur of currencies; track cur) {
-              <mat-option [value]="cur">{{ cur }}</mat-option>
-            }
-          </mat-select>
-        </mat-form-field>
+        <div class="app-settings__row-content">
+          <mat-form-field class="app-settings__select-field">
+            <mat-icon matPrefix class="app-settings__row-icon">payments</mat-icon>
+            <mat-label>{{ 'settings.currency' | transloco }}</mat-label>
+            <mat-select
+              [value]="settings().currency"
+              (selectionChange)="onCurrencyChange($event.value)"
+            >
+              @for (cur of currencies; track cur) {
+                <mat-option [value]="cur">{{ cur }}</mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+          <p class="app-settings__hint">{{ 'settings.currencyHint' | transloco }}</p>
+        </div>
       </div>
     </div>
   </section>
@@ -121,12 +142,15 @@
 
     <div class="app-settings__row">
       <div class="app-settings__row-item">
-        <mat-slide-toggle
-          [checked]="settings().keepScreenAwake"
-          (change)="onKeepScreenAwakeToggle($event.checked)"
-          labelPosition="before"
-          ><mat-icon class="app-settings__row-icon">visibility</mat-icon>{{ 'settings.keepScreenAwake' | transloco }}</mat-slide-toggle
-        >
+        <div class="app-settings__row-content">
+          <mat-slide-toggle
+            [checked]="settings().keepScreenAwake"
+            (change)="onKeepScreenAwakeToggle($event.checked)"
+            labelPosition="before"
+            ><mat-icon class="app-settings__row-icon">visibility</mat-icon>{{ 'settings.keepScreenAwake' | transloco }}</mat-slide-toggle
+          >
+          <p class="app-settings__hint">{{ 'settings.keepScreenAwakeHint' | transloco }}</p>
+        </div>
       </div>
     </div>
 
