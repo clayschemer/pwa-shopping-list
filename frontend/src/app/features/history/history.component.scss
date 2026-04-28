@@ -42,11 +42,16 @@
     gap: 0.5rem;
   }
 
+  &__panel-header {
+    padding: 0.5rem 1rem;
+  }
+
   &__panel-title {
     display: flex;
     flex-direction: column;
     gap: 0.125rem;
-    flex: 1;
+    flex-basis: 100%;
+    align-items: flex-start;
   }
 
   &__shop {
