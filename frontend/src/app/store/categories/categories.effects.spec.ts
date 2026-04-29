@@ -11,8 +11,8 @@ import type { Category } from '../../models/category.model';
 import type { AccountId, CategoryId, ShopId } from '../../models/ids.model';
 
 const mockCategories: Category[] = [
-  { id: 'c1' as CategoryId, accountId: 'a1' as AccountId, name: 'Produce', globalSortOrder: 0 },
-  { id: 'c2' as CategoryId, accountId: 'a1' as AccountId, name: 'Dairy', globalSortOrder: 1 },
+  { id: 'c1' as CategoryId, accountId: 'a1' as AccountId, name: 'Produce', color: null, globalSortOrder: 0 },
+  { id: 'c2' as CategoryId, accountId: 'a1' as AccountId, name: 'Dairy', color: null, globalSortOrder: 1 },
 ];
 
 const mockAccount = { id: 'a1' as AccountId, name: 'Test', aiConfig: null };
@@ -78,6 +78,7 @@ describe('CategoriesEffects', () => {
         id: 'c3' as CategoryId,
         accountId: 'a1' as AccountId,
         name: 'Bakery',
+        color: null,
         globalSortOrder: 2,
       };
       categoryApi.addCategory.mockResolvedValue(newCat);
@@ -85,11 +86,11 @@ describe('CategoriesEffects', () => {
       const results: unknown[] = [];
       effects.addCategory$.subscribe((action) => results.push(action));
 
-      actions$.next(categoriesApiActions.addCategoryRequested({ name: 'Bakery' }));
+      actions$.next(categoriesApiActions.addCategoryRequested({ name: 'Bakery', color: null }));
 
       return new Promise<void>((resolve) => {
         setTimeout(() => {
-          expect(categoryApi.addCategory).toHaveBeenCalledWith('Bakery');
+          expect(categoryApi.addCategory).toHaveBeenCalledWith('Bakery', null);
           expect(results).toEqual([
             categoriesActions.categoryAdded({ category: newCat }),
           ]);
@@ -110,6 +111,7 @@ describe('CategoriesEffects', () => {
         categoriesApiActions.renameCategoryRequested({
           id: 'c1' as CategoryId,
           name: 'Fresh Produce',
+          color: null,
         }),
       );
 
@@ -118,6 +120,7 @@ describe('CategoriesEffects', () => {
           expect(categoryApi.renameCategory).toHaveBeenCalledWith(
             'c1',
             'Fresh Produce',
+            null,
           );
           expect(results).toHaveLength(1);
           const action = results[0] as ReturnType<

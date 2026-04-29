@@ -200,7 +200,7 @@ AiConfig      { provider, apiKeyRef, priceLookupShopOrder: ShopId[], autoAddEnab
               // It is intentionally absent from the API contract — the frontend never sees it.
 User          { id, accountId, email, displayName }
 Shop          { id, accountId, name, categoryOrder: CategoryId[] }
-Category      { id, accountId, name, globalSortOrder }
+Category      { id, accountId, name, color, globalSortOrder }
 Item          { id, accountId, name, quantity, unit,
                 primaryCategoryId, secondaryCategoryIds,
                 removed, removedAt, addedBy, aiMotivation,

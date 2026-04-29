@@ -16,6 +16,7 @@ import { MatSelect } from '@angular/material/select';
 import { MatOption } from '@angular/material/core';
 import { MatChipListbox, MatChipOption } from '@angular/material/chips';
 import { MatButton } from '@angular/material/button';
+import { MatIcon } from '@angular/material/icon';
 import { TranslocoPipe } from '@jsverse/transloco';
 import type { Category } from '../../models/category.model';
 import type { CategoryId } from '../../models/ids.model';
@@ -56,6 +57,7 @@ export interface ItemSheetResult {
     MatChipListbox,
     MatChipOption,
     MatButton,
+    MatIcon,
     TranslocoPipe,
   ],
   templateUrl: './item-sheet.component.html',
@@ -81,6 +83,9 @@ export class ItemSheetComponent {
   readonly secondaryCategoryIds = signal<CategoryId[]>([
     ...this.data.currentSecondaryCategoryIds,
   ]);
+  readonly secondaryExpanded = signal(
+    this.data.currentSecondaryCategoryIds.length > 0,
+  );
 
   private readonly existingNames = this.data.existingNames.map((n) =>
     n.toLowerCase(),
@@ -88,6 +93,10 @@ export class ItemSheetComponent {
 
   readonly secondaryCategoryOptions = computed(() =>
     this.categories.filter((c) => c.id !== this.primaryCategoryId()),
+  );
+
+  readonly secondarySelectedCount = computed(() =>
+    this.secondaryCategoryIds().length,
   );
 
   readonly hasConflict = computed(() => {
@@ -111,6 +120,10 @@ export class ItemSheetComponent {
 
   readonly actionLabel =
     this.mode === 'add' ? 'itemSheet.add' : 'itemSheet.save';
+
+  toggleSecondary(): void {
+    this.secondaryExpanded.update((v) => !v);
+  }
 
   onPrimaryCategoryChange(id: CategoryId | null): void {
     this.primaryCategoryId.set(id);

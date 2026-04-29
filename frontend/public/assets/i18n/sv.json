@@ -112,6 +112,10 @@
     "renameTitle": "Byt namn på kategori",
     "categoryName": "Kategorinamn",
     "nameConflict": "En kategori med detta namn finns redan",
+    "color": "Färg",
+    "chooseColor": "Välj färg",
+    "changeColor": "Ändra färg",
+    "clearColor": "Ta bort färg",
     "cancel": "Avbryt",
     "add": "Lägg till kategori",
     "save": "Spara"

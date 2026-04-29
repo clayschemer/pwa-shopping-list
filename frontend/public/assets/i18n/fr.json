@@ -112,6 +112,10 @@
     "renameTitle": "Renommer la catégorie",
     "categoryName": "Nom de la catégorie",
     "nameConflict": "Une catégorie portant ce nom existe déjà",
+    "color": "Couleur",
+    "chooseColor": "Choisir une couleur",
+    "changeColor": "Changer la couleur",
+    "clearColor": "Supprimer la couleur",
     "cancel": "Annuler",
     "add": "Ajouter la catégorie",
     "save": "Enregistrer"

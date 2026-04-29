@@ -47,6 +47,44 @@
     padding: 0;
   }
 
+  &__chip-dot {
+    display: inline-block;
+    width: 0.5rem;
+    height: 0.5rem;
+    border-radius: 50%;
+    flex-shrink: 0;
+    margin-inline-end: 0.25rem;
+    vertical-align: middle;
+  }
+
+  &__chip--tinted {
+    background-color: var(--chip-tint) !important;
+  }
+
+  &__secondary-section {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  &__secondary-toggle {
+    all: unset;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--mat-sys-on-surface-variant);
+    padding: 0.25rem 0;
+
+    &:focus-visible {
+      outline: 0.125rem solid var(--mat-sys-primary);
+      outline-offset: 0.125rem;
+      border-radius: 0.125rem;
+    }
+  }
+
   &__actions {
     display: flex;
     justify-content: flex-end;

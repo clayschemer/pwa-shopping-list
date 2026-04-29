@@ -4,10 +4,11 @@ import { categoriesActions } from './categories.actions';
 import type { Category } from '../../models/category.model';
 import type { AccountId, CategoryId } from '../../models/ids.model';
 
-const cat = (id: string, name: string, order: number): Category => ({
+const cat = (id: string, name: string, order: number, color: string | null = null): Category => ({
   id: id as CategoryId,
   accountId: 'a1' as AccountId,
   name,
+  color,
   globalSortOrder: order,
 });
 
@@ -115,6 +116,26 @@ describe('categoriesReducer', () => {
     );
     expect(state.entities['c1']!.name).toBe('Fresh Produce');
     expect(state.entities['c2']!.name).toBe('Dairy');
+  });
+
+  it('preserves color on categoryAdded', () => {
+    const loaded = categoriesReducer(
+      initialCategoriesState,
+      categoriesActions.categoriesLoaded({ categories: [cat('c1', 'Produce', 0)] }),
+    );
+    const state = categoriesReducer(
+      loaded,
+      categoriesActions.categoryAdded({ category: cat('c2', 'Dairy', 1, '#FF5733') }),
+    );
+    expect(state.entities['c2']!.color).toBe('#FF5733');
+  });
+
+  it('preserves null color', () => {
+    const state = categoriesReducer(
+      initialCategoriesState,
+      categoriesActions.categoriesLoaded({ categories: [cat('c1', 'Produce', 0, null)] }),
+    );
+    expect(state.entities['c1']!.color).toBeNull();
   });
 
   it('handles categoryChangesReceived with removals', () => {

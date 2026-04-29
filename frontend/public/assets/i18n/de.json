@@ -112,6 +112,10 @@
     "renameTitle": "Kategorie umbenennen",
     "categoryName": "Kategoriename",
     "nameConflict": "Eine Kategorie mit diesem Namen existiert bereits",
+    "color": "Farbe",
+    "chooseColor": "Farbe wählen",
+    "changeColor": "Farbe ändern",
+    "clearColor": "Farbe entfernen",
     "cancel": "Abbrechen",
     "add": "Kategorie hinzufügen",
     "save": "Speichern"

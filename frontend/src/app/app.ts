@@ -298,13 +298,14 @@ export class App {
       data: {
         mode: 'add',
         currentName: '',
+        currentColor: null,
         existingNames: this.categories().map((c) => c.name),
       },
     });
     ref.afterDismissed().subscribe((result) => {
       if (!result) return;
       this.store.dispatch(
-        categoriesApiActions.addCategoryRequested({ name: result.name }),
+        categoriesApiActions.addCategoryRequested({ name: result.name, color: result.color }),
       );
     });
   }

@@ -46,8 +46,8 @@ export class CategoriesEffects {
   readonly addCategory$ = createEffect(() =>
     this.actions$.pipe(
       ofType(categoriesApiActions.addCategoryRequested),
-      switchMap(({ name }) =>
-        from(this.categoryApi.addCategory(name)).pipe(
+      switchMap(({ name, color }) =>
+        from(this.categoryApi.addCategory(name, color)).pipe(
           map((result) => {
             if ((result as NameConflictError).type === 'NAME_CONFLICT') {
               return { type: '[Categories] Add Category Conflict (noop)' };
@@ -62,8 +62,8 @@ export class CategoriesEffects {
   readonly renameCategory$ = createEffect(() =>
     this.actions$.pipe(
       ofType(categoriesApiActions.renameCategoryRequested),
-      switchMap(({ id, name }) =>
-        from(this.categoryApi.renameCategory(id, name)).pipe(
+      switchMap(({ id, name, color }) =>
+        from(this.categoryApi.renameCategory(id, name, color)).pipe(
           map((result) => {
             if (result && (result as NameConflictError).type === 'NAME_CONFLICT') {
               return { type: '[Categories] Rename Category Conflict (noop)' };

@@ -74,27 +74,61 @@
           {{ 'itemSheet.uncategorised' | transloco }}
         </mat-chip-option>
         @for (cat of categories; track cat.id) {
-          <mat-chip-option [value]="cat.id">{{ cat.name }}</mat-chip-option>
+          <mat-chip-option
+            [value]="cat.id"
+            [style.--chip-tint]="cat.color ? cat.color + '1A' : 'transparent'"
+            [class.app-item-sheet__chip--tinted]="!!cat.color"
+          >
+            @if (cat.color) {
+              <span class="app-item-sheet__chip-dot" [style.background-color]="cat.color"></span>
+            }
+            {{ cat.name }}
+          </mat-chip-option>
         }
       </mat-chip-listbox>
     </fieldset>
 
     @if (secondaryCategoryOptions().length > 0) {
-      <fieldset class="app-item-sheet__group">
-        <legend class="app-item-sheet__group-label">
-          {{ 'itemSheet.secondaryCategories' | transloco }}
-        </legend>
-        <mat-chip-listbox
-          multiple
-          [value]="secondaryCategoryIds()"
-          (change)="onSecondarySelectionChange($event.value)"
-          [attr.aria-label]="'itemSheet.secondaryCategories' | transloco"
+      <div class="app-item-sheet__secondary-section">
+        <button
+          type="button"
+          class="app-item-sheet__secondary-toggle"
+          (click)="toggleSecondary()"
+          [attr.aria-expanded]="secondaryExpanded()"
         >
-          @for (cat of secondaryCategoryOptions(); track cat.id) {
-            <mat-chip-option [value]="cat.id">{{ cat.name }}</mat-chip-option>
-          }
-        </mat-chip-listbox>
-      </fieldset>
+          <span>
+            {{ 'itemSheet.secondaryCategories' | transloco }}
+            @if (secondarySelectedCount() > 0) {
+              ({{ secondarySelectedCount() }})
+            }
+          </span>
+          <mat-icon>{{ secondaryExpanded() ? 'expand_less' : 'expand_more' }}</mat-icon>
+        </button>
+
+        @if (secondaryExpanded()) {
+          <fieldset class="app-item-sheet__group">
+            <mat-chip-listbox
+              multiple
+              [value]="secondaryCategoryIds()"
+              (change)="onSecondarySelectionChange($event.value)"
+              [attr.aria-label]="'itemSheet.secondaryCategories' | transloco"
+            >
+              @for (cat of secondaryCategoryOptions(); track cat.id) {
+                <mat-chip-option
+                  [value]="cat.id"
+                  [style.--chip-tint]="cat.color ? cat.color + '1A' : 'transparent'"
+                  [class.app-item-sheet__chip--tinted]="!!cat.color"
+                >
+                  @if (cat.color) {
+                    <span class="app-item-sheet__chip-dot" [style.background-color]="cat.color"></span>
+                  }
+                  {{ cat.name }}
+                </mat-chip-option>
+              }
+            </mat-chip-listbox>
+          </fieldset>
+        }
+      </div>
     }
   }
 

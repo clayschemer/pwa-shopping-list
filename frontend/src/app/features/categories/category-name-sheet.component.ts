@@ -15,11 +15,13 @@ import { TranslocoPipe } from '@jsverse/transloco';
 export interface CategoryNameSheetData {
   mode: 'add' | 'rename';
   currentName: string;
+  currentColor: string | null;
   existingNames: string[];
 }
 
 export interface CategoryNameSheetResult {
   name: string;
+  color: string | null;
 }
 
 @Component({
@@ -43,6 +45,8 @@ export class CategoryNameSheetComponent {
 
   readonly mode = this.data.mode;
   readonly name = signal(this.data.currentName);
+  readonly color = signal<string | null>(this.data.currentColor);
+  readonly hasColor = computed(() => this.color() !== null);
 
   private readonly existingNames = this.data.existingNames.map((n) =>
     n.toLowerCase(),
@@ -74,10 +78,19 @@ export class CategoryNameSheetComponent {
     this.sheetRef.dismiss();
   }
 
+  onColorInput(event: Event): void {
+    this.color.set((event.target as HTMLInputElement).value);
+  }
+
+  onClearColor(): void {
+    this.color.set(null);
+  }
+
   onSubmit(): void {
     if (this.isValid()) {
       this.sheetRef.dismiss({
         name: this.name().trim(),
+        color: this.color(),
       } satisfies CategoryNameSheetResult);
     }
   }

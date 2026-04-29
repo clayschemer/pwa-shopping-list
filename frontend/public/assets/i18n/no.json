@@ -112,6 +112,10 @@
     "renameTitle": "Gi nytt navn til kategori",
     "categoryName": "Kategorinavn",
     "nameConflict": "En kategori med dette navnet finnes allerede",
+    "color": "Farge",
+    "chooseColor": "Velg farge",
+    "changeColor": "Endre farge",
+    "clearColor": "Fjern farge",
     "cancel": "Avbryt",
     "add": "Legg til kategori",
     "save": "Lagre"

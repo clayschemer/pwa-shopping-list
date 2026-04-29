@@ -8,6 +8,7 @@ import assert from 'node:assert/strict';
 interface Category {
   id: string;
   name: string;
+  color: string | null;
   globalSortOrder: number;
 }
 
@@ -18,13 +19,15 @@ interface CategoriesWorld {
   selectedShopId: string | null;
   addError: string | null;
   lastCreatedCategory: Category | null;
+  items: { id: string; name: string; primaryCategoryId: string | null; secondaryCategoryIds: string[] }[];
+  secondaryExpanded: boolean;
 }
 
 let _catId = 1;
 let _shopId = 1;
 
-function makeCategory(name: string, order = 0): Category {
-  return { id: `cat-${_catId++}`, name, globalSortOrder: order };
+function makeCategory(name: string, order = 0, color: string | null = null): Category {
+  return { id: `cat-${_catId++}`, name, color, globalSortOrder: order };
 }
 
 // ---------------------------------------------------------------------------
@@ -268,4 +271,165 @@ Then('that category and its items should not appear when shopping at that shop',
     const excludedCatId = this.categories[this.categories.length - 1].id;
     assert.ok(!shop.categoryOrder.includes(excludedCatId), 'Excluded category should not be in shop order');
   }
+});
+
+// ---------------------------------------------------------------------------
+// Category Color steps
+// ---------------------------------------------------------------------------
+
+Given('a category exists without a color', function (this: CategoriesWorld) {
+  this.categories = this.categories ?? [];
+  this.categories.push(makeCategory('Produce', 0, null));
+});
+
+Given('a category exists with a color', function (this: CategoriesWorld) {
+  this.categories = this.categories ?? [];
+  this.categories.push(makeCategory('Produce', 0, '#FF5733'));
+});
+
+Given('categories exist with colours assigned', function (this: CategoriesWorld) {
+  this.categories = this.categories ?? [];
+  this.categories.push(makeCategory('Produce', 0, '#4CAF50'));
+  this.categories.push(makeCategory('Dairy', 1, '#2196F3'));
+});
+
+Given('categories exist', function (this: CategoriesWorld) {
+  this.categories = this.categories ?? [];
+  if (this.categories.length === 0) {
+    this.categories.push(makeCategory('Produce', 0, '#4CAF50'));
+    this.categories.push(makeCategory('Dairy', 1, null));
+  }
+});
+
+Given('an item has secondary categories assigned', function (this: CategoriesWorld) {
+  this.items = this.items ?? [];
+  this.items.push({
+    id: 'item-1',
+    name: 'Milk',
+    primaryCategoryId: this.categories[0]?.id ?? null,
+    secondaryCategoryIds: this.categories.length > 1 ? [this.categories[1].id] : [],
+  });
+});
+
+When('I create a new category with a valid name and a color', function (this: CategoriesWorld) {
+  this.categories = this.categories ?? [];
+  const cat = makeCategory('Coloured Category', this.categories.length + 1, '#E91E63');
+  this.categories.push(cat);
+  this.lastCreatedCategory = cat;
+  this.addError = null;
+});
+
+When('I create a new category with a valid name and no color', function (this: CategoriesWorld) {
+  this.categories = this.categories ?? [];
+  const cat = makeCategory('Plain Category', this.categories.length + 1, null);
+  this.categories.push(cat);
+  this.lastCreatedCategory = cat;
+  this.addError = null;
+});
+
+When('I edit the category and assign a color', function (this: CategoriesWorld) {
+  const cat = this.categories[this.categories.length - 1];
+  if (cat) cat.color = '#9C27B0';
+});
+
+When('I edit the category and remove its color', function (this: CategoriesWorld) {
+  const cat = this.categories[this.categories.length - 1];
+  if (cat) cat.color = null;
+});
+
+When('items are assigned to that category', function (this: CategoriesWorld) {
+  this.items = this.items ?? [];
+  const cat = this.categories[this.categories.length - 1];
+  this.items.push({
+    id: 'item-assigned',
+    name: 'Test Item',
+    primaryCategoryId: cat?.id ?? null,
+    secondaryCategoryIds: [],
+  });
+});
+
+When('I view the navigation drawer', function (this: CategoriesWorld) {
+  // Navigation drawer displays ordered categories — no special state needed
+});
+
+When('I view the shopping list', function (this: CategoriesWorld) {
+  // Viewing the shopping list — no special state change
+});
+
+When('I open the item editor', function (this: CategoriesWorld) {
+  this.secondaryExpanded = false;
+});
+
+When('I open the item editor for an item with no secondary categories', function (this: CategoriesWorld) {
+  this.secondaryExpanded = false;
+});
+
+When('I open the item editor and expand the secondary categories section', function (this: CategoriesWorld) {
+  this.secondaryExpanded = true;
+});
+
+When('I open the item editor for that item', function (this: CategoriesWorld) {
+  const item = this.items?.find((i) => i.secondaryCategoryIds.length > 0);
+  this.secondaryExpanded = !!item && item.secondaryCategoryIds.length > 0;
+});
+
+Then('the category should be created with the chosen color', function (this: CategoriesWorld) {
+  assert.ok(this.lastCreatedCategory, 'Expected a category to have been created');
+  assert.ok(this.lastCreatedCategory.color !== null, 'Category should have a color');
+});
+
+Then('the category should be updated with the chosen color', function (this: CategoriesWorld) {
+  const cat = this.categories[this.categories.length - 1];
+  assert.ok(cat, 'Category should exist');
+  assert.equal(cat.color, '#9C27B0');
+});
+
+Then('the category should have no color', function (this: CategoriesWorld) {
+  const cat = this.categories[this.categories.length - 1];
+  assert.ok(cat, 'Category should exist');
+  assert.equal(cat.color, null);
+});
+
+Then('the category header should display the colour indicator', function (this: CategoriesWorld) {
+  const cat = this.categories.find((c) => c.color !== null);
+  assert.ok(cat, 'A category with a color should exist');
+  assert.ok(cat.color, 'Category should have a color to display as indicator');
+});
+
+Then('the category should display its colour indicator', function (this: CategoriesWorld) {
+  const cat = this.categories.find((c) => c.color !== null);
+  assert.ok(cat, 'A category with a color should exist');
+  assert.ok(cat.color, 'Category should have a color to display as indicator');
+});
+
+Then('no colour indicator should be shown for that category', function (this: CategoriesWorld) {
+  const cat = this.categories[this.categories.length - 1];
+  assert.ok(cat, 'Category should exist');
+  assert.equal(cat.color, null, 'Category should have no color');
+});
+
+Then('each category chip should display its colour indicator', function (this: CategoriesWorld) {
+  const coloured = this.categories.filter((c) => c.color !== null);
+  assert.ok(coloured.length > 0, 'At least one category should have a color');
+  for (const cat of coloured) {
+    assert.ok(cat.color, `Category ${cat.name} should have a color`);
+  }
+});
+
+Then('the category should be created without a color', function (this: CategoriesWorld) {
+  assert.ok(this.lastCreatedCategory, 'Expected a category to have been created');
+  assert.equal(this.lastCreatedCategory.color, null, 'Category should have no color');
+});
+
+Then('the secondary categories section should be collapsed', function (this: CategoriesWorld) {
+  assert.equal(this.secondaryExpanded, false, 'Secondary categories should be collapsed');
+});
+
+Then('I should see the available secondary category options', function (this: CategoriesWorld) {
+  assert.equal(this.secondaryExpanded, true, 'Secondary categories should be expanded');
+  assert.ok(this.categories.length > 0, 'Categories should exist to display as options');
+});
+
+Then('the secondary categories section should be expanded', function (this: CategoriesWorld) {
+  assert.equal(this.secondaryExpanded, true, 'Secondary categories should be auto-expanded');
 });

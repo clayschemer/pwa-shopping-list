@@ -25,10 +25,11 @@ const item = (id: string, name: string, primary: string | null): Item =>
     purchaseCount: 0,
   }) as Item;
 
-const cat = (id: string, name: string): Category => ({
+const cat = (id: string, name: string, color: string | null = null): Category => ({
   id: id as CategoryId,
   accountId: 'a1' as AccountId,
   name,
+  color,
   globalSortOrder: 0,
 });
 
@@ -96,6 +97,19 @@ describe('selectGroupedPlanList', () => {
       [cat('c1', 'Produce')],
     );
     expect(groups[0]!.estTotal).toBeCloseTo(2.3);
+  });
+
+  it('passes categoryColor through to groups', () => {
+    const items = [item('i1', 'Milk', 'c1')];
+    const categories = [cat('c1', 'Dairy', '#2196F3')];
+    const groups = selectGroupedPlanList.projector(items, categories);
+    expect(groups[0]!.categoryColor).toBe('#2196F3');
+  });
+
+  it('sets categoryColor to null for uncategorised group', () => {
+    const items = [item('i1', 'Loose', null)];
+    const groups = selectGroupedPlanList.projector(items, []);
+    expect(groups[0]!.categoryColor).toBeNull();
   });
 
   it('sets estTotal to 0 for the uncategorised group', () => {

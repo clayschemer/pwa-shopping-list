@@ -4,5 +4,6 @@ export interface Category {
   id: CategoryId;
   accountId: AccountId;
   name: string;
+  color: string | null;
   globalSortOrder: number;
 }

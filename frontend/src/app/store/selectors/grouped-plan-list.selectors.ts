@@ -8,6 +8,7 @@ import type { CategoryId } from '../../models/ids.model';
 export interface PlanListGroup {
   categoryId: CategoryId | null; // null = uncategorised bucket
   categoryName: string | null;
+  categoryColor: string | null;
   items: Item[];
   estTotal: number; // sum of price for active items; 0 means hidden in UI
 }
@@ -40,6 +41,7 @@ export const selectGroupedPlanList = createSelector(
         groups.push({
           categoryId: cat.id,
           categoryName: cat.name,
+          categoryColor: cat.color,
           items: [...bucket].sort((a, b) => a.name.localeCompare(b.name)),
           estTotal: sumPrices(bucket),
         });
@@ -50,6 +52,7 @@ export const selectGroupedPlanList = createSelector(
       groups.push({
         categoryId: UNCATEGORISED_KEY,
         categoryName: null,
+        categoryColor: null,
         items: [...uncategorised].sort((a, b) =>
           a.name.localeCompare(b.name),
         ),

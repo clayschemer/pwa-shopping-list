@@ -178,6 +178,7 @@ export class PlanComponent {
   openRenameCategory(group: PlanListGroup): void {
     if (group.categoryId === null || group.categoryName === null) return;
     const categoryId = group.categoryId;
+    const category = this.categories().find((c) => c.id === categoryId);
     const ref = this.bottomSheet.open<
       CategoryNameSheetComponent,
       CategoryNameSheetData,
@@ -186,6 +187,7 @@ export class PlanComponent {
       data: {
         mode: 'rename',
         currentName: group.categoryName,
+        currentColor: category?.color ?? null,
         existingNames: this.categories()
           .filter((c) => c.id !== categoryId)
           .map((c) => c.name),
@@ -198,6 +200,7 @@ export class PlanComponent {
         categoriesApiActions.renameCategoryRequested({
           id: categoryId,
           name: result.name,
+          color: result.color,
         }),
       );
     });

@@ -82,6 +82,7 @@ Category
   - id
   - accountId: AccountId
   - name                                ← unique within account
+  - color: string | null                ← optional hex color (e.g. '#FF5733'); null = no color
   - globalSortOrder: number             ← fallback order when no shop is selected
 ```
 

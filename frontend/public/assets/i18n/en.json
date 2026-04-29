@@ -112,6 +112,10 @@
     "renameTitle": "Rename category",
     "categoryName": "Category name",
     "nameConflict": "A category with this name already exists",
+    "color": "Colour",
+    "chooseColor": "Choose colour",
+    "changeColor": "Change colour",
+    "clearColor": "Remove colour",
     "cancel": "Cancel",
     "add": "Add category",
     "save": "Save"

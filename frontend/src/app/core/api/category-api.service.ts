@@ -27,6 +27,7 @@ function mapCategory(snap: QueryDocumentSnapshot, accountId: AccountId): Categor
     id: snap.id as CategoryId,
     accountId,
     name: (data['name'] ?? '') as string,
+    color: (data['color'] ?? null) as string | null,
     globalSortOrder: (data['globalSortOrder'] ?? 0) as number,
   };
 }
@@ -46,7 +47,7 @@ export class CategoryApiService {
     return snap.docs.map((d) => mapCategory(d, accountId));
   }
 
-  async addCategory(name: string): Promise<Category | NameConflictError> {
+  async addCategory(name: string, color: string | null = null): Promise<Category | NameConflictError> {
     const { accountId } = this.context.require();
     return runInInjectionContext(this.injector, async () => {
       const trimmed = name.trim();
@@ -66,6 +67,7 @@ export class CategoryApiService {
 
       const ref = await addDoc(paths.categories(this.db, accountId), {
         name: trimmed,
+        color,
         globalSortOrder: nextOrder,
       });
 
@@ -86,6 +88,7 @@ export class CategoryApiService {
         id: ref.id as CategoryId,
         accountId,
         name: trimmed,
+        color,
         globalSortOrder: nextOrder,
       };
     });
@@ -94,6 +97,7 @@ export class CategoryApiService {
   async renameCategory(
     id: CategoryId,
     name: string,
+    color: string | null = null,
   ): Promise<Category | NotFoundError | NameConflictError> {
     const { accountId } = this.context.require();
     return runInInjectionContext(this.injector, async () => {
@@ -106,7 +110,7 @@ export class CategoryApiService {
       }
       const ref = paths.categoryDoc(this.db, accountId, id);
       try {
-        await updateDoc(ref, { name: trimmed });
+        await updateDoc(ref, { name: trimmed, color });
       } catch {
         return { type: 'NOT_FOUND', entityKind: 'category', id };
       }

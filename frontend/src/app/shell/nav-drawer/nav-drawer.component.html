@@ -44,6 +44,9 @@
             class="app-nav-drawer__category-name"
             (click)="onCategoryTap(category.id)"
           >
+            @if (category.color) {
+              <span class="app-nav-drawer__category-dot" [style.background-color]="category.color"></span>
+            }
             {{ category.name }}
           </button>
           <mat-icon cdkDragHandle class="app-nav-drawer__drag-handle">drag_indicator</mat-icon>

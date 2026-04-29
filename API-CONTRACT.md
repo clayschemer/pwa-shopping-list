@@ -125,6 +125,7 @@ Category {
   id:              CategoryId
   accountId:       AccountId
   name:            string
+  color:           string | null   // hex color, e.g. '#FF5733'; null = no color
   globalSortOrder: number
 }
 ```
@@ -563,17 +564,19 @@ Intent:  Create a new category.
          existing shops. Explicit exclusion from a shop is a separate operation.
          The new Category arrives via categoryChanges$ as a batch of one.
          All affected Shops arrive via shopChanges$ as a single batch.
-Input:   name: string
+Input:   name:  string
+         color: string | null   // optional hex color; null = no color
 Output:  Category
 Errors:  NameConflictError
 ```
 
 #### renameCategory
 ```
-Intent:  Rename an existing category.
+Intent:  Rename an existing category and/or update its color.
          The updated Category arrives via categoryChanges$ as a batch of one.
-Input:   id:   CategoryId
-         name: string
+Input:   id:    CategoryId
+         name:  string
+         color: string | null   // optional hex color; null = no color
 Output:  Category
 Errors:  NotFoundError
          NameConflictError

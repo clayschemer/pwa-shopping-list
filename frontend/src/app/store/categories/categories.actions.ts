@@ -18,8 +18,8 @@ export const categoriesApiActions = createActionGroup({
   source: 'Categories API',
   events: {
     'Fetch All Categories Requested': emptyProps(),
-    'Add Category Requested': props<{ name: string }>(),
-    'Rename Category Requested': props<{ id: CategoryId; name: string }>(),
+    'Add Category Requested': props<{ name: string; color: string | null }>(),
+    'Rename Category Requested': props<{ id: CategoryId; name: string; color: string | null }>(),
     'Delete Category Requested': props<{ id: CategoryId }>(),
     'Set Global Category Order Requested': props<{ orderedIds: CategoryId[] }>(),
   },

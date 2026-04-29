@@ -21,6 +21,42 @@
     }
   </mat-form-field>
 
+  <div class="app-category-name-sheet__color-row">
+    <span class="app-category-name-sheet__color-label">
+      {{ 'categoryNameSheet.color' | transloco }}
+    </span>
+    <div class="app-category-name-sheet__color-controls">
+      @if (hasColor()) {
+        <span
+          class="app-category-name-sheet__color-preview"
+          [style.background-color]="color()"
+        ></span>
+      } @else {
+        <span class="app-category-name-sheet__color-preview app-category-name-sheet__color-preview--none"></span>
+      }
+      <label class="app-category-name-sheet__color-picker-label">
+        <input
+          type="color"
+          class="app-category-name-sheet__color-input"
+          [value]="color() ?? '#808080'"
+          (input)="onColorInput($event)"
+        />
+        <span class="app-category-name-sheet__color-picker-text">
+          {{ (hasColor() ? 'categoryNameSheet.changeColor' : 'categoryNameSheet.chooseColor') | transloco }}
+        </span>
+      </label>
+      @if (hasColor()) {
+        <button
+          type="button"
+          class="app-category-name-sheet__color-clear"
+          (click)="onClearColor()"
+        >
+          {{ 'categoryNameSheet.clearColor' | transloco }}
+        </button>
+      }
+    </div>
+  </div>
+
   <div class="app-category-name-sheet__actions">
     <button mat-button (click)="onCancel()">
       {{ 'categoryNameSheet.cancel' | transloco }}

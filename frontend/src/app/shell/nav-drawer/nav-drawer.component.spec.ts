@@ -18,6 +18,7 @@ const cat = (id: string, name: string, order: number): Category => ({
   id: id as CategoryId,
   accountId: 'a1' as AccountId,
   name,
+  color: null,
   globalSortOrder: order,
 });
 

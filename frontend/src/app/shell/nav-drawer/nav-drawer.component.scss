@@ -70,6 +70,14 @@
     }
   }
 
+  &__category-dot {
+    display: inline-block;
+    width: 0.5rem;
+    height: 0.5rem;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
   &__category-name {
     all: unset;
     cursor: pointer;
@@ -77,6 +85,9 @@
     font-size: 0.9375rem;
     color: var(--mat-sys-on-surface);
     padding: 0.5rem 0.25rem;
+    display: flex;
+    align-items: center;
+    gap: 0.375rem;
 
     &:focus-visible {
       outline: 2px solid var(--mat-sys-primary);

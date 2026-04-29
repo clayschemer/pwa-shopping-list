@@ -25,6 +25,9 @@
       >
         <header class="app-plan__group-header">
           <h2 class="app-plan__group-title">
+            @if (group.categoryColor) {
+              <span class="app-plan__group-dot" [style.background-color]="group.categoryColor"></span>
+            }
             {{ group.categoryName ?? ('plan.uncategorised' | transloco) }}
           </h2>
           <div class="app-plan__group-meta">

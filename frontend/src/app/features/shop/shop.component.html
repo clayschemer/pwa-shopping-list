@@ -30,6 +30,9 @@
       >
         <header class="app-shop__group-header">
           <h2 class="app-shop__group-title">
+            @if (group.categoryColor) {
+              <span class="app-shop__group-dot" [style.background-color]="group.categoryColor"></span>
+            }
             {{ group.categoryName ?? ('shop.uncategorised' | transloco) }}
           </h2>
           <div class="app-shop__group-totals">

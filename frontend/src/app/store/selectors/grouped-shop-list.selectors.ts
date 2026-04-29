@@ -10,6 +10,7 @@ import type { CategoryId } from '../../models/ids.model';
 export interface ShopListGroup {
   categoryId: CategoryId | null; // null = uncategorised bucket
   categoryName: string | null;
+  categoryColor: string | null;
   items: Item[];
   estTotal: number;
   sessionCheckedTotal: number;
@@ -74,6 +75,7 @@ export const selectGroupedShopList = createSelector(
       groups.push({
         categoryId: cat.id,
         categoryName: cat.name,
+        categoryColor: cat.color,
         items: sorted,
         estTotal,
         sessionCheckedTotal,
@@ -85,6 +87,7 @@ export const selectGroupedShopList = createSelector(
       groups.push({
         categoryId: null,
         categoryName: null,
+        categoryColor: null,
         items: sorted,
         estTotal: sorted
           .filter((i) => !i.removed && i.price !== null)
