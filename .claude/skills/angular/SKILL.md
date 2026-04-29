@@ -171,6 +171,33 @@ Components decide, they do not process. A component method calls a service or di
 - Do not manage async subscriptions manually — use `toSignal()` or the `async` pipe
 - Do not call a service method that returns data and render it directly — route shared data through the store
 
+### Loading states — skeleton loaders
+
+Views that depend on async data (store selectors with a `loaded` flag) must show **skeleton loaders** — not spinners — while waiting for data. Skeletons mimic the layout of the real content so the page does not shift on load.
+
+- Use the `selectListDataLoaded` cross-domain selector (combines items + categories + shops loaded flags) for list views
+- Use `selectIsAuthChecking` for views that depend only on account/auth state
+- Skeleton markup lives in the component template behind `@if (!loaded())`, with `aria-hidden="true"`
+- Skeleton SCSS uses `@use '../../../styles/skeleton';` and `@include skeleton.pulse;` on each placeholder element
+- The pulse animation is automatically suppressed under `prefers-reduced-motion` (static grey blocks remain visible)
+- Skeleton layout must reflect the real content structure — group containers, row heights, and spacing should match
+- Use varying widths on placeholders (e.g. 40%, 60%, 5rem) to suggest mixed content lengths
+
+**Template pattern:**
+```html
+@if (!loaded()) {
+  <div class="app-feature__skeleton" aria-hidden="true">
+    <!-- skeleton markup mimicking real layout -->
+  </div>
+} @else if (items().length === 0) {
+  <p class="app-feature__empty">...</p>
+} @else {
+  <!-- real content -->
+}
+```
+
+Do **not** use `MatProgressSpinner` for page-level content loading. Spinners are acceptable only for inline action feedback (e.g. a submit button).
+
 ### Container vs presentational split
 
 - **Container components** connect to the store. They select state and dispatch actions.

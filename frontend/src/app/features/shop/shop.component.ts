@@ -4,6 +4,7 @@ import { Store } from '@ngrx/store';
 import { MatIcon } from '@angular/material/icon';
 import { TranslocoPipe } from '@jsverse/transloco';
 import { selectGroupedShopList } from '../../store/selectors/grouped-shop-list.selectors';
+import { selectListDataLoaded } from '../../store/selectors/list-data-loaded.selectors';
 import { selectActiveSessionForCurrentShop } from '../../store/sessions/sessions.selectors';
 import { selectPendingChecks } from '../../store/items/items.selectors';
 import { itemsActions, itemsApiActions } from '../../store/items/items.actions';
@@ -21,6 +22,10 @@ import type { ItemId } from '../../models/ids.model';
 })
 export class ShopComponent {
   private readonly store = inject(Store);
+
+  readonly loaded = toSignal(this.store.select(selectListDataLoaded), {
+    initialValue: false,
+  });
 
   readonly groups = toSignal(this.store.select(selectGroupedShopList), {
     initialValue: [],

@@ -10,6 +10,27 @@
   <h1 class="app-settings__title">{{ 'settings.title' | transloco }}</h1>
 </header>
 
+@if (loading()) {
+  <div class="app-settings__body" aria-hidden="true">
+    @for (section of [1, 2, 3]; track section) {
+      <div class="app-settings__skeleton-section">
+        <div class="app-settings__skeleton-section-title"></div>
+        <div class="app-settings__skeleton-rows">
+          @for (row of section === 2 ? [1, 2, 3] : [1, 2]; track row) {
+            <div class="app-settings__skeleton-row">
+              <div class="app-settings__skeleton-row-item">
+                <div class="app-settings__skeleton-icon"></div>
+                <div class="app-settings__skeleton-label"></div>
+                <div class="app-settings__skeleton-toggle"></div>
+              </div>
+              <div class="app-settings__skeleton-hint"></div>
+            </div>
+          }
+        </div>
+      </div>
+    }
+  </div>
+} @else {
 <div class="app-settings__body">
   <!-- Appearance -->
   <section class="app-settings__section">
@@ -182,3 +203,4 @@
     </button>
   </section>
 </div>
+}

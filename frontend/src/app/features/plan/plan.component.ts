@@ -8,6 +8,7 @@ import { MatIconButton } from '@angular/material/button';
 import { MatMenu, MatMenuItem, MatMenuTrigger } from '@angular/material/menu';
 import { TranslocoPipe } from '@jsverse/transloco';
 import { selectGroupedPlanList, type PlanListGroup } from '../../store/selectors/grouped-plan-list.selectors';
+import { selectListDataLoaded } from '../../store/selectors/list-data-loaded.selectors';
 import { selectAllCategories } from '../../store/categories/categories.selectors';
 import { selectAllShops } from '../../store/shops/shops.selectors';
 import { selectActiveItems } from '../../store/items/items.selectors';
@@ -66,6 +67,10 @@ export class PlanComponent {
   private readonly bottomSheet = inject(MatBottomSheet);
   private readonly dialog = inject(MatDialog);
   private readonly host = inject(ElementRef<HTMLElement>);
+
+  readonly loaded = toSignal(this.store.select(selectListDataLoaded), {
+    initialValue: false,
+  });
 
   readonly groups = toSignal(this.store.select(selectGroupedPlanList), {
     initialValue: [],

@@ -12,8 +12,8 @@ import { TranslocoPipe } from '@jsverse/transloco';
 import { ThemeService, Language, Currency } from '../../core/theme/theme.service';
 import { PwaInstallService } from '../../core/pwa/pwa-install.service';
 import { selectCurrentUser } from '../../store/account/account.selectors';
+import { selectIsAuthChecking } from '../../store/account/account.selectors';
 import { authActions } from '../../store/account/account.actions';
-import { V } from '@angular/cdk/keycodes';
 
 @Component({
   selector: 'app-settings',
@@ -43,6 +43,9 @@ export class SettingsComponent {
   readonly effectiveDarkMode = this.themeService.effectiveDarkMode;
   readonly effectiveReduceMotion = this.themeService.effectiveReduceMotion;
   readonly effectiveHighContrast = this.themeService.effectiveHighContrast;
+  readonly loading = toSignal(this.store.select(selectIsAuthChecking), {
+    initialValue: true,
+  });
   readonly user = toSignal(this.store.select(selectCurrentUser));
 
   readonly languages: Language[] = ['EN', 'NO', 'SV', 'DE', 'FR'];

@@ -314,6 +314,12 @@ Follow these formatting rules to avoid conflicts with Prettier's SCSS formatter:
 
 ---
 
+## Shared mixins
+
+`frontend/src/styles/_skeleton.scss` — skeleton loader pulse animation. Import with `@use '../../../styles/skeleton';` (adjust relative depth) and apply `@include skeleton.pulse;` on placeholder elements. The mixin sets the background colour (`--mat-sys-surface-container-highest`), border radius, and a `prefers-reduced-motion`-safe opacity pulse animation.
+
+---
+
 ## Quick reference checklist
 
 Before finalising any SCSS, verify:
@@ -328,3 +334,4 @@ Before finalising any SCSS, verify:
 - [ ] Focus indicators present on interactive elements (using `:focus-visible`)
 - [ ] Touch targets ≥ 2.75rem on interactive elements
 - [ ] Specificity kept flat — no deep SCSS nesting
+- [ ] Loading states use skeleton loaders, not spinners (see `_skeleton.scss`)

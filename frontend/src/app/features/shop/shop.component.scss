@@ -1,8 +1,85 @@
+@use '../../../styles/skeleton';
+
 .app-shop {
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
   padding: 0.5rem 0 6rem;
+
+  &__skeleton {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  &__skeleton-group {
+    display: flex;
+    flex-direction: column;
+  }
+
+  &__skeleton-header {
+    padding: 0.25rem 0.5rem 0 0.75rem;
+    background: var(--mat-sys-surface-container);
+    border-radius: 0.5rem 0.5rem 0 0;
+    width: max-content;
+  }
+
+  &__skeleton-title {
+    @include skeleton.pulse;
+
+    width: 5rem;
+    height: 0.75rem;
+    margin: 0.25rem 0;
+  }
+
+  &__skeleton-items {
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+    padding: 0.15rem;
+    background: var(--mat-sys-surface-container);
+    border-radius: 0 0.5rem 0.5rem 0.5rem;
+  }
+
+  &__skeleton-item {
+    display: flex;
+    align-items: center;
+    min-height: 2.75rem;
+    gap: 0.5rem;
+    border-radius: 0.5rem;
+    background-color: var(--mat-sys-surface-container-lowest);
+  }
+
+  &__skeleton-item-main {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.75rem;
+  }
+
+  &__skeleton-name {
+    @include skeleton.pulse;
+
+    width: 40%;
+    height: 1rem;
+  }
+
+  &__skeleton-price {
+    @include skeleton.pulse;
+
+    width: 3rem;
+    height: 0.8125rem;
+  }
+
+  &__skeleton-check {
+    @include skeleton.pulse;
+
+    width: 1.5rem;
+    height: 1.5rem;
+    margin-right: 1rem;
+    border-radius: 0.1875rem;
+  }
 
   &__empty {
     text-align: center;

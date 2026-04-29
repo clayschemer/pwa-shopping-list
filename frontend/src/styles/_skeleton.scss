@@ -1,0 +1,22 @@
+// _skeleton.scss — Shared skeleton loader shimmer animation
+// Usage: @use '../../../styles/skeleton'; then @include skeleton.pulse;
+
+@mixin pulse {
+  background: var(--mat-sys-surface-container-highest);
+  border-radius: 0.25rem;
+
+  @media (prefers-reduced-motion: no-preference) {
+    animation: skeleton-shimmer 1.5s ease-in-out infinite;
+  }
+}
+
+@keyframes skeleton-shimmer {
+  0%,
+  100% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0.4;
+  }
+}

@@ -134,7 +134,7 @@ For SCSS conventions (BEM, units, layout, accessibility, reduced motion) → `.c
 │   │   │   ├── app.config.ts
 │   │   │   ├── app.routes.ts
 │   │   │   └── app.{ts,html,scss}   ← root component
-│   │   ├── styles/                  ← design-system.scss + Angular Material theme
+│   │   ├── styles/                  ← Angular Material theme + skeleton mixin
 │   │   └── testing/                 ← shared test helpers (init-testbed, transloco-testing)
 │   ├── tests/
 │   │   └── acceptance/

@@ -70,6 +70,19 @@ Under `prefers-reduced-motion: reduce`, all durations collapse to `0ms` — ever
 
 See `.claude/skills/angular-material3-theming/SKILL.md` for conventions.
 
+### Loading States — Skeleton Loaders
+Views that load async data show **skeleton loaders** — not spinners — while the data is being fetched. Skeletons mirror the visual structure of the real content (group containers, row heights, spacing, alignment) so the page feels stable and does not shift on load.
+
+- **Colour:** `--mat-sys-surface-container-highest` — one step above the surface container, visible in both light and dark themes
+- **Shape:** `border-radius: 0.25rem` on placeholder bars; container shapes match the real content (e.g. 0.5rem rounded groups)
+- **Animation:** A gentle opacity pulse (`1 → 0.4 → 1` over 1.5s ease-in-out infinite). Suppressed under `prefers-reduced-motion` — placeholders remain static
+- **Accessibility:** Entire skeleton wrapper carries `aria-hidden="true"`
+- **Composition:** Each view creates its own skeleton layout reflecting its unique structure (e.g. plan mode shows category groups with item rows; shop mode adds checkbox placeholders; settings shows toggle rows with hint lines)
+
+Shared pulse mixin lives in `frontend/src/styles/_skeleton.scss`. Components import it via `@use` and apply `@include skeleton.pulse;` on each placeholder element.
+
+Spinners (`MatProgressSpinner`) are acceptable only for inline action feedback — e.g. a submit button in progress. They are not used for page-level content loading.
+
 ---
 
 ## App Shell & Navigation (Screen 1)

@@ -1,5 +1,21 @@
 <section class="app-plan" [attr.aria-label]="'plan.listLabel' | transloco">
-  @if (groups().length === 0) {
+  @if (!loaded()) {
+    <div class="app-plan__skeleton" aria-hidden="true">
+      @for (g of [1, 2]; track g) {
+        <div class="app-plan__skeleton-group">
+          <div class="app-plan__skeleton-header">
+            <div class="app-plan__skeleton-title"></div>
+          </div>
+          @for (i of g === 1 ? [1, 2, 3] : [1, 2]; track i) {
+            <div class="app-plan__skeleton-item">
+              <div class="app-plan__skeleton-name"></div>
+              <div class="app-plan__skeleton-qty"></div>
+            </div>
+          }
+        </div>
+      }
+    </div>
+  } @else if (groups().length === 0) {
     <p class="app-plan__empty">{{ 'plan.empty' | transloco }}</p>
   } @else {
     @for (group of groups(); track group.categoryId ?? '__uncat__') {
