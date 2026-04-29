@@ -1,5 +1,5 @@
 import { ApplicationConfig, isDevMode, provideBrowserGlobalErrorListeners } from '@angular/core';
-import { provideRouter } from '@angular/router';
+import { provideRouter, withViewTransitions, ActivatedRouteSnapshot } from '@angular/router';
 import { provideStore } from '@ngrx/store';
 import { provideEffects } from '@ngrx/effects';
 import { initializeApp, provideFirebaseApp } from '@angular/fire/app';
@@ -29,6 +29,29 @@ import { ReconnectEffects } from './store/reconnect/reconnect.effects';
 import { environment } from '../environments/environment';
 import { provideAppTransloco } from './core/i18n/transloco-config';
 
+const OVERLAY_PATHS = new Set(['settings', 'manage-shops', 'history']);
+
+function leafPath(snapshot: ActivatedRouteSnapshot): string {
+  let node = snapshot;
+  while (node.firstChild) node = node.firstChild;
+  return node.routeConfig?.path ?? '';
+}
+
+function viewTransitionClass(
+  from: ActivatedRouteSnapshot,
+  to: ActivatedRouteSnapshot,
+): string | null {
+  const fromPath = leafPath(from);
+  const toPath = leafPath(to);
+  const fromOverlay = OVERLAY_PATHS.has(fromPath);
+  const toOverlay = OVERLAY_PATHS.has(toPath);
+  if (toOverlay && !fromOverlay) return 'app-vt-overlay-in';
+  if (fromOverlay && !toOverlay) return 'app-vt-overlay-out';
+  if (fromPath === '' && toPath === 'shop') return 'app-vt-swap-forward';
+  if (fromPath === 'shop' && toPath === '') return 'app-vt-swap-backward';
+  return null;
+}
+
 const USE_EMULATORS =
   typeof window !== 'undefined' &&
   (window.location.hostname === 'localhost' ||
@@ -38,7 +61,22 @@ const USE_EMULATORS =
 export const appConfig: ApplicationConfig = {
   providers: [
     provideBrowserGlobalErrorListeners(),
-    provideRouter(routes),
+    provideRouter(
+      routes,
+      withViewTransitions({
+        skipInitialTransition: true,
+        onViewTransitionCreated: ({ transition, from, to }) => {
+          const cls = viewTransitionClass(from, to);
+          if (!cls) {
+            transition.skipTransition();
+            return;
+          }
+          const html = document.documentElement;
+          html.classList.add(cls);
+          transition.finished.finally(() => html.classList.remove(cls));
+        },
+      }),
+    ),
     ...provideAppTransloco(),
     provideStore({
       account: accountReducer,

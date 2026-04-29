@@ -1,0 +1,81 @@
+// _view-transitions.scss — Cross-route slide animations via the
+// browser's View Transitions API (wired up by withViewTransitions() in
+// app.config.ts). Direction class is added to <html> for the duration of
+// each transition.
+//
+//   .app-vt-overlay-in  — entering Settings / Manage Shops / History
+//   .app-vt-overlay-out — leaving those routes
+//   .app-vt-swap-forward  — Plan → Shop
+//   .app-vt-swap-backward — Shop → Plan
+//
+// Honors prefers-reduced-motion (OS) and the explicit
+// body.theme-reduce-motion override.
+
+$vt-duration: 280ms;
+$vt-easing: cubic-bezier(0.2, 0, 0, 1);
+
+@media (prefers-reduced-motion: no-preference) {
+  html:not(:has(body.theme-reduce-motion)) {
+    &.app-vt-overlay-in {
+      &::view-transition-old(root) {
+        animation: app-vt-stay $vt-duration linear both;
+      }
+      &::view-transition-new(root) {
+        animation: app-vt-slide-in-right $vt-duration $vt-easing both;
+      }
+    }
+
+    &.app-vt-overlay-out {
+      &::view-transition-old(root) {
+        animation: app-vt-slide-out-right $vt-duration $vt-easing both;
+        z-index: 1;
+      }
+      &::view-transition-new(root) {
+        animation: app-vt-stay $vt-duration linear both;
+      }
+    }
+
+    &.app-vt-swap-forward {
+      &::view-transition-old(root) {
+        animation: app-vt-slide-out-left $vt-duration $vt-easing both;
+      }
+      &::view-transition-new(root) {
+        animation: app-vt-slide-in-right $vt-duration $vt-easing both;
+      }
+    }
+
+    &.app-vt-swap-backward {
+      &::view-transition-old(root) {
+        animation: app-vt-slide-out-right $vt-duration $vt-easing both;
+      }
+      &::view-transition-new(root) {
+        animation: app-vt-slide-in-left $vt-duration $vt-easing both;
+      }
+    }
+  }
+}
+
+@keyframes app-vt-stay {
+  from { opacity: 1; }
+  to { opacity: 1; }
+}
+
+@keyframes app-vt-slide-in-right {
+  from { transform: translateX(100%); }
+  to { transform: translateX(0); }
+}
+
+@keyframes app-vt-slide-out-right {
+  from { transform: translateX(0); }
+  to { transform: translateX(100%); }
+}
+
+@keyframes app-vt-slide-in-left {
+  from { transform: translateX(-100%); }
+  to { transform: translateX(0); }
+}
+
+@keyframes app-vt-slide-out-left {
+  from { transform: translateX(0); }
+  to { transform: translateX(-100%); }
+}
