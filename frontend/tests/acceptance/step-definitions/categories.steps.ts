@@ -352,9 +352,7 @@ When('I view the navigation drawer', function (this: CategoriesWorld) {
   // Navigation drawer displays ordered categories — no special state needed
 });
 
-When('I view the shopping list', function (this: CategoriesWorld) {
-  // Viewing the shopping list — no special state change
-});
+// Note: 'I view the shopping list' is defined in items.steps.ts
 
 When('I open the item editor', function (this: CategoriesWorld) {
   this.secondaryExpanded = false;
