@@ -296,16 +296,17 @@
   &__sign-out-btn {
     all: unset;
     cursor: pointer;
-    display: inline-flex;
+    display: flex;
     align-items: center;
+    justify-content: center;
     gap: 0.5rem;
     padding: 0.625rem 1rem;
     border-radius: 1.25rem;
     font-size: var(--app-font-size-section-title);
     font-weight: 500;
     line-height: var(--app-line-height-body);
-    color: var(--mat-sys-error);
-    border: 1px solid var(--mat-sys-error);
+    color: var(--mat-sys-on-error);
+    background-color: var(--mat-sys-error);
     margin-block-start: var(--app-spacing-padding-block);
 
     @media (prefers-reduced-motion: no-preference) {
@@ -315,7 +316,7 @@
     }
 
     &:hover {
-      background: color-mix(in srgb, var(--mat-sys-error) 8%, transparent);
+      background-color: color-mix(in srgb, var(--mat-sys-on-error) 8%, var(--mat-sys-error));
     }
 
     &:focus-visible {

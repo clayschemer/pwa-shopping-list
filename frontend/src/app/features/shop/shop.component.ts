@@ -10,6 +10,7 @@ import { selectPendingChecks } from '../../store/items/items.selectors';
 import { itemsActions, itemsApiActions } from '../../store/items/items.actions';
 import type { PendingCheck } from '../../store/items/items.reducer';
 import { MoneyPipe } from '../../core/format/money.pipe';
+import { HapticsService } from '../../core/haptics/haptics.service';
 import type { Item } from '../../models/item.model';
 import type { ItemId } from '../../models/ids.model';
 
@@ -22,6 +23,7 @@ import type { ItemId } from '../../models/ids.model';
 })
 export class ShopComponent {
   private readonly store = inject(Store);
+  private readonly haptics = inject(HapticsService);
 
   readonly loaded = toSignal(this.store.select(selectListDataLoaded), {
     initialValue: false,
@@ -74,6 +76,7 @@ export class ShopComponent {
       return;
     }
 
+    this.haptics.checkConfirm();
     this.store.dispatch(
       itemsActions.checkItemPending({ id: item.id, sessionId: session.id }),
     );
