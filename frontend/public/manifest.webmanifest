@@ -1,6 +1,6 @@
 {
-  "name": "Shopping List",
-  "short_name": "Shopping",
+  "name": "Datista - Shopping List",
+  "short_name": "Datista",
   "theme_color": "#b23000",
   "background_color": "#fff8f6",
   "display": "standalone",
