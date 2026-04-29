@@ -225,6 +225,8 @@
     "keepScreenAwake": "Keep screen awake",
     "keepScreenAwakeHint": "Prevent the screen from dimming while shopping.",
     "installApp": "Install on this device",
+    "alreadyInstalled": "App is installed on this device",
+    "installIosHint": "To install, tap the share button and then \"Add to Home Screen\".",
     "account": "Account",
     "signedInAs": "Signed in as",
     "signOut": "Sign out"

@@ -6,6 +6,7 @@ import { provideRouter } from '@angular/router';
 import { provideTranslocoTesting } from '../../../testing/transloco-testing';
 import { SettingsComponent } from './settings.component';
 import { ThemeService, AppSettings } from '../../core/theme/theme.service';
+import { PwaInstallService, PwaInstallState } from '../../core/pwa/pwa-install.service';
 import { accountReducer } from '../../store/account/account.reducer';
 import { uiReducer } from '../../store/ui/ui.reducer';
 import { authActions, accountActions } from '../../store/account/account.actions';
@@ -35,6 +36,12 @@ describe('SettingsComponent', () => {
     effectiveReduceMotion: ReturnType<typeof vi.fn>;
     effectiveHighContrast: ReturnType<typeof vi.fn>;
   };
+  let pwaInstallService: {
+    canInstall: ReturnType<typeof vi.fn>;
+    state: ReturnType<typeof vi.fn>;
+    isIos: boolean;
+    install: ReturnType<typeof vi.fn>;
+  };
 
   beforeEach(async () => {
     localStorage.clear();
@@ -47,6 +54,13 @@ describe('SettingsComponent', () => {
       effectiveHighContrast: vi.fn().mockReturnValue(false),
     };
 
+    pwaInstallService = {
+      canInstall: vi.fn().mockReturnValue(false),
+      state: vi.fn().mockReturnValue('unsupported' as PwaInstallState),
+      isIos: false,
+      install: vi.fn().mockResolvedValue(false),
+    };
+
     await TestBed.configureTestingModule({
       imports: [SettingsComponent, provideTranslocoTesting()],
       providers: [
@@ -56,6 +70,7 @@ describe('SettingsComponent', () => {
           ui: uiReducer,
         }),
         { provide: ThemeService, useValue: themeService },
+        { provide: PwaInstallService, useValue: pwaInstallService },
       ],
     }).compileComponents();
 
@@ -249,5 +264,59 @@ describe('SettingsComponent', () => {
     const dispatchSpy = vi.spyOn(store, 'dispatch');
     component.signOut();
     expect(dispatchSpy).toHaveBeenCalledWith(authActions.signOutRequested());
+  });
+
+  describe('PWA install section', () => {
+    it('shows install button when state is installable', () => {
+      pwaInstallService.state.mockReturnValue('installable');
+      fixture.detectChanges();
+
+      const el: HTMLElement = fixture.nativeElement;
+      const installBtn = el.querySelector('.app-settings__install-btn');
+      expect(installBtn).toBeTruthy();
+      expect(el.querySelector('.app-settings__install-status')).toBeFalsy();
+    });
+
+    it('shows "already installed" message when state is installed', () => {
+      pwaInstallService.state.mockReturnValue('installed');
+      fixture.detectChanges();
+
+      const el: HTMLElement = fixture.nativeElement;
+      expect(el.querySelector('.app-settings__install-status')).toBeTruthy();
+      expect(el.querySelector('.app-settings__install-btn')).toBeFalsy();
+    });
+
+    it('shows iOS instructions when unsupported and on iOS', () => {
+      pwaInstallService.state.mockReturnValue('unsupported');
+      pwaInstallService.isIos = true;
+      fixture.detectChanges();
+
+      const el: HTMLElement = fixture.nativeElement;
+      expect(el.querySelector('.app-settings__install-manual')).toBeTruthy();
+      expect(el.querySelector('.app-settings__install-btn')).toBeFalsy();
+      expect(el.querySelector('.app-settings__install-status')).toBeFalsy();
+    });
+
+    it('shows nothing when unsupported and not iOS', () => {
+      pwaInstallService.state.mockReturnValue('unsupported');
+      pwaInstallService.isIos = false;
+      fixture.detectChanges();
+
+      const el: HTMLElement = fixture.nativeElement;
+      expect(el.querySelector('.app-settings__install-manual')).toBeFalsy();
+      expect(el.querySelector('.app-settings__install-btn')).toBeFalsy();
+      expect(el.querySelector('.app-settings__install-status')).toBeFalsy();
+    });
+
+    it('calls install() when install button is clicked', () => {
+      pwaInstallService.state.mockReturnValue('installable');
+      fixture.detectChanges();
+
+      const el: HTMLElement = fixture.nativeElement;
+      const installBtn = el.querySelector('.app-settings__install-btn') as HTMLButtonElement;
+      installBtn.click();
+
+      expect(pwaInstallService.install).toHaveBeenCalled();
+    });
   });
 });

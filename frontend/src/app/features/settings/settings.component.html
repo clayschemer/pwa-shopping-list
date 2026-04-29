@@ -175,11 +175,27 @@
       </div>
     </div>
 
-    @if (pwaInstall.canInstall()) {
-      <button class="app-settings__install-btn" (click)="installApp()">
-        <mat-icon>install_mobile</mat-icon>
-        {{ 'settings.installApp' | transloco }}
-      </button>
+    @switch (pwaInstall.state()) {
+      @case ('installable') {
+        <button class="app-settings__install-btn" (click)="installApp()">
+          <mat-icon>install_mobile</mat-icon>
+          {{ 'settings.installApp' | transloco }}
+        </button>
+      }
+      @case ('installed') {
+        <div class="app-settings__install-status">
+          <mat-icon class="app-settings__install-status-icon">check_circle</mat-icon>
+          <span>{{ 'settings.alreadyInstalled' | transloco }}</span>
+        </div>
+      }
+      @case ('unsupported') {
+        @if (pwaInstall.isIos) {
+          <div class="app-settings__install-manual">
+            <mat-icon class="app-settings__install-manual-icon">ios_share</mat-icon>
+            <span>{{ 'settings.installIosHint' | transloco }}</span>
+          </div>
+        }
+      }
     }
   </section>
 

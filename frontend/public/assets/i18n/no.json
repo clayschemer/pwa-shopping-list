@@ -225,6 +225,8 @@
     "keepScreenAwake": "Hold skjermen på",
     "keepScreenAwakeHint": "Forhindre at skjermen dimmes mens du handler.",
     "installApp": "Installer på denne enheten",
+    "alreadyInstalled": "Appen er installert på denne enheten",
+    "installIosHint": "For å installere, trykk på del-knappen og velg «Legg til på Hjem-skjerm».",
     "account": "Konto",
     "signedInAs": "Logget inn som",
     "signOut": "Logg ut"

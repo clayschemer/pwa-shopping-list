@@ -225,6 +225,8 @@
     "keepScreenAwake": "Håll skärmen på",
     "keepScreenAwakeHint": "Förhindra att skärmen dimmas medan du handlar.",
     "installApp": "Installera på denna enhet",
+    "alreadyInstalled": "Appen är installerad på denna enhet",
+    "installIosHint": "För att installera, tryck på dela-knappen och välj \"Lägg till på hemskärmen\".",
     "account": "Konto",
     "signedInAs": "Inloggad som",
     "signOut": "Logga ut"
