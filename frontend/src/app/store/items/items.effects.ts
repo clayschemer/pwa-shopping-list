@@ -1,8 +1,60 @@
-import { inject, Injectable } from '@angular/core';
+import { inject, Injectable, NgZone } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
-import { filter, from, map, mergeMap, of, switchMap, takeUntil, timer } from 'rxjs';
+import {
+  filter,
+  from,
+  map,
+  mergeMap,
+  Observable,
+  of,
+  switchMap,
+  takeUntil,
+} from 'rxjs';
 
 export const CHECK_UNDO_WINDOW_MS = 4000;
+
+function wallClockTimer(durationMs: number, zone: NgZone): Observable<void> {
+  return new Observable<void>((subscriber) => {
+    const startedAt = Date.now();
+    let timeoutId: ReturnType<typeof setTimeout> | null = null;
+
+    const emit = (): void => {
+      if (timeoutId !== null) {
+        clearTimeout(timeoutId);
+        timeoutId = null;
+      }
+      subscriber.next();
+      subscriber.complete();
+    };
+
+    const scheduleRemaining = (): void => {
+      if (timeoutId !== null) {
+        clearTimeout(timeoutId);
+        timeoutId = null;
+      }
+      const remaining = durationMs - (Date.now() - startedAt);
+      if (remaining <= 0) {
+        emit();
+      } else {
+        timeoutId = setTimeout(emit, remaining);
+      }
+    };
+
+    const onVisibilityChange = (): void => {
+      if (document.visibilityState === 'visible') {
+        zone.run(() => scheduleRemaining());
+      }
+    };
+
+    document.addEventListener('visibilitychange', onVisibilityChange);
+    scheduleRemaining();
+
+    return () => {
+      if (timeoutId !== null) clearTimeout(timeoutId);
+      document.removeEventListener('visibilitychange', onVisibilityChange);
+    };
+  });
+}
 import { itemsActions, itemsApiActions } from './items.actions';
 import { sessionsActions } from '../sessions/sessions.actions';
 import { accountActions } from '../account/account.actions';
@@ -20,6 +72,7 @@ import type { CheckSuccess } from '../../core/api/item-api.service';
 export class ItemsEffects {
   private readonly actions$ = inject(Actions);
   private readonly itemApi = inject(ItemApiService);
+  private readonly zone = inject(NgZone);
 
   readonly fetchActiveList$ = createEffect(() =>
     this.actions$.pipe(
@@ -122,7 +175,7 @@ export class ItemsEffects {
     this.actions$.pipe(
       ofType(itemsActions.checkItemPending),
       mergeMap(({ id, sessionId }) =>
-        timer(CHECK_UNDO_WINDOW_MS).pipe(
+        wallClockTimer(CHECK_UNDO_WINDOW_MS, this.zone).pipe(
           takeUntil(
             this.actions$.pipe(
               ofType(itemsActions.checkItemUndoneDuringWindow),
