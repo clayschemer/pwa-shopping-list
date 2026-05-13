@@ -23,10 +23,19 @@
         class="app-plan__group"
         [class.app-plan__group--uncategorised]="group.categoryId === null"
       >
+        @if (group.categoryColor) {
+          <span
+            class="app-plan__group-color-element"
+            [style.background]="`linear-gradient(90deg, ${group.categoryColor}, transparent)`"
+          ></span>
+        }
         <header class="app-plan__group-header">
           <h2 class="app-plan__group-title">
             @if (group.categoryColor) {
-              <span class="app-plan__group-dot" [style.background-color]="group.categoryColor"></span>
+              <span
+                class="app-plan__group-dot"
+                [style.background-color]="group.categoryColor"
+              ></span>
             }
             {{ group.categoryName ?? ('plan.uncategorised' | transloco) }}
           </h2>
@@ -64,15 +73,12 @@
         <ul class="app-plan__items" role="list">
           @for (item of group.items; track item.id) {
             <li class="app-plan__item">
-              <button
-                type="button"
-                class="app-plan__item-main"
-                (click)="openEditSheet(item)"
-              >
+              <button type="button" class="app-plan__item-main" (click)="openEditSheet(item)">
                 <span class="app-plan__item-name">{{ item.name }}</span>
                 @if (item.quantity !== null || item.unit !== null) {
                   <span class="app-plan__item-qty">
-                    {{ item.quantity }}{{ item.unit ? ' ' + ('units.' + item.unit | transloco) : '' }}
+                    {{ item.quantity
+                    }}{{ item.unit ? ' ' + ('units.' + item.unit | transloco) : '' }}
                   </span>
                 }
                 @if (item.description) {
@@ -94,8 +100,5 @@
     }
   }
 
-  <app-add-item-pill
-    [existingNames]="existingNamesList()"
-    (submitted)="onAddRequested($event)"
-  />
+  <app-add-item-pill [existingNames]="existingNamesList()" (submitted)="onAddRequested($event)" />
 </section>

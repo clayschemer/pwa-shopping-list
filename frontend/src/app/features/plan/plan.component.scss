@@ -65,6 +65,8 @@
 
   &__group {
     display: flex;
+    overflow: hidden;
+    position: relative;
     flex-direction: column;
     gap: 0.15rem;
     background: var(--mat-sys-surface-container);
@@ -80,6 +82,15 @@
         opacity: 0.5;
       }
     }
+  }
+
+  &__group-color-element {
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 4.5rem;
+    opacity: 0.2;
   }
 
   &__group-header {
@@ -108,6 +119,7 @@
     width: 0.5rem;
     height: 0.5rem;
     border-radius: 50%;
+    border: 0.1rem solid var(--mat-sys-surface);
     flex-shrink: 0;
     opacity: 1;
   }
@@ -129,6 +141,7 @@
 
   &__items {
     list-style: none;
+    position: relative;
     margin: 0;
     padding: 0;
     display: flex;
