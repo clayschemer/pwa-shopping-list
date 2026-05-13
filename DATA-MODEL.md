@@ -135,7 +135,7 @@ Session
 ```
 
 ### SessionCheckedItem
-A log entry within a session. Records that a specific item was checked (picked up) during this session, along with the price and quantity at the time of checking.
+A log entry within a session. Records that a specific item was checked (picked up) during this session, along with the name, price, and quantity at the time of checking.
 
 ```
 SessionCheckedItem
@@ -145,6 +145,7 @@ SessionCheckedItem
   - priceSnapshot: number | null       ← price at time of checking; null if no price was set
   - priceQuantitySnapshot: number | null
   - priceUnitSnapshot: string | null
+  - nameSnapshot: string | null        ← item name at time of checking; null on legacy entries written before this field existed
 ```
 
 **Notes on Session:**
@@ -152,7 +153,7 @@ SessionCheckedItem
 - At most one active session per `shopId` per account. When a second user selects the same shop, they join the existing session automatically.
 - `participants` starts with `startedBy` and grows as other users join. Designed for multiple users; currently a two-user product.
 - `checkedItems` is the source of truth for session totals and purchase history. An item appearing here means it was physically picked up in this session. The committed undo history is visible to all session participants.
-- Price snapshots are recorded at the moment of checking so that session history remains accurate even if prices change later.
+- Name and price snapshots are recorded at the moment of checking so that session history (and the in-session undo list) remains accurate even if the underlying item is later renamed, removed, or evicted from the active-list store.
 - On session completion, `purchaseCount` is incremented on each item that appears in `checkedItems`.
 
 ---

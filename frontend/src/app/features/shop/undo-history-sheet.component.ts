@@ -42,7 +42,7 @@ export class UndoHistorySheetComponent {
         const user = this.data.usersById[c.checkedBy];
         return {
           itemId: c.itemId,
-          itemName: item?.name ?? '—',
+          itemName: c.nameSnapshot ?? item?.name ?? '—',
           price: c.priceSnapshot,
           userInitials: initialsOf(user?.displayName ?? user?.email ?? '?'),
           checkedAt: c.checkedAt,

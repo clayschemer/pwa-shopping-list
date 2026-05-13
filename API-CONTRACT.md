@@ -179,6 +179,7 @@ SessionCheckedItem {
   priceSnapshot:         number | null
   priceQuantitySnapshot: number | null
   priceUnitSnapshot:     string | null
+  nameSnapshot:          string | null // null only on legacy entries written before the field existed
 }
 ```
 
@@ -515,7 +516,10 @@ Errors:  NotFoundError
 ```
 Intent:  Mark an item as picked up during a shopping session.
          Sets removed = true and appends a SessionCheckedItem to the active session,
-         snapshotting the current price at the moment of checking.
+         snapshotting the current name and price at the moment of checking. The name
+         snapshot keeps the in-session undo list and historical session log accurate
+         even if the underlying item is later renamed, removed, or no longer in the
+         loaded items store.
          First-write-wins: if two users check the same item concurrently, the slower
          write is rejected and a CheckConflictError is returned to that caller.
          On success, the updated Item and Session arrive via itemChanges$ and

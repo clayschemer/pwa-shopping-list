@@ -89,7 +89,7 @@ export class HistoryComponent implements OnInit {
       total: s.checkedItems.reduce((acc, c) => acc + (c.priceSnapshot ?? 0), 0),
       itemCount: s.checkedItems.length,
       items: s.checkedItems.map((c: SessionCheckedItem) => ({
-        name: items[c.itemId]?.name ?? unknownItem,
+        name: c.nameSnapshot ?? items[c.itemId]?.name ?? unknownItem,
         quantity: items[c.itemId]?.quantity ?? 1,
         unit: c.priceUnitSnapshot,
         priceSnapshot: c.priceSnapshot,

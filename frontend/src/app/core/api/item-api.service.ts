@@ -254,6 +254,7 @@ export class ItemApiService {
             priceSnapshot: itemData['price'] ?? null,
             priceQuantitySnapshot: itemData['priceQuantity'] ?? null,
             priceUnitSnapshot: itemData['priceUnit'] ?? null,
+            nameSnapshot: (itemData['name'] ?? null) as string | null,
           };
           tx.update(itemRef, { removed: true, removedAt: checkedAt });
           tx.update(sessionRef, {
