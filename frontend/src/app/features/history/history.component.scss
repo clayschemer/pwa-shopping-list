@@ -42,6 +42,10 @@
     gap: 0.5rem;
   }
 
+  &__panel {
+    background: var(--mat-sys-surface-container);
+  }
+
   &__panel-header {
     padding: 0.5rem 1rem;
   }
@@ -79,6 +83,7 @@
   &__count {
     font-size: 0.8125rem;
     color: var(--mat-sys-on-surface-variant);
+    min-width: max-content;
   }
 
   &__items {

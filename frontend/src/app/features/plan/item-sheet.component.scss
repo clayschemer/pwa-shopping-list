@@ -89,7 +89,8 @@
     display: flex;
     justify-content: flex-end;
     gap: 0.5rem;
-    padding-top: 0.5rem;
+    padding: 0.5rem;
+    border-radius: 0.5rem;
     position: sticky;
     bottom: 0;
     background: var(--mat-sys-surface-container);
