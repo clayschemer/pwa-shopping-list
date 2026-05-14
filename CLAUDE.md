@@ -20,13 +20,15 @@ Use **`claude-opus-4-6`** for all API calls in this project.
 
 ## Skills
 
-Three project skills are active. Load them when working in their domains:
+Project skills are active. Load them when working in their domains:
 
 | Skill | File | When to load |
 |---|---|---|
 | `angular` | `.claude/skills/angular/SKILL.md` | Any Angular code — components, services, store, effects, guards, pipes, tests, architecture decisions |
 | `angular-material3-theming` | `.claude/skills/angular-material3-theming/SKILL.md` | Theming, design tokens, Material component styling, dark/light/high-contrast/compact modes |
 | `scss-conventions` | `.claude/skills/scss-conventions/SKILL.md` | Any SCSS or CSS work in the frontend |
+| `ship` | `.claude/skills/ship/SKILL.md` | Finalising a change — runs the full quality gate (i18n parity, unit tests, acceptance tests, build) before commit |
+| `deploy` | `.claude/skills/deploy/SKILL.md` | Anything touching deployment — Firestore rules/indexes, GH Pages asset paths, PWA / service-worker behaviour |
 
 ---
 
@@ -45,6 +47,42 @@ A shared shopping list PWA for two users (a couple). Private by default, may ope
 - **Model agnosticism** — the logical data model is expressed in terms of entities, relationships, and rules. Nothing assumes Firestore, PostgreSQL, or any specific storage technology.
 - **Accessibility by default** — all settings (dark mode, high contrast, reduced motion) respect device preferences unless explicitly overridden.
 - **AI is optional** — all AI features are inactive unless an AI provider is configured on the account. The app is fully functional without AI.
+
+---
+
+## Workflow Rules
+
+These rules are baked in. They reflect recurring lessons; do not skip them.
+
+### Testing
+- TDD is mandatory. For bug fixes, reproduce with a failing unit or acceptance test **before** touching production code. For features, drive the implementation from the relevant Gherkin scenario.
+- A task is not complete until `npm test` (Vitest) and `npm run test:acceptance` (Cucumber) both pass. The build (`npm run build`) must succeed too — type errors are blocking.
+- Don't silence or skip failing tests to "ship" — fix the underlying cause.
+- For complex framework-level work (route snapshots, async injection contexts, `visualViewport`, viewport overlays, Firestore stream lifecycle), trace the actual runtime path before writing code. Verify with a failing test first; "looks right" implementations have repeatedly missed the runtime path here.
+
+### Animations & Styling
+- **Pure CSS only.** Never install, import, or reference `@angular/animations`, `BrowserAnimationsModule`, or `NoopAnimationsModule` — the package is deprecated. Use `transition`, `@keyframes`, and the View Transitions API.
+- All animations must respect `prefers-reduced-motion` and the in-app reduced-motion setting.
+- SCSS `@use`/`@import` of shared mixins/tokens uses **relative paths** (`@use '../../styles/...'`) — absolute paths and bare specifiers have broken builds.
+- All spacing, line-height, and font-size in component SCSS goes through `--app-*` custom properties so compact mode and theming work uniformly.
+
+### i18n
+- Every user-facing string lives in **all five** translation files: `frontend/public/assets/i18n/{en,no,sv,de,fr}.json`. Adding a key to one without the others is a regression.
+- Templates use the `transloco` pipe; TS uses `TranslocoService.translate()`. No hard-coded English in templates or components.
+- Escape quotes inside translation values (`\"`) — unescaped quotes have broken `de.json` builds before.
+- After any translation edit, validate JSON syntax (`jq empty <file>`) and run the build. The `i18n-json` PostToolUse hook in `.claude/settings.local.json` auto-validates on save; if it fails, fix before continuing.
+- Tests that mount components needing translations must use `provideTranslocoTesting()` from `frontend/src/testing/`.
+
+### Deployment
+- **Firestore rules and indexes do NOT auto-deploy with the app.** After editing `backend/firebase/firestore.rules` or `firestore.indexes.json`, remind the user to run `firebase deploy --only firestore:rules,firestore:indexes` from `backend/firebase/`. Many sessions have been blocked by "permission denied" in prod because rules weren't pushed.
+- **Service workers / PWA install prompt do not work on the dev server.** `ng serve` disables the service worker. Verify PWA behaviour against a production build (`npm run build` + a static server) or the deployed environment, not localhost.
+- **GitHub Pages serves under a subpath** (`/shopping-list/`). All asset references — including i18n JSON, icons, manifest — must resolve against `baseHref`, not absolute `/...` paths. A working dev build can still 404 on GH Pages if absolute paths slipped in.
+- The CI pipeline is `.github/workflows/deploy.yml`: tests on every push/PR; `develop` → GH Pages; `main` → cPanel via FTPS. Firestore rules deploy separately and manually.
+- See `.claude/skills/deploy/SKILL.md` for the full deploy checklist.
+
+### MCP servers
+- The `firebase` MCP server (`firebase-tools experimental:mcp --dir backend/firebase`) is registered at user scope. Use it to inspect deployed Firestore rules/indexes, project config, and emulator state — particularly when diagnosing "works locally, fails in prod" bugs caused by rules drift. Tools are exposed under `mcp__firebase__*`.
+- Note: this stack has a packaging bug in `firebase-tools@14.24.1` — its MCP code requires `googleapis` but the package doesn't declare it. The user-scope config sets `NODE_PATH` to Volta's googleapis package storage as a workaround. If MCP startup ever breaks after a node/Volta upgrade, the NODE_PATH may need updating.
 
 ---
 
