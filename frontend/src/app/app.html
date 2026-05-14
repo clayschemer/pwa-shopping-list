@@ -5,11 +5,7 @@
     </main>
   } @else {
     <mat-sidenav-container class="app-root__sidenav-container">
-      <mat-sidenav
-        [opened]="navDrawerOpen()"
-        mode="over"
-        (closed)="onDrawerClosed()"
-      >
+      <mat-sidenav [opened]="navDrawerOpen()" mode="over" (closed)="onDrawerClosed()">
         <app-nav-drawer
           (categorySelected)="onCategorySelected($event)"
           (manageShops)="onManageShops()"
@@ -91,10 +87,8 @@
                 <span class="app-root__session-pill-total">
                   {{ sessionShopName() ?? ('nav.global' | transloco) }}
                 </span>
-                <span class="app-root__session-pill-sub">
-                  {{ 'nav.sessionActive' | transloco }}
-                </span>
               }
+              <mat-icon>shopping_cart_checkout</mat-icon>
             </button>
           }
         </header>
