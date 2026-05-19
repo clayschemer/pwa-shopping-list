@@ -5,9 +5,27 @@
 
   @if (categories.length > 0) {
     <fieldset class="app-item-sheet__group">
-      <legend class="app-item-sheet__group-label">
-        {{ 'itemSheet.primaryCategory' | transloco }}
-      </legend>
+      <div class="app-item-sheet__group-header">
+        <legend class="app-item-sheet__group-label">
+          {{ 'itemSheet.primaryCategory' | transloco }}
+        </legend>
+        <mat-form-field
+          class="app-item-sheet__sort-field"
+          appearance="outline"
+          subscriptSizing="dynamic"
+        >
+          <mat-label>{{ 'itemSheet.sort.label' | transloco }}</mat-label>
+          <mat-select
+            [ngModel]="sortMode()"
+            (ngModelChange)="sortMode.set($event)"
+            name="categorySort"
+            [attr.aria-label]="'itemSheet.sort.label' | transloco"
+          >
+            <mat-option value="shop">{{ 'itemSheet.sort.shopLayout' | transloco }}</mat-option>
+            <mat-option value="alphabetical">{{ 'itemSheet.sort.alphabetical' | transloco }}</mat-option>
+          </mat-select>
+        </mat-form-field>
+      </div>
       <mat-chip-listbox
         [value]="primaryCategoryId()"
         (change)="onPrimaryCategoryChange($event.value)"
@@ -16,7 +34,7 @@
         <mat-chip-option [value]="null">
           {{ 'itemSheet.uncategorised' | transloco }}
         </mat-chip-option>
-        @for (cat of categories; track cat.id) {
+        @for (cat of sortedCategories(); track cat.id) {
           <mat-chip-option
             [value]="cat.id"
             [style.--chip-tint]="cat.color ? cat.color + '1A' : 'transparent'"

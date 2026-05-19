@@ -9,6 +9,7 @@ import { MatMenu, MatMenuItem, MatMenuTrigger } from '@angular/material/menu';
 import { TranslocoPipe } from '@jsverse/transloco';
 import { selectGroupedPlanList, type PlanListGroup } from '../../store/selectors/grouped-plan-list.selectors';
 import { selectListDataLoaded } from '../../store/selectors/list-data-loaded.selectors';
+import { selectOrderedCategories } from '../../store/selectors/ordered-categories.selectors';
 import { selectAllCategories } from '../../store/categories/categories.selectors';
 import { selectAllShops } from '../../store/shops/shops.selectors';
 import { selectActiveItems } from '../../store/items/items.selectors';
@@ -81,6 +82,11 @@ export class PlanComponent {
     { initialValue: [] },
   );
 
+  private readonly shopOrderedCategories = toSignal(
+    this.store.select(selectOrderedCategories),
+    { initialValue: [] },
+  );
+
   private readonly shops = toSignal(this.store.select(selectAllShops), {
     initialValue: [],
   });
@@ -136,7 +142,7 @@ export class PlanComponent {
         existingNames: this.activeItems()
           .filter((i) => i.id !== item.id)
           .map((i) => i.name),
-        categories: this.categories(),
+        categories: this.shopOrderedCategories(),
       } satisfies ItemSheetData,
     });
 

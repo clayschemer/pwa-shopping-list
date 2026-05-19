@@ -57,7 +57,12 @@
     "nameConflict": "An item with this name already exists",
     "cancel": "Cancel",
     "add": "Add",
-    "save": "Save"
+    "save": "Save",
+    "sort": {
+      "label": "Sort",
+      "shopLayout": "Shop layout",
+      "alphabetical": "Alphabetical"
+    }
   },
   "signIn": {
     "title": "Shopping List",

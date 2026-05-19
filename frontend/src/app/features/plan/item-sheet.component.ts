@@ -44,6 +44,8 @@ export interface ItemSheetResult {
   secondaryCategoryIds: CategoryId[];
 }
 
+export type CategorySortMode = 'shop' | 'alphabetical';
+
 @Component({
   selector: 'app-item-sheet',
   imports: [
@@ -73,6 +75,15 @@ export class ItemSheetComponent {
   readonly categories = this.data.categories;
   readonly units = computed(() => getSelectableUnits(this.theme.settings().language));
 
+  readonly sortMode = signal<CategorySortMode>('shop');
+
+  readonly sortedCategories = computed<Category[]>(() => {
+    if (this.sortMode() === 'alphabetical') {
+      return [...this.categories].sort((a, b) => a.name.localeCompare(b.name));
+    }
+    return this.categories;
+  });
+
   readonly name = signal(this.data.currentName);
   readonly description = signal(this.data.currentDescription ?? '');
   readonly quantity = signal<number | null>(this.data.currentQuantity);
@@ -92,7 +103,7 @@ export class ItemSheetComponent {
   );
 
   readonly secondaryCategoryOptions = computed(() =>
-    this.categories.filter((c) => c.id !== this.primaryCategoryId()),
+    this.sortedCategories().filter((c) => c.id !== this.primaryCategoryId()),
   );
 
   readonly secondarySelectedCount = computed(() =>

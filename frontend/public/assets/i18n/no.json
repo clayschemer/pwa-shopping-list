@@ -57,7 +57,12 @@
     "nameConflict": "En vare med dette navnet finnes allerede",
     "cancel": "Avbryt",
     "add": "Legg til",
-    "save": "Lagre"
+    "save": "Lagre",
+    "sort": {
+      "label": "Sortér",
+      "shopLayout": "Butikkoppsett",
+      "alphabetical": "Alfabetisk"
+    }
   },
   "signIn": {
     "title": "Handleliste",

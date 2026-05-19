@@ -57,7 +57,12 @@
     "nameConflict": "En vara med detta namn finns redan",
     "cancel": "Avbryt",
     "add": "Lägg till",
-    "save": "Spara"
+    "save": "Spara",
+    "sort": {
+      "label": "Sortera",
+      "shopLayout": "Butikslayout",
+      "alphabetical": "Alfabetiskt"
+    }
   },
   "signIn": {
     "title": "Inköpslista",

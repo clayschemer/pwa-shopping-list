@@ -57,7 +57,12 @@
     "nameConflict": "Ein Artikel mit diesem Namen existiert bereits",
     "cancel": "Abbrechen",
     "add": "Hinzufügen",
-    "save": "Speichern"
+    "save": "Speichern",
+    "sort": {
+      "label": "Sortieren",
+      "shopLayout": "Ladenanordnung",
+      "alphabetical": "Alphabetisch"
+    }
   },
   "signIn": {
     "title": "Einkaufsliste",
