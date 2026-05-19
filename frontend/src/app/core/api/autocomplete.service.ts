@@ -29,8 +29,18 @@ export class AutocompleteService {
       return [];
     }
     const all = this.cache() ?? [];
-    return all
-      .filter((item) => item.name.toLowerCase().includes(trimmed))
+    const byName = new Map<string, AutocompleteItem>();
+    for (const item of all) {
+      if (!item.name.toLowerCase().includes(trimmed)) {
+        continue;
+      }
+      const key = item.name.toLowerCase();
+      const existing = byName.get(key);
+      if (!existing || item.purchaseCount > existing.purchaseCount) {
+        byName.set(key, item);
+      }
+    }
+    return [...byName.values()]
       .sort((a, b) => b.purchaseCount - a.purchaseCount)
       .slice(0, limit);
   }

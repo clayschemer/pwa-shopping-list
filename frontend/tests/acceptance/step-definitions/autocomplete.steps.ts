@@ -36,10 +36,27 @@ function makeAcItem(name: string, purchaseCount = 1, catId: string | null = null
   };
 }
 
+function makeAcVariant(
+  name: string,
+  quantity: number,
+  unit: string,
+  purchaseCount: number,
+): AutocompleteItem {
+  return { id: `ac-${_acId++}`, name, quantity, unit, categoryId: null, purchaseCount };
+}
+
 function getSuggestions(world: AutocompleteWorld, input: string): AutocompleteItem[] {
   if (!input || input.length < 2) return [];
-  return world.autocompleteItems
-    .filter((i) => i.name.toLowerCase().includes(input.toLowerCase()))
+  const byName = new Map<string, AutocompleteItem>();
+  for (const i of world.autocompleteItems) {
+    if (!i.name.toLowerCase().includes(input.toLowerCase())) continue;
+    const key = i.name.toLowerCase();
+    const existing = byName.get(key);
+    if (!existing || i.purchaseCount > existing.purchaseCount) {
+      byName.set(key, i);
+    }
+  }
+  return [...byName.values()]
     .sort((a, b) => b.purchaseCount - a.purchaseCount)
     .slice(0, 3);
 }
@@ -90,6 +107,17 @@ Given('multiple previously added items match what I am adding', function (this: 
   this.suggestionsDisplayed = true;
 });
 
+Given('the same item has previously been bought in several quantity or unit variants', function (this: AutocompleteWorld) {
+  this.autocompleteItems = [
+    makeAcVariant('Milk', 1, 'L', 4),
+    makeAcVariant('Milk', 1.5, 'L', 9),
+    makeAcVariant('Milk', 0.5, 'L', 2),
+  ];
+  this.inputText = 'Milk';
+  this.suggestions = [];
+  this.suggestionsDisplayed = false;
+});
+
 Given('suggestions are displayed when adding a new item', function (this: AutocompleteWorld) {
   this.autocompleteItems = [makeAcItem('Milk', 5)];
   this.inputText = 'Mil';
@@ -129,6 +157,11 @@ When('suggestions are displayed', function (this: AutocompleteWorld) {
   // Already set in Given
 });
 
+When('suggestions are displayed for that item', function (this: AutocompleteWorld) {
+  this.suggestions = getSuggestions(this, this.inputText);
+  this.suggestionsDisplayed = this.suggestions.length > 0;
+});
+
 When('I ignore the suggestions and enter a new item name', function (this: AutocompleteWorld) {
   this.inputText = 'Oat Milk';
   this.selectedSuggestion = null;
@@ -162,6 +195,18 @@ Then('more frequently bought items should appear higher in the suggestions', fun
   const first = this.suggestions[0];
   const second = this.suggestions[1];
   assert.ok(first.purchaseCount >= second.purchaseCount, 'Most frequent item should be first');
+});
+
+Then('only the most frequently bought variant of that item should be suggested', function (this: AutocompleteWorld) {
+  const milk = this.suggestions.filter((s) => s.name.toLowerCase() === 'milk');
+  assert.equal(milk.length, 1, 'Exactly one Milk variant should be suggested');
+  assert.equal(milk[0].quantity, 1.5, 'The most-purchased variant (1.5 L) should be the one suggested');
+  assert.equal(milk[0].purchaseCount, 9, 'The suggested variant should be the highest purchaseCount');
+});
+
+Then('no other variant of the same item should appear in the suggestions', function (this: AutocompleteWorld) {
+  const milk = this.suggestions.filter((s) => s.name.toLowerCase() === 'milk');
+  assert.equal(milk.length, 1, 'No additional Milk variants should appear');
 });
 
 Then('the new item should be added as entered', function (this: AutocompleteWorld) {
