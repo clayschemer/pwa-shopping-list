@@ -37,6 +37,8 @@ const checked = (
   priceQuantitySnapshot: null,
   priceUnitSnapshot: null,
   nameSnapshot: null,
+  quantitySnapshot: null,
+  unitSnapshot: null,
   ...overrides,
 });
 

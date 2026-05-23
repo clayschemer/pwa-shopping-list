@@ -28,7 +28,9 @@
     "empty": "Ingen fullførte økter ennå.",
     "itemCount": "{{count}} varer",
     "noChecked": "Ingen varer avkrysset",
-    "unknownItem": "Slettet vare"
+    "unknownItem": "Slettet vare",
+    "qtyWithUnit": ", {{quantity}} {{unit}}",
+    "qtyOnly": ", {{quantity}}"
   },
   "plan": {
     "listLabel": "Handleliste",

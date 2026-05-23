@@ -4,7 +4,10 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Location } from '@angular/common';
 import { provideRouter } from '@angular/router';
 import { provideStore, Store } from '@ngrx/store';
+import { TranslocoService, TranslocoTestingModule } from '@jsverse/transloco';
 import { provideTranslocoTesting } from '../../../testing/transloco-testing';
+import en from '../../../../public/assets/i18n/en.json';
+import sv from '../../../../public/assets/i18n/sv.json';
 import { HistoryComponent } from './history.component';
 import { SessionApiService } from '../../core/api/session-api.service';
 import { itemsReducer } from '../../store/items/items.reducer';
@@ -73,6 +76,8 @@ describe('HistoryComponent', () => {
           priceQuantitySnapshot: null,
           priceUnitSnapshot: null,
           nameSnapshot: 'Bananas',
+          quantitySnapshot: null,
+          unitSnapshot: null,
         },
       ],
     };
@@ -107,6 +112,8 @@ describe('HistoryComponent', () => {
           priceQuantitySnapshot: null,
           priceUnitSnapshot: null,
           nameSnapshot: 'Old name',
+          quantitySnapshot: null,
+          unitSnapshot: null,
         },
       ],
     };
@@ -145,5 +152,139 @@ describe('HistoryComponent', () => {
       .querySelector('.app-history__item-name')
       ?.textContent?.trim();
     expect(itemName).toBe('Old name');
+  });
+
+  it('renders quantity and unit from the snapshot alongside the name', async () => {
+    const session: Session = {
+      id: 's1' as SessionId,
+      accountId: 'a1' as AccountId,
+      shopId: 'shop-1' as ShopId,
+      participants: ['u1' as UserId],
+      startedBy: 'u1' as UserId,
+      startedAt: 1,
+      completedAt: 100,
+      checkedItems: [
+        {
+          itemId: 'i1' as ItemId,
+          checkedBy: 'u1' as UserId,
+          checkedAt: 10,
+          priceSnapshot: 1,
+          priceQuantitySnapshot: null,
+          priceUnitSnapshot: null,
+          nameSnapshot: 'Flour',
+          quantitySnapshot: 400,
+          unitSnapshot: 'g',
+        },
+      ],
+    };
+
+    await configure(session);
+    await render();
+
+    const el: HTMLElement = fixture.nativeElement;
+    const nameText = el
+      .querySelector('.app-history__item-name')
+      ?.textContent?.replace(/\s+/g, ' ')
+      .trim();
+    expect(nameText).toBe('Flour, 400 g');
+  });
+
+  it('localises the canonical unit via units.* when rendering', async () => {
+    sessionApi = {
+      fetchSessionHistory: vi.fn().mockResolvedValue([
+        {
+          id: 's1' as SessionId,
+          accountId: 'a1' as AccountId,
+          shopId: 'shop-1' as ShopId,
+          participants: ['u1' as UserId],
+          startedBy: 'u1' as UserId,
+          startedAt: 1,
+          completedAt: 100,
+          checkedItems: [
+            {
+              itemId: 'i1' as ItemId,
+              checkedBy: 'u1' as UserId,
+              checkedAt: 10,
+              priceSnapshot: null,
+              priceQuantitySnapshot: null,
+              priceUnitSnapshot: null,
+              nameSnapshot: 'Lemons',
+              quantitySnapshot: 1,
+              unitSnapshot: 'pcs',
+            },
+          ],
+        } satisfies Session,
+      ]),
+    };
+
+    await TestBed.configureTestingModule({
+      imports: [
+        HistoryComponent,
+        TranslocoTestingModule.forRoot({
+          langs: { en, sv },
+          translocoConfig: {
+            availableLangs: ['en', 'sv'],
+            defaultLang: 'en',
+          },
+        }),
+      ],
+      providers: [
+        provideRouter([]),
+        provideStore({
+          items: itemsReducer,
+          shops: shopsReducer,
+          users: usersReducer,
+        }),
+        { provide: SessionApiService, useValue: sessionApi },
+        { provide: Location, useValue: { back: () => undefined } },
+      ],
+    }).compileComponents();
+    TestBed.inject(TranslocoService).setActiveLang('sv');
+
+    await render();
+
+    const el: HTMLElement = fixture.nativeElement;
+    const nameText = el
+      .querySelector('.app-history__item-name')
+      ?.textContent?.replace(/\s+/g, ' ')
+      .trim();
+    expect(nameText).toBe('Lemons, 1 st');
+    expect(nameText).not.toContain('pcs');
+  });
+
+  it('omits the qty span for legacy entries without quantity/unit snapshots', async () => {
+    const session: Session = {
+      id: 's1' as SessionId,
+      accountId: 'a1' as AccountId,
+      shopId: 'shop-1' as ShopId,
+      participants: ['u1' as UserId],
+      startedBy: 'u1' as UserId,
+      startedAt: 1,
+      completedAt: 100,
+      checkedItems: [
+        {
+          itemId: 'i1' as ItemId,
+          checkedBy: 'u1' as UserId,
+          checkedAt: 10,
+          priceSnapshot: 1,
+          priceQuantitySnapshot: null,
+          priceUnitSnapshot: null,
+          nameSnapshot: 'Legacy item',
+          quantitySnapshot: null,
+          unitSnapshot: null,
+        },
+      ],
+    };
+
+    await configure(session);
+    await render();
+
+    const el: HTMLElement = fixture.nativeElement;
+    expect(el.querySelector('.app-history__item-qty')).toBeNull();
+    const nameText = el
+      .querySelector('.app-history__item-name')
+      ?.textContent?.replace(/\s+/g, ' ')
+      .trim();
+    expect(nameText).toBe('Legacy item');
   });
 });

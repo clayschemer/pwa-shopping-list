@@ -8,6 +8,8 @@ export interface SessionCheckedItem {
   priceQuantitySnapshot: number | null;
   priceUnitSnapshot: string | null;
   nameSnapshot: string | null;
+  quantitySnapshot: number | null;
+  unitSnapshot: string | null;
 }
 
 export interface Session {

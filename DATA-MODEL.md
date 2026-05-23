@@ -146,6 +146,8 @@ SessionCheckedItem
   - priceQuantitySnapshot: number | null
   - priceUnitSnapshot: string | null
   - nameSnapshot: string | null        ← item name at time of checking; null on legacy entries written before this field existed
+  - quantitySnapshot: number | null    ← item purchase quantity at time of checking; null on legacy entries written before this field existed
+  - unitSnapshot: string | null        ← item purchase unit at time of checking; null on legacy entries written before this field existed
 ```
 
 **Notes on Session:**

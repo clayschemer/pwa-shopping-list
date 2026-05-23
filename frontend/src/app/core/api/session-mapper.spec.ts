@@ -36,7 +36,34 @@ describe('mapSession', () => {
     expect(session.checkedItems[0].nameSnapshot).toBe('Milk');
   });
 
-  it('defaults nameSnapshot to null when missing on legacy data', () => {
+  it('reads quantitySnapshot and unitSnapshot off each checked item', () => {
+    const snap = fakeSnap('s1', {
+      shopId: 'shop-1',
+      participants: ['u1'],
+      startedBy: 'u1',
+      startedAt: 100,
+      completedAt: null,
+      checkedItems: [
+        {
+          itemId: 'i1',
+          checkedBy: 'u1',
+          checkedAt: 150,
+          priceSnapshot: 1.5,
+          priceQuantitySnapshot: 1,
+          priceUnitSnapshot: 'pcs',
+          nameSnapshot: 'Flour',
+          quantitySnapshot: 400,
+          unitSnapshot: 'g',
+        },
+      ],
+    });
+
+    const session = mapSession(snap, 'a1' as AccountId);
+    expect(session.checkedItems[0].quantitySnapshot).toBe(400);
+    expect(session.checkedItems[0].unitSnapshot).toBe('g');
+  });
+
+  it('defaults nameSnapshot, quantitySnapshot, and unitSnapshot to null when missing on legacy data', () => {
     const snap = fakeSnap('s1', {
       shopId: null,
       participants: ['u1'],
@@ -57,5 +84,7 @@ describe('mapSession', () => {
 
     const session = mapSession(snap, 'a1' as AccountId);
     expect(session.checkedItems[0].nameSnapshot).toBeNull();
+    expect(session.checkedItems[0].quantitySnapshot).toBeNull();
+    expect(session.checkedItems[0].unitSnapshot).toBeNull();
   });
 });

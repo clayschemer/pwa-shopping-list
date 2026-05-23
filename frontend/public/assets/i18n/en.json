@@ -28,7 +28,9 @@
     "empty": "No completed sessions yet.",
     "itemCount": "{{count}} items",
     "noChecked": "No items checked",
-    "unknownItem": "Deleted item"
+    "unknownItem": "Deleted item",
+    "qtyWithUnit": ", {{quantity}} {{unit}}",
+    "qtyOnly": ", {{quantity}}"
   },
   "plan": {
     "listLabel": "Shopping list",

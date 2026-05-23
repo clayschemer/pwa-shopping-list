@@ -116,6 +116,10 @@
     color: var(--mat-sys-on-surface);
   }
 
+  &__item-qty {
+    color: var(--mat-sys-on-surface-variant);
+  }
+
   &__item-price {
     color: var(--mat-sys-on-surface-variant);
 

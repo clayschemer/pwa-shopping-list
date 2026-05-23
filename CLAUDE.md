@@ -68,7 +68,8 @@ These rules are baked in. They reflect recurring lessons; do not skip them.
 
 ### i18n
 - Every user-facing string lives in **all five** translation files: `frontend/public/assets/i18n/{en,no,sv,de,fr}.json`. Adding a key to one without the others is a regression.
-- Templates use the `transloco` pipe; TS uses `TranslocoService.translate()`. No hard-coded English in templates or components.
+- Templates use the `transloco` pipe; TS uses `TranslocoService.translate()`. **Nothing user-visible may be hard-coded** — that includes English words, separators (`, ` / `:` / ` · `), composed format strings (e.g. `${qty} ${unit}`), and any punctuation that joins or wraps interpolated values. If a user can see it, it ships as a translation key with placeholders so locales can rewrite the separator and order as needed (e.g. `"qtyWithUnit": ", {{quantity}} {{unit}}"`).
+- When adding or editing a feature, audit every user-visible render path for hard-coded text *or formatting* and route the whole pattern through transloco — not just the words.
 - Escape quotes inside translation values (`\"`) — unescaped quotes have broken `de.json` builds before.
 - After any translation edit, validate JSON syntax (`jq empty <file>`) and run the build. The `i18n-json` PostToolUse hook in `.claude/settings.local.json` auto-validates on save; if it fails, fix before continuing.
 - Tests that mount components needing translations must use `provideTranslocoTesting()` from `frontend/src/testing/`.

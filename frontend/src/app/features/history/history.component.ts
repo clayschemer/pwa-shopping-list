@@ -36,8 +36,7 @@ interface HistoryRow {
 
 interface HistoryItemRow {
   name: string;
-  quantity: number;
-  unit: string | null;
+  qtyLabel: string | null;
   priceSnapshot: number | null;
 }
 
@@ -90,8 +89,7 @@ export class HistoryComponent implements OnInit {
       itemCount: s.checkedItems.length,
       items: s.checkedItems.map((c: SessionCheckedItem) => ({
         name: c.nameSnapshot ?? items[c.itemId]?.name ?? unknownItem,
-        quantity: items[c.itemId]?.quantity ?? 1,
-        unit: c.priceUnitSnapshot,
+        qtyLabel: buildQtyLabel(c.quantitySnapshot, c.unitSnapshot, this.transloco),
         priceSnapshot: c.priceSnapshot,
       })),
     }));
@@ -105,4 +103,18 @@ export class HistoryComponent implements OnInit {
   goBack(): void {
     this.location.back();
   }
+}
+
+function buildQtyLabel(
+  quantity: number | null,
+  unit: string | null,
+  transloco: TranslocoService,
+): string | null {
+  if (quantity === null) return null;
+  if (!unit) return transloco.translate('history.qtyOnly', { quantity });
+  const localisedUnit = transloco.translate(`units.${unit}`);
+  return transloco.translate('history.qtyWithUnit', {
+    quantity,
+    unit: localisedUnit,
+  });
 }

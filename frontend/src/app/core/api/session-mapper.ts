@@ -25,6 +25,8 @@ function mapCheckedItem(raw: unknown): SessionCheckedItem {
     priceQuantitySnapshot: (r['priceQuantitySnapshot'] ?? null) as number | null,
     priceUnitSnapshot: (r['priceUnitSnapshot'] ?? null) as string | null,
     nameSnapshot: (r['nameSnapshot'] ?? null) as string | null,
+    quantitySnapshot: (r['quantitySnapshot'] ?? null) as number | null,
+    unitSnapshot: (r['unitSnapshot'] ?? null) as string | null,
   };
 }
 

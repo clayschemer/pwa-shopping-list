@@ -28,7 +28,9 @@
     "empty": "Noch keine abgeschlossenen Sitzungen.",
     "itemCount": "{{count}} Artikel",
     "noChecked": "Keine Artikel abgehakt",
-    "unknownItem": "Gelöschter Artikel"
+    "unknownItem": "Gelöschter Artikel",
+    "qtyWithUnit": ", {{quantity}} {{unit}}",
+    "qtyOnly": ", {{quantity}}"
   },
   "plan": {
     "listLabel": "Einkaufsliste",

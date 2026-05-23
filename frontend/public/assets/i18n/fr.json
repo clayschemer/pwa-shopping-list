@@ -28,7 +28,9 @@
     "empty": "Aucune session terminée.",
     "itemCount": "{{count}} articles",
     "noChecked": "Aucun article coché",
-    "unknownItem": "Article supprimé"
+    "unknownItem": "Article supprimé",
+    "qtyWithUnit": ", {{quantity}} {{unit}}",
+    "qtyOnly": ", {{quantity}}"
   },
   "plan": {
     "listLabel": "Liste de courses",

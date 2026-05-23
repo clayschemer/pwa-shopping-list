@@ -180,6 +180,8 @@ SessionCheckedItem {
   priceQuantitySnapshot: number | null
   priceUnitSnapshot:     string | null
   nameSnapshot:          string | null // null only on legacy entries written before the field existed
+  quantitySnapshot:      number | null // item purchase quantity at check time; null on legacy entries
+  unitSnapshot:          string | null // item purchase unit at check time; null on legacy entries
 }
 ```
 
