@@ -4,6 +4,7 @@ import { selectOrderedCategories } from './ordered-categories.selectors';
 import { selectActiveSessionForCurrentShop } from '../sessions/sessions.selectors';
 import { selectShopEntities } from '../shops/shops.selectors';
 import { selectSelectedShopId } from '../ui/ui.selectors';
+import { effectivePrice } from '../../models/item-price.util';
 import type { Item } from '../../models/item.model';
 import type { CategoryId } from '../../models/ids.model';
 
@@ -67,7 +68,7 @@ export const selectGroupedShopList = createSelector(
       const sorted = [...bucket].sort((a, b) => a.name.localeCompare(b.name));
       const estTotal = sorted
         .filter((i) => !i.removed && i.price !== null)
-        .reduce((acc, i) => acc + (i.price ?? 0), 0);
+        .reduce((acc, i) => acc + (effectivePrice(i) ?? 0), 0);
       const sessionCheckedTotal = sorted
         .filter((i) => sessionItemIds.has(i.id))
         .reduce((acc, i) => acc + (sessionItemPrices.get(i.id) ?? 0), 0);
@@ -91,7 +92,7 @@ export const selectGroupedShopList = createSelector(
         items: sorted,
         estTotal: sorted
           .filter((i) => !i.removed && i.price !== null)
-          .reduce((acc, i) => acc + (i.price ?? 0), 0),
+          .reduce((acc, i) => acc + (effectivePrice(i) ?? 0), 0),
         sessionCheckedTotal: sorted
           .filter((i) => sessionItemIds.has(i.id))
           .reduce((acc, i) => acc + (sessionItemPrices.get(i.id) ?? 0), 0),

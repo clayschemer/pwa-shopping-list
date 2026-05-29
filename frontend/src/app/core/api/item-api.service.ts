@@ -19,6 +19,7 @@ import type {
   CategoryId,
   ItemId,
   SessionId,
+  ShopId,
 } from '../../models/ids.model';
 import type {
   CheckConflictError,
@@ -79,7 +80,9 @@ export function mapItem(snap: QueryDocumentSnapshot, accountId: AccountId): Item
     price: (data['price'] ?? null) as number | null,
     priceQuantity: (data['priceQuantity'] ?? null) as number | null,
     priceUnit: (data['priceUnit'] ?? null) as string | null,
+    priceShopId: (data['priceShopId'] ?? null) as ShopId | null,
     priceUpdatedAt: toMillis(data['priceUpdatedAt']),
+    priceAttemptedAt: toMillis(data['priceAttemptedAt']),
     purchaseCount: (data['purchaseCount'] ?? 0) as number,
   };
 }
@@ -128,7 +131,9 @@ export class ItemApiService {
         price: null,
         priceQuantity: null,
         priceUnit: null,
+        priceShopId: null,
         priceUpdatedAt: null,
+        priceAttemptedAt: null,
         purchaseCount: 0,
       };
 
@@ -194,6 +199,7 @@ export class ItemApiService {
     price: number | null,
     priceQuantity: number | null,
     priceUnit: string | null,
+    shopId: ShopId | null = null,
   ): Promise<void | NotFoundError> {
     const { accountId } = this.context.require();
     return runInInjectionContext(this.injector, async () => {
@@ -202,6 +208,7 @@ export class ItemApiService {
           price,
           priceQuantity,
           priceUnit,
+          priceShopId: price === null ? null : shopId,
           priceUpdatedAt: price === null ? null : serverTimestamp(),
         });
       } catch {

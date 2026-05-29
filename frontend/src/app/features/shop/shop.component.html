@@ -86,7 +86,7 @@
                         {{ 'shop.tapToUndo' | transloco }}
                       </span>
                     } @else if (item.price !== null) {
-                      <span class="app-shop__item-price">{{ item.price | money }}</span>
+                      <span class="app-shop__item-price">{{ item | effectivePrice | money }}</span>
                     }
                   </span>
                   @if (item.description) {

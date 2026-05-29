@@ -111,10 +111,12 @@ User {
 
 ```
 Shop {
-  id:            ShopId
-  accountId:     AccountId
-  name:          string
-  categoryOrder: CategoryId[]   // ordered; categories excluded from this shop are absent
+  id:              ShopId
+  accountId:       AccountId
+  name:            string
+  categoryOrder:   CategoryId[]   // ordered; categories excluded from this shop are absent
+  priceSearchUrl:  string | null  // URL template with {query} placeholder for price lookup;
+                                  // null = shop is skipped during pipeline price lookup
 }
 ```
 
@@ -149,6 +151,8 @@ Item {
   price:                number | null
   priceQuantity:        number | null
   priceUnit:            string | null
+  priceShopId:          ShopId | null    // which shop's price is stored; null when manually set
+                                         // or when the item pre-dates this field (Option B)
   priceUpdatedAt:       number | null    // Unix ms; null if price has never been set
   purchaseCount:        number
 }
@@ -491,14 +495,15 @@ Errors:  NotFoundError
 
 #### setItemPrice
 ```
-Intent:  Set or update the price, reference quantity, and unit for an item.
-         Last writer wins — whether the caller is a user action or an AI operation.
-         Passing null for price clears the price record entirely.
+Intent:  Set or update the price, reference quantity, unit, and source shop for an item.
+         Last writer wins — whether the caller is a user action or the price pipeline.
+         Passing null for price clears the price record entirely (shopId also cleared).
          The updated Item arrives via itemChanges$.
 Input:   id:            ItemId
          price:         number | null
          priceQuantity: number | null
          priceUnit:     string | null
+         shopId:        ShopId | null   // which shop's price this is; null for manual entry
 Output:  void
 Errors:  NotFoundError
 ```
@@ -631,7 +636,8 @@ Errors:  none
 Intent:  Create a new shop. The new shop's categoryOrder is initialised with all
          existing categories in their current global sort order.
          The new Shop arrives via shopChanges$ as a batch of one.
-Input:   name: string
+Input:   name:           string
+         priceSearchUrl: string | null   // URL template with {query} placeholder; null = skip price lookup
 Output:  Shop
 Errors:  NameConflictError
 ```
@@ -645,6 +651,20 @@ Input:   id:   ShopId
 Output:  Shop
 Errors:  NotFoundError
          NameConflictError
+```
+
+#### setShopPriceUrl
+```
+Intent:  Set or clear the price search URL template for a shop.
+         Used by the Manage Shops UI to configure which store page the price
+         pipeline scrapes for this shop. The {query} placeholder is substituted
+         with the item's search query string at pipeline run time.
+         Setting null opts the shop out of pipeline price lookup entirely.
+         The updated Shop arrives via shopChanges$ as a batch of one.
+Input:   id:  ShopId
+         url: string | null
+Output:  void
+Errors:  NotFoundError
 ```
 
 #### deleteShop
@@ -770,10 +790,18 @@ The service implementation enforces this gate — callers do not need to check.
 
 #### requestPriceLookup
 ```
-Intent:  Ask the AI to look up and set the current price for an item.
-         The AI checks shops in the order defined by AiConfig.priceLookupShopOrder.
-         On success the implementation calls setItemPrice internally — the updated
-         Item arrives via itemChanges$ as a batch of one, like any other item update.
+Intent:  Request a price lookup for an item from the external price pipeline.
+         The pipeline (Playwright + Gemma via Ollama) checks shops in the order
+         defined by AiConfig.priceLookupShopOrder, scraping each shop's search
+         results page and validating the best match via LLM.
+         The implementation triggers the pipeline by resetting priceUpdatedAt to null,
+         which causes the pipeline's next 30-minute quick-scan cycle to pick up the
+         item. Max user-facing latency is one scan interval (typically 30 min).
+         On success the pipeline writes directly to Firestore via the same path as
+         setItemPrice — the updated Item arrives via itemChanges$ as a batch of one.
+         If AiConfig is null, returns AiUnavailableError immediately without contacting
+         the pipeline. If the pipeline server is unreachable, the item is queued for
+         the next scan cycle and no error surfaces to the caller.
 Input:   itemId: ItemId
 Output:  void
 Errors:  NotFoundError

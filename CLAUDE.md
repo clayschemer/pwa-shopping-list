@@ -60,6 +60,9 @@ These rules are baked in. They reflect recurring lessons; do not skip them.
 - Don't silence or skip failing tests to "ship" — fix the underlying cause.
 - For complex framework-level work (route snapshots, async injection contexts, `visualViewport`, viewport overlays, Firestore stream lifecycle), trace the actual runtime path before writing code. Verify with a failing test first; "looks right" implementations have repeatedly missed the runtime path here.
 
+### Gherkin Scenarios
+- **Always pause for user review before proceeding** whenever a Gherkin scenario is added, changed, or deleted — show the full scenario diff and wait for explicit approval before writing any step definitions or production code that depends on it. The feature file is the contract; the user must sign off on the contract before implementation begins.
+
 ### Animations & Styling
 - **Pure CSS only.** Never install, import, or reference `@angular/animations`, `BrowserAnimationsModule`, or `NoopAnimationsModule` — the package is deprecated. Use `transition`, `@keyframes`, and the View Transitions API.
 - All animations must respect `prefers-reduced-motion` and the in-app reduced-motion setting.
@@ -238,13 +241,14 @@ AiConfig      { provider, apiKeyRef, priceLookupShopOrder: ShopId[], autoAddEnab
               // Note: apiKeyRef exists in the logical data model but is backend-internal.
               // It is intentionally absent from the API contract — the frontend never sees it.
 User          { id, accountId, email, displayName }
-Shop          { id, accountId, name, categoryOrder: CategoryId[] }
+Shop          { id, accountId, name, categoryOrder: CategoryId[],
+                priceSearchUrl: string | null }
 Category      { id, accountId, name, color, globalSortOrder }
-Item          { id, accountId, name, quantity, unit,
+Item          { id, accountId, name, description, quantity, unit,
                 primaryCategoryId, secondaryCategoryIds,
                 removed, removedAt, addedBy, aiMotivation,
-                price, priceQuantity, priceUnit, priceUpdatedAt,
-                purchaseCount }
+                price, priceQuantity, priceUnit, priceShopId: ShopId | null,
+                priceUpdatedAt, purchaseCount }
 Session       { id, accountId, shopId, participants, startedBy,
                 startedAt, completedAt, checkedItems: SessionCheckedItem[] }
 SessionCheckedItem { itemId, checkedBy, checkedAt,
@@ -261,7 +265,10 @@ SessionCheckedItem { itemId, checkedBy, checkedAt,
 - **Session log is source of truth** for purchase history and totals. Price, qty, unit snapshotted at check time.
 - **One active session per shop per account.** Users at the same shop share a session via start-or-join semantics. Users at different shops have independent sessions.
 - **Undo on check has two layers.** 4-second pending window is client-side only (visible only to the checking user). Committed undo history (`session.checkedItems`) is shared — any participant can undo any check.
-- **Single price field on Item.** Last writer wins (user or AI). Staleness by `priceUpdatedAt` alone.
+- **Single price field on Item (Option B).** Last writer wins (user or price pipeline). `priceShopId` records which shop's price is stored — enables the UI to show a staleness hint when the active session shop differs. Full per-shop price map deferred. Staleness by `priceUpdatedAt` alone.
+- **`description` is passed to the price pipeline LLM** as shopper context. Notes like "inte Arla" or "ekologisk" influence which search result Gemma selects.
+- **Price pipeline is external and additive.** A separate Docker service (`price-pipeline/`) uses Playwright + Gemma (Ollama) to scrape store pages and write prices back via the same Firestore path as `setItemPrice`. The Angular app cannot distinguish pipeline-written prices from user-entered ones. Removing the pipeline requires only decommissioning the Docker service and clearing `aiConfig` — zero frontend changes.
+- **`Shop.priceSearchUrl`** is the URL template (with `{query}` placeholder) the pipeline uses to scrape that shop. Null = shop is skipped during pipeline runs.
 - **AI gated by `AiConfig`.** Service layer enforces the gate — components never check this directly.
 - **`purchaseCount` incremented on session close** for all items in `checkedItems`. Drives autocomplete ranking.
 - **Category order per-shop with global fallback.** Drawer reorder → `setShopCategoryOrder`. Global order → `setGlobalCategoryOrder`.
@@ -326,9 +333,11 @@ All device-local (localStorage) unless noted:
 | 2 | Price field granularity in edit sheet | Open: flat only, or qty+unit sub-fields? |
 | 3 | AI provider setup screen | Open: needs own design pass |
 | 4 | Shops reorderable in Manage Shops? | Open |
-| 5 | Price staleness threshold | Working assumption 6–12 months |
-| 6 | AI price lookup mechanics | Beyond shop priority order — TBD |
+| 5 | Price staleness threshold | Working assumption 6 months (180 days) in pipeline config; exact value TBD |
+| 6 | AI price lookup mechanics | **Resolved.** External pipeline (Playwright + Ollama/Gemma). See `price-pipeline/`. Shop-specific URL in `Shop.priceSearchUrl`. No aggregator fallback — grocery-specific store URLs only. |
 | 7 | AI suggestion motivation refresh | Existing motivation reused on re-suggestion; update deferred |
+| 8 | Store-specific prices | **Resolved (Option B).** Single price per item tagged with `priceShopId`. UI can show staleness hint when active session shop differs. Full per-shop price map deferred. |
+| 9 | Manage Shops UI — price URL field | Not yet built. `setShopPriceUrl` is in the API contract; UI work deferred. |
 
 ---
 
@@ -346,6 +355,8 @@ Built (test-first, behind the API service layer):
 - PWA shell: `@angular/service-worker` with `ngsw-config.json`, `manifest.webmanifest`, default icon set under `frontend/public/icons/`, hosting headers configured for SW + manifest in `backend/firebase/firebase.json`
 
 Backend status: All API services (Auth, Item, Category, Shop, Session, Account, Users) are wired to Firestore through the `core/api/` layer. Each entity exposes a real `EntityChangeBatch<T>` stream via `snapshotChanges` (see `change-stream.ts`). `StreamErrorService` surfaces unrecoverable stream failures globally. Firestore security rules in `backend/firebase/firestore.rules` enforce the `accounts/{accountId}/...` subcollection layout via an `isMember()` check.
+
+Price pipeline: `price-pipeline/` is a standalone Docker Compose workspace containing an Ollama service (`gemma2:2b`) and a `price-fetcher` Node.js service. The fetcher scrapes grocery store search pages via Playwright and validates results with Gemma via Ollama. It writes prices back to Firestore via Firebase Admin SDK using the same path as `setItemPrice`. Two modes: 30-min quick-scan for unpriced items (`priceUpdatedAt == null`), nightly full sweep for stale prices (> 180 days). The pipeline reads `Shop.priceSearchUrl` from Firestore and falls back to a local `stores.json` for stores not yet configured via the UI. Phase 0 (manual item testing) and Phase 1 (scheduler mode with real Firestore) are both complete. AWS ECS Fargate deployment (Phase 3) is planned for when the app leaves private phase. The scheduler runs locally via `./start-scheduler` (requires `service-account.json` from Firebase Console).
 
 Deployment: GitHub Actions workflow (`.github/workflows/deploy.yml`) runs Vitest + Cucumber on every push/PR to `develop`/`main`, then deploys `develop` → GitHub Pages and `main` → cPanel via FTPS. Firestore rules and indexes deploy separately via `firebase deploy --only firestore:rules,firestore:indexes` from `backend/firebase/`. Firebase Hosting config exists in `firebase.json` as a fallback path but is not part of the active pipeline.
 

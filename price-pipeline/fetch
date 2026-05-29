@@ -1,0 +1,4 @@
+#!/bin/bash
+# Usage: ./fetch --item "mjölk" [--site willys|ica|coop|hemkop|matsmart|prisjakt] [--url "https://.../{query}"]
+set -e
+docker compose run --rm price-fetcher npx tsx src/index.ts "$@"

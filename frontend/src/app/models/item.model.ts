@@ -1,4 +1,4 @@
-import type { AccountId, CategoryId, ItemId } from './ids.model';
+import type { AccountId, CategoryId, ItemId, ShopId } from './ids.model';
 
 export interface Item {
   id: ItemId;
@@ -16,6 +16,8 @@ export interface Item {
   price: number | null;
   priceQuantity: number | null;
   priceUnit: string | null;
+  priceShopId: ShopId | null;
   priceUpdatedAt: number | null;
+  priceAttemptedAt: number | null;  // set by pipeline on every attempt; null = never tried
   purchaseCount: number;
 }

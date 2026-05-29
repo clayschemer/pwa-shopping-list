@@ -10,13 +10,14 @@ import { selectPendingChecks } from '../../store/items/items.selectors';
 import { itemsActions, itemsApiActions } from '../../store/items/items.actions';
 import type { PendingCheck } from '../../store/items/items.reducer';
 import { MoneyPipe } from '../../core/format/money.pipe';
+import { EffectivePricePipe } from '../../core/format/effective-price.pipe';
 import { HapticsService } from '../../core/haptics/haptics.service';
 import type { Item } from '../../models/item.model';
 import type { ItemId } from '../../models/ids.model';
 
 @Component({
   selector: 'app-shop',
-  imports: [MatIcon, TranslocoPipe, MoneyPipe],
+  imports: [MatIcon, TranslocoPipe, MoneyPipe, EffectivePricePipe],
   templateUrl: './shop.component.html',
   styleUrl: './shop.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

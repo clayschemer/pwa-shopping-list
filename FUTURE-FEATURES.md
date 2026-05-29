@@ -69,3 +69,19 @@ Settings screen (S4) has a placeholder link. Needs its own design pass.
 ## Broader AI Analytics
 
 Basket analysis, spend trends per category, session patterns, price drift, item co-occurrence, time-since-last-purchase signals, items added but never checked.
+
+---
+
+## Currency Conversion
+
+**Background:** The settings pane lets users switch display currency (GBP, USD, EUR, NOK, SEK, DKK), but currently only swaps the currency symbol — no conversion is applied. All prices in Firestore are in SEK (scraped from Swedish stores).
+
+**What is needed:**
+- A daily exchange rate fetch from a free API. [Frankfurter](https://www.frankfurter.dev) (ECB data, no API key, no rate limit) is the recommended source: `https://api.frankfurter.dev/v1/latest?base=SEK&symbols=GBP,USD,EUR,NOK,DKK`
+- Store the fetched rates in the app (localStorage or a Firestore document updated daily)
+- Add a `priceCurrency` field to the `Item` model (default `"SEK"` for all existing items) so the app knows which currency to convert from — necessary if we ever support non-SEK stores in the future
+- Convert `item.price` at display time using the stored rate before rendering via `MoneyPipe`
+
+**Data model note:** All prices are currently assumed to be SEK. `priceShopId` already records which shop's price is stored. Adding `priceCurrency: string` (ISO 4217, default `"SEK"`) makes the conversion source explicit and future-proofs the model for non-Swedish stores.
+
+**Implementation note:** Conversion should happen in `MoneyPipe` or a dedicated selector, not in individual components. The raw SEK price must remain stored in Firestore unchanged.

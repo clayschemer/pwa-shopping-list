@@ -1,0 +1,34 @@
+services:
+  ollama:
+    image: ollama/ollama
+    entrypoint: ["/bin/bash", "/entrypoint.sh"]
+    volumes:
+      - ./ollama-entrypoint.sh:/entrypoint.sh:ro
+      - ollama_data:/root/.ollama
+    ports:
+      - "11434:11434"
+    healthcheck:
+      # Ready once the model has been pulled and appears in the list.
+      # ollama list is always available; curl is not in the ollama/ollama image.
+      test: ["CMD-SHELL", "ollama list 2>/dev/null | grep -q 'gemma2'"]
+      interval: 15s
+      timeout: 10s
+      retries: 80
+      start_period: 1200s  # 20 min for the initial ~1.6 GB pull on a slow connection
+
+  price-fetcher:
+    build: ./price-fetcher
+    environment:
+      OLLAMA_URL: http://ollama:11434
+      # Override with OLLAMA_MODEL=gemma3:4b if upgrading
+      OLLAMA_MODEL: gemma2:2b
+    volumes:
+      - ./price-fetcher/src:/app/src:ro
+      - ./stores.json:/app/stores.json:ro
+    depends_on:
+      ollama:
+        condition: service_healthy
+
+volumes:
+  ollama_data:
+    # Named volume persists model weights across docker compose down/up

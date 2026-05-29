@@ -1,0 +1,8 @@
+{
+  "ICA vh":      "https://handlaprivatkund.ica.se/stores/1003569/search?q={query}",
+  "ICA Erikslust":      "https://handlaprivatkund.ica.se/stores/1003569/search?q={query}",
+  "ICA Supermarket limhamn":      "https://handlaprivatkund.ica.se/stores/1003569/search?q={query}",
+  "coop":     "https://www.coop.se/globalt-sok/?query={query}",
+  "lidl":     "https://www.lidl.se/q/search?q={query}",
+  "hemkop":   "https://www.hemkop.se/sok?q={query}&sort=relevance"
+}

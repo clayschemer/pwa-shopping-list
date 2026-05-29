@@ -64,7 +64,7 @@ missing the `verified` field are treated as verified so existing hand-created
 allowlist entries keep working without migration.
 
 ### Shop
-A named place to shop. Stores the category order and exclusions specific to that shop.
+A named place to shop. Stores the category order and exclusions specific to that shop, and the URL template used to fetch prices from that shop's website.
 
 ```
 Shop
@@ -72,6 +72,8 @@ Shop
   - accountId: AccountId
   - name                                ← unique within account
   - categoryOrder: CategoryId[]         ← ordered, excludable list of categories for this shop
+  - priceSearchUrl: string | null       ← URL template with {query} placeholder for price lookup;
+                                          null = shop is skipped during price lookup
 ```
 
 ### Category
@@ -103,18 +105,20 @@ Item
   - removedAt: timestamp | null         ← set when removed, cleared when restored
   - addedBy: 'user' | 'ai'             ← origin indicator only, no functional difference
   - aiMotivation: string | null         ← populated when addedBy is 'ai'; persists for reference
-  - price: number | null               ← single price field; user or AI, no distinction
+  - price: number | null               ← single price field; last writer wins (user or pipeline)
   - priceQuantity: number | null        ← quantity the price applies to
   - priceUnit: string | null            ← unit the price applies to
-  - priceUpdatedAt: timestamp | null    ← used to determine staleness; source (user/AI) not recorded
+  - priceShopId: ShopId | null          ← which shop's price is stored (Option B); null when manually
+                                          set or when the item pre-dates this field
+  - priceUpdatedAt: timestamp | null    ← used to determine staleness; source (user/pipeline) not recorded
   - purchaseCount: number               ← incremented on each session completion where item was checked
 ```
 
 **Notes on Item:**
 
-- `description` is optional freetext displayed beneath the item name in both modes. No functional role — purely informational.
+- `description` is optional freetext displayed beneath the item name in both modes. Also passed to the price-lookup pipeline as context — notes like "inte Arla" or "ekologisk" influence which search result is selected by the LLM validation step.
 - `removed` is set to `true` by two actors: a plan-mode deletion, or a session check. It is cleared to `false` by an uncheck action (item restored to list).
-- `price`, `priceQuantity`, `priceUnit`, and `priceUpdatedAt` form a single price record. The last writer wins — user or AI. No separate manual/estimated distinction.
+- `price`, `priceQuantity`, `priceUnit`, `priceShopId`, and `priceUpdatedAt` form a single price record. The last writer wins — user or pipeline. No separate manual/estimated distinction. `priceShopId` identifies which shop's price is stored (Option B: single price + source shop), enabling the UI to flag staleness when the active session shop differs from `priceShopId`. Full per-shop price maps are a future enhancement.
 - `aiMotivation` is set when the AI adds the item and is never updated. If the AI re-suggests the same item, the existing motivation is reused.
 - `purchaseCount` is incremented once per completed session in which the item appears in the session's checked log. It is the basis for autocomplete frequency ranking.
 - Price staleness is determined by `priceUpdatedAt` alone. Working assumption is a 6-12 month refresh window; exact threshold is an open decision.
@@ -212,13 +216,56 @@ These are computed from stored data, not stored themselves.
 
 | # | Topic | Status |
 |---|---|---|
-| 1 | Price staleness threshold | Working assumption 6-12 months. Exact value TBD. |
-| 2 | AI price lookup mechanics | Beyond shop priority order — how AI is instructed to find prices at a given shop. TBD. |
-| 3 | Undo window duration | Resolved: 4-second window, client-side only, shop mode, checking user only. Item dims + strikethrough on check; tap again within window to undo; disappears after timeout. |
+| 1 | Price staleness threshold | Working assumption 6 months (180 days) in pipeline config; exact value TBD. |
+| 2 | AI price lookup mechanics | **Resolved.** External pipeline (Playwright + Ollama/Gemma). See `price-pipeline/`. Shop-specific URL in `Shop.priceSearchUrl`. No aggregator fallback — if all shops fail, item stays unpriced. |
+| 3 | Undo window duration | Resolved: 4-second window, client-side only, shop mode, checking user only. |
 | 4 | Uncategorised items label | Resolved: "Uncategorised", muted style, always last in list, no context menu. |
 | 5 | Permitted user definition | Allowlist for now; may expand to signup flow. |
 | 6 | AI suggestion motivation refresh | If AI re-suggests an item, existing motivation is reused. Updating motivation on re-suggestion is a future consideration. |
 | 7 | AI analytical scope | Starting with purchase frequency. Basket analysis, co-occurrence, spend trends etc. deferred. |
+| 8 | Store-specific prices | **Resolved (Option B).** Single price per item tagged with `priceShopId`. UI shows staleness hint when active session shop differs. Full per-shop price map deferred. |
+
+---
+
+---
+
+## Price Pipeline Architecture
+
+Price lookup is implemented as a separate server-side pipeline in `price-pipeline/` — it is not part of the Angular app and has no direct dependency on the frontend code. It communicates with the backend exclusively through the same Firestore write path as `setItemPrice()`.
+
+### How it works
+
+```
+Scheduler (nightly + 30-min quick-scan)
+  ↓
+Query Firestore — items where priceUpdatedAt is null or older than threshold
+  ↓
+For each item, for each shop in AiConfig.priceLookupShopOrder:
+  → Build search URL from Shop.priceSearchUrl + item name + qty/unit
+  → Playwright fetch (headless Chromium) — scrapes the store's search results page
+  → Structured extraction — JSON-LD parsing, fallback to page text
+  → Gemma validation (Ollama) — selects best match, respects item.description context
+  → If match found: write price + priceShopId back to Firestore → triggers itemChanges$ stream
+  → If no match: try next shop
+  ↓
+If all shops fail: item stays unpriced; no aggregator fallback
+```
+
+### Key decisions
+
+- **No aggregator fallback.** Grocery aggregators (e.g. Prisjakt) return multi-category results that produce unreliable prices for food. All lookups use store-specific URLs.
+- **`Shop.priceSearchUrl`** is the authoritative source for each shop's search URL template (`{query}` placeholder). The pipeline also reads a local `stores.json` for experimentation; this is a bridge that becomes irrelevant once all shops have `priceSearchUrl` populated via the Manage Shops UI.
+- **`item.description` is passed to the LLM** as shopper context. Notes like "inte Arla" or "ekologisk" directly influence product selection in the validation step.
+- **`priceShopId`** (Option B) records which shop's price is stored, enabling the UI to show a staleness hint when the active session shop differs.
+- **Graceful degradation.** If `AiConfig` is null, the pipeline is inactive. If the pipeline server is unreachable, prices stay at their current values. Individual item failures are logged and skipped — the pipeline never writes partial or invalid data.
+- **Infrastructure**: Docker Compose locally (Ollama + Playwright containers), ECS Fargate on AWS in production. Local Docker serves as a production emulator during the private phase — same containers, same Firebase credentials, real Firestore writes.
+
+### Scheduling
+
+| Trigger | Scope | Condition |
+|---|---|---|
+| Every 30 minutes | Unpriced items only | `priceUpdatedAt == null` |
+| Nightly at 02:00 UTC | Full sweep | `priceUpdatedAt < now - PRICE_STALE_DAYS` or null |
 
 ---
 

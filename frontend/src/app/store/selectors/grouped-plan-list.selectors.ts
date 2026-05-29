@@ -1,6 +1,7 @@
 import { createSelector } from '@ngrx/store';
 import { selectActiveItems } from '../items/items.selectors';
 import { selectOrderedCategories } from './ordered-categories.selectors';
+import { effectivePrice } from '../../models/item-price.util';
 import type { Category } from '../../models/category.model';
 import type { Item } from '../../models/item.model';
 import type { CategoryId } from '../../models/ids.model';
@@ -67,9 +68,8 @@ export const selectGroupedPlanList = createSelector(
 function sumPrices(items: Item[]): number {
   let total = 0;
   for (const item of items) {
-    if (typeof item.price === 'number') {
-      total += item.price;
-    }
+    const p = effectivePrice(item);
+    if (p !== null) total += p;
   }
   return total;
 }
