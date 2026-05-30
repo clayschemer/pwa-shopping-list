@@ -93,6 +93,8 @@ describe('UndoHistorySheetComponent', () => {
           priceQuantity: null,
           priceUnit: null,
           priceUpdatedAt: null,
+          sizePerPieceQuantity: null,
+          sizePerPieceUnit: null,
           purchaseCount: 0,
         },
       } as Record<ItemId, Item>,

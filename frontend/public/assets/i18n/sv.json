@@ -64,7 +64,11 @@
       "label": "Sortera",
       "shopLayout": "Butikslayout",
       "alphabetical": "Alfabetiskt"
-    }
+    },
+    "sizePerPiece": "Storlek per styck",
+    "sizePerPieceHint": "Hjälper att uppskatta priset när varan säljs efter vikt eller volym (t.ex. lime ≈ 70 g).",
+    "sizePerPieceQuantity": "Mängd",
+    "sizePerPieceUnit": "Enhet"
   },
   "signIn": {
     "title": "Inköpslista",
@@ -163,7 +167,9 @@
     "est": "Ber.",
     "tapToUndo": "tryck för att ångra",
     "checkItem": "Bocka av {{name}}",
-    "activeSession": "Aktiv session"
+    "activeSession": "Aktiv session",
+    "approxShelfPrice": "≈ {{price}} / {{quantity}} {{unit}}",
+    "approxShelfPriceNoQty": "≈ {{price}}"
   },
   "closeSession": {
     "allDoneTitle": "Klart!",
@@ -195,6 +201,7 @@
     "ml": "ml",
     "L": "L",
     "cl": "cl",
+    "dl": "dl",
     "bag": "påse",
     "pack": "förp",
     "box": "låda",

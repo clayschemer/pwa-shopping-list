@@ -16,6 +16,15 @@ export interface PriceResult {
   price: number;
   priceQuantity: number | null;
   priceUnit: string | null;
+  /** Typical size of one piece — only relevant when the shelf prices by
+   *  weight/volume but the item is normally sold by piece (lime, egg, etc.).
+   *  Null when not applicable. */
+  sizePerPiece: SizePerPiece | null;
+}
+
+export interface SizePerPiece {
+  quantity: number;
+  unit: string;
 }
 
 /** An item from Firestore that needs a price update */

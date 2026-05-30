@@ -104,6 +104,7 @@ async function runManual(args: Args): Promise<void> {
     console.log(`Price:    ${result.price} kr`);
     if (result.priceQuantity != null) console.log(`Quantity: ${result.priceQuantity}`);
     if (result.priceUnit)             console.log(`Unit:     ${result.priceUnit}`);
+    if (result.sizePerPiece)          console.log(`Per piece: ${result.sizePerPiece.quantity} ${result.sizePerPiece.unit}`);
     console.log(`Source:   ${url}`);
   } else {
     console.log('No price found. Consider trying a different --site or --url.');

@@ -111,6 +111,8 @@ Item
   - priceShopId: ShopId | null          ← which shop's price is stored (Option B); null when manually
                                           set or when the item pre-dates this field
   - priceUpdatedAt: timestamp | null    ← used to determine staleness; source (user/pipeline) not recorded
+  - sizePerPieceQuantity: number | null ← typical size of one piece; bridges pcs <-> mass/volume
+  - sizePerPieceUnit: string | null     ← unit for sizePerPieceQuantity ('g', 'kg', 'ml', 'cl', 'dl', 'L')
   - purchaseCount: number               ← incremented on each session completion where item was checked
 ```
 
@@ -119,6 +121,7 @@ Item
 - `description` is optional freetext displayed beneath the item name in both modes. Also passed to the price-lookup pipeline as context — notes like "inte Arla" or "ekologisk" influence which search result is selected by the LLM validation step.
 - `removed` is set to `true` by two actors: a plan-mode deletion, or a session check. It is cleared to `false` by an uncheck action (item restored to list).
 - `price`, `priceQuantity`, `priceUnit`, `priceShopId`, and `priceUpdatedAt` form a single price record. The last writer wins — user or pipeline. No separate manual/estimated distinction. `priceShopId` identifies which shop's price is stored (Option B: single price + source shop), enabling the UI to flag staleness when the active session shop differs from `priceShopId`. Full per-shop price maps are a future enhancement.
+- `sizePerPieceQuantity` and `sizePerPieceUnit` describe what one piece of the item typically weighs or measures — used by the frontend to convert between `pcs` and weight/volume when the user lists by piece but the shelf is priced per kg (or vice versa). The pipeline pre-fills it for produce-like items via Gemma. Sticky to user edits: once non-null, the pipeline does not overwrite. Clearing both fields lets the pipeline re-estimate on the next run.
 - `aiMotivation` is set when the AI adds the item and is never updated. If the AI re-suggests the same item, the existing motivation is reused.
 - `purchaseCount` is incremented once per completed session in which the item appears in the session's checked log. It is the basis for autocomplete frequency ranking.
 - Price staleness is determined by `priceUpdatedAt` alone. Working assumption is a 6-12 month refresh window; exact threshold is an open decision.

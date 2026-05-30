@@ -64,7 +64,11 @@
       "label": "Sort",
       "shopLayout": "Shop layout",
       "alphabetical": "Alphabetical"
-    }
+    },
+    "sizePerPiece": "Size per piece",
+    "sizePerPieceHint": "Helps estimate the price when this item is sold by weight or volume (e.g. lime ≈ 70 g).",
+    "sizePerPieceQuantity": "Amount",
+    "sizePerPieceUnit": "Unit"
   },
   "signIn": {
     "title": "Shopping List",
@@ -163,7 +167,9 @@
     "est": "Est.",
     "tapToUndo": "tap to undo",
     "checkItem": "Check {{name}}",
-    "activeSession": "Active session"
+    "activeSession": "Active session",
+    "approxShelfPrice": "≈ {{price}} / {{quantity}} {{unit}}",
+    "approxShelfPriceNoQty": "≈ {{price}}"
   },
   "closeSession": {
     "allDoneTitle": "All done!",
@@ -195,6 +201,7 @@
     "ml": "ml",
     "L": "L",
     "cl": "cl",
+    "dl": "dl",
     "bag": "bag",
     "pack": "pack",
     "box": "box",

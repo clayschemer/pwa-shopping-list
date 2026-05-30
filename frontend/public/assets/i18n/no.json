@@ -64,7 +64,11 @@
       "label": "Sortér",
       "shopLayout": "Butikkoppsett",
       "alphabetical": "Alfabetisk"
-    }
+    },
+    "sizePerPiece": "Størrelse per stk",
+    "sizePerPieceHint": "Hjelper å estimere prisen når varen selges etter vekt eller volum (f.eks. lime ≈ 70 g).",
+    "sizePerPieceQuantity": "Mengde",
+    "sizePerPieceUnit": "Enhet"
   },
   "signIn": {
     "title": "Handleliste",
@@ -163,7 +167,9 @@
     "est": "Est.",
     "tapToUndo": "trykk for å angre",
     "checkItem": "Kryss av {{name}}",
-    "activeSession": "Aktiv økt"
+    "activeSession": "Aktiv økt",
+    "approxShelfPrice": "≈ {{price}} / {{quantity}} {{unit}}",
+    "approxShelfPriceNoQty": "≈ {{price}}"
   },
   "closeSession": {
     "allDoneTitle": "Ferdig!",
@@ -195,6 +201,7 @@
     "ml": "ml",
     "L": "L",
     "cl": "cl",
+    "dl": "dl",
     "bag": "pose",
     "pack": "pakke",
     "box": "boks",

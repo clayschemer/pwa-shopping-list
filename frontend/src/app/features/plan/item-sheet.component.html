@@ -150,6 +150,43 @@
     </mat-form-field>
   </div>
 
+  <fieldset class="app-item-sheet__group">
+    <legend class="app-item-sheet__group-label">
+      {{ 'itemSheet.sizePerPiece' | transloco }}
+    </legend>
+    <p class="app-item-sheet__group-hint">
+      {{ 'itemSheet.sizePerPieceHint' | transloco }}
+    </p>
+    <div class="app-item-sheet__row">
+      <mat-form-field class="app-item-sheet__qty" appearance="outline">
+        <mat-label>{{ 'itemSheet.sizePerPieceQuantity' | transloco }}</mat-label>
+        <input
+          matInput
+          type="number"
+          min="0"
+          step="any"
+          name="sizePerPieceQuantity"
+          [ngModel]="sizePerPieceQuantity()"
+          (ngModelChange)="sizePerPieceQuantity.set($event === '' ? null : +$event)"
+        />
+      </mat-form-field>
+
+      <mat-form-field class="app-item-sheet__unit" appearance="outline">
+        <mat-label>{{ 'itemSheet.sizePerPieceUnit' | transloco }}</mat-label>
+        <mat-select
+          [ngModel]="sizePerPieceUnit()"
+          (ngModelChange)="sizePerPieceUnit.set($event)"
+          name="sizePerPieceUnitSelect"
+        >
+          <mat-option [value]="null">{{ 'itemSheet.unitNone' | transloco }}</mat-option>
+          @for (u of sizePerPieceUnits; track u) {
+            <mat-option [value]="u">{{ 'units.' + u | transloco }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+    </div>
+  </fieldset>
+
   <div class="app-item-sheet__actions">
     <button mat-button type="button" (click)="onCancel()">
       {{ 'itemSheet.cancel' | transloco }}

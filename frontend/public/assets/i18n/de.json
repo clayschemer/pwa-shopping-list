@@ -64,7 +64,11 @@
       "label": "Sortieren",
       "shopLayout": "Ladenanordnung",
       "alphabetical": "Alphabetisch"
-    }
+    },
+    "sizePerPiece": "Größe pro Stück",
+    "sizePerPieceHint": "Hilft, den Preis zu schätzen, wenn der Artikel nach Gewicht oder Volumen verkauft wird (z. B. Limette ≈ 70 g).",
+    "sizePerPieceQuantity": "Menge",
+    "sizePerPieceUnit": "Einheit"
   },
   "signIn": {
     "title": "Einkaufsliste",
@@ -163,7 +167,9 @@
     "est": "Gesch.",
     "tapToUndo": "Zum Rückgängigmachen tippen",
     "checkItem": "{{name}} abhaken",
-    "activeSession": "Aktive Sitzung"
+    "activeSession": "Aktive Sitzung",
+    "approxShelfPrice": "≈ {{price}} / {{quantity}} {{unit}}",
+    "approxShelfPriceNoQty": "≈ {{price}}"
   },
   "closeSession": {
     "allDoneTitle": "Alles erledigt!",
@@ -195,6 +201,7 @@
     "ml": "ml",
     "L": "L",
     "cl": "cl",
+    "dl": "dl",
     "bag": "Beutel",
     "pack": "Pkg",
     "box": "Schachtel",

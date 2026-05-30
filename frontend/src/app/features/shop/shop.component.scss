@@ -225,6 +225,15 @@
     font-weight: 500;
   }
 
+  &__item-price {
+    white-space: nowrap;
+
+    &--approximate {
+      font-style: italic;
+      color: var(--mat-sys-on-surface-variant);
+    }
+  }
+
   &__item-check {
     all: unset;
     cursor: pointer;

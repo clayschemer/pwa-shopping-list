@@ -47,6 +47,8 @@ export interface AddItemInput {
   unit: string | null;
   primaryCategoryId: CategoryId | null;
   secondaryCategoryIds: CategoryId[];
+  sizePerPieceQuantity: number | null;
+  sizePerPieceUnit: string | null;
 }
 
 export interface UpdateItemInput extends AddItemInput {
@@ -83,6 +85,8 @@ export function mapItem(snap: QueryDocumentSnapshot, accountId: AccountId): Item
     priceShopId: (data['priceShopId'] ?? null) as ShopId | null,
     priceUpdatedAt: toMillis(data['priceUpdatedAt']),
     priceAttemptedAt: toMillis(data['priceAttemptedAt']),
+    sizePerPieceQuantity: (data['sizePerPieceQuantity'] ?? null) as number | null,
+    sizePerPieceUnit: (data['sizePerPieceUnit'] ?? null) as string | null,
     purchaseCount: (data['purchaseCount'] ?? 0) as number,
   };
 }
@@ -134,6 +138,8 @@ export class ItemApiService {
         priceShopId: null,
         priceUpdatedAt: null,
         priceAttemptedAt: null,
+        sizePerPieceQuantity: input.sizePerPieceQuantity,
+        sizePerPieceUnit: input.sizePerPieceUnit,
         purchaseCount: 0,
       };
 
@@ -176,6 +182,8 @@ export class ItemApiService {
             unit: input.unit,
             primaryCategoryId: input.primaryCategoryId,
             secondaryCategoryIds: input.secondaryCategoryIds,
+            sizePerPieceQuantity: input.sizePerPieceQuantity,
+            sizePerPieceUnit: input.sizePerPieceUnit,
           });
         });
       } catch (err) {

@@ -21,6 +21,8 @@ const item = (id: string, name: string, removed = false): Item => ({
   priceQuantity: null,
   priceUnit: null,
   priceUpdatedAt: null,
+  sizePerPieceQuantity: null,
+  sizePerPieceUnit: null,
   purchaseCount: 0,
 });
 

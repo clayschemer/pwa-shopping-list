@@ -44,6 +44,7 @@ import {
   DeleteCategoryData,
 } from '../categories/delete-category-dialog.component';
 import { MoneyPipe } from '../../core/format/money.pipe';
+import { EffectivePricePipe } from '../../core/format/effective-price.pipe';
 import type { Item } from '../../models/item.model';
 import type { CategoryId } from '../../models/ids.model';
 
@@ -58,6 +59,7 @@ import type { CategoryId } from '../../models/ids.model';
     TranslocoPipe,
     AddItemPillComponent,
     MoneyPipe,
+    EffectivePricePipe,
   ],
   templateUrl: './plan.component.html',
   styleUrl: './plan.component.scss',
@@ -108,6 +110,8 @@ export class PlanComponent {
         unit: req.unit,
         primaryCategoryId: req.primaryCategoryId,
         secondaryCategoryIds: [],
+        sizePerPieceQuantity: null,
+        sizePerPieceUnit: null,
       }),
     );
     this.scrollToItemAfterRender(req.name);
@@ -139,6 +143,8 @@ export class PlanComponent {
         currentUnit: item.unit,
         currentPrimaryCategoryId: item.primaryCategoryId,
         currentSecondaryCategoryIds: item.secondaryCategoryIds,
+        currentSizePerPieceQuantity: item.sizePerPieceQuantity,
+        currentSizePerPieceUnit: item.sizePerPieceUnit,
         existingNames: this.activeItems()
           .filter((i) => i.id !== item.id)
           .map((i) => i.name),
@@ -157,6 +163,8 @@ export class PlanComponent {
             unit: result.unit,
             primaryCategoryId: result.primaryCategoryId,
             secondaryCategoryIds: result.secondaryCategoryIds,
+            sizePerPieceQuantity: result.sizePerPieceQuantity,
+            sizePerPieceUnit: result.sizePerPieceUnit,
           }),
         );
       }

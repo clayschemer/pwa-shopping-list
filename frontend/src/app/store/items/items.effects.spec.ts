@@ -27,6 +27,8 @@ const mockItem: Item = {
   priceQuantity: null,
   priceUnit: null,
   priceUpdatedAt: null,
+  sizePerPieceQuantity: null,
+  sizePerPieceUnit: null,
   purchaseCount: 0,
 };
 

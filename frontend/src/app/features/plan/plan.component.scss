@@ -189,6 +189,22 @@
     color: var(--mat-sys-on-surface-variant);
   }
 
+  &__item-meta {
+    display: flex;
+    gap: 0.5rem;
+    align-items: baseline;
+    font-size: 0.875rem;
+    color: var(--mat-sys-on-surface-variant);
+  }
+
+  &__item-price {
+    white-space: nowrap;
+
+    &--approximate {
+      font-style: italic;
+    }
+  }
+
   &__item-description {
     flex-basis: 100%;
     font-size: 0.8125rem;

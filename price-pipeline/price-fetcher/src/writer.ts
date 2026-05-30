@@ -34,14 +34,26 @@ export async function writePriceResult(
   shopId: string | null,
 ): Promise<void> {
   const db = getDb();
-  await db
-    .collection(`accounts/${accountId}/items`)
-    .doc(itemId)
-    .update({
-      price: result.price,
-      priceQuantity: result.priceQuantity,
-      priceUnit: result.priceUnit,
-      priceShopId: shopId,
-      priceUpdatedAt: FieldValue.serverTimestamp(),
-    });
+  const ref = db.collection(`accounts/${accountId}/items`).doc(itemId);
+
+  const update: Record<string, unknown> = {
+    price: result.price,
+    priceQuantity: result.priceQuantity,
+    priceUnit: result.priceUnit,
+    priceShopId: shopId,
+    priceUpdatedAt: FieldValue.serverTimestamp(),
+  };
+
+  // Sticky-user-edit: only seed sizePerPiece when no value is already stored —
+  // either from a previous pipeline run or, more importantly, a manual edit.
+  if (result.sizePerPiece) {
+    const snap = await ref.get();
+    const data = snap.data() ?? {};
+    if (data['sizePerPieceQuantity'] == null && data['sizePerPieceUnit'] == null) {
+      update['sizePerPieceQuantity'] = result.sizePerPiece.quantity;
+      update['sizePerPieceUnit'] = result.sizePerPiece.unit;
+    }
+  }
+
+  await ref.update(update);
 }

@@ -64,7 +64,11 @@
       "label": "Trier",
       "shopLayout": "Disposition du magasin",
       "alphabetical": "Alphabétique"
-    }
+    },
+    "sizePerPiece": "Taille par pièce",
+    "sizePerPieceHint": "Aide à estimer le prix lorsque l'article est vendu au poids ou au volume (par ex. citron vert ≈ 70 g).",
+    "sizePerPieceQuantity": "Quantité",
+    "sizePerPieceUnit": "Unité"
   },
   "signIn": {
     "title": "Liste de courses",
@@ -163,7 +167,9 @@
     "est": "Est.",
     "tapToUndo": "appuyez pour annuler",
     "checkItem": "Cocher {{name}}",
-    "activeSession": "Session active"
+    "activeSession": "Session active",
+    "approxShelfPrice": "≈ {{price}} / {{quantity}} {{unit}}",
+    "approxShelfPriceNoQty": "≈ {{price}}"
   },
   "closeSession": {
     "allDoneTitle": "Terminé !",
@@ -195,6 +201,7 @@
     "ml": "ml",
     "L": "L",
     "cl": "cl",
+    "dl": "dl",
     "bag": "sachet",
     "pack": "paquet",
     "box": "boîte",

@@ -9,6 +9,8 @@ export interface ItemInputPayload {
   unit: string | null;
   primaryCategoryId: CategoryId | null;
   secondaryCategoryIds: CategoryId[];
+  sizePerPieceQuantity: number | null;
+  sizePerPieceUnit: string | null;
 }
 
 export const itemsActions = createActionGroup({

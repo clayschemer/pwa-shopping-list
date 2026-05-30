@@ -248,7 +248,9 @@ Item          { id, accountId, name, description, quantity, unit,
                 primaryCategoryId, secondaryCategoryIds,
                 removed, removedAt, addedBy, aiMotivation,
                 price, priceQuantity, priceUnit, priceShopId: ShopId | null,
-                priceUpdatedAt, purchaseCount }
+                priceUpdatedAt,
+                sizePerPieceQuantity, sizePerPieceUnit,
+                purchaseCount }
 Session       { id, accountId, shopId, participants, startedBy,
                 startedAt, completedAt, checkedItems: SessionCheckedItem[] }
 SessionCheckedItem { itemId, checkedBy, checkedAt,
@@ -266,6 +268,7 @@ SessionCheckedItem { itemId, checkedBy, checkedAt,
 - **One active session per shop per account.** Users at the same shop share a session via start-or-join semantics. Users at different shops have independent sessions.
 - **Undo on check has two layers.** 4-second pending window is client-side only (visible only to the checking user). Committed undo history (`session.checkedItems`) is shared — any participant can undo any check.
 - **Single price field on Item (Option B).** Last writer wins (user or price pipeline). `priceShopId` records which shop's price is stored — enables the UI to show a staleness hint when the active session shop differs. Full per-shop price map deferred. Staleness by `priceUpdatedAt` alone.
+- **`sizePerPiece` (quantity + unit) bridges `pcs` ↔ mass/volume.** Needed for items listed by piece but shelf-priced by weight (lime, banana, egg, bread, milk carton) and the reverse. Pipeline pre-fills via Gemma; user edits stick (pipeline never overwrites once non-null — clear both fields to let it re-estimate). Without it, mismatched-dimension prices render as approximate (`≈ shelf price / unit`) and drop out of category totals rather than fabricating bogus multiplications.
 - **`description` is passed to the price pipeline LLM** as shopper context. Notes like "inte Arla" or "ekologisk" influence which search result Gemma selects.
 - **Price pipeline is external and additive.** A separate Docker service (`price-pipeline/`) uses Playwright + Gemma (Ollama) to scrape store pages and write prices back via the same Firestore path as `setItemPrice`. The Angular app cannot distinguish pipeline-written prices from user-entered ones. Removing the pipeline requires only decommissioning the Docker service and clearing `aiConfig` — zero frontend changes.
 - **`Shop.priceSearchUrl`** is the URL template (with `{query}` placeholder) the pipeline uses to scrape that shop. Null = shop is skipped during pipeline runs.

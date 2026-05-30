@@ -19,5 +19,11 @@ export interface Item {
   priceShopId: ShopId | null;
   priceUpdatedAt: number | null;
   priceAttemptedAt: number | null;  // set by pipeline on every attempt; null = never tried
+  // Typical size of one unit of this item. Used to bridge pcs <-> mass/volume
+  // when the user lists by piece but the shelf is priced by weight (e.g. lime).
+  // Pre-fillable by the pipeline; once non-null the pipeline does not overwrite it,
+  // so user edits stick. Clear both fields to let the pipeline re-estimate.
+  sizePerPieceQuantity: number | null;
+  sizePerPieceUnit: string | null;
   purchaseCount: number;
 }

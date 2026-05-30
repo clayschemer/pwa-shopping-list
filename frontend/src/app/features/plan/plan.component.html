@@ -75,12 +75,43 @@
             <li class="app-plan__item">
               <button type="button" class="app-plan__item-main" (click)="openEditSheet(item)">
                 <span class="app-plan__item-name">{{ item.name }}</span>
-                @if (item.quantity !== null || item.unit !== null) {
-                  <span class="app-plan__item-qty">
-                    {{ item.quantity
-                    }}{{ item.unit ? ' ' + ('units.' + item.unit | transloco) : '' }}
-                  </span>
-                }
+                <span class="app-plan__item-meta">
+                  @if (item.quantity !== null || item.unit !== null) {
+                    <span class="app-plan__item-qty">
+                      {{ item.quantity
+                      }}{{ item.unit ? ' ' + ('units.' + item.unit | transloco) : '' }}
+                    </span>
+                  }
+                  @if (item.price !== null) {
+                    @let priceResult = item | effectivePrice;
+                    @if (priceResult.kind === 'exact') {
+                      <span class="app-plan__item-price">
+                        {{ priceResult.total | money }}
+                      </span>
+                    } @else if (priceResult.kind === 'approximate') {
+                      <span class="app-plan__item-price app-plan__item-price--approximate">
+                        @if (
+                          priceResult.shelfQuantity !== null && priceResult.shelfUnit
+                        ) {
+                          {{
+                            'shop.approxShelfPrice'
+                              | transloco
+                                : {
+                                    price: priceResult.shelfPrice | money,
+                                    quantity: priceResult.shelfQuantity,
+                                    unit: priceResult.shelfUnit,
+                                  }
+                          }}
+                        } @else {
+                          {{
+                            'shop.approxShelfPriceNoQty'
+                              | transloco: { price: priceResult.shelfPrice | money }
+                          }}
+                        }
+                      </span>
+                    }
+                  }
+                </span>
                 @if (item.description) {
                   <span class="app-plan__item-description">{{ item.description }}</span>
                 }

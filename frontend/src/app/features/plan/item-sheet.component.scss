@@ -47,6 +47,12 @@
     padding: 0;
   }
 
+  &__group-hint {
+    font-size: 0.75rem;
+    color: var(--mat-sys-on-surface-variant);
+    margin: 0;
+  }
+
   &__group-header {
     display: flex;
     align-items: center;

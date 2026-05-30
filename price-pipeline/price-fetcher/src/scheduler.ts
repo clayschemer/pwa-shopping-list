@@ -47,7 +47,10 @@ async function runCycle(mode: 'full' | 'unpriced'): Promise<void> {
         const unitStr = result.priceUnit
           ? `/${result.priceQuantity ?? ''}${result.priceUnit}`
           : '';
-        console.log(`  ✓  ${result.price} kr${unitStr}  (${shop.name})`);
+        const sppStr = result.sizePerPiece
+          ? `  [≈ ${result.sizePerPiece.quantity} ${result.sizePerPiece.unit}/st]`
+          : '';
+        console.log(`  ✓  ${result.price} kr${unitStr}${sppStr}  (${shop.name})`);
         await writePriceResult(accountId, item.id, result, shop.id);
       } else {
         console.log(`  ✗  No price found — will retry in ${process.env['PRICE_RETRY_DAYS'] ?? 7} days.`);

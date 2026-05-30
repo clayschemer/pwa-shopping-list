@@ -22,6 +22,8 @@ const item = (id: string, name: string, primary: string | null): Item =>
     priceQuantity: null,
     priceUnit: null,
     priceUpdatedAt: null,
+    sizePerPieceQuantity: null,
+    sizePerPieceUnit: null,
     purchaseCount: 0,
   }) as Item;
 

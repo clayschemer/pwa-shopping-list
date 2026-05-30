@@ -86,7 +86,33 @@
                         {{ 'shop.tapToUndo' | transloco }}
                       </span>
                     } @else if (item.price !== null) {
-                      <span class="app-shop__item-price">{{ item | effectivePrice | money }}</span>
+                      @let priceResult = item | effectivePrice;
+                      @if (priceResult.kind === 'exact') {
+                        <span class="app-shop__item-price">
+                          {{ priceResult.total | money }}
+                        </span>
+                      } @else if (priceResult.kind === 'approximate') {
+                        <span class="app-shop__item-price app-shop__item-price--approximate">
+                          @if (
+                            priceResult.shelfQuantity !== null && priceResult.shelfUnit
+                          ) {
+                            {{
+                              'shop.approxShelfPrice'
+                                | transloco
+                                  : {
+                                      price: priceResult.shelfPrice | money,
+                                      quantity: priceResult.shelfQuantity,
+                                      unit: priceResult.shelfUnit,
+                                    }
+                            }}
+                          } @else {
+                            {{
+                              'shop.approxShelfPriceNoQty'
+                                | transloco: { price: priceResult.shelfPrice | money }
+                            }}
+                          }
+                        </span>
+                      }
                     }
                   </span>
                   @if (item.description) {

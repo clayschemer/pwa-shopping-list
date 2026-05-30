@@ -31,6 +31,8 @@ export interface ItemSheetData {
   currentUnit: string | null;
   currentPrimaryCategoryId: CategoryId | null;
   currentSecondaryCategoryIds: CategoryId[];
+  currentSizePerPieceQuantity: number | null;
+  currentSizePerPieceUnit: string | null;
   existingNames: string[];
   categories: Category[];
 }
@@ -42,6 +44,8 @@ export interface ItemSheetResult {
   unit: string | null;
   primaryCategoryId: CategoryId | null;
   secondaryCategoryIds: CategoryId[];
+  sizePerPieceQuantity: number | null;
+  sizePerPieceUnit: string | null;
 }
 
 export type CategorySortMode = 'shop' | 'alphabetical';
@@ -74,6 +78,8 @@ export class ItemSheetComponent {
   readonly mode = this.data.mode;
   readonly categories = this.data.categories;
   readonly units = computed(() => getSelectableUnits(this.theme.settings().language));
+  // Bridges pcs <-> mass/volume; count units would never make sense here.
+  readonly sizePerPieceUnits = ['g', 'kg', 'ml', 'cl', 'dl', 'L'] as const;
 
   readonly sortMode = signal<CategorySortMode>('shop');
 
@@ -88,6 +94,12 @@ export class ItemSheetComponent {
   readonly description = signal(this.data.currentDescription ?? '');
   readonly quantity = signal<number | null>(this.data.currentQuantity);
   readonly unit = signal<string | null>(this.data.currentUnit);
+  readonly sizePerPieceQuantity = signal<number | null>(
+    this.data.currentSizePerPieceQuantity,
+  );
+  readonly sizePerPieceUnit = signal<string | null>(
+    this.data.currentSizePerPieceUnit,
+  );
   readonly primaryCategoryId = signal<CategoryId | null>(
     this.data.currentPrimaryCategoryId,
   );
@@ -159,6 +171,10 @@ export class ItemSheetComponent {
       return;
     }
     const descTrimmed = this.description().trim();
+    // Both halves of the tuple must be present, otherwise the field is meaningless.
+    const sppQty = this.sizePerPieceQuantity();
+    const sppUnit = this.sizePerPieceUnit();
+    const sppBothSet = sppQty !== null && sppQty > 0 && !!sppUnit;
     this.sheetRef.dismiss({
       name: this.name().trim(),
       description: descTrimmed.length > 0 ? descTrimmed : null,
@@ -166,6 +182,8 @@ export class ItemSheetComponent {
       unit: this.unit() ?? null,
       primaryCategoryId: this.primaryCategoryId(),
       secondaryCategoryIds: this.secondaryCategoryIds(),
+      sizePerPieceQuantity: sppBothSet ? sppQty : null,
+      sizePerPieceUnit: sppBothSet ? sppUnit : null,
     } satisfies ItemSheetResult);
   }
 }
