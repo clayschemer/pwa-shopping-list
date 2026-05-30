@@ -5,4 +5,5 @@ export interface Shop {
   accountId: AccountId;
   name: string;
   categoryOrder: CategoryId[];
+  priceSearchUrl: string | null;
 }

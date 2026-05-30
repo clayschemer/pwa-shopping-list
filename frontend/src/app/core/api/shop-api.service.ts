@@ -29,6 +29,7 @@ function mapShop(snap: QueryDocumentSnapshot, accountId: AccountId): Shop {
     categoryOrder: ((data['categoryOrder'] ?? []) as string[]).map(
       (id) => id as CategoryId,
     ),
+    priceSearchUrl: (data['priceSearchUrl'] as string | null) ?? null,
   };
 }
 
@@ -66,6 +67,7 @@ export class ShopApiService {
       const ref = await addDoc(paths.shops(this.db, accountId), {
         name: trimmed,
         categoryOrder,
+        priceSearchUrl: null,
       });
 
       return {
@@ -73,6 +75,7 @@ export class ShopApiService {
         accountId,
         name: trimmed,
         categoryOrder: categoryOrder.map((c) => c as CategoryId),
+        priceSearchUrl: null,
       };
     });
   }
@@ -141,6 +144,21 @@ export class ShopApiService {
           return { type: 'NOT_FOUND', entityKind: 'shop', id: shopId };
         }
         throw err;
+      }
+      return;
+    });
+  }
+
+  async setShopPriceUrl(
+    id: ShopId,
+    url: string | null,
+  ): Promise<void | NotFoundError> {
+    const { accountId } = this.context.require();
+    return runInInjectionContext(this.injector, async () => {
+      try {
+        await updateDoc(paths.shopDoc(this.db, accountId, id), { priceSearchUrl: url });
+      } catch {
+        return { type: 'NOT_FOUND', entityKind: 'shop', id };
       }
       return;
     });

@@ -103,7 +103,16 @@
     "empty": "No shops yet. Tap + to add one.",
     "addShop": "Add shop",
     "deleteShop": "Delete {{name}}",
-    "deleteConfirm": "Delete \"{{name}}\"? This cannot be undone."
+    "deleteConfirm": "Delete \"{{name}}\"? This cannot be undone.",
+    "setPriceUrl": "Set price search URL for {{name}}"
+  },
+  "shopPriceUrlSheet": {
+    "title": "Price search URL",
+    "urlLabel": "Search page URL",
+    "urlPlaceholder": "https://example.com/search?q={query}",
+    "hint": "Use {query} as a placeholder for the item name. Leave empty to disable.",
+    "cancel": "Cancel",
+    "save": "Save"
   },
   "shopNameSheet": {
     "addTitle": "Add shop",

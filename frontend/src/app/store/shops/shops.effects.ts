@@ -93,4 +93,15 @@ export class ShopsEffects {
       ),
     ),
   );
+
+  readonly setShopPriceUrl$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(shopsApiActions.setShopPriceUrlRequested),
+      switchMap(({ id, url }) =>
+        from(this.shopApi.setShopPriceUrl(id, url)).pipe(
+          map(() => shopsActions.shopPriceUrlSet({ id, url })),
+        ),
+      ),
+    ),
+  );
 }

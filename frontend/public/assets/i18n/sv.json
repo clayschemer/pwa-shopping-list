@@ -103,7 +103,16 @@
     "empty": "Inga butiker ännu. Tryck + för att lägga till en.",
     "addShop": "Lägg till butik",
     "deleteShop": "Ta bort {{name}}",
-    "deleteConfirm": "Ta bort \"{{name}}\"? Detta kan inte ångras."
+    "deleteConfirm": "Ta bort \"{{name}}\"? Detta kan inte ångras.",
+    "setPriceUrl": "Ange prissöknings-URL för {{name}}"
+  },
+  "shopPriceUrlSheet": {
+    "title": "Prissöknings-URL",
+    "urlLabel": "URL till söksida",
+    "urlPlaceholder": "https://exempel.se/sok?q={query}",
+    "hint": "Använd {query} som platshållare för varunamnet. Lämna tomt för att inaktivera.",
+    "cancel": "Avbryt",
+    "save": "Spara"
   },
   "shopNameSheet": {
     "addTitle": "Lägg till butik",

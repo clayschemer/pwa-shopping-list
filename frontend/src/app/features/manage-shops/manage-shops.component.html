@@ -14,20 +14,35 @@
   <div class="app-manage-shops__list">
     @for (shop of shops(); track shop.id) {
       <div class="app-manage-shops__shop-row">
-        <button
-          class="app-manage-shops__shop-name"
-          (click)="openRenameSheet(shop)"
-        >
-          {{ shop.name }}
-        </button>
-        <button
-          mat-icon-button
-          class="app-manage-shops__delete-btn"
-          [attr.aria-label]="'manageShops.deleteShop' | transloco: { name: shop.name }"
-          (click)="deleteShop(shop)"
-        >
-          <mat-icon>delete</mat-icon>
-        </button>
+        <div class="app-manage-shops__shop-info">
+          <button
+            class="app-manage-shops__shop-name"
+            (click)="openRenameSheet(shop)"
+          >
+            {{ shop.name }}
+          </button>
+          @if (shop.priceSearchUrl) {
+            <span class="app-manage-shops__shop-url">{{ shop.priceSearchUrl }}</span>
+          }
+        </div>
+        <div class="app-manage-shops__shop-actions">
+          <button
+            mat-icon-button
+            class="app-manage-shops__price-url-btn"
+            [attr.aria-label]="'manageShops.setPriceUrl' | transloco: { name: shop.name }"
+            (click)="openPriceUrlSheet(shop)"
+          >
+            <mat-icon>{{ shop.priceSearchUrl ? 'link' : 'link_off' }}</mat-icon>
+          </button>
+          <button
+            mat-icon-button
+            class="app-manage-shops__delete-btn"
+            [attr.aria-label]="'manageShops.deleteShop' | transloco: { name: shop.name }"
+            (click)="deleteShop(shop)"
+          >
+            <mat-icon>delete</mat-icon>
+          </button>
+        </div>
       </div>
     } @empty {
       <p class="app-manage-shops__empty">{{ 'manageShops.empty' | transloco }}</p>

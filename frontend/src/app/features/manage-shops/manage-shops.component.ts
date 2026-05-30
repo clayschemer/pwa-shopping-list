@@ -12,6 +12,11 @@ import {
   ShopNameSheetData,
   ShopNameSheetResult,
 } from './shop-name-sheet.component';
+import {
+  ShopPriceUrlSheetComponent,
+  ShopPriceUrlSheetData,
+  ShopPriceUrlSheetResult,
+} from './shop-price-url-sheet.component';
 import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
 import type { Shop } from '../../models/shop.model';
 import type { ShopId } from '../../models/ids.model';
@@ -68,6 +73,23 @@ export class ManageShopsComponent {
     ref.afterDismissed().subscribe((result?: ShopNameSheetResult) => {
       if (result) {
         this.store.dispatch(shopsApiActions.renameShopRequested({ id: shop.id, name: result.name }));
+      }
+    });
+  }
+
+  openPriceUrlSheet(shop: Shop): void {
+    const ref = this.bottomSheet.open(ShopPriceUrlSheetComponent, {
+      data: {
+        shopName: shop.name,
+        currentUrl: shop.priceSearchUrl,
+      } satisfies ShopPriceUrlSheetData,
+    });
+
+    ref.afterDismissed().subscribe((result?: ShopPriceUrlSheetResult) => {
+      if (result !== undefined) {
+        this.store.dispatch(
+          shopsApiActions.setShopPriceUrlRequested({ id: shop.id, url: result.url }),
+        );
       }
     });
   }

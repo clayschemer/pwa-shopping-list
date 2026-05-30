@@ -9,6 +9,7 @@ interface Shop {
   id: string;
   name: string;
   categoryOrder: string[];
+  priceSearchUrl: string | null;
 }
 
 interface ShopsWorld {
@@ -23,8 +24,8 @@ interface ShopsWorld {
 
 let _shopId = 100;
 
-function makeShop(name: string): Shop {
-  return { id: `shop-${_shopId++}`, name, categoryOrder: [] };
+function makeShop(name: string, priceSearchUrl: string | null = null): Shop {
+  return { id: `shop-${_shopId++}`, name, categoryOrder: [], priceSearchUrl };
 }
 
 // ---------------------------------------------------------------------------
@@ -159,4 +160,39 @@ Then('the category order should update to reflect the newly selected shop', func
   const selected = this.shops.find((s) => s.id === this.selectedShopId);
   assert.ok(selected, 'A new shop should be selected');
   assert.ok(selected.id !== this.shops[0].id, 'The selected shop should have changed');
+});
+
+// ---------------------------------------------------------------------------
+// Price search URL
+// ---------------------------------------------------------------------------
+
+Given('a shop exists with a price search URL configured', function (this: ShopsWorld) {
+  this.shops = this.shops ?? [];
+  if (!this.shops.length) {
+    this.shops.push(makeShop('Test Shop', 'https://example.com/search?q={query}'));
+  } else {
+    this.shops[0].priceSearchUrl = 'https://example.com/search?q={query}';
+  }
+});
+
+When('I configure a price search URL for that shop', function (this: ShopsWorld) {
+  const shop = this.shops[0];
+  if (shop) shop.priceSearchUrl = 'https://www.matbutik.se/sok?q={query}';
+});
+
+When('I remove the price search URL from that shop', function (this: ShopsWorld) {
+  const shop = this.shops[0];
+  if (shop) shop.priceSearchUrl = null;
+});
+
+Then('the shop should have the price search URL stored', function (this: ShopsWorld) {
+  const shop = this.shops[0];
+  assert.ok(shop, 'Expected a shop to exist');
+  assert.ok(shop.priceSearchUrl !== null, 'Expected the shop to have a price search URL');
+});
+
+Then('the shop should have no price search URL stored', function (this: ShopsWorld) {
+  const shop = this.shops[0];
+  assert.ok(shop, 'Expected a shop to exist');
+  assert.equal(shop.priceSearchUrl, null, 'Expected the shop to have no price search URL');
 });

@@ -103,7 +103,16 @@
     "empty": "Ingen butikker ennå. Trykk + for å legge til en.",
     "addShop": "Legg til butikk",
     "deleteShop": "Slett {{name}}",
-    "deleteConfirm": "Slette \"{{name}}\"? Dette kan ikke angres."
+    "deleteConfirm": "Slette \"{{name}}\"? Dette kan ikke angres.",
+    "setPriceUrl": "Angi prissøk-URL for {{name}}"
+  },
+  "shopPriceUrlSheet": {
+    "title": "Prissøk-URL",
+    "urlLabel": "URL til søkeside",
+    "urlPlaceholder": "https://eksempel.no/sok?q={query}",
+    "hint": "Bruk {query} som plassholder for varenavnet. La feltet stå tomt for å deaktivere.",
+    "cancel": "Avbryt",
+    "save": "Lagre"
   },
   "shopNameSheet": {
     "addTitle": "Legg til butikk",

@@ -10,6 +10,7 @@ export const shopsActions = createActionGroup({
     'Shop Renamed': props<{ shop: Shop }>(),
     'Shop Deleted': props<{ id: ShopId }>(),
     'Shop Category Order Set': props<{ shopId: ShopId; orderedIds: CategoryId[] }>(),
+    'Shop Price Url Set': props<{ id: ShopId; url: string | null }>(),
     'Shop Changes Received': props<{ shops: Shop[]; removed: ShopId[] }>(),
   },
 });
@@ -22,5 +23,6 @@ export const shopsApiActions = createActionGroup({
     'Rename Shop Requested': props<{ id: ShopId; name: string }>(),
     'Delete Shop Requested': props<{ id: ShopId }>(),
     'Set Shop Category Order Requested': props<{ shopId: ShopId; orderedIds: CategoryId[] }>(),
+    'Set Shop Price Url Requested': props<{ id: ShopId; url: string | null }>(),
   },
 });

@@ -36,6 +36,10 @@ export const shopsReducer = createReducer(
     shopsAdapter.updateOne({ id: shopId, changes: { categoryOrder: orderedIds } }, state),
   ),
 
+  on(shopsActions.shopPriceUrlSet, (state, { id, url }) =>
+    shopsAdapter.updateOne({ id, changes: { priceSearchUrl: url } }, state),
+  ),
+
   on(shopsActions.shopChangesReceived, (state, { shops, removed }) => {
     const afterRemove = shopsAdapter.removeMany(removed, state);
     return shopsAdapter.upsertMany(shops, afterRemove);

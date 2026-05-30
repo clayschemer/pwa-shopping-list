@@ -103,7 +103,16 @@
     "empty": "Noch keine Läden. Tippe +, um einen hinzuzufügen.",
     "addShop": "Laden hinzufügen",
     "deleteShop": "{{name}} löschen",
-    "deleteConfirm": "\"{{name}}\" löschen? Dies kann nicht rückgängig gemacht werden."
+    "deleteConfirm": "\"{{name}}\" löschen? Dies kann nicht rückgängig gemacht werden.",
+    "setPriceUrl": "Preissuche-URL für {{name}} festlegen"
+  },
+  "shopPriceUrlSheet": {
+    "title": "Preissuche-URL",
+    "urlLabel": "URL der Suchseite",
+    "urlPlaceholder": "https://beispiel.de/suche?q={query}",
+    "hint": "Verwende {query} als Platzhalter für den Artikelnamen. Leer lassen zum Deaktivieren.",
+    "cancel": "Abbrechen",
+    "save": "Speichern"
   },
   "shopNameSheet": {
     "addTitle": "Laden hinzufügen",

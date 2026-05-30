@@ -51,3 +51,15 @@ Feature: Shop Management
     And I have selected a shop
     When I select a different shop
     Then the category order should update to reflect the newly selected shop
+
+  Scenario: Configure a price search URL for a shop
+    Given I am in plan mode
+    And a shop exists
+    When I configure a price search URL for that shop
+    Then the shop should have the price search URL stored
+
+  Scenario: Remove a price search URL from a shop
+    Given I am in plan mode
+    And a shop exists with a price search URL configured
+    When I remove the price search URL from that shop
+    Then the shop should have no price search URL stored
