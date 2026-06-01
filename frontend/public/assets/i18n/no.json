@@ -171,6 +171,23 @@
     "approxShelfPrice": "≈ {{price}} / {{quantity}} {{unit}}",
     "approxShelfPriceNoQty": "≈ {{price}}"
   },
+  "pricePopup": {
+    "title": "Prisdetaljer",
+    "openLabel": "Vis pris for {{name}}",
+    "item": "Vare",
+    "matchedProduct": "Matchet produkt",
+    "sourceShop": "Kilde",
+    "price": "Pris",
+    "priceWithUnit": "{{price}} / {{quantity}} {{unit}}",
+    "openProductPage": "Åpne produktsiden",
+    "viewSearchResults": "Vis søkeresultater",
+    "notRightProduct": "Ikke riktig produkt?",
+    "feedbackPlaceholder": "Fortell hva som var feil (hjelper neste søk)",
+    "submit": "Send tilbakemelding",
+    "cancel": "Avbryt",
+    "thanksFeedback": "Takk — vi leter etter en bedre match.",
+    "close": "Lukk"
+  },
   "closeSession": {
     "allDoneTitle": "Ferdig!",
     "allDoneMessage": "Alt er krysset av. Avslutte økten og lagre historikken?",

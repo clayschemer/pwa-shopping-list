@@ -110,10 +110,30 @@ Item
   - priceUnit: string | null            ← unit the price applies to
   - priceShopId: ShopId | null          ← which shop's price is stored (Option B); null when manually
                                           set or when the item pre-dates this field
+  - priceProductName: string | null     ← matched product name from the last successful pipeline run;
+                                          null for manually-entered prices or items pre-dating the field
+  - priceProductUrl: string | null      ← product page URL when the source exposed one; powers the
+                                          "inspect matched product" deep-link
+  - priceSearchUrl: string | null       ← search-results URL the pipeline scraped for this match;
+                                          fallback link target when priceProductUrl is unavailable
+  - priceFeedback: PriceFeedbackEntry[] ← user rejections of prior price matches; consumed by the next
+                                          pipeline run; cleared on successful re-match
   - priceUpdatedAt: timestamp | null    ← used to determine staleness; source (user/pipeline) not recorded
   - sizePerPieceQuantity: number | null ← typical size of one piece; bridges pcs <-> mass/volume
   - sizePerPieceUnit: string | null     ← unit for sizePerPieceQuantity ('g', 'kg', 'ml', 'cl', 'dl', 'L')
   - purchaseCount: number               ← incremented on each session completion where item was checked
+```
+
+### PriceFeedbackEntry
+A single rejection entry stored on an Item. The pipeline reads the array on
+the next lookup and instructs the LLM to avoid these prior matches.
+
+```
+PriceFeedbackEntry
+  - rejectedName: string
+  - rejectedUrl:  string | null
+  - reason:       string                ← user-provided, non-empty
+  - timestamp:    timestamp
 ```
 
 **Notes on Item:**
@@ -121,10 +141,32 @@ Item
 - `description` is optional freetext displayed beneath the item name in both modes. Also passed to the price-lookup pipeline as context — notes like "inte Arla" or "ekologisk" influence which search result is selected by the LLM validation step.
 - `removed` is set to `true` by two actors: a plan-mode deletion, or a session check. It is cleared to `false` by an uncheck action (item restored to list).
 - `price`, `priceQuantity`, `priceUnit`, `priceShopId`, and `priceUpdatedAt` form a single price record. The last writer wins — user or pipeline. No separate manual/estimated distinction. `priceShopId` identifies which shop's price is stored (Option B: single price + source shop), enabling the UI to flag staleness when the active session shop differs from `priceShopId`. Full per-shop price maps are a future enhancement.
+- `priceProductName` and `priceProductUrl` capture *which* product the pipeline matched. They are set together by the pipeline whenever the LLM-returned `matchedName` resolves to an extracted JSON-LD product. Both are cleared when the price is cleared. They power the in-app price-inspection affordance — clicking a price opens a card showing the matched product with a link to its source page.
+- `priceFeedback` captures user rejections of prior matches. Each entry records the rejected match (name + URL) and the user's reason. The pipeline reads this array on the next run and instructs the LLM to avoid the listed matches and apply the reasons. The array is cleared by a successful pipeline write so feedback does not influence indefinitely. Independent of this operational state, every rejection is also append-written to an immutable corpus collection (see *Price feedback corpus* below) for future training analysis.
 - `sizePerPieceQuantity` and `sizePerPieceUnit` describe what one piece of the item typically weighs or measures — used by the frontend to convert between `pcs` and weight/volume when the user lists by piece but the shelf is priced per kg (or vice versa). The pipeline pre-fills it for produce-like items via Gemma. Sticky to user edits: once non-null, the pipeline does not overwrite. Clearing both fields lets the pipeline re-estimate on the next run.
 - `aiMotivation` is set when the AI adds the item and is never updated. If the AI re-suggests the same item, the existing motivation is reused.
 - `purchaseCount` is incremented once per completed session in which the item appears in the session's checked log. It is the basis for autocomplete frequency ranking.
 - Price staleness is determined by `priceUpdatedAt` alone. Working assumption is a 6-12 month refresh window; exact threshold is an open decision.
+
+### Price feedback corpus (side-channel)
+
+In addition to the operational `priceFeedback` array on the item, every user
+rejection is append-written to an immutable per-account collection. This is a
+side-channel store — it is never read by the pipeline or the frontend, and it
+is not part of the API contract. Its sole purpose is to retain a durable
+training corpus for future model fine-tuning.
+
+```
+PriceFeedbackLogEntry
+  - itemId: ItemId
+  - itemName: string                    ← name at the time of feedback
+  - description: string | null          ← shopper notes at the time of feedback
+  - categoryName: string | null         ← primary category name at the time of feedback
+  - shopId: ShopId | null               ← active priceShopId at the time of feedback
+  - reason: string                      ← the user's explanation
+  - createdBy: UserId
+  - createdAt: timestamp
+```
 
 ### Session
 Represents an active or completed shopping trip at a specific shop. At most one active session per shopId per account — multiple shops may have concurrent active sessions. Users shopping at the same shop share a single session.

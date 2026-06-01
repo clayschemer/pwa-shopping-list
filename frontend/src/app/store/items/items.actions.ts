@@ -39,5 +39,7 @@ export const itemsApiActions = createActionGroup({
     'Remove Item Requested': props<{ id: ItemId }>(),
     'Check Item Requested': props<{ id: ItemId; sessionId: SessionId }>(),
     'Uncheck Item Requested': props<{ id: ItemId; sessionId: SessionId }>(),
+    'Submit Price Feedback Requested': props<{ id: ItemId; reason: string }>(),
+    'Submit Price Feedback Succeeded': props<{ id: ItemId }>(),
   },
 });

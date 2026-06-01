@@ -55,4 +55,8 @@ export const paths = {
   sessionDoc(db: Firestore, accountId: AccountId, id: string): DocumentReference {
     return doc(db, 'accounts', accountId, 'sessions', id);
   },
+
+  priceFeedback(db: Firestore, accountId: AccountId): CollectionReference {
+    return collection(db, 'accounts', accountId, 'priceFeedback');
+  },
 } as const;

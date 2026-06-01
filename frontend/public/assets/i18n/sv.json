@@ -171,6 +171,23 @@
     "approxShelfPrice": "≈ {{price}} / {{quantity}} {{unit}}",
     "approxShelfPriceNoQty": "≈ {{price}}"
   },
+  "pricePopup": {
+    "title": "Prisdetaljer",
+    "openLabel": "Visa pris för {{name}}",
+    "item": "Vara",
+    "matchedProduct": "Matchad produkt",
+    "sourceShop": "Källa",
+    "price": "Pris",
+    "priceWithUnit": "{{price}} / {{quantity}} {{unit}}",
+    "openProductPage": "Öppna produktsidan",
+    "viewSearchResults": "Visa sökresultat",
+    "notRightProduct": "Inte rätt produkt?",
+    "feedbackPlaceholder": "Berätta vad som var fel (hjälper nästa sökning)",
+    "submit": "Skicka feedback",
+    "cancel": "Avbryt",
+    "thanksFeedback": "Tack — vi letar efter en bättre matchning.",
+    "close": "Stäng"
+  },
   "closeSession": {
     "allDoneTitle": "Klart!",
     "allDoneMessage": "Allt är avbockat. Avsluta sessionen och spara historiken?",

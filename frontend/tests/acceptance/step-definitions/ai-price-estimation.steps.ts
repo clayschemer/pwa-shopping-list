@@ -12,15 +12,40 @@ interface PriceItem {
   priceQuantity: number | null;
   priceUnit: string | null;
   priceUpdatedAt: number | null;
+  productName: string | null;
+  productUrl: string | null;
+  shopId: string | null;
+  priceFeedback: PriceFeedbackEntry[];
   quantity: number | null;
   unit: string | null;
   categoryId: string | null;
   removed: boolean;
 }
 
+interface PriceFeedbackEntry {
+  rejectedName: string;
+  rejectedUrl: string | null;
+  reason: string;
+  timestamp: number;
+}
+
+interface PriceFeedbackLogEntry {
+  itemId: string;
+  itemName: string;
+  categoryName: string | null;
+  reason: string;
+  createdAt: number;
+}
+
 interface CheckedPriceItem {
   itemId: string;
   priceSnapshot: number | null;
+}
+
+interface LookupContext {
+  itemName: string;
+  categoryName: string | null;
+  feedback: PriceFeedbackEntry[];
 }
 
 interface AiPriceWorld {
@@ -30,6 +55,11 @@ interface AiPriceWorld {
   priceLookupTriggered: boolean;
   stalePriceSuggestion: { itemId: string; suggestedPrice: number } | null;
   derivedPriceForDifferentQty: number | null;
+  // Price feedback / inspection world
+  feedbackCorpus: PriceFeedbackLogEntry[];
+  lastLookupContext: LookupContext | null;
+  reestimationQueued: boolean;
+  categoryNamesById: Record<string, string>;
 }
 
 function makeItem(
@@ -45,6 +75,10 @@ function makeItem(
     priceQuantity: price !== null ? 1 : null,
     priceUnit: price !== null ? 'ea' : null,
     priceUpdatedAt: price !== null ? Date.now() : null,
+    productName: null,
+    productUrl: null,
+    shopId: null,
+    priceFeedback: [],
     quantity: null,
     unit: null,
     categoryId: catId,
@@ -286,4 +320,226 @@ Then('no lookup should occur', function (this: AiPriceWorld) {
 Then('the item should have no price until one is entered manually', function (this: AiPriceWorld) {
   const item = this.items[0];
   assert.equal(item?.price, null, 'Item should have no price when AI is not configured');
+});
+
+// ---------------------------------------------------------------------------
+// Price inspection + feedback scenarios
+// ---------------------------------------------------------------------------
+
+Given('an item has an estimated price set by the application', function (this: AiPriceWorld) {
+  this.aiConfigured = true;
+  this.categoryNamesById = this.categoryNamesById ?? { 'cat-fruit': 'Fruit' };
+  this.items = [{
+    ...makeItem('item-1', 'Lime', 4.9, 'cat-fruit'),
+    productName: 'ICA Lime Fresh',
+    productUrl: 'https://shop.example/lime-fresh',
+    shopId: 'shop-ica',
+  }];
+  this.checkedItems = [];
+  this.feedbackCorpus = this.feedbackCorpus ?? [];
+  this.reestimationQueued = false;
+});
+
+Given('the user has previously rejected a price match for an item with a reason', function (this: AiPriceWorld) {
+  this.aiConfigured = true;
+  this.categoryNamesById = this.categoryNamesById ?? { 'cat-fruit': 'Fruit' };
+  const reason = 'this was a soft drink, I wanted the fruit';
+  this.items = [{
+    ...makeItem('item-1', 'Lime', null, 'cat-fruit'),
+    priceFeedback: [{
+      rejectedName: 'Festis Lime 250ml',
+      rejectedUrl: 'https://shop.example/festis-lime',
+      reason,
+      timestamp: Date.now() - 60_000,
+    }],
+  }];
+  this.feedbackCorpus = [{
+    itemId: 'item-1',
+    itemName: 'Lime',
+    categoryName: 'Fruit',
+    reason,
+    createdAt: Date.now() - 60_000,
+  }];
+  this.checkedItems = [];
+  this.lastLookupContext = null;
+});
+
+Given('the user has previously rejected one or more price matches for an item', function (this: AiPriceWorld) {
+  this.aiConfigured = true;
+  this.categoryNamesById = this.categoryNamesById ?? { 'cat-fruit': 'Fruit' };
+  this.items = [{
+    ...makeItem('item-1', 'Lime', null, 'cat-fruit'),
+    priceFeedback: [{
+      rejectedName: 'Festis Lime 250ml',
+      rejectedUrl: null,
+      reason: 'not the fruit',
+      timestamp: Date.now() - 60_000,
+    }],
+  }];
+  this.feedbackCorpus = [{
+    itemId: 'item-1',
+    itemName: 'Lime',
+    categoryName: 'Fruit',
+    reason: 'not the fruit',
+    createdAt: Date.now() - 60_000,
+  }];
+  this.checkedItems = [];
+});
+
+Given('an item has a primary category assigned', function (this: AiPriceWorld) {
+  this.aiConfigured = true;
+  this.categoryNamesById = { 'cat-fruit': 'Fruit' };
+  this.items = [makeItem('item-1', 'Lime', null, 'cat-fruit')];
+  this.checkedItems = [];
+  this.lastLookupContext = null;
+});
+
+When('the user inspects the price', function (this: AiPriceWorld) {
+  // Inspection is a UI read of the matched-product fields the pipeline wrote.
+  // No state mutation — the Then step asserts that those fields are populated.
+});
+
+When('the user indicates the matched product is incorrect and provides a reason', function (this: AiPriceWorld) {
+  const item = this.items[0];
+  if (!item) return;
+  const reason = 'this is a different product than what I wanted';
+  // Operational: append to the item's priceFeedback array, queue re-estimation.
+  item.priceFeedback.push({
+    rejectedName: item.productName ?? item.name,
+    rejectedUrl: item.productUrl,
+    reason,
+    timestamp: Date.now(),
+  });
+  item.priceUpdatedAt = null;
+  this.reestimationQueued = true;
+  // Corpus: append-only log for future analysis.
+  this.feedbackCorpus = this.feedbackCorpus ?? [];
+  this.feedbackCorpus.push({
+    itemId: item.id,
+    itemName: item.name,
+    categoryName: item.categoryId
+      ? (this.categoryNamesById?.[item.categoryId] ?? null)
+      : null,
+    reason,
+    createdAt: Date.now(),
+  });
+});
+
+When('the user rejects a price match with a reason', function (this: AiPriceWorld) {
+  this.aiConfigured = this.aiConfigured ?? true;
+  this.categoryNamesById = this.categoryNamesById ?? { 'cat-fruit': 'Fruit' };
+  if (!this.items || this.items.length === 0) {
+    this.items = [{
+      ...makeItem('item-1', 'Lime', 12, 'cat-fruit'),
+      productName: 'Festis Lime 250ml',
+      productUrl: 'https://shop.example/festis-lime',
+    }];
+  }
+  const item = this.items[0];
+  const reason = 'wrong product';
+  item.priceFeedback.push({
+    rejectedName: item.productName ?? item.name,
+    rejectedUrl: item.productUrl,
+    reason,
+    timestamp: Date.now(),
+  });
+  this.feedbackCorpus = this.feedbackCorpus ?? [];
+  this.feedbackCorpus.push({
+    itemId: item.id,
+    itemName: item.name,
+    categoryName: item.categoryId
+      ? (this.categoryNamesById[item.categoryId] ?? null)
+      : null,
+    reason,
+    createdAt: Date.now(),
+  });
+});
+
+When('the rejection is recorded', function (this: AiPriceWorld) {
+  // The corpus write happens transactionally with the operational write.
+  // Assertions in the Then step verify the corpus retained the search context.
+});
+
+When('the application re-estimates the price for that item', function (this: AiPriceWorld) {
+  const item = this.items[0];
+  if (!item) return;
+  this.lastLookupContext = {
+    itemName: item.name,
+    categoryName: item.categoryId
+      ? (this.categoryNamesById?.[item.categoryId] ?? null)
+      : null,
+    feedback: [...item.priceFeedback],
+  };
+});
+
+When('the application successfully sets a new estimated price for that item', function (this: AiPriceWorld) {
+  const item = this.items[0];
+  if (!item) return;
+  item.price = 5.9;
+  item.priceQuantity = 1;
+  item.priceUnit = 'st';
+  item.priceUpdatedAt = Date.now();
+  item.productName = 'Lime EKO';
+  item.productUrl = 'https://shop.example/lime-eko';
+  // Successful re-match clears the operational feedback array.
+  item.priceFeedback = [];
+});
+
+When('the application looks up an estimated price for that item', function (this: AiPriceWorld) {
+  const item = this.items[0];
+  if (!item) return;
+  this.lastLookupContext = {
+    itemName: item.name,
+    categoryName: item.categoryId
+      ? (this.categoryNamesById?.[item.categoryId] ?? null)
+      : null,
+    feedback: [...item.priceFeedback],
+  };
+});
+
+Then("the matched product's name and source should be available for review", function (this: AiPriceWorld) {
+  const item = this.items[0];
+  assert.ok(item?.productName, 'matched product name should be available');
+  assert.ok(item?.productUrl, 'matched product URL should be available');
+});
+
+Then('the price should be queued for re-estimation', function (this: AiPriceWorld) {
+  const item = this.items[0];
+  assert.equal(this.reestimationQueued, true, 'reestimation should have been queued');
+  assert.equal(item?.priceUpdatedAt, null, 'priceUpdatedAt should be cleared to trigger pipeline');
+});
+
+Then('the rejection reason should be retained', function (this: AiPriceWorld) {
+  const item = this.items[0];
+  assert.ok(item?.priceFeedback && item.priceFeedback.length > 0, 'feedback should be stored on the item');
+  assert.ok(item!.priceFeedback[item!.priceFeedback.length - 1].reason.length > 0,
+    'rejection reason should be non-empty');
+});
+
+Then('the previous rejection and reason should influence the new lookup', function (this: AiPriceWorld) {
+  assert.ok(this.lastLookupContext, 'a lookup context should have been built');
+  assert.ok(this.lastLookupContext!.feedback.length > 0,
+    'prior feedback should be carried into the lookup context');
+  assert.ok(this.lastLookupContext!.feedback[0].reason.length > 0,
+    'reason should accompany the rejection');
+});
+
+Then('the prior rejections should no longer influence future lookups', function (this: AiPriceWorld) {
+  const item = this.items[0];
+  assert.deepEqual(item?.priceFeedback, [],
+    'operational feedback array should be cleared after a successful re-match');
+});
+
+Then('the search context and reason should be retained for later analysis independently of the item\'s operational state', function (this: AiPriceWorld) {
+  assert.ok(this.feedbackCorpus && this.feedbackCorpus.length > 0,
+    'corpus log should contain the feedback entry');
+  const last = this.feedbackCorpus[this.feedbackCorpus.length - 1];
+  assert.ok(last.reason.length > 0, 'corpus entry should retain the reason');
+  assert.ok(last.itemName.length > 0, 'corpus entry should retain the item name');
+});
+
+Then("the item's category should inform which product is selected as the match", function (this: AiPriceWorld) {
+  assert.ok(this.lastLookupContext, 'a lookup context should have been built');
+  assert.ok(this.lastLookupContext!.categoryName,
+    'category name should be present in the lookup context');
 });

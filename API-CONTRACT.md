@@ -153,10 +153,36 @@ Item {
   priceUnit:            string | null
   priceShopId:          ShopId | null    // which shop's price is stored; null when manually set
                                          // or when the item pre-dates this field (Option B)
+  priceProductName:     string | null    // matched product name from the last successful pipeline run;
+                                         // null for manual prices or pre-existing items
+  priceProductUrl:      string | null    // matched product page URL when the source exposed one;
+                                         // null when unavailable
+  priceSearchUrl:       string | null    // search-results URL the pipeline used; powers the
+                                         // "view search results" fallback in the inspect popup
+                                         // when productUrl is absent
+  priceFeedback:        PriceFeedbackEntry[]   // empty array when none; user rejections of prior
+                                               // price matches, consumed by the next pipeline run
   priceUpdatedAt:       number | null    // Unix ms; null if price has never been set
   purchaseCount:        number
 }
 ```
+
+### PriceFeedbackEntry
+
+```
+PriceFeedbackEntry {
+  rejectedName: string         // product name that the user rejected
+  rejectedUrl:  string | null  // product page URL of the rejected match, when known
+  reason:       string         // user-provided explanation
+  timestamp:    number         // Unix ms; when the rejection was recorded
+}
+```
+
+Operational only. The pipeline reads this array on the next lookup to instruct
+the LLM to avoid these prior matches and apply the reasons given. A successful
+re-match clears the array. An immutable corpus copy is also written to a
+side-channel store (`accounts/{accountId}/priceFeedback`) and is not exposed
+through this contract.
 
 ### Session
 
@@ -497,13 +523,31 @@ Errors:  NotFoundError
 ```
 Intent:  Set or update the price, reference quantity, unit, and source shop for an item.
          Last writer wins — whether the caller is a user action or the price pipeline.
-         Passing null for price clears the price record entirely (shopId also cleared).
+         Passing null for price clears the price record entirely (shopId, productName,
+         and productUrl are also cleared).
          The updated Item arrives via itemChanges$.
 Input:   id:            ItemId
          price:         number | null
          priceQuantity: number | null
          priceUnit:     string | null
          shopId:        ShopId | null   // which shop's price this is; null for manual entry
+Output:  void
+Errors:  NotFoundError
+```
+
+#### submitPriceFeedback
+```
+Intent:  Record that the user believes the current price match is incorrect.
+         Appends an entry to the item's priceFeedback array (capturing the
+         currently-displayed match name/url and the user's reason) and queues
+         the item for re-estimation by resetting priceUpdatedAt to null.
+         Also writes an immutable corpus entry capturing the full search
+         context (item name, description, category, shop, reason) for future
+         model-training analysis. The corpus entry is not exposed back through
+         this contract.
+         The updated Item arrives via itemChanges$ as a batch of one.
+Input:   id:     ItemId
+         reason: string   // user-provided explanation; must be non-empty
 Output:  void
 Errors:  NotFoundError
 ```

@@ -7,6 +7,14 @@
         { "fieldPath": "completedAt", "order": "ASCENDING" },
         { "fieldPath": "shopId", "order": "ASCENDING" }
       ]
+    },
+    {
+      "collectionGroup": "items",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "removed", "order": "ASCENDING" },
+        { "fieldPath": "priceUpdatedAt", "order": "ASCENDING" }
+      ]
     }
   ],
   "fieldOverrides": []

@@ -199,6 +199,28 @@
 
   &__item-price {
     white-space: nowrap;
+    padding: 0.25rem 0.5rem;
+    font-size: 0.875rem;
+    color: var(--mat-sys-on-surface-variant);
+
+    &--approximate {
+      font-style: italic;
+    }
+  }
+
+  &__item-price-btn {
+    all: unset;
+    cursor: pointer;
+    white-space: nowrap;
+    padding: 0.25rem 0.5rem;
+    border-radius: 0.25rem;
+    font-size: 0.875rem;
+    color: var(--mat-sys-on-surface-variant);
+
+    &:focus-visible {
+      outline: 0.125rem solid var(--mat-sys-primary);
+      outline-offset: 0.125rem;
+    }
 
     &--approximate {
       font-style: italic;

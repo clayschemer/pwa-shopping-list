@@ -50,3 +50,34 @@ Feature: AI Price Estimation
     When a price lookup would otherwise be triggered
     Then no lookup should occur
     And the item should have no price until one is entered manually
+
+  Scenario: User can inspect the product an estimated price was matched against
+    Given an item has an estimated price set by the application
+    When the user inspects the price
+    Then the matched product's name and source should be available for review
+
+  Scenario: User can reject an inaccurate price match
+    Given an item has an estimated price set by the application
+    When the user indicates the matched product is incorrect and provides a reason
+    Then the price should be queued for re-estimation
+    And the rejection reason should be retained
+
+  Scenario: Rejected matches inform subsequent price lookups
+    Given the user has previously rejected a price match for an item with a reason
+    When the application re-estimates the price for that item
+    Then the previous rejection and reason should influence the new lookup
+
+  Scenario: Successful re-estimation clears prior rejections for the item
+    Given the user has previously rejected one or more price matches for an item
+    When the application successfully sets a new estimated price for that item
+    Then the prior rejections should no longer influence future lookups
+
+  Scenario: Rejection feedback is retained for future analysis
+    Given the user rejects a price match with a reason
+    When the rejection is recorded
+    Then the search context and reason should be retained for later analysis independently of the item's operational state
+
+  Scenario: Item category contributes to price lookup accuracy
+    Given an item has a primary category assigned
+    When the application looks up an estimated price for that item
+    Then the item's category should inform which product is selected as the match

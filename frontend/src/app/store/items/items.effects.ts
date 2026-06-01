@@ -198,4 +198,15 @@ export class ItemsEffects {
       ),
     ),
   );
+
+  readonly submitPriceFeedback$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(itemsApiActions.submitPriceFeedbackRequested),
+      mergeMap(({ id, reason }) =>
+        from(this.itemApi.submitPriceFeedback(id, reason)).pipe(
+          map(() => itemsApiActions.submitPriceFeedbackSucceeded({ id })),
+        ),
+      ),
+    ),
+  );
 }

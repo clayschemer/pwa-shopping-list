@@ -1,5 +1,12 @@
 import type { AccountId, CategoryId, ItemId, ShopId } from './ids.model';
 
+export interface PriceFeedbackEntry {
+  rejectedName: string;
+  rejectedUrl: string | null;
+  reason: string;
+  timestamp: number;
+}
+
 export interface Item {
   id: ItemId;
   accountId: AccountId;
@@ -17,6 +24,10 @@ export interface Item {
   priceQuantity: number | null;
   priceUnit: string | null;
   priceShopId: ShopId | null;
+  priceProductName: string | null;
+  priceProductUrl: string | null;
+  priceSearchUrl: string | null;
+  priceFeedback: PriceFeedbackEntry[];
   priceUpdatedAt: number | null;
   priceAttemptedAt: number | null;  // set by pipeline on every attempt; null = never tried
   // Typical size of one unit of this item. Used to bridge pcs <-> mass/volume

@@ -87,29 +87,59 @@
                       </span>
                     } @else if (item.price !== null) {
                       @let priceResult = item | effectivePrice;
-                      @if (priceResult.kind === 'exact') {
-                        <span class="app-shop__item-price">
-                          {{ priceResult.total | money }}
-                        </span>
-                      } @else if (priceResult.kind === 'approximate') {
-                        <span class="app-shop__item-price app-shop__item-price--approximate">
-                          @if (
-                            priceResult.shelfQuantity !== null && priceResult.shelfUnit
-                          ) {
-                            {{
-                              'shop.approxShelfPrice'
-                                | transloco
-                                  : {
-                                      price: priceResult.shelfPrice | money,
-                                      quantity: priceResult.shelfQuantity,
-                                      unit: priceResult.shelfUnit,
-                                    }
-                            }}
-                          } @else {
-                            {{
-                              'shop.approxShelfPriceNoQty'
-                                | transloco: { price: priceResult.shelfPrice | money }
-                            }}
+                      @if (canInspectPrice(item)) {
+                        <button
+                          type="button"
+                          class="app-shop__item-price-btn"
+                          [class.app-shop__item-price-btn--approximate]="priceResult.kind === 'approximate'"
+                          [attr.aria-label]="'pricePopup.openLabel' | transloco: { name: item.name }"
+                          (click)="openPriceDialog(item)"
+                        >
+                          @if (priceResult.kind === 'exact') {
+                            {{ priceResult.total | money }}
+                          } @else if (priceResult.kind === 'approximate') {
+                            @if (priceResult.shelfQuantity !== null && priceResult.shelfUnit) {
+                              {{
+                                'shop.approxShelfPrice'
+                                  | transloco
+                                    : {
+                                        price: priceResult.shelfPrice | money,
+                                        quantity: priceResult.shelfQuantity,
+                                        unit: priceResult.shelfUnit,
+                                      }
+                              }}
+                            } @else {
+                              {{
+                                'shop.approxShelfPriceNoQty'
+                                  | transloco: { price: priceResult.shelfPrice | money }
+                              }}
+                            }
+                          }
+                        </button>
+                      } @else {
+                        <span
+                          class="app-shop__item-price"
+                          [class.app-shop__item-price--approximate]="priceResult.kind === 'approximate'"
+                        >
+                          @if (priceResult.kind === 'exact') {
+                            {{ priceResult.total | money }}
+                          } @else if (priceResult.kind === 'approximate') {
+                            @if (priceResult.shelfQuantity !== null && priceResult.shelfUnit) {
+                              {{
+                                'shop.approxShelfPrice'
+                                  | transloco
+                                    : {
+                                        price: priceResult.shelfPrice | money,
+                                        quantity: priceResult.shelfQuantity,
+                                        unit: priceResult.shelfUnit,
+                                      }
+                              }}
+                            } @else {
+                              {{
+                                'shop.approxShelfPriceNoQty'
+                                  | transloco: { price: priceResult.shelfPrice | money }
+                              }}
+                            }
                           }
                         </span>
                       }

@@ -26,6 +26,10 @@ import {
   ConfirmRemoveItemData,
 } from './confirm-remove-item-dialog.component';
 import {
+  PriceProductDialogComponent,
+  PriceProductDialogData,
+} from './price-product-dialog.component';
+import {
   AddItemPillComponent,
   AddItemRequest,
 } from './add-item-pill.component';
@@ -169,6 +173,34 @@ export class PlanComponent {
         );
       }
     });
+  }
+
+  canInspectPrice(item: Item): boolean {
+    // Inspectable when the pipeline left any verifiable trace — matched
+    // product name, product URL, or at minimum the search URL it used.
+    // Manually-entered prices have none of these and render as static text.
+    return !!(item.priceProductName || item.priceProductUrl || item.priceSearchUrl);
+  }
+
+  openPriceDialog(item: Item): void {
+    const shop = this.shops().find((s) => s.id === item.priceShopId);
+    this.dialog.open<PriceProductDialogComponent, PriceProductDialogData>(
+      PriceProductDialogComponent,
+      {
+        data: {
+          itemId: item.id,
+          itemName: item.name,
+          productName: item.priceProductName,
+          productUrl: item.priceProductUrl,
+          searchUrl: item.priceSearchUrl,
+          shopName: shop?.name ?? null,
+          price: item.price,
+          priceQuantity: item.priceQuantity,
+          priceUnit: item.priceUnit,
+          priceUpdatedAt: item.priceUpdatedAt,
+        },
+      },
+    );
   }
 
   confirmRemove(item: Item): void {

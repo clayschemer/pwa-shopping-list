@@ -58,6 +58,14 @@ service cloud.firestore {
       match /sessions/{sessionId} {
         allow read, write: if isMember(accountId);
       }
+
+      // Append-only price-feedback corpus for future model-training analysis.
+      // Members may read and create entries; updates and deletes are not
+      // permitted (the log is immutable by design).
+      match /priceFeedback/{entryId} {
+        allow read, create: if isMember(accountId);
+        allow update, delete: if false;
+      }
     }
   }
 }

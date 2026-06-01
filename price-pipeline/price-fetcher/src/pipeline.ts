@@ -6,13 +6,15 @@ import type { StaleItem, ShopConfig, PriceResult } from './types.js';
 
 /**
  * Runs a single item through the full pipeline, trying each shop in order.
- * Returns the first successful price result along with which shop found it,
- * or null if all shops fail or return no match.
+ * Returns the first successful price result along with which shop found it
+ * and the search URL the scrape used (powers the inspect-popup's "view search
+ * results" fallback when JSON-LD didn't expose a per-product URL), or null if
+ * all shops fail or return no match.
  */
 export async function processItem(
   item: StaleItem,
   shops: ShopConfig[],
-): Promise<{ result: PriceResult; shop: ShopConfig } | null> {
+): Promise<{ result: PriceResult; shop: ShopConfig; searchUrl: string } | null> {
   // Cache scrape+validate results by URL so shops sharing the same search page
   // are only scraped once per item — avoids redundant requests and reduces
   // the risk of being rate-limited by the same domain.
@@ -26,7 +28,7 @@ export async function processItem(
         const cached = urlCache.get(searchUrl) ?? null;
         if (cached) {
           console.log(`  → [${shop.name}] Reusing result from same URL (${shop.searchUrl.slice(0, 40)}…)`);
-          return { result: cached, shop };
+          return { result: cached, shop, searchUrl };
         }
         console.log(`  → [${shop.name}] Skipping — same URL already returned no match.`);
         continue;
@@ -37,10 +39,17 @@ export async function processItem(
       const products = extract(html);
       console.log(`     ${products.length} structured product(s) found.`);
 
-      const result = await validate(item.name, products, text, item.description);
+      const result = await validate(
+        item.name,
+        products,
+        text,
+        item.description,
+        item.categoryName,
+        item.priceFeedback,
+      );
       urlCache.set(searchUrl, result);
 
-      if (result) return { result, shop };
+      if (result) return { result, shop, searchUrl };
       console.log(`     No match — trying next shop.`);
     } catch (err) {
       console.error(`     [${shop.name}] scrape error: ${(err as Error).message}`);

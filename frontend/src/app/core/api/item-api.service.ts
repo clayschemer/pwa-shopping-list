@@ -3,6 +3,7 @@ import { Observable } from 'rxjs';
 import {
   Firestore,
   addDoc,
+  doc,
   getDocs,
   query,
   QueryDocumentSnapshot,
@@ -13,7 +14,7 @@ import {
   where,
   arrayUnion,
 } from '@angular/fire/firestore';
-import type { Item } from '../../models/item.model';
+import type { Item, PriceFeedbackEntry } from '../../models/item.model';
 import type {
   AccountId,
   CategoryId,
@@ -62,6 +63,25 @@ function toMillis(v: unknown): number | null {
   return null;
 }
 
+function mapFeedback(raw: unknown): PriceFeedbackEntry[] {
+  if (!Array.isArray(raw)) return [];
+  const out: PriceFeedbackEntry[] = [];
+  for (const entry of raw) {
+    if (entry == null || typeof entry !== 'object') continue;
+    const e = entry as Record<string, unknown>;
+    const rejectedName = typeof e['rejectedName'] === 'string' ? e['rejectedName'] : null;
+    const reason = typeof e['reason'] === 'string' ? e['reason'] : null;
+    if (!rejectedName || !reason) continue;
+    out.push({
+      rejectedName,
+      rejectedUrl: typeof e['rejectedUrl'] === 'string' ? e['rejectedUrl'] : null,
+      reason,
+      timestamp: toMillis(e['timestamp']) ?? 0,
+    });
+  }
+  return out;
+}
+
 export function mapItem(snap: QueryDocumentSnapshot, accountId: AccountId): Item {
   const data = snap.data();
   return {
@@ -83,6 +103,10 @@ export function mapItem(snap: QueryDocumentSnapshot, accountId: AccountId): Item
     priceQuantity: (data['priceQuantity'] ?? null) as number | null,
     priceUnit: (data['priceUnit'] ?? null) as string | null,
     priceShopId: (data['priceShopId'] ?? null) as ShopId | null,
+    priceProductName: (data['priceProductName'] ?? null) as string | null,
+    priceProductUrl: (data['priceProductUrl'] ?? null) as string | null,
+    priceSearchUrl: (data['priceSearchUrl'] ?? null) as string | null,
+    priceFeedback: mapFeedback(data['priceFeedback']),
     priceUpdatedAt: toMillis(data['priceUpdatedAt']),
     priceAttemptedAt: toMillis(data['priceAttemptedAt']),
     sizePerPieceQuantity: (data['sizePerPieceQuantity'] ?? null) as number | null,
@@ -136,6 +160,10 @@ export class ItemApiService {
         priceQuantity: null,
         priceUnit: null,
         priceShopId: null,
+        priceProductName: null,
+        priceProductUrl: null,
+        priceSearchUrl: null,
+        priceFeedback: [] as PriceFeedbackEntry[],
         priceUpdatedAt: null,
         priceAttemptedAt: null,
         sizePerPieceQuantity: input.sizePerPieceQuantity,
@@ -212,15 +240,93 @@ export class ItemApiService {
     const { accountId } = this.context.require();
     return runInInjectionContext(this.injector, async () => {
       try {
+        // Manually-entered prices have no pipeline-matched product, so clear
+        // productName/Url alongside the price write. Clearing also runs when
+        // price itself is cleared.
         await updateDoc(paths.itemDoc(this.db, accountId, id), {
           price,
           priceQuantity,
           priceUnit,
           priceShopId: price === null ? null : shopId,
+          priceProductName: null,
+          priceProductUrl: null,
+          priceSearchUrl: null,
           priceUpdatedAt: price === null ? null : serverTimestamp(),
         });
       } catch {
         return { type: 'NOT_FOUND', entityKind: 'item', id };
+      }
+      return;
+    });
+  }
+
+  async submitPriceFeedback(
+    id: ItemId,
+    reason: string,
+  ): Promise<void | NotFoundError> {
+    const trimmed = reason.trim();
+    if (!trimmed) {
+      throw new Error('submitPriceFeedback requires a non-empty reason');
+    }
+    const { accountId, userId } = this.context.require();
+    return runInInjectionContext(this.injector, async () => {
+      try {
+        // Resolve category name for the corpus record before opening the
+        // transaction — keeps the transaction cost low and avoids unrelated
+        // reads being retried on contention.
+        const itemRef = paths.itemDoc(this.db, accountId, id);
+
+        await runTransaction(this.db, async (tx) => {
+          const snap = await tx.get(itemRef);
+          if (!snap.exists()) throw new Error('NOT_FOUND');
+          const data = snap.data();
+
+          const categoryId = (data['primaryCategoryId'] ?? null) as string | null;
+          let categoryName: string | null = null;
+          if (categoryId) {
+            const catSnap = await tx.get(
+              paths.categoryDoc(this.db, accountId, categoryId),
+            );
+            categoryName = catSnap.exists()
+              ? ((catSnap.data()['name'] ?? null) as string | null)
+              : null;
+          }
+
+          const rejectedName = (data['priceProductName'] ?? data['name'] ?? '') as string;
+          const rejectedUrl = (data['priceProductUrl'] ?? null) as string | null;
+
+          const entry: PriceFeedbackEntry = {
+            rejectedName,
+            rejectedUrl,
+            reason: trimmed,
+            timestamp: Date.now(),
+          };
+
+          tx.update(itemRef, {
+            priceFeedback: arrayUnion(entry),
+            priceUpdatedAt: null,
+            priceAttemptedAt: null,
+          });
+
+          // Append-only corpus write — never read back; sized for future
+          // model-training export.
+          const corpusRef = doc(paths.priceFeedback(this.db, accountId));
+          tx.set(corpusRef, {
+            itemId: id,
+            itemName: (data['name'] ?? '') as string,
+            description: (data['description'] ?? null) as string | null,
+            categoryName,
+            shopId: (data['priceShopId'] ?? null) as string | null,
+            reason: trimmed,
+            createdBy: userId,
+            createdAt: serverTimestamp(),
+          });
+        });
+      } catch (err) {
+        if ((err as Error).message === 'NOT_FOUND') {
+          return { type: 'NOT_FOUND', entityKind: 'item', id };
+        }
+        throw err;
       }
       return;
     });

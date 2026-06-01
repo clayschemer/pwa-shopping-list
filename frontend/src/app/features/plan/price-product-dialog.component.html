@@ -1,0 +1,113 @@
+<h2 mat-dialog-title>{{ 'pricePopup.title' | transloco }}</h2>
+<mat-dialog-content>
+  <div class="app-price-dialog">
+    <p class="app-price-dialog__row">
+      <span class="app-price-dialog__label">{{ 'pricePopup.item' | transloco }}</span>
+      <span class="app-price-dialog__value">{{ data.itemName }}</span>
+    </p>
+    @if (data.productName) {
+      <p class="app-price-dialog__row">
+        <span class="app-price-dialog__label">
+          {{ 'pricePopup.matchedProduct' | transloco }}
+        </span>
+        <span class="app-price-dialog__value">{{ data.productName }}</span>
+      </p>
+    }
+    @if (data.shopName) {
+      <p class="app-price-dialog__row">
+        <span class="app-price-dialog__label">
+          {{ 'pricePopup.sourceShop' | transloco }}
+        </span>
+        <span class="app-price-dialog__value">{{ data.shopName }}</span>
+      </p>
+    }
+    @if (data.price !== null) {
+      <p class="app-price-dialog__row">
+        <span class="app-price-dialog__label">{{ 'pricePopup.price' | transloco }}</span>
+        <span class="app-price-dialog__value">
+          @if (data.priceQuantity !== null && data.priceUnit) {
+            {{
+              'pricePopup.priceWithUnit'
+                | transloco
+                  : {
+                      price: data.price | money,
+                      quantity: data.priceQuantity,
+                      unit: ('units.' + data.priceUnit | transloco),
+                    }
+            }}
+          } @else {
+            {{ data.price | money }}
+          }
+        </span>
+      </p>
+    }
+
+    @if (!feedbackOpen() && !feedbackSubmitted()) {
+      <button
+        type="button"
+        class="app-price-dialog__feedback-link"
+        (click)="openFeedback()"
+      >
+        {{ 'pricePopup.notRightProduct' | transloco }}
+      </button>
+    }
+
+    @if (feedbackOpen() && !feedbackSubmitted()) {
+      <div class="app-price-dialog__feedback">
+        <mat-form-field appearance="outline" class="app-price-dialog__feedback-field">
+          <mat-label>{{ 'pricePopup.feedbackPlaceholder' | transloco }}</mat-label>
+          <textarea
+            matInput
+            rows="3"
+            [ngModel]="reason()"
+            (ngModelChange)="reason.set($event)"
+          ></textarea>
+        </mat-form-field>
+      </div>
+    }
+
+    @if (feedbackSubmitted()) {
+      <p class="app-price-dialog__thanks">
+        {{ 'pricePopup.thanksFeedback' | transloco }}
+      </p>
+    }
+  </div>
+</mat-dialog-content>
+<mat-dialog-actions align="end">
+  @if (feedbackOpen() && !feedbackSubmitted()) {
+    <button mat-button (click)="cancelFeedback()">
+      {{ 'pricePopup.cancel' | transloco }}
+    </button>
+    <button
+      mat-flat-button
+      color="primary"
+      [disabled]="!reason().trim()"
+      (click)="submitFeedback()"
+    >
+      {{ 'pricePopup.submit' | transloco }}
+    </button>
+  } @else {
+    @if (data.productUrl) {
+      <a
+        mat-stroked-button
+        [href]="data.productUrl"
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        {{ 'pricePopup.openProductPage' | transloco }}
+      </a>
+    } @else if (data.searchUrl) {
+      <a
+        mat-stroked-button
+        [href]="data.searchUrl"
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        {{ 'pricePopup.viewSearchResults' | transloco }}
+      </a>
+    }
+    <button mat-flat-button color="primary" (click)="onClose()">
+      {{ 'pricePopup.close' | transloco }}
+    </button>
+  }
+</mat-dialog-actions>

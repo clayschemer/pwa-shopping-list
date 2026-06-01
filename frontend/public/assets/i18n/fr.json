@@ -171,6 +171,23 @@
     "approxShelfPrice": "≈ {{price}} / {{quantity}} {{unit}}",
     "approxShelfPriceNoQty": "≈ {{price}}"
   },
+  "pricePopup": {
+    "title": "Détails du prix",
+    "openLabel": "Voir le prix de {{name}}",
+    "item": "Article",
+    "matchedProduct": "Produit identifié",
+    "sourceShop": "Source",
+    "price": "Prix",
+    "priceWithUnit": "{{price}} / {{quantity}} {{unit}}",
+    "openProductPage": "Ouvrir la page produit",
+    "viewSearchResults": "Voir les résultats de recherche",
+    "notRightProduct": "Ce n'est pas le bon produit ?",
+    "feedbackPlaceholder": "Précisez ce qui ne va pas (aide la prochaine recherche)",
+    "submit": "Envoyer le retour",
+    "cancel": "Annuler",
+    "thanksFeedback": "Merci — nous chercherons une meilleure correspondance.",
+    "close": "Fermer"
+  },
   "closeSession": {
     "allDoneTitle": "Terminé !",
     "allDoneMessage": "Tout est coché. Fermer la session et sauvegarder l'historique ?",

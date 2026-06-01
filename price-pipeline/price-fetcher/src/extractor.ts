@@ -4,8 +4,9 @@ import type { ExtractedProduct } from './types.js';
 interface LdProduct {
   '@type'?: string;
   name?: string;
+  url?: string;
   offers?: LdOffer | LdOffer[];
-  itemListElement?: Array<{ item?: LdProduct } | LdProduct>;
+  itemListElement?: Array<{ item?: LdProduct; url?: string } | LdProduct>;
   mainEntity?: LdProduct;
 }
 
@@ -29,7 +30,7 @@ export function extract(html: string): ExtractedProduct[] {
       const data: LdProduct | LdProduct[] = JSON.parse(match[1]);
       const nodes = Array.isArray(data) ? data : [data];
       for (const node of nodes) {
-        products.push(...fromNode(node));
+        products.push(...fromNode(node, null));
       }
     } catch {
       // Malformed JSON-LD — skip silently
@@ -39,7 +40,12 @@ export function extract(html: string): ExtractedProduct[] {
   return products;
 }
 
-function fromNode(node: LdProduct): ExtractedProduct[] {
+/**
+ * Walks a JSON-LD subtree. `fallbackUrl` carries down the URL from a parent
+ * ItemList entry when the inner Product node has no url of its own — some
+ * stores attach the link only to the list wrapper.
+ */
+function fromNode(node: LdProduct, fallbackUrl: string | null): ExtractedProduct[] {
   const results: ExtractedProduct[] = [];
 
   if (node['@type'] === 'Product' && node.name) {
@@ -52,6 +58,7 @@ function fromNode(node: LdProduct): ExtractedProduct[] {
           price,
           priceQuantity: null,
           priceUnit: offer.unitText ?? null,
+          url: node.url ?? fallbackUrl,
         });
       }
     }
@@ -61,11 +68,12 @@ function fromNode(node: LdProduct): ExtractedProduct[] {
   if (node.itemListElement) {
     for (const el of node.itemListElement) {
       const child = 'item' in el ? el.item : el;
-      if (child) results.push(...fromNode(child));
+      const childFallback = ('url' in el && el.url) ? el.url : null;
+      if (child) results.push(...fromNode(child, childFallback));
     }
   }
   if (node.mainEntity) {
-    results.push(...fromNode(node.mainEntity));
+    results.push(...fromNode(node.mainEntity, fallbackUrl));
   }
 
   return results;

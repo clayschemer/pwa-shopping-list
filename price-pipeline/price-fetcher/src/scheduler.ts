@@ -3,7 +3,15 @@ import { writePriceResult, writeAttemptTimestamp } from './writer.js';
 import { processItem } from './pipeline.js';
 import type { StaleItem } from './types.js';
 
-const INTERVAL_MIN = parseInt(process.env['SCAN_INTERVAL_MINUTES'] ?? '30', 10);
+// SCAN_INTERVAL_SECONDS takes precedence; SCAN_INTERVAL_MINUTES is the legacy
+// coarser knob. Use seconds for sub-minute responsiveness on small accounts.
+const INTERVAL_MS = (() => {
+  const sec = process.env['SCAN_INTERVAL_SECONDS'];
+  if (sec) return parseInt(sec, 10) * 1_000;
+  const min = parseInt(process.env['SCAN_INTERVAL_MINUTES'] ?? '30', 10);
+  return min * 60_000;
+})();
+
 // Politeness delay between items — avoids hammering the same store
 const ITEM_DELAY_MS = 2_500;
 
@@ -43,7 +51,7 @@ async function runCycle(mode: 'full' | 'unpriced'): Promise<void> {
       const found = await processItem(item, shops);
 
       if (found) {
-        const { result, shop } = found;
+        const { result, shop, searchUrl } = found;
         const unitStr = result.priceUnit
           ? `/${result.priceQuantity ?? ''}${result.priceUnit}`
           : '';
@@ -51,7 +59,7 @@ async function runCycle(mode: 'full' | 'unpriced'): Promise<void> {
           ? `  [≈ ${result.sizePerPiece.quantity} ${result.sizePerPiece.unit}/st]`
           : '';
         console.log(`  ✓  ${result.price} kr${unitStr}${sppStr}  (${shop.name})`);
-        await writePriceResult(accountId, item.id, result, shop.id);
+        await writePriceResult(accountId, item.id, result, shop.id, searchUrl);
       } else {
         console.log(`  ✗  No price found — will retry in ${process.env['PRICE_RETRY_DAYS'] ?? 7} days.`);
         await writeAttemptTimestamp(accountId, item.id);
@@ -83,11 +91,14 @@ async function tick(): Promise<void> {
 }
 
 export async function start(): Promise<void> {
-  console.log(`Price scheduler started (interval: ${INTERVAL_MIN} min, stale threshold: ${process.env['PRICE_STALE_DAYS'] ?? 180} days).`);
+  const intervalLabel = INTERVAL_MS < 60_000
+    ? `${Math.round(INTERVAL_MS / 1_000)} s`
+    : `${Math.round(INTERVAL_MS / 60_000)} min`;
+  console.log(`Price scheduler started (interval: ${intervalLabel}, stale threshold: ${process.env['PRICE_STALE_DAYS'] ?? 180} days).`);
 
   await tick();
 
-  setInterval(tick, INTERVAL_MIN * 60_000);
+  setInterval(tick, INTERVAL_MS);
 
   // Keep the process alive
   process.stdin.resume();

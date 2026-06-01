@@ -171,6 +171,23 @@
     "approxShelfPrice": "≈ {{price}} / {{quantity}} {{unit}}",
     "approxShelfPriceNoQty": "≈ {{price}}"
   },
+  "pricePopup": {
+    "title": "Price details",
+    "openLabel": "Inspect price for {{name}}",
+    "item": "Item",
+    "matchedProduct": "Matched product",
+    "sourceShop": "Source",
+    "price": "Price",
+    "priceWithUnit": "{{price}} / {{quantity}} {{unit}}",
+    "openProductPage": "Open product page",
+    "viewSearchResults": "View search results",
+    "notRightProduct": "Not the product you're looking for?",
+    "feedbackPlaceholder": "Tell us what's wrong (optional details help the next lookup)",
+    "submit": "Send feedback",
+    "cancel": "Cancel",
+    "thanksFeedback": "Thanks — we'll look again for a better match.",
+    "close": "Close"
+  },
   "closeSession": {
     "allDoneTitle": "All done!",
     "allDoneMessage": "Everything's checked off. Close this session and save the history?",

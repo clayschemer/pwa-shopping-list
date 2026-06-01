@@ -16,7 +16,9 @@ services:
     environment:
       GOOGLE_APPLICATION_CREDENTIALS: /run/secrets/firebase-sa
       PRICE_STALE_DAYS: "180"
-      SCAN_INTERVAL_MINUTES: "30"
+      # Sub-minute polling — private-phase volume is tiny, latency matters more
+      # than amortising poll cost. Bump up when account count grows.
+      SCAN_INTERVAL_SECONDS: "30"
     volumes:
       - ./service-account.json:/run/secrets/firebase-sa:ro
     command: ["npx", "tsx", "src/index.ts", "--mode", "scheduler"]

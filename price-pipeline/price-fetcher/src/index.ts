@@ -4,7 +4,7 @@ import { extract } from './extractor.js';
 import { validate } from './validator.js';
 
 // Scheduler mode is imported lazily to avoid loading firebase-admin in manual mode
-type Mode = 'manual' | 'scheduler' | 'once-full' | 'once-unpriced' | 'reset-item';
+type Mode = 'manual' | 'scheduler' | 'once-full' | 'once-unpriced' | 'reset-item' | 'reset-all';
 
 interface Args {
   mode: Mode;
@@ -58,7 +58,10 @@ Environment:
   OLLAMA_MODEL            Model name    (default: gemma2:2b)
   GOOGLE_APPLICATION_CREDENTIALS  Path to Firebase service account JSON (scheduler modes)
   PRICE_STALE_DAYS        Days before a price is considered stale (default: 180)
-  SCAN_INTERVAL_MINUTES   How often the scheduler checks for unpriced items (default: 30)
+  SCAN_INTERVAL_SECONDS   How often the scheduler checks for unpriced items, in seconds
+                          (takes precedence over MINUTES; default unset)
+  SCAN_INTERVAL_MINUTES   How often the scheduler checks for unpriced items, in minutes
+                          (default: 30; ignored when SCAN_INTERVAL_SECONDS is set)
 
 Examples:
   npx tsx src/index.ts --item "mellanmjölk 1l" --site ica
@@ -105,6 +108,8 @@ async function runManual(args: Args): Promise<void> {
     if (result.priceQuantity != null) console.log(`Quantity: ${result.priceQuantity}`);
     if (result.priceUnit)             console.log(`Unit:     ${result.priceUnit}`);
     if (result.sizePerPiece)          console.log(`Per piece: ${result.sizePerPiece.quantity} ${result.sizePerPiece.unit}`);
+    if (result.productName)           console.log(`Matched:  ${result.productName}`);
+    if (result.productUrl)            console.log(`Product:  ${result.productUrl}`);
     console.log(`Source:   ${url}`);
   } else {
     console.log('No price found. Consider trying a different --site or --url.');
@@ -116,6 +121,13 @@ async function runResetItem(itemId: string, accountId: string): Promise<void> {
   const { resetPriceForRescan } = await import('./writer.js');
   await resetPriceForRescan(accountId, itemId);
   console.log(`Reset ${itemId} — will be picked up by next unpriced scan.`);
+}
+
+async function runResetAll(): Promise<void> {
+  const { resetAllPriceUpdatedAt } = await import('./writer.js');
+  console.log('Resetting priceUpdatedAt to null on every item in every account...');
+  const count = await resetAllPriceUpdatedAt();
+  console.log(`Done. Reset ${count} item(s) total.`);
 }
 
 async function runFirestoreMode(mode: 'scheduler' | 'once-full' | 'once-unpriced'): Promise<void> {
@@ -137,7 +149,7 @@ async function runFirestoreMode(mode: 'scheduler' | 'once-full' | 'once-unpriced
       const found = await processItem(item, shops);
       if (found) {
         console.log(`✓ "${item.name}": ${found.result.price} kr (${found.shop.name})`);
-        await writePriceResult(item.accountId, item.id, found.result, found.shop.id);
+        await writePriceResult(item.accountId, item.id, found.result, found.shop.id, found.searchUrl);
       } else {
         console.log(`✗ "${item.name}": no price found — will retry in ${process.env['PRICE_RETRY_DAYS'] ?? 7} days.`);
         await writeAttemptTimestamp(item.accountId, item.id);
@@ -168,6 +180,11 @@ if (args.mode === 'manual') {
     process.exit(1);
   }
   runResetItem(args.itemId, args.accountId).catch(err => {
+    console.error('\nFatal error:', (err as Error).message);
+    process.exit(1);
+  });
+} else if (args.mode === 'reset-all') {
+  runResetAll().catch(err => {
     console.error('\nFatal error:', (err as Error).message);
     process.exit(1);
   });

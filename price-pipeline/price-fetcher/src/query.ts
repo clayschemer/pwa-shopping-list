@@ -1,7 +1,7 @@
 import { Timestamp } from 'firebase-admin/firestore';
 import { getDb } from './firebase-admin.js';
 import { KNOWN_STORES } from './search-query.js';
-import type { StaleItem, ShopConfig } from './types.js';
+import type { FeedbackHint, StaleItem, ShopConfig } from './types.js';
 
 const STALE_DAYS = parseInt(process.env['PRICE_STALE_DAYS'] ?? '180', 10);
 const RETRY_DAYS = parseInt(process.env['PRICE_RETRY_DAYS'] ?? '7', 10);
@@ -48,6 +48,7 @@ export async function queryStaleItems(mode: 'full' | 'unpriced'): Promise<StaleI
           categoryName: d['primaryCategoryId']
             ? (categoryMap.get(d['primaryCategoryId'] as string) ?? null)
             : null,
+          priceFeedback: readFeedback(d['priceFeedback']),
         });
       }
     };
@@ -79,6 +80,7 @@ export async function queryStaleItems(mode: 'full' | 'unpriced'): Promise<StaleI
         categoryName: d['primaryCategoryId']
           ? (categoryMap.get(d['primaryCategoryId'] as string) ?? null)
           : null,
+        priceFeedback: readFeedback(d['priceFeedback']),
       });
     }
 
@@ -146,4 +148,24 @@ function normalise(s: string): string {
     .replace(/ö/g, 'o')
     .replace(/å/g, 'a')
     .replace(/ä/g, 'a');
+}
+
+/** Defensive read of the priceFeedback array from Firestore. Filters out
+ *  malformed entries rather than failing the whole pipeline run. */
+function readFeedback(raw: unknown): FeedbackHint[] {
+  if (!Array.isArray(raw)) return [];
+  const out: FeedbackHint[] = [];
+  for (const entry of raw) {
+    if (entry == null || typeof entry !== 'object') continue;
+    const e = entry as Record<string, unknown>;
+    const rejectedName = typeof e['rejectedName'] === 'string' ? e['rejectedName'] : null;
+    const reason = typeof e['reason'] === 'string' ? e['reason'] : null;
+    if (!rejectedName || !reason) continue;
+    out.push({
+      rejectedName,
+      rejectedUrl: typeof e['rejectedUrl'] === 'string' ? e['rejectedUrl'] : null,
+      reason,
+    });
+  }
+  return out;
 }
