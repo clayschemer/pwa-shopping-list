@@ -21,6 +21,7 @@
     "viewHistory": "Historique\u2026",
     "settings": "Param\u00e8tres\u2026",
     "categories": "Catégories",
+    "stores": "Magasins…",
     "addCategory": "Ajouter une catégorie"
   },
   "planFilter": {
@@ -57,6 +58,31 @@
     "cancel": "Annuler",
     "save": "Enregistrer",
     "delete": "Supprimer la catégorie"
+  },
+  "stores": {
+    "title": "Magasins",
+    "goBack": "Retour",
+    "addStore": "Ajouter un magasin",
+    "dragHandle": "Glisser pour réorganiser {{name}}",
+    "noPriceSearchUrl": "Aucune URL de recherche de prix configurée",
+    "empty": "Aucun magasin. Appuyez sur + pour en ajouter un."
+  },
+  "storeEditSheet": {
+    "createTitle": "Ajouter un magasin",
+    "editTitle": "Modifier le magasin",
+    "name": "Nom",
+    "priceSearchUrl": "URL de recherche de prix",
+    "priceSearchUrlHint": "Laissez vide pour ignorer ce magasin. Utilisez {query} comme placeholder.",
+    "nameConflict": "Un magasin avec ce nom existe déjà",
+    "cancel": "Annuler",
+    "save": "Enregistrer",
+    "delete": "Supprimer le magasin"
+  },
+  "deleteStore": {
+    "title": "Supprimer le magasin ?",
+    "message": "\"{{name}}\" et sa configuration d'ordre seront supprimés. Les articles et catégories ne sont pas affectés.",
+    "cancel": "Annuler",
+    "delete": "Supprimer"
   },
   "history": {
     "title": "Historique des courses",

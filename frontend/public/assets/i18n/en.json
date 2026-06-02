@@ -21,6 +21,7 @@
     "viewHistory": "History\u2026",
     "settings": "Settings\u2026",
     "categories": "Categories",
+    "stores": "Stores\u2026",
     "addCategory": "Add category"
   },
   "planFilter": {
@@ -57,6 +58,31 @@
     "cancel": "Cancel",
     "save": "Save",
     "delete": "Delete category"
+  },
+  "stores": {
+    "title": "Stores",
+    "goBack": "Go back",
+    "addStore": "Add store",
+    "dragHandle": "Drag to reorder {{name}}",
+    "noPriceSearchUrl": "No price-search URL set",
+    "empty": "No stores yet. Tap + to add one."
+  },
+  "storeEditSheet": {
+    "createTitle": "Add store",
+    "editTitle": "Edit store",
+    "name": "Name",
+    "priceSearchUrl": "Price-search URL",
+    "priceSearchUrlHint": "Leave empty to skip during pipeline runs. Use {query} as the placeholder.",
+    "nameConflict": "A store with this name already exists",
+    "cancel": "Cancel",
+    "save": "Save",
+    "delete": "Delete store"
+  },
+  "deleteStore": {
+    "title": "Delete store?",
+    "message": "\"{{name}}\" and its order configuration will be removed. Items and categories are unaffected.",
+    "cancel": "Cancel",
+    "delete": "Delete"
   },
   "history": {
     "title": "Shopping history",

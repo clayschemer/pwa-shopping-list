@@ -60,13 +60,13 @@ import type { Shop } from './models/shop.model';
 import type { User } from './models/user.model';
 import type { Dictionary } from '@ngrx/entity';
 
-const FULL_SCREEN_ROUTES = ['/settings', '/manage-shops', '/history', '/categories'];
+const FULL_SCREEN_ROUTES = ['/settings', '/stores', '/history', '/categories'];
 
 const ROUTE_TITLE_KEYS: Record<string, string> = {
   '/': '',
   '/shop': '',
   '/settings': 'settings.title',
-  '/manage-shops': 'manageShops.title',
+  '/stores': 'stores.title',
   '/history': 'history.title',
   '/categories': 'categories.title',
   '/sign-in': 'signIn.title',
@@ -271,7 +271,7 @@ export class App {
 
   onManageShops(): void {
     this.store.dispatch(uiActions.navDrawerClosed());
-    this.router.navigateByUrl('/manage-shops');
+    this.router.navigateByUrl('/stores');
   }
 
   onViewHistory(): void {

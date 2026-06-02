@@ -21,6 +21,7 @@
     "viewHistory": "Verlauf\u2026",
     "settings": "Einstellungen\u2026",
     "categories": "Kategorien",
+    "stores": "Läden…",
     "addCategory": "Kategorie hinzufügen"
   },
   "planFilter": {
@@ -57,6 +58,31 @@
     "cancel": "Abbrechen",
     "save": "Speichern",
     "delete": "Kategorie löschen"
+  },
+  "stores": {
+    "title": "Läden",
+    "goBack": "Zurück",
+    "addStore": "Laden hinzufügen",
+    "dragHandle": "Ziehen, um {{name}} neu anzuordnen",
+    "noPriceSearchUrl": "Keine Preis-Such-URL gesetzt",
+    "empty": "Noch keine Läden. Tippe auf +, um einen hinzuzufügen."
+  },
+  "storeEditSheet": {
+    "createTitle": "Laden hinzufügen",
+    "editTitle": "Laden bearbeiten",
+    "name": "Name",
+    "priceSearchUrl": "Preis-Such-URL",
+    "priceSearchUrlHint": "Leer lassen, um den Laden zu überspringen. Verwende {query} als Platzhalter.",
+    "nameConflict": "Ein Laden mit diesem Namen existiert bereits",
+    "cancel": "Abbrechen",
+    "save": "Speichern",
+    "delete": "Laden löschen"
+  },
+  "deleteStore": {
+    "title": "Laden löschen?",
+    "message": "\"{{name}}\" und die Anordnungs-Konfiguration werden entfernt. Artikel und Kategorien sind nicht betroffen.",
+    "cancel": "Abbrechen",
+    "delete": "Löschen"
   },
   "history": {
     "title": "Einkaufsverlauf",

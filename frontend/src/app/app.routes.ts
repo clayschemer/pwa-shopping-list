@@ -34,7 +34,7 @@ export const routes: Routes = [
           import('./features/shop/shop.component').then((m) => m.ShopComponent),
       },
       {
-        path: 'manage-shops',
+        path: 'stores',
         loadComponent: () =>
           import('./features/manage-shops/manage-shops.component').then((m) => m.ManageShopsComponent),
       },

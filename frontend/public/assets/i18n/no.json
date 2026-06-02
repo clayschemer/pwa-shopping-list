@@ -21,6 +21,7 @@
     "viewHistory": "Historikk\u2026",
     "settings": "Innstillinger\u2026",
     "categories": "Kategorier",
+    "stores": "Butikker\u2026",
     "addCategory": "Legg til kategori"
   },
   "planFilter": {
@@ -57,6 +58,31 @@
     "cancel": "Avbryt",
     "save": "Lagre",
     "delete": "Slett kategori"
+  },
+  "stores": {
+    "title": "Butikker",
+    "goBack": "Gå tilbake",
+    "addStore": "Legg til butikk",
+    "dragHandle": "Dra for å endre rekkefølge på {{name}}",
+    "noPriceSearchUrl": "Ingen pris-søk-URL angitt",
+    "empty": "Ingen butikker ennå. Trykk + for å legge til."
+  },
+  "storeEditSheet": {
+    "createTitle": "Legg til butikk",
+    "editTitle": "Rediger butikk",
+    "name": "Navn",
+    "priceSearchUrl": "Pris-søk-URL",
+    "priceSearchUrlHint": "La feltet stå tomt for å hoppe over butikken. Bruk {query} som plassholder.",
+    "nameConflict": "En butikk med dette navnet finnes allerede",
+    "cancel": "Avbryt",
+    "save": "Lagre",
+    "delete": "Slett butikk"
+  },
+  "deleteStore": {
+    "title": "Slette butikken?",
+    "message": "\"{{name}}\" og rekkefølge-konfigurasjon fjernes. Varer og kategorier påvirkes ikke.",
+    "cancel": "Avbryt",
+    "delete": "Slett"
   },
   "history": {
     "title": "Handlehistorikk",

@@ -149,6 +149,20 @@ export class ShopApiService {
     });
   }
 
+  /**
+   * Persists the user-defined order of shops on the Account document.
+   * Empty array = insertion order. Callers should pass the full list of
+   * shop ids in the desired order.
+   */
+  async setShopOrder(orderedIds: ShopId[]): Promise<void> {
+    const { accountId } = this.context.require();
+    await runInInjectionContext(this.injector, async () => {
+      await updateDoc(paths.accountDoc(this.db, accountId), {
+        shopOrder: orderedIds,
+      });
+    });
+  }
+
   async setShopPriceUrl(
     id: ShopId,
     url: string | null,

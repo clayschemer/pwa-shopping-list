@@ -9,5 +9,7 @@ export interface AiConfig {
 export interface Account {
   id: AccountId;
   name: string;
+  /** User-defined order of shops shown across the app. Empty = insertion order. */
+  shopOrder: ShopId[];
   aiConfig: AiConfig | null;
 }

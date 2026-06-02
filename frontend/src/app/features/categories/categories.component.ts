@@ -17,7 +17,8 @@ import { MatFormField, MatLabel } from '@angular/material/form-field';
 import { MatSelect, MatOption } from '@angular/material/select';
 import { TranslocoPipe } from '@jsverse/transloco';
 import { selectAllCategories } from '../../store/categories/categories.selectors';
-import { selectAllShops, selectShopEntities } from '../../store/shops/shops.selectors';
+import { selectShopEntities } from '../../store/shops/shops.selectors';
+import { selectOrderedShops } from '../../store/selectors/ordered-shops.selectors';
 import type { Dictionary } from '@ngrx/entity';
 import type { Shop } from '../../models/shop.model';
 import { categoriesApiActions } from '../../store/categories/categories.actions';
@@ -66,7 +67,7 @@ export class CategoriesComponent {
   private readonly bottomSheet = inject(MatBottomSheet);
   private readonly dialog = inject(MatDialog);
 
-  readonly shops = toSignal(this.store.select(selectAllShops), {
+  readonly shops = toSignal(this.store.select(selectOrderedShops), {
     initialValue: [],
   });
   private readonly shopEntities = toSignal(this.store.select(selectShopEntities), {

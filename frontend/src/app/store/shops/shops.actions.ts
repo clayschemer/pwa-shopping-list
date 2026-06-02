@@ -24,5 +24,6 @@ export const shopsApiActions = createActionGroup({
     'Delete Shop Requested': props<{ id: ShopId }>(),
     'Set Shop Category Order Requested': props<{ shopId: ShopId; orderedIds: CategoryId[] }>(),
     'Set Shop Price Url Requested': props<{ id: ShopId; url: string | null }>(),
+    'Set Shop Order Requested': props<{ orderedIds: ShopId[] }>(),
   },
 });

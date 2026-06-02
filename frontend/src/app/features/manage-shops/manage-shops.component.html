@@ -3,57 +3,60 @@
     <button
       mat-icon-button
       class="app-manage-shops__back-btn"
-      [attr.aria-label]="'manageShops.goBack' | transloco"
+      [attr.aria-label]="'stores.goBack' | transloco"
       (click)="goBack()"
     >
       <mat-icon>arrow_back</mat-icon>
     </button>
-    <h1 class="app-manage-shops__title">{{ 'manageShops.title' | transloco }}</h1>
+    <h1 class="app-manage-shops__title">{{ 'stores.title' | transloco }}</h1>
   </header>
 
-  <div class="app-manage-shops__list">
+  <div
+    cdkDropList
+    class="app-manage-shops__list"
+    (cdkDropListDropped)="onShopDrop($event)"
+  >
     @for (shop of shops(); track shop.id) {
-      <div class="app-manage-shops__shop-row">
-        <div class="app-manage-shops__shop-info">
-          <button
-            class="app-manage-shops__shop-name"
-            (click)="openRenameSheet(shop)"
-          >
-            {{ shop.name }}
-          </button>
+      <div cdkDrag class="app-manage-shops__shop-row">
+        <mat-icon
+          cdkDragHandle
+          class="app-manage-shops__handle"
+          [attr.aria-label]="'stores.dragHandle' | transloco: { name: shop.name }"
+        >
+          drag_indicator
+        </mat-icon>
+        <button
+          class="app-manage-shops__shop-main"
+          type="button"
+          (click)="openEdit(shop)"
+        >
+          <span class="app-manage-shops__shop-name">{{ shop.name }}</span>
           @if (shop.priceSearchUrl) {
-            <span class="app-manage-shops__shop-url">{{ shop.priceSearchUrl }}</span>
+            <span class="app-manage-shops__shop-url">
+              <mat-icon class="app-manage-shops__shop-url-icon" aria-hidden="true">link</mat-icon>
+              {{ shop.priceSearchUrl }}
+            </span>
+          } @else {
+            <span class="app-manage-shops__shop-url app-manage-shops__shop-url--missing">
+              <mat-icon class="app-manage-shops__shop-url-icon" aria-hidden="true">link_off</mat-icon>
+              {{ 'stores.noPriceSearchUrl' | transloco }}
+            </span>
           }
-        </div>
-        <div class="app-manage-shops__shop-actions">
-          <button
-            mat-icon-button
-            class="app-manage-shops__price-url-btn"
-            [attr.aria-label]="'manageShops.setPriceUrl' | transloco: { name: shop.name }"
-            (click)="openPriceUrlSheet(shop)"
-          >
-            <mat-icon>{{ shop.priceSearchUrl ? 'link' : 'link_off' }}</mat-icon>
-          </button>
-          <button
-            mat-icon-button
-            class="app-manage-shops__delete-btn"
-            [attr.aria-label]="'manageShops.deleteShop' | transloco: { name: shop.name }"
-            (click)="deleteShop(shop)"
-          >
-            <mat-icon>delete</mat-icon>
-          </button>
-        </div>
+        </button>
+        <mat-icon class="app-manage-shops__row-chevron" aria-hidden="true">
+          chevron_right
+        </mat-icon>
       </div>
     } @empty {
-      <p class="app-manage-shops__empty">{{ 'manageShops.empty' | transloco }}</p>
+      <p class="app-manage-shops__empty">{{ 'stores.empty' | transloco }}</p>
     }
   </div>
 
   <button
     mat-fab
     class="app-manage-shops__fab"
-    [attr.aria-label]="'manageShops.addShop' | transloco"
-    (click)="openAddSheet()"
+    [attr.aria-label]="'stores.addStore' | transloco"
+    (click)="openCreate()"
   >
     <mat-icon>add</mat-icon>
   </button>

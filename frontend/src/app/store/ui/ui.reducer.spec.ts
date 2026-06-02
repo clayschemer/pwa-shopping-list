@@ -79,7 +79,7 @@ describe('uiReducer', () => {
   });
 
   it('seeds selectedShopId from accountLoaded', () => {
-    const account: Account = { id: 'a1' as AccountId, name: 'Test', aiConfig: null };
+    const account: Account = { id: 'a1' as AccountId, name: 'Test', shopOrder: [], aiConfig: null };
     const state = uiReducer(
       undefined,
       accountActions.accountLoaded({ account, selectedShopId: 'shop-2' as ShopId }),
@@ -88,7 +88,7 @@ describe('uiReducer', () => {
   });
 
   it('seeds selectedShopId as null from accountLoaded when no shop persisted', () => {
-    const account: Account = { id: 'a1' as AccountId, name: 'Test', aiConfig: null };
+    const account: Account = { id: 'a1' as AccountId, name: 'Test', shopOrder: [], aiConfig: null };
     const state = uiReducer(
       undefined,
       accountActions.accountLoaded({ account, selectedShopId: null }),

@@ -4,7 +4,7 @@ import { Store } from '@ngrx/store';
 import { MatFormField, MatLabel } from '@angular/material/form-field';
 import { MatSelect, MatOption } from '@angular/material/select';
 import { TranslocoPipe } from '@jsverse/transloco';
-import { selectAllShops } from '../../store/shops/shops.selectors';
+import { selectOrderedShops } from '../../store/selectors/ordered-shops.selectors';
 import { selectSelectedShopId } from '../../store/ui/ui.selectors';
 import { uiActions } from '../../store/ui/ui.actions';
 import type { ShopId } from '../../models/ids.model';
@@ -25,7 +25,7 @@ import type { ShopId } from '../../models/ids.model';
 export class NavDrawerComponent {
   private readonly store = inject(Store);
 
-  readonly shops = toSignal(this.store.select(selectAllShops), { initialValue: [] });
+  readonly shops = toSignal(this.store.select(selectOrderedShops), { initialValue: [] });
   readonly selectedShopId = toSignal(this.store.select(selectSelectedShopId), { initialValue: null });
 
   readonly viewCategories = output<void>();

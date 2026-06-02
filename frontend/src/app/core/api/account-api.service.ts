@@ -174,6 +174,9 @@ export class AccountApiService {
           account: {
             id: accountId,
             name: accountData['name'] ?? '',
+            shopOrder: ((accountData['shopOrder'] ?? []) as string[]).map(
+              (id) => id as ShopId,
+            ),
             aiConfig: accountData['aiConfig'] ?? null,
           },
           selectedShopId,

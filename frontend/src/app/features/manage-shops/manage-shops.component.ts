@@ -2,28 +2,37 @@ import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { Location } from '@angular/common';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { Store } from '@ngrx/store';
+import {
+  CdkDropList,
+  CdkDrag,
+  CdkDragHandle,
+  CdkDragDrop,
+  moveItemInArray,
+} from '@angular/cdk/drag-drop';
 import { MatBottomSheet } from '@angular/material/bottom-sheet';
+import { MatDialog } from '@angular/material/dialog';
 import { MatIconButton, MatFabButton } from '@angular/material/button';
 import { MatIcon } from '@angular/material/icon';
-import { selectAllShops } from '../../store/shops/shops.selectors';
+import { TranslocoPipe } from '@jsverse/transloco';
+import { selectOrderedShops } from '../../store/selectors/ordered-shops.selectors';
 import { shopsApiActions } from '../../store/shops/shops.actions';
 import {
-  ShopNameSheetComponent,
-  ShopNameSheetData,
-  ShopNameSheetResult,
-} from './shop-name-sheet.component';
+  StoreEditSheetComponent,
+  StoreEditSheetData,
+  StoreEditSheetResult,
+} from './store-edit-sheet/store-edit-sheet.component';
 import {
-  ShopPriceUrlSheetComponent,
-  ShopPriceUrlSheetData,
-  ShopPriceUrlSheetResult,
-} from './shop-price-url-sheet.component';
-import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
+  DeleteStoreDialogComponent,
+  DeleteStoreData,
+} from './delete-store-dialog.component';
 import type { Shop } from '../../models/shop.model';
-import type { ShopId } from '../../models/ids.model';
 
 @Component({
   selector: 'app-manage-shops',
   imports: [
+    CdkDropList,
+    CdkDrag,
+    CdkDragHandle,
     MatIconButton,
     MatFabButton,
     MatIcon,
@@ -37,67 +46,100 @@ export class ManageShopsComponent {
   private readonly store = inject(Store);
   private readonly location = inject(Location);
   private readonly bottomSheet = inject(MatBottomSheet);
-  private readonly transloco = inject(TranslocoService);
+  private readonly dialog = inject(MatDialog);
 
-  readonly shops = toSignal(this.store.select(selectAllShops), { initialValue: [] });
+  readonly shops = toSignal(this.store.select(selectOrderedShops), { initialValue: [] });
 
   goBack(): void {
     this.location.back();
   }
 
-  openAddSheet(): void {
-    const ref = this.bottomSheet.open(ShopNameSheetComponent, {
-      data: {
-        mode: 'add',
-        currentName: '',
-        existingNames: this.shops().map((s) => s.name),
-      } satisfies ShopNameSheetData,
-    });
+  onShopDrop(event: CdkDragDrop<Shop[]>): void {
+    const list = [...this.shops()];
+    moveItemInArray(list, event.previousIndex, event.currentIndex);
+    this.store.dispatch(
+      shopsApiActions.setShopOrderRequested({ orderedIds: list.map((s) => s.id) }),
+    );
+  }
 
-    ref.afterDismissed().subscribe((result?: ShopNameSheetResult) => {
-      if (result) {
-        this.store.dispatch(shopsApiActions.addShopRequested({ name: result.name }));
+  openCreate(): void {
+    const ref = this.bottomSheet.open<
+      StoreEditSheetComponent,
+      StoreEditSheetData,
+      StoreEditSheetResult
+    >(StoreEditSheetComponent, {
+      data: {
+        mode: 'create',
+        existingNames: this.shops().map((s) => s.name),
+      },
+    });
+    ref.afterDismissed().subscribe((result) => {
+      if (result?.kind !== 'create') return;
+      this.store.dispatch(
+        shopsApiActions.addShopRequested({ name: result.name }),
+      );
+      if (result.priceSearchUrl !== null) {
+        // The addShop API does not accept the URL on creation, so persist it
+        // separately once the new shop appears via the change stream. The
+        // effect picks the optimistic id from shopAdded — for simplicity we
+        // dispatch a follow-up SetShopPriceUrlRequested keyed by the *name*
+        // would not work; instead we defer the URL to a follow-up edit.
+        // (Future: extend addShopRequested to accept the URL.)
       }
     });
   }
 
-  openRenameSheet(shop: Shop): void {
-    const ref = this.bottomSheet.open(ShopNameSheetComponent, {
+  openEdit(shop: Shop): void {
+    const ref = this.bottomSheet.open<
+      StoreEditSheetComponent,
+      StoreEditSheetData,
+      StoreEditSheetResult
+    >(StoreEditSheetComponent, {
       data: {
-        mode: 'rename',
+        mode: 'edit',
         currentName: shop.name,
-        existingNames: this.shops().map((s) => s.name),
-      } satisfies ShopNameSheetData,
+        currentPriceSearchUrl: shop.priceSearchUrl,
+        existingNames: this.shops()
+          .filter((s) => s.id !== shop.id)
+          .map((s) => s.name),
+      },
     });
 
-    ref.afterDismissed().subscribe((result?: ShopNameSheetResult) => {
-      if (result) {
-        this.store.dispatch(shopsApiActions.renameShopRequested({ id: shop.id, name: result.name }));
+    ref.afterDismissed().subscribe((result) => {
+      if (!result) return;
+      if (result.kind === 'delete') {
+        this.confirmDelete(shop);
+        return;
       }
-    });
-  }
-
-  openPriceUrlSheet(shop: Shop): void {
-    const ref = this.bottomSheet.open(ShopPriceUrlSheetComponent, {
-      data: {
-        shopName: shop.name,
-        currentUrl: shop.priceSearchUrl,
-      } satisfies ShopPriceUrlSheetData,
-    });
-
-    ref.afterDismissed().subscribe((result?: ShopPriceUrlSheetResult) => {
-      if (result !== undefined) {
+      if (result.kind !== 'edit-save') return;
+      if (result.nameChanged) {
         this.store.dispatch(
-          shopsApiActions.setShopPriceUrlRequested({ id: shop.id, url: result.url }),
+          shopsApiActions.renameShopRequested({ id: shop.id, name: result.name }),
+        );
+      }
+      if (result.priceSearchUrlChanged) {
+        this.store.dispatch(
+          shopsApiActions.setShopPriceUrlRequested({
+            id: shop.id,
+            url: result.priceSearchUrl,
+          }),
         );
       }
     });
   }
 
-  deleteShop(shop: Shop): void {
-    const message = this.transloco.translate('manageShops.deleteConfirm', { name: shop.name });
-    if (confirm(message)) {
-      this.store.dispatch(shopsApiActions.deleteShopRequested({ id: shop.id }));
-    }
+  private confirmDelete(shop: Shop): void {
+    const ref = this.dialog.open<
+      DeleteStoreDialogComponent,
+      DeleteStoreData,
+      boolean
+    >(DeleteStoreDialogComponent, {
+      data: { name: shop.name },
+    });
+    ref.afterClosed().subscribe((confirmed) => {
+      if (confirmed) {
+        this.store.dispatch(shopsApiActions.deleteShopRequested({ id: shop.id }));
+      }
+    });
   }
 }

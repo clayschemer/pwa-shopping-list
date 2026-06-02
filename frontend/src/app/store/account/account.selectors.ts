@@ -32,3 +32,8 @@ export const selectSignInError = createSelector(
   selectAccountState,
   (state) => state.signInError,
 );
+
+export const selectShopOrder = createSelector(
+  selectAccount,
+  (a) => a?.shopOrder ?? [],
+);

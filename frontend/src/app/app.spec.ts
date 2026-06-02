@@ -138,7 +138,7 @@ describe('App', () => {
       await createTestBed([
         { path: '', component: DummyComponent },
         { path: 'settings', component: DummyComponent },
-        { path: 'manage-shops', component: DummyComponent },
+        { path: 'stores', component: DummyComponent },
         { path: 'history', component: DummyComponent },
         { path: 'sign-in', component: DummyComponent },
       ]);
@@ -181,13 +181,13 @@ describe('App', () => {
       expect(title.getTitle()).toBe('Settings — Shopping List');
     });
 
-    it('sets page title when navigating to manage shops', async () => {
+    it('sets page title when navigating to stores', async () => {
       await setupWithRoutes();
       const router = TestBed.inject(Router);
       const title = TestBed.inject(Title);
 
-      await router.navigateByUrl('/manage-shops');
-      expect(title.getTitle()).toBe('Manage shops — Shopping List');
+      await router.navigateByUrl('/stores');
+      expect(title.getTitle()).toBe('Stores — Shopping List');
     });
 
     it('sets page title when navigating to history', async () => {

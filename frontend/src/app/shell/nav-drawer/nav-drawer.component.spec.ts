@@ -6,6 +6,7 @@ import { provideTranslocoTesting } from '../../../testing/transloco-testing';
 import { NavDrawerComponent } from './nav-drawer.component';
 import { shopsReducer } from '../../store/shops/shops.reducer';
 import { uiReducer } from '../../store/ui/ui.reducer';
+import { accountReducer } from '../../store/account/account.reducer';
 import { shopsActions } from '../../store/shops/shops.actions';
 import type { Shop } from '../../models/shop.model';
 import type { AccountId, CategoryId, ShopId } from '../../models/ids.model';
@@ -29,6 +30,7 @@ describe('NavDrawerComponent', () => {
         provideStore({
           shops: shopsReducer,
           ui: uiReducer,
+          account: accountReducer,
         }),
       ],
     }).compileComponents();
@@ -56,7 +58,7 @@ describe('NavDrawerComponent', () => {
       .map((b) => b.textContent?.trim());
     expect(labels).toEqual([
       'Categories',
-      'Manage shops…',
+      'Stores…',
       'History…',
       'Settings…',
     ]);
@@ -71,12 +73,12 @@ describe('NavDrawerComponent', () => {
     expect(emitted).toBe(true);
   });
 
-  it('emits manageShops when the Manage shops link is clicked', () => {
+  it('emits manageShops when the Stores link is clicked', () => {
     let emitted = false;
     component.manageShops.subscribe(() => (emitted = true));
     const el: HTMLElement = fixture.nativeElement;
-    const links = el.querySelectorAll('.app-nav-drawer__manage-shops');
-    (links[1] as HTMLElement).click(); // Manage shops is the second entry
+    const link = el.querySelector('.app-nav-drawer__stores') as HTMLElement;
+    link.click();
     expect(emitted).toBe(true);
   });
 

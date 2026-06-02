@@ -21,6 +21,7 @@
     "viewHistory": "Historik\u2026",
     "settings": "Inst\u00e4llningar\u2026",
     "categories": "Kategorier",
+    "stores": "Butiker…",
     "addCategory": "Lägg till kategori"
   },
   "planFilter": {
@@ -57,6 +58,31 @@
     "cancel": "Avbryt",
     "save": "Spara",
     "delete": "Ta bort kategori"
+  },
+  "stores": {
+    "title": "Butiker",
+    "goBack": "Tillbaka",
+    "addStore": "Lägg till butik",
+    "dragHandle": "Dra för att ändra ordning på {{name}}",
+    "noPriceSearchUrl": "Ingen pris-sök-URL angiven",
+    "empty": "Inga butiker ännu. Tryck + för att lägga till."
+  },
+  "storeEditSheet": {
+    "createTitle": "Lägg till butik",
+    "editTitle": "Redigera butik",
+    "name": "Namn",
+    "priceSearchUrl": "Pris-sök-URL",
+    "priceSearchUrlHint": "Lämna tomt för att hoppa över butiken. Använd {query} som platshållare.",
+    "nameConflict": "En butik med detta namn finns redan",
+    "cancel": "Avbryt",
+    "save": "Spara",
+    "delete": "Ta bort butik"
+  },
+  "deleteStore": {
+    "title": "Ta bort butiken?",
+    "message": "\"{{name}}\" och ordnings-konfiguration tas bort. Varor och kategorier påverkas inte.",
+    "cancel": "Avbryt",
+    "delete": "Ta bort"
   },
   "history": {
     "title": "Köphistorik",
