@@ -13,53 +13,40 @@
       </mat-select>
     </mat-form-field>
 
-    <button
-      class="app-nav-drawer__manage-shops"
-      (click)="onManageShops()"
+    <mat-divider></mat-divider>
+
+    <button matButton
+      class="app-nav-drawer__manage-shops app-nav-drawer__categories"
+      (click)="onViewCategories()"
     >
-      {{ 'navDrawer.manageShops' | transloco }}
+      <mat-icon>category</mat-icon>
+      {{ 'navDrawer.categories' | transloco }}
     </button>
 
-    <button
+    <button matButton
+      class="app-nav-drawer__manage-shops app-nav-drawer__stores"
+      (click)="onManageShops()"
+    >
+      <mat-icon>store</mat-icon>
+      {{ 'navDrawer.stores' | transloco }}
+    </button>
+
+    <button matButton
       class="app-nav-drawer__manage-shops"
       (click)="onViewHistory()"
     >
+      <mat-icon>history</mat-icon>
       {{ 'navDrawer.viewHistory' | transloco }}
     </button>
-  </section>
 
-  <mat-divider />
+    <mat-divider></mat-divider>
 
-  <section class="app-nav-drawer__categories-section">
-    <h3 class="app-nav-drawer__categories-heading">{{ 'navDrawer.categories' | transloco }}</h3>
-
-    <div
-      cdkDropList
-      class="app-nav-drawer__category-list"
-      (cdkDropListDropped)="onCategoryDrop($event)"
+    <button matButton
+      class="app-nav-drawer__manage-shops app-nav-drawer__settings"
+      (click)="onViewSettings()"
     >
-      @for (category of orderedCategories(); track category.id) {
-        <div cdkDrag class="app-nav-drawer__category-row">
-          <button
-            class="app-nav-drawer__category-name"
-            (click)="onCategoryTap(category.id)"
-          >
-            @if (category.color) {
-              <span class="app-nav-drawer__category-dot" [style.background-color]="category.color"></span>
-            }
-            {{ category.name }}
-          </button>
-          <mat-icon cdkDragHandle class="app-nav-drawer__drag-handle">drag_indicator</mat-icon>
-        </div>
-      }
-    </div>
-
-    <button
-      class="app-nav-drawer__add-category"
-      (click)="onAddCategory()"
-    >
-      <mat-icon>add</mat-icon>
-      {{ 'navDrawer.addCategory' | transloco }}
+      <mat-icon>settings</mat-icon>
+      {{ 'navDrawer.settings' | transloco }}
     </button>
   </section>
 </div>

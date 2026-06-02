@@ -91,6 +91,12 @@ export const accountReducer = createReducer(
     account: null,
   })),
 
+  on(accountActions.shopOrderUpdated, (state, { orderedIds }) =>
+    state.account
+      ? { ...state, account: { ...state.account, shopOrder: orderedIds } }
+      : state,
+  ),
+
   on(accountActions.streamFailed, (state, { message }) => ({
     ...state,
     status: 'stream_failed' as const,

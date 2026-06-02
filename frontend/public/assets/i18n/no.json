@@ -9,6 +9,7 @@
     "openMenu": "Åpne navigasjonsmeny",
     "viewChecked": "Vis avkryssede varer",
     "settings": "Innstillinger",
+    "openFilters": "Filter og layout",
     "activeSession": "Aktiv økt",
     "global": "Global",
     "sessionActive": "aktiv"
@@ -16,10 +17,70 @@
   "navDrawer": {
     "shopLayout": "Nåværende butikkoppsett",
     "globalAll": "Global (alle)",
-    "manageShops": "Administrer butikker\u2026",
-    "viewHistory": "Historikk\u2026",
+    "viewHistory": "Historikk…",
+    "settings": "Innstillinger…",
     "categories": "Kategorier",
-    "addCategory": "Legg til kategori"
+    "stores": "Butikker…"
+  },
+  "planFilter": {
+    "title": "Filter og layout",
+    "hideGrouping": "Skjul kategorigruppering",
+    "hideGroupingHint": "Flat liste i butikkoppsettets rekkefølge",
+    "showChecked": "Vis avkryssede varer",
+    "showCheckedHint": "Vis varer avkrysset under en handleøkt",
+    "hidePrices": "Skjul priser",
+    "hidePricesHint": "Per-vare-priser; summer og kassen vises fortsatt",
+    "reorderCategories": "Endre rekkefølge på kategorier…",
+    "reorderCategoriesHint": "Rediger rekkefølgen for det aktive butikkoppsettet"
+  },
+  "categories": {
+    "title": "Kategorier",
+    "goBack": "Gå tilbake",
+    "orderFor": "Rekkefølge for",
+    "orderForGlobal": "Global",
+    "addCategory": "Legg til kategori",
+    "dragHandle": "Dra for å endre rekkefølge på {{name}}",
+    "empty": "Ingen kategorier ennå. Trykk + for å lage en."
+  },
+  "categoryEditSheet": {
+    "createTitle": "Legg til kategori",
+    "editTitle": "Rediger kategori",
+    "name": "Navn",
+    "color": "Farge",
+    "chooseColor": "Velg farge",
+    "changeColor": "Endre farge",
+    "clearColor": "Fjern",
+    "availableInShops": "Tilgjengelig i butikker",
+    "noShops": "Ingen butikker ennå.",
+    "nameConflict": "En kategori med dette navnet finnes allerede",
+    "cancel": "Avbryt",
+    "save": "Lagre",
+    "delete": "Slett kategori"
+  },
+  "stores": {
+    "title": "Butikker",
+    "goBack": "Gå tilbake",
+    "addStore": "Legg til butikk",
+    "dragHandle": "Dra for å endre rekkefølge på {{name}}",
+    "noPriceSearchUrl": "Ingen pris-søk-URL angitt",
+    "empty": "Ingen butikker ennå. Trykk + for å legge til."
+  },
+  "storeEditSheet": {
+    "createTitle": "Legg til butikk",
+    "editTitle": "Rediger butikk",
+    "name": "Navn",
+    "priceSearchUrl": "Pris-søk-URL",
+    "priceSearchUrlHint": "La feltet stå tomt for å hoppe over butikken. Bruk {query} som plassholder.",
+    "nameConflict": "En butikk med dette navnet finnes allerede",
+    "cancel": "Avbryt",
+    "save": "Lagre",
+    "delete": "Slett butikk"
+  },
+  "deleteStore": {
+    "title": "Slette butikken?",
+    "message": "\"{{name}}\" og rekkefølge-konfigurasjon fjernes. Varer og kategorier påvirkes ikke.",
+    "cancel": "Avbryt",
+    "delete": "Slett"
   },
   "history": {
     "title": "Handlehistorikk",
@@ -78,7 +139,7 @@
     "email": "E-post",
     "password": "Passord",
     "signIn": "Logg inn",
-    "signingIn": "Logger inn\u2026",
+    "signingIn": "Logger inn…",
     "formLabel": "Logg inn med e-post",
     "errors": {
       "wrongPassword": "Ugyldig e-post eller passord.",
@@ -100,57 +161,6 @@
     "messageNoEmail": "Kontoen din venter på godkjenning fra listeeieren. Du får tilgang så snart den er verifisert.",
     "reload": "Jeg er godkjent — last på nytt",
     "switchAccount": "Bruk en annen konto"
-  },
-  "manageShops": {
-    "title": "Administrer butikker",
-    "goBack": "Gå tilbake",
-    "empty": "Ingen butikker ennå. Trykk + for å legge til en.",
-    "addShop": "Legg til butikk",
-    "deleteShop": "Slett {{name}}",
-    "deleteConfirm": "Slette \"{{name}}\"? Dette kan ikke angres.",
-    "setPriceUrl": "Angi prissøk-URL for {{name}}"
-  },
-  "shopPriceUrlSheet": {
-    "title": "Prissøk-URL",
-    "urlLabel": "URL til søkeside",
-    "urlPlaceholder": "https://eksempel.no/sok?q={query}",
-    "hint": "Bruk {query} som plassholder for varenavnet. La feltet stå tomt for å deaktivere.",
-    "cancel": "Avbryt",
-    "save": "Lagre"
-  },
-  "shopNameSheet": {
-    "addTitle": "Legg til butikk",
-    "renameTitle": "Gi nytt navn til butikk",
-    "shopName": "Butikknavn",
-    "nameConflict": "En butikk med dette navnet finnes allerede",
-    "cancel": "Avbryt",
-    "add": "Legg til butikk",
-    "save": "Lagre"
-  },
-  "categoryNameSheet": {
-    "addTitle": "Legg til kategori",
-    "renameTitle": "Gi nytt navn til kategori",
-    "categoryName": "Kategorinavn",
-    "nameConflict": "En kategori med dette navnet finnes allerede",
-    "color": "Farge",
-    "chooseColor": "Velg farge",
-    "changeColor": "Endre farge",
-    "clearColor": "Fjern farge",
-    "cancel": "Avbryt",
-    "add": "Legg til kategori",
-    "save": "Lagre"
-  },
-  "categoryMenu": {
-    "open": "Kategorialternativer for {{name}}",
-    "rename": "Gi nytt navn",
-    "availableInShops": "Tilgjengelig i butikker\u2026",
-    "delete": "Slett kategori"
-  },
-  "availableInShops": {
-    "title": "Tilgjengelig i butikker",
-    "subtitle": "{{name}}",
-    "empty": "Ingen butikker konfigurert.",
-    "done": "Ferdig"
   },
   "deleteCategory": {
     "title": "Slette kategori?",

@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>09 · Stores — view</title>
+  <link rel="stylesheet" href="shared.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Symbols+Outlined" rel="stylesheet">
+</head>
+<body>
+  <div class="page">
+    <h1 class="page__title">09 — Stores view</h1>
+    <p class="page__subtitle">
+      Renamed from "Manage Shops" to "Stores". New: rows are draggable to reorder, and the row-side
+      action icons (link / delete) collapse into a single row-tap that opens the edit action sheet.
+      Resolves DESIGN.md open question #4.
+    </p>
+
+    <div class="phone">
+      <header class="appbar">
+        <button class="appbar__action" aria-label="Back">
+          <span class="material-symbols-outlined">arrow_back</span>
+        </button>
+        <h1 class="appbar__title">Stores</h1>
+      </header>
+
+      <main class="content" style="padding-bottom: 92px;">
+        <ul class="row-list">
+          <li class="row">
+            <span class="row__handle"><span class="material-symbols-outlined">drag_indicator</span></span>
+            <span class="row__main" style="flex-direction:column; align-items:flex-start; gap:0.05rem;">
+              <span class="row__name">Tesco Express</span>
+              <span class="row__sub">
+                <span class="material-symbols-outlined" style="font-size:0.85rem;vertical-align:-2px;">link</span>
+                tesco.com/groceries/en-GB/search?query={query}
+              </span>
+            </span>
+            <span class="row__chevron"><span class="material-symbols-outlined">chevron_right</span></span>
+          </li>
+          <li class="row">
+            <span class="row__handle"><span class="material-symbols-outlined">drag_indicator</span></span>
+            <span class="row__main" style="flex-direction:column; align-items:flex-start; gap:0.05rem;">
+              <span class="row__name">ICA Maxi</span>
+              <span class="row__sub">
+                <span class="material-symbols-outlined" style="font-size:0.85rem;vertical-align:-2px;">link</span>
+                ica.se/handla/sok/?q={query}
+              </span>
+            </span>
+            <span class="row__chevron"><span class="material-symbols-outlined">chevron_right</span></span>
+          </li>
+          <li class="row row--dragging">
+            <span class="row__handle"><span class="material-symbols-outlined">drag_indicator</span></span>
+            <span class="row__main" style="flex-direction:column; align-items:flex-start; gap:0.05rem;">
+              <span class="row__name">Coop</span>
+              <span class="row__sub" style="color: var(--outline);">
+                <span class="material-symbols-outlined" style="font-size:0.85rem;vertical-align:-2px;">link_off</span>
+                No price-search URL set
+              </span>
+            </span>
+            <span class="row__chevron"><span class="material-symbols-outlined">chevron_right</span></span>
+          </li>
+          <li class="row">
+            <span class="row__handle"><span class="material-symbols-outlined">drag_indicator</span></span>
+            <span class="row__main" style="flex-direction:column; align-items:flex-start; gap:0.05rem;">
+              <span class="row__name">Hemköp</span>
+              <span class="row__sub">
+                <span class="material-symbols-outlined" style="font-size:0.85rem;vertical-align:-2px;">link</span>
+                hemkop.se/sok?q={query}
+              </span>
+            </span>
+            <span class="row__chevron"><span class="material-symbols-outlined">chevron_right</span></span>
+          </li>
+        </ul>
+      </main>
+
+      <button class="fab" aria-label="Add store">
+        <span class="material-symbols-outlined">add</span>
+      </button>
+    </div>
+
+    <p class="caption">
+      The sub-line on each row shows the price-search URL state (set / not set) at a glance — no
+      more separate
+      <span class="material-symbols-outlined" style="font-size:0.95rem;vertical-align:-3px;">link</span>
+      vs
+      <span class="material-symbols-outlined" style="font-size:0.95rem;vertical-align:-3px;">link_off</span>
+      icon. Tap row → <a href="10-store-edit-sheet.html">edit sheet</a>.
+      <br />
+      <a href="index.html">← back to index</a> ·
+      <a href="07-categories.html">07 · categories</a> ·
+      <a href="10-store-edit-sheet.html">10 · store edit sheet →</a>
+    </p>
+  </div>
+</body>
+</html>

@@ -9,6 +9,7 @@
     "openMenu": "Öppna navigationsmeny",
     "viewChecked": "Visa avbockade varor",
     "settings": "Inställningar",
+    "openFilters": "Filter och layout",
     "activeSession": "Aktiv session",
     "global": "Global",
     "sessionActive": "aktiv"
@@ -16,10 +17,70 @@
   "navDrawer": {
     "shopLayout": "Aktuell butikslayout",
     "globalAll": "Global (alla)",
-    "manageShops": "Hantera butiker\u2026",
-    "viewHistory": "Historik\u2026",
+    "viewHistory": "Historik…",
+    "settings": "Inställningar…",
     "categories": "Kategorier",
-    "addCategory": "Lägg till kategori"
+    "stores": "Butiker…"
+  },
+  "planFilter": {
+    "title": "Filter och layout",
+    "hideGrouping": "Dölj kategoriindelning",
+    "hideGroupingHint": "Platt lista i butikslayoutens ordning",
+    "showChecked": "Visa avbockade varor",
+    "showCheckedHint": "Visa varor som bockats av under en handlingssession",
+    "hidePrices": "Dölj priser",
+    "hidePricesHint": "Per-varu-priser; summor och kassan visas fortfarande",
+    "reorderCategories": "Ändra ordning på kategorier…",
+    "reorderCategoriesHint": "Redigera ordningen för den aktiva butikslayouten"
+  },
+  "categories": {
+    "title": "Kategorier",
+    "goBack": "Tillbaka",
+    "orderFor": "Ordning för",
+    "orderForGlobal": "Global",
+    "addCategory": "Lägg till kategori",
+    "dragHandle": "Dra för att ändra ordning på {{name}}",
+    "empty": "Inga kategorier ännu. Tryck + för att skapa en."
+  },
+  "categoryEditSheet": {
+    "createTitle": "Lägg till kategori",
+    "editTitle": "Redigera kategori",
+    "name": "Namn",
+    "color": "Färg",
+    "chooseColor": "Välj färg",
+    "changeColor": "Ändra färg",
+    "clearColor": "Rensa",
+    "availableInShops": "Tillgänglig i butiker",
+    "noShops": "Inga butiker ännu.",
+    "nameConflict": "En kategori med detta namn finns redan",
+    "cancel": "Avbryt",
+    "save": "Spara",
+    "delete": "Ta bort kategori"
+  },
+  "stores": {
+    "title": "Butiker",
+    "goBack": "Tillbaka",
+    "addStore": "Lägg till butik",
+    "dragHandle": "Dra för att ändra ordning på {{name}}",
+    "noPriceSearchUrl": "Ingen pris-sök-URL angiven",
+    "empty": "Inga butiker ännu. Tryck + för att lägga till."
+  },
+  "storeEditSheet": {
+    "createTitle": "Lägg till butik",
+    "editTitle": "Redigera butik",
+    "name": "Namn",
+    "priceSearchUrl": "Pris-sök-URL",
+    "priceSearchUrlHint": "Lämna tomt för att hoppa över butiken. Använd {query} som platshållare.",
+    "nameConflict": "En butik med detta namn finns redan",
+    "cancel": "Avbryt",
+    "save": "Spara",
+    "delete": "Ta bort butik"
+  },
+  "deleteStore": {
+    "title": "Ta bort butiken?",
+    "message": "\"{{name}}\" och ordnings-konfiguration tas bort. Varor och kategorier påverkas inte.",
+    "cancel": "Avbryt",
+    "delete": "Ta bort"
   },
   "history": {
     "title": "Köphistorik",
@@ -78,7 +139,7 @@
     "email": "E-post",
     "password": "Lösenord",
     "signIn": "Logga in",
-    "signingIn": "Loggar in\u2026",
+    "signingIn": "Loggar in…",
     "formLabel": "Logga in med e-post",
     "errors": {
       "wrongPassword": "Ogiltig e-post eller lösenord.",
@@ -101,60 +162,9 @@
     "reload": "Jag har godkänts — ladda om",
     "switchAccount": "Använd ett annat konto"
   },
-  "manageShops": {
-    "title": "Hantera butiker",
-    "goBack": "Gå tillbaka",
-    "empty": "Inga butiker ännu. Tryck + för att lägga till en.",
-    "addShop": "Lägg till butik",
-    "deleteShop": "Ta bort {{name}}",
-    "deleteConfirm": "Ta bort \"{{name}}\"? Detta kan inte ångras.",
-    "setPriceUrl": "Ange prissöknings-URL för {{name}}"
-  },
-  "shopPriceUrlSheet": {
-    "title": "Prissöknings-URL",
-    "urlLabel": "URL till söksida",
-    "urlPlaceholder": "https://exempel.se/sok?q={query}",
-    "hint": "Använd {query} som platshållare för varunamnet. Lämna tomt för att inaktivera.",
-    "cancel": "Avbryt",
-    "save": "Spara"
-  },
-  "shopNameSheet": {
-    "addTitle": "Lägg till butik",
-    "renameTitle": "Byt namn på butik",
-    "shopName": "Butiksnamn",
-    "nameConflict": "En butik med detta namn finns redan",
-    "cancel": "Avbryt",
-    "add": "Lägg till butik",
-    "save": "Spara"
-  },
-  "categoryNameSheet": {
-    "addTitle": "Lägg till kategori",
-    "renameTitle": "Byt namn på kategori",
-    "categoryName": "Kategorinamn",
-    "nameConflict": "En kategori med detta namn finns redan",
-    "color": "Färg",
-    "chooseColor": "Välj färg",
-    "changeColor": "Ändra färg",
-    "clearColor": "Ta bort färg",
-    "cancel": "Avbryt",
-    "add": "Lägg till kategori",
-    "save": "Spara"
-  },
-  "categoryMenu": {
-    "open": "Kategorialternativ för {{name}}",
-    "rename": "Byt namn",
-    "availableInShops": "Tillgänglig i butiker\u2026",
-    "delete": "Ta bort kategori"
-  },
-  "availableInShops": {
-    "title": "Tillgänglig i butiker",
-    "subtitle": "{{name}}",
-    "empty": "Inga butiker konfigurerade.",
-    "done": "Klar"
-  },
   "deleteCategory": {
     "title": "Ta bort kategori?",
-    "message": "Varor i \u201c{{name}}\u201d blir okategoriserade. De tas inte bort från listan.",
+    "message": "Varor i “{{name}}” blir okategoriserade. De tas inte bort från listan.",
     "cancel": "Avbryt",
     "delete": "Ta bort"
   },

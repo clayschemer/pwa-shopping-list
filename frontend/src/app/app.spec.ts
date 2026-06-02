@@ -103,6 +103,27 @@ describe('App', () => {
     expect(el.querySelector('.app-root__top-bar')).toBeTruthy();
   });
 
+  it('renders the filter button (not Settings icon) in plan-mode right slot', async () => {
+    await createTestBed();
+    const store = TestBed.inject(Store);
+    store.dispatch(authActions.authStateResolved({
+      user: { id: 'u1' as UserId, accountId: 'a1' as AccountId, email: 't@t.com', displayName: 'T' },
+    }));
+    store.dispatch(accountActions.accountLoaded({
+      account: { id: 'a1' as AccountId, name: 'A', aiConfig: null },
+      selectedShopId: null,
+    }));
+
+    const fixture = TestBed.createComponent(App);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    const el = fixture.nativeElement as HTMLElement;
+    expect(el.querySelector('.app-root__filter-btn')).toBeTruthy();
+    expect(el.querySelector('.app-root__settings-btn')).toBeFalsy();
+  });
+
   it('injects ThemeService on init so language and theme classes are applied immediately', async () => {
     await createTestBed();
     const fixture = TestBed.createComponent(App);
@@ -117,7 +138,7 @@ describe('App', () => {
       await createTestBed([
         { path: '', component: DummyComponent },
         { path: 'settings', component: DummyComponent },
-        { path: 'manage-shops', component: DummyComponent },
+        { path: 'stores', component: DummyComponent },
         { path: 'history', component: DummyComponent },
         { path: 'sign-in', component: DummyComponent },
       ]);
@@ -160,13 +181,13 @@ describe('App', () => {
       expect(title.getTitle()).toBe('Settings — Shopping List');
     });
 
-    it('sets page title when navigating to manage shops', async () => {
+    it('sets page title when navigating to stores', async () => {
       await setupWithRoutes();
       const router = TestBed.inject(Router);
       const title = TestBed.inject(Title);
 
-      await router.navigateByUrl('/manage-shops');
-      expect(title.getTitle()).toBe('Manage shops — Shopping List');
+      await router.navigateByUrl('/stores');
+      expect(title.getTitle()).toBe('Stores — Shopping List');
     });
 
     it('sets page title when navigating to history', async () => {

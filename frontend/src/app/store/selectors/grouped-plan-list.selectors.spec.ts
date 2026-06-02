@@ -1,8 +1,13 @@
 import { describe, it, expect } from 'vitest';
-import { selectGroupedPlanList } from './grouped-plan-list.selectors';
+import {
+  selectActiveSessionCheckedItemIds,
+  selectGroupedPlanList,
+  selectGroupedPlanListWithChecked,
+} from './grouped-plan-list.selectors';
 import type { Item } from '../../models/item.model';
 import type { Category } from '../../models/category.model';
-import type { AccountId, CategoryId, ItemId } from '../../models/ids.model';
+import type { Session } from '../../models/session.model';
+import type { AccountId, CategoryId, ItemId, SessionId, ShopId, UserId } from '../../models/ids.model';
 
 const item = (id: string, name: string, primary: string | null): Item =>
   ({
@@ -118,5 +123,83 @@ describe('selectGroupedPlanList', () => {
     const items = [{ ...item('i1', 'Loose', null), price: 5 }] as Item[];
     const groups = selectGroupedPlanList.projector(items, []);
     expect(groups[0]!.estTotal).toBe(0);
+  });
+});
+
+const removed = (i: Item): Item => ({ ...i, removed: true, removedAt: 1 } as Item);
+
+const session = (id: string, shopId: string | null, checkedItemIds: string[]): Session => ({
+  id: id as SessionId,
+  accountId: 'a1' as AccountId,
+  shopId: shopId ? (shopId as ShopId) : null,
+  participants: ['u1' as UserId],
+  startedBy: 'u1' as UserId,
+  startedAt: 1,
+  completedAt: null,
+  checkedItems: checkedItemIds.map((iid) => ({
+    itemId: iid as ItemId,
+    checkedBy: 'u1' as UserId,
+    checkedAt: 2,
+    priceSnapshot: null,
+    priceQuantitySnapshot: null,
+    priceUnitSnapshot: null,
+    nameSnapshot: null,
+    quantitySnapshot: null,
+    unitSnapshot: null,
+  })),
+});
+
+describe('selectActiveSessionCheckedItemIds', () => {
+  it('unions checkedItem ids across all active sessions', () => {
+    const sessions = [
+      session('s1', 'shop-a', ['i1', 'i2']),
+      session('s2', 'shop-b', ['i2', 'i3']),
+    ];
+    const ids = selectActiveSessionCheckedItemIds.projector(sessions);
+    expect([...ids].sort()).toEqual(['i1', 'i2', 'i3']);
+  });
+
+  it('returns empty set when no active sessions exist', () => {
+    expect(selectActiveSessionCheckedItemIds.projector([]).size).toBe(0);
+  });
+});
+
+describe('selectGroupedPlanListWithChecked', () => {
+  it('falls back to plain grouped list when no items are checked', () => {
+    const active = [item('i1', 'Apples', 'c1')];
+    const all = active;
+    const groups = selectGroupedPlanListWithChecked.projector(
+      active,
+      new Set<ItemId>(),
+      all,
+      [cat('c1', 'Produce')],
+    );
+    expect(groups[0]!.items.map((i) => i.id)).toEqual(['i1']);
+  });
+
+  it('includes session-checked items alongside active items in the same category', () => {
+    const active = [item('i1', 'Apples', 'c1')];
+    const checked = removed(item('i2', 'Bananas', 'c1'));
+    const all: Item[] = [active[0]!, checked];
+    const groups = selectGroupedPlanListWithChecked.projector(
+      active,
+      new Set<ItemId>(['i2' as ItemId]),
+      all,
+      [cat('c1', 'Produce')],
+    );
+    expect(groups[0]!.items.map((i) => i.name)).toEqual(['Apples', 'Bananas']);
+  });
+
+  it('excludes session-checked items from the category total', () => {
+    const active = [{ ...item('i1', 'Apples', 'c1'), price: 2 }] as Item[];
+    const checked = removed({ ...item('i2', 'Bananas', 'c1'), price: 5 } as Item);
+    const all: Item[] = [active[0]!, checked];
+    const groups = selectGroupedPlanListWithChecked.projector(
+      active,
+      new Set<ItemId>(['i2' as ItemId]),
+      all,
+      [cat('c1', 'Produce')],
+    );
+    expect(groups[0]!.estTotal).toBeCloseTo(2);
   });
 });

@@ -25,5 +25,6 @@ export const accountActions = createActionGroup({
     'Stream Auth Revoked': emptyProps(),
     'Stream Account Not Found': emptyProps(),
     'Stream Failed': props<{ message: string }>(),
+    'Shop Order Updated': props<{ orderedIds: ShopId[] }>(),
   },
 });

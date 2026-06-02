@@ -7,10 +7,10 @@
     <mat-sidenav-container class="app-root__sidenav-container">
       <mat-sidenav [opened]="navDrawerOpen()" mode="over" (closed)="onDrawerClosed()">
         <app-nav-drawer
-          (categorySelected)="onCategorySelected($event)"
+          (viewCategories)="onViewCategories()"
           (manageShops)="onManageShops()"
-          (addCategory)="onAddCategory()"
           (viewHistory)="onViewHistory()"
+          (viewSettings)="onViewSettings()"
         />
       </mat-sidenav>
 
@@ -61,14 +61,15 @@
           </nav>
 
           @if (isPlanMode()) {
-            <a
+            <button
               mat-icon-button
-              class="app-root__settings-btn"
-              routerLink="/settings"
-              [attr.aria-label]="'nav.settings' | transloco"
+              type="button"
+              class="app-root__filter-btn"
+              [attr.aria-label]="'nav.openFilters' | transloco"
+              (click)="openPlanFilters()"
             >
-              <mat-icon>settings</mat-icon>
-            </a>
+              <mat-icon>tune</mat-icon>
+            </button>
           } @else {
             <button
               type="button"

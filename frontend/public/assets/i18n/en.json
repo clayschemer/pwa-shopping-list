@@ -9,6 +9,7 @@
     "openMenu": "Open navigation menu",
     "viewChecked": "View checked items",
     "settings": "Settings",
+    "openFilters": "Filter and layout",
     "activeSession": "Active session",
     "global": "Global",
     "sessionActive": "active"
@@ -16,10 +17,70 @@
   "navDrawer": {
     "shopLayout": "Current shop layout",
     "globalAll": "Global (all)",
-    "manageShops": "Manage shops\u2026",
-    "viewHistory": "History\u2026",
+    "viewHistory": "History…",
+    "settings": "Settings…",
     "categories": "Categories",
-    "addCategory": "Add category"
+    "stores": "Stores…"
+  },
+  "planFilter": {
+    "title": "Filter & layout",
+    "hideGrouping": "Hide category grouping",
+    "hideGroupingHint": "Flat list in shop layout order",
+    "showChecked": "Show checked items",
+    "showCheckedHint": "Reveal items checked off during a shop session",
+    "hidePrices": "Hide prices",
+    "hidePricesHint": "Per-item price chips; sums and checkout stay visible",
+    "reorderCategories": "Reorder categories…",
+    "reorderCategoriesHint": "Edit the order for the current shop layout"
+  },
+  "categories": {
+    "title": "Categories",
+    "goBack": "Go back",
+    "orderFor": "Order for",
+    "orderForGlobal": "Global",
+    "addCategory": "Add category",
+    "dragHandle": "Drag to reorder {{name}}",
+    "empty": "No categories yet. Tap + to create one."
+  },
+  "categoryEditSheet": {
+    "createTitle": "Add category",
+    "editTitle": "Edit category",
+    "name": "Name",
+    "color": "Colour",
+    "chooseColor": "Choose colour",
+    "changeColor": "Change colour",
+    "clearColor": "Clear",
+    "availableInShops": "Available in shops",
+    "noShops": "No shops yet.",
+    "nameConflict": "A category with this name already exists",
+    "cancel": "Cancel",
+    "save": "Save",
+    "delete": "Delete category"
+  },
+  "stores": {
+    "title": "Stores",
+    "goBack": "Go back",
+    "addStore": "Add store",
+    "dragHandle": "Drag to reorder {{name}}",
+    "noPriceSearchUrl": "No price-search URL set",
+    "empty": "No stores yet. Tap + to add one."
+  },
+  "storeEditSheet": {
+    "createTitle": "Add store",
+    "editTitle": "Edit store",
+    "name": "Name",
+    "priceSearchUrl": "Price-search URL",
+    "priceSearchUrlHint": "Leave empty to skip during pipeline runs. Use {query} as the placeholder.",
+    "nameConflict": "A store with this name already exists",
+    "cancel": "Cancel",
+    "save": "Save",
+    "delete": "Delete store"
+  },
+  "deleteStore": {
+    "title": "Delete store?",
+    "message": "\"{{name}}\" and its order configuration will be removed. Items and categories are unaffected.",
+    "cancel": "Cancel",
+    "delete": "Delete"
   },
   "history": {
     "title": "Shopping history",
@@ -78,7 +139,7 @@
     "email": "Email",
     "password": "Password",
     "signIn": "Sign in",
-    "signingIn": "Signing in\u2026",
+    "signingIn": "Signing in…",
     "formLabel": "Sign in with email",
     "errors": {
       "wrongPassword": "Invalid email or password.",
@@ -100,57 +161,6 @@
     "messageNoEmail": "Your account is awaiting approval from the list owner. You'll get access as soon as they verify it.",
     "reload": "I've been approved — reload",
     "switchAccount": "Use a different account"
-  },
-  "manageShops": {
-    "title": "Manage shops",
-    "goBack": "Go back",
-    "empty": "No shops yet. Tap + to add one.",
-    "addShop": "Add shop",
-    "deleteShop": "Delete {{name}}",
-    "deleteConfirm": "Delete \"{{name}}\"? This cannot be undone.",
-    "setPriceUrl": "Set price search URL for {{name}}"
-  },
-  "shopPriceUrlSheet": {
-    "title": "Price search URL",
-    "urlLabel": "Search page URL",
-    "urlPlaceholder": "https://example.com/search?q={query}",
-    "hint": "Use {query} as a placeholder for the item name. Leave empty to disable.",
-    "cancel": "Cancel",
-    "save": "Save"
-  },
-  "shopNameSheet": {
-    "addTitle": "Add shop",
-    "renameTitle": "Rename shop",
-    "shopName": "Shop name",
-    "nameConflict": "A shop with this name already exists",
-    "cancel": "Cancel",
-    "add": "Add shop",
-    "save": "Save"
-  },
-  "categoryNameSheet": {
-    "addTitle": "Add category",
-    "renameTitle": "Rename category",
-    "categoryName": "Category name",
-    "nameConflict": "A category with this name already exists",
-    "color": "Colour",
-    "chooseColor": "Choose colour",
-    "changeColor": "Change colour",
-    "clearColor": "Remove colour",
-    "cancel": "Cancel",
-    "add": "Add category",
-    "save": "Save"
-  },
-  "categoryMenu": {
-    "open": "Category options for {{name}}",
-    "rename": "Rename",
-    "availableInShops": "Available in shops\u2026",
-    "delete": "Delete category"
-  },
-  "availableInShops": {
-    "title": "Available in shops",
-    "subtitle": "{{name}}",
-    "empty": "No shops configured.",
-    "done": "Done"
   },
   "deleteCategory": {
     "title": "Delete category?",

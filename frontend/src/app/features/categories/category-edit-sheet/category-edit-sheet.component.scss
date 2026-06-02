@@ -1,4 +1,4 @@
-.app-category-name-sheet {
+.app-category-edit-sheet {
   display: flex;
   flex-direction: column;
   gap: var(--app-spacing-stack, 1rem);
@@ -43,10 +43,12 @@
     flex-shrink: 0;
 
     &--none {
-      background: repeating-conic-gradient(
-        var(--mat-sys-surface-variant) 0% 25%,
-        var(--mat-sys-surface) 0% 50%
-      ) 50% / 0.75rem 0.75rem;
+      background:
+        repeating-conic-gradient(
+          var(--mat-sys-surface-variant) 0% 25%,
+          var(--mat-sys-surface) 0% 50%
+        )
+        50% / 0.75rem 0.75rem;
     }
   }
 
@@ -87,9 +89,56 @@
     }
   }
 
+  &__shops {
+    border: 1px solid var(--mat-sys-outline-variant);
+    border-radius: 0.5rem;
+    padding: 0.5rem 0.75rem 0.75rem;
+    margin: 0;
+
+    &-legend {
+      padding: 0 0.25rem;
+      font-size: 0.75rem;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      color: var(--mat-sys-on-surface-variant);
+    }
+
+    &-empty {
+      font-size: 0.875rem;
+      color: var(--mat-sys-on-surface-variant);
+      margin: 0.25rem 0 0;
+    }
+
+    &-list {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+    }
+
+    &-row {
+      min-height: 2.25rem;
+      display: flex;
+      align-items: center;
+    }
+  }
+
   &__actions {
     display: flex;
     justify-content: flex-end;
     gap: 0.5rem;
+  }
+
+  &__danger {
+    border-top: 1px solid var(--mat-sys-outline-variant);
+    padding-top: 0.5rem;
+    display: flex;
+    justify-content: flex-start;
+  }
+
+  &__delete {
+    --mdc-text-button-label-text-color: var(--mat-sys-error);
   }
 }

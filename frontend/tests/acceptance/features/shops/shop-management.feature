@@ -63,3 +63,32 @@ Feature: Shop Management
     And a shop exists with a price search URL configured
     When I remove the price search URL from that shop
     Then the shop should have no price search URL stored
+
+  @pending
+  Scenario: Reorder shops
+    Given I am in plan mode
+    And two or more shops exist
+    When I change the order of the shops
+    Then the shops should be displayed in my chosen order throughout the application
+
+  @pending
+  Scenario: Shop order is shared between users
+    Given a user has set the order of the shops
+    When the other user accesses the application
+    Then they should see the shops in the same order
+
+  @pending
+  Scenario: Edit multiple shop attributes in one operation
+    Given I am in plan mode
+    And a shop exists
+    When I change the name and the price search URL of the shop in a single edit
+    And I save the changes
+    Then both changes should be reflected throughout the application
+
+  @pending
+  Scenario: Discard shop edits before saving
+    Given I am in plan mode
+    And a shop exists
+    When I begin editing the shop and change one or more attributes
+    And I discard the edit without saving
+    Then the shop should retain its previous name and price search URL

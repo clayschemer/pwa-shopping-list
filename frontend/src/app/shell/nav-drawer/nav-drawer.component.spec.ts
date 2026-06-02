@@ -1,26 +1,15 @@
 import '../../../testing/init-testbed';
-import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { describe, it, expect, beforeEach } from 'vitest';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideStore, Store } from '@ngrx/store';
 import { provideTranslocoTesting } from '../../../testing/transloco-testing';
 import { NavDrawerComponent } from './nav-drawer.component';
-import { categoriesReducer } from '../../store/categories/categories.reducer';
 import { shopsReducer } from '../../store/shops/shops.reducer';
 import { uiReducer } from '../../store/ui/ui.reducer';
-import { categoriesActions, categoriesApiActions } from '../../store/categories/categories.actions';
-import { shopsActions, shopsApiActions } from '../../store/shops/shops.actions';
-import { uiActions } from '../../store/ui/ui.actions';
-import type { Category } from '../../models/category.model';
+import { accountReducer } from '../../store/account/account.reducer';
+import { shopsActions } from '../../store/shops/shops.actions';
 import type { Shop } from '../../models/shop.model';
 import type { AccountId, CategoryId, ShopId } from '../../models/ids.model';
-
-const cat = (id: string, name: string, order: number): Category => ({
-  id: id as CategoryId,
-  accountId: 'a1' as AccountId,
-  name,
-  color: null,
-  globalSortOrder: order,
-});
 
 const shop = (id: string, name: string, categoryOrder: string[]): Shop => ({
   id: id as ShopId,
@@ -39,132 +28,66 @@ describe('NavDrawerComponent', () => {
       imports: [NavDrawerComponent, provideTranslocoTesting()],
       providers: [
         provideStore({
-          categories: categoriesReducer,
           shops: shopsReducer,
           ui: uiReducer,
+          account: accountReducer,
         }),
       ],
     }).compileComponents();
 
     store = TestBed.inject(Store);
-    store.dispatch(categoriesActions.categoriesLoaded({
-      categories: [cat('c1', 'Produce', 0), cat('c2', 'Dairy', 1), cat('c3', 'Bakery', 2)],
-    }));
-    store.dispatch(shopsActions.shopsLoaded({
-      shops: [
-        shop('s1', 'Tesco', ['c1', 'c2', 'c3']),
-        shop('s2', 'Lidl', ['c3', 'c1', 'c2']),
-      ],
-    }));
+    store.dispatch(
+      shopsActions.shopsLoaded({
+        shops: [shop('s1', 'Tesco', []), shop('s2', 'Lidl', [])],
+      }),
+    );
 
     fixture = TestBed.createComponent(NavDrawerComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });
 
-  it('renders shop dropdown with "Global (all)" option plus all shops', () => {
+  it('renders the shop-layout dropdown', () => {
     const el: HTMLElement = fixture.nativeElement;
-    // Trigger the mat-select to get options
-    const select = el.querySelector('mat-select');
-    expect(select).toBeTruthy();
+    expect(el.querySelector('mat-select')).toBeTruthy();
   });
 
-  it('renders category list in global order by default', () => {
+  it('renders Categories, Manage shops, History and Settings links', () => {
     const el: HTMLElement = fixture.nativeElement;
-    const categoryNames = Array.from(el.querySelectorAll('.app-nav-drawer__category-name'))
-      .map((e) => e.textContent?.trim());
-    expect(categoryNames).toEqual(['Produce', 'Dairy', 'Bakery']);
+    const labels = Array.from(el.querySelectorAll('.app-nav-drawer__manage-shops'))
+      .map((b) => b.textContent?.trim());
+    expect(labels).toEqual([
+      'Categories',
+      'Stores…',
+      'History…',
+      'Settings…',
+    ]);
   });
 
-  it('renders category list in shop order when shop is selected', () => {
-    store.dispatch(uiActions.planModeShopSelected({ shopId: 's2' as ShopId }));
-    fixture.detectChanges();
-
+  it('emits viewCategories when the Categories link is clicked', () => {
+    let emitted = false;
+    component.viewCategories.subscribe(() => (emitted = true));
     const el: HTMLElement = fixture.nativeElement;
-    const categoryNames = Array.from(el.querySelectorAll('.app-nav-drawer__category-name'))
-      .map((e) => e.textContent?.trim());
-    expect(categoryNames).toEqual(['Bakery', 'Produce', 'Dairy']);
+    const link = el.querySelector('.app-nav-drawer__categories') as HTMLElement;
+    link.click();
+    expect(emitted).toBe(true);
   });
 
-  it('renders "Manage shops..." link', () => {
-    const el: HTMLElement = fixture.nativeElement;
-    const link = el.querySelector('.app-nav-drawer__manage-shops');
-    expect(link).toBeTruthy();
-    expect(link!.textContent?.trim()).toBe('Manage shops\u2026');
-  });
-
-  it('renders "+ Add category" button', () => {
-    const el: HTMLElement = fixture.nativeElement;
-    const btn = el.querySelector('.app-nav-drawer__add-category');
-    expect(btn).toBeTruthy();
-    expect(btn!.textContent?.trim()).toContain('Add category');
-  });
-
-  it('emits categorySelected when a category is tapped', () => {
-    let emitted: CategoryId | undefined;
-    component.categorySelected.subscribe((id) => (emitted = id));
-
-    const el: HTMLElement = fixture.nativeElement;
-    const firstCategory = el.querySelector('.app-nav-drawer__category-name') as HTMLElement;
-    firstCategory.click();
-
-    expect(emitted).toBe('c1');
-  });
-
-  it('emits manageShops when link is clicked', () => {
+  it('emits manageShops when the Stores link is clicked', () => {
     let emitted = false;
     component.manageShops.subscribe(() => (emitted = true));
-
     const el: HTMLElement = fixture.nativeElement;
-    const link = el.querySelector('.app-nav-drawer__manage-shops') as HTMLElement;
+    const link = el.querySelector('.app-nav-drawer__stores') as HTMLElement;
     link.click();
-
     expect(emitted).toBe(true);
   });
 
-  it('emits addCategory when button is clicked', () => {
+  it('emits viewSettings when the Settings link is clicked', () => {
     let emitted = false;
-    component.addCategory.subscribe(() => (emitted = true));
-
+    component.viewSettings.subscribe(() => (emitted = true));
     const el: HTMLElement = fixture.nativeElement;
-    const btn = el.querySelector('.app-nav-drawer__add-category') as HTMLElement;
-    btn.click();
-
+    const link = el.querySelector('.app-nav-drawer__settings') as HTMLElement;
+    link.click();
     expect(emitted).toBe(true);
-  });
-
-  it('dispatches setGlobalCategoryOrder on drop when no shop selected', () => {
-    const dispatchSpy = vi.spyOn(store, 'dispatch');
-
-    component.onCategoryDrop({
-      previousIndex: 0,
-      currentIndex: 2,
-      item: { data: undefined },
-    } as never);
-
-    expect(dispatchSpy).toHaveBeenCalledWith(
-      categoriesApiActions.setGlobalCategoryOrderRequested({
-        orderedIds: ['c2', 'c3', 'c1'] as CategoryId[],
-      }),
-    );
-  });
-
-  it('dispatches setShopCategoryOrder on drop when a shop is selected', () => {
-    store.dispatch(uiActions.planModeShopSelected({ shopId: 's1' as ShopId }));
-    fixture.detectChanges();
-    const dispatchSpy = vi.spyOn(store, 'dispatch');
-
-    component.onCategoryDrop({
-      previousIndex: 0,
-      currentIndex: 2,
-      item: { data: undefined },
-    } as never);
-
-    expect(dispatchSpy).toHaveBeenCalledWith(
-      shopsApiActions.setShopCategoryOrderRequested({
-        shopId: 's1' as ShopId,
-        orderedIds: ['c2', 'c3', 'c1'] as CategoryId[],
-      }),
-    );
   });
 });

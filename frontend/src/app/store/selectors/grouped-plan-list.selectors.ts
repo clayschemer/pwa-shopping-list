@@ -1,10 +1,10 @@
 import { createSelector } from '@ngrx/store';
-import { selectActiveItems } from '../items/items.selectors';
+import { selectActiveItems, selectAllItems } from '../items/items.selectors';
+import { selectActiveSessions } from '../sessions/sessions.selectors';
 import { selectOrderedCategories } from './ordered-categories.selectors';
 import { effectivePrice } from '../../models/item-price.util';
-import type { Category } from '../../models/category.model';
 import type { Item } from '../../models/item.model';
-import type { CategoryId } from '../../models/ids.model';
+import type { CategoryId, ItemId } from '../../models/ids.model';
 
 export interface PlanListGroup {
   categoryId: CategoryId | null; // null = uncategorised bucket
@@ -19,51 +19,91 @@ export const UNCATEGORISED_KEY = null;
 export const selectGroupedPlanList = createSelector(
   selectActiveItems,
   selectOrderedCategories,
-  (items, orderedCategories): PlanListGroup[] => {
-    const byCategory = new Map<CategoryId, Item[]>();
-    const uncategorised: Item[] = [];
+  (items, orderedCategories): PlanListGroup[] =>
+    buildGroups(items, orderedCategories),
+);
 
-    for (const item of items) {
-      const catId = item.primaryCategoryId;
-      if (catId === null) {
-        uncategorised.push(item);
-      } else {
-        const bucket = byCategory.get(catId) ?? [];
-        bucket.push(item);
-        byCategory.set(catId, bucket);
-      }
+/**
+ * Set of item ids that are recorded in any currently-active session's
+ * checked-items log. Used by the "Show checked items" plan filter to surface
+ * items that have been checked off mid-session but are otherwise hidden
+ * from plan view (because `removed=true`).
+ */
+export const selectActiveSessionCheckedItemIds = createSelector(
+  selectActiveSessions,
+  (sessions): Set<ItemId> => {
+    const ids = new Set<ItemId>();
+    for (const s of sessions) {
+      for (const c of s.checkedItems) ids.add(c.itemId);
     }
-
-    const groups: PlanListGroup[] = [];
-
-    for (const cat of orderedCategories) {
-      const bucket = byCategory.get(cat.id);
-      if (bucket && bucket.length > 0) {
-        groups.push({
-          categoryId: cat.id,
-          categoryName: cat.name,
-          categoryColor: cat.color,
-          items: [...bucket].sort((a, b) => a.name.localeCompare(b.name)),
-          estTotal: sumPrices(bucket),
-        });
-      }
-    }
-
-    if (uncategorised.length > 0) {
-      groups.push({
-        categoryId: UNCATEGORISED_KEY,
-        categoryName: null,
-        categoryColor: null,
-        items: [...uncategorised].sort((a, b) =>
-          a.name.localeCompare(b.name),
-        ),
-        estTotal: 0,
-      });
-    }
-
-    return groups;
+    return ids;
   },
 );
+
+/**
+ * Grouped plan list that ADDITIONALLY includes session-checked items from
+ * any active session, even though those items are `removed=true`. Group
+ * totals still reflect only active (un-checked) items, matching the visible
+ * sum a user would still expect to spend.
+ */
+export const selectGroupedPlanListWithChecked = createSelector(
+  selectActiveItems,
+  selectActiveSessionCheckedItemIds,
+  selectAllItems,
+  selectOrderedCategories,
+  (active, checkedIds, all, orderedCategories): PlanListGroup[] => {
+    if (checkedIds.size === 0) return buildGroups(active, orderedCategories);
+    const checked = all.filter((i) => checkedIds.has(i.id));
+    return buildGroups([...active, ...checked], orderedCategories, checkedIds);
+  },
+);
+
+function buildGroups(
+  items: Item[],
+  orderedCategories: { id: CategoryId; name: string; color: string | null }[],
+  excludeFromTotalIds: Set<ItemId> = new Set(),
+): PlanListGroup[] {
+  const byCategory = new Map<CategoryId, Item[]>();
+  const uncategorised: Item[] = [];
+
+  for (const item of items) {
+    const catId = item.primaryCategoryId;
+    if (catId === null) {
+      uncategorised.push(item);
+    } else {
+      const bucket = byCategory.get(catId) ?? [];
+      bucket.push(item);
+      byCategory.set(catId, bucket);
+    }
+  }
+
+  const groups: PlanListGroup[] = [];
+
+  for (const cat of orderedCategories) {
+    const bucket = byCategory.get(cat.id);
+    if (bucket && bucket.length > 0) {
+      groups.push({
+        categoryId: cat.id,
+        categoryName: cat.name,
+        categoryColor: cat.color,
+        items: [...bucket].sort((a, b) => a.name.localeCompare(b.name)),
+        estTotal: sumPrices(bucket.filter((i) => !excludeFromTotalIds.has(i.id))),
+      });
+    }
+  }
+
+  if (uncategorised.length > 0) {
+    groups.push({
+      categoryId: UNCATEGORISED_KEY,
+      categoryName: null,
+      categoryColor: null,
+      items: [...uncategorised].sort((a, b) => a.name.localeCompare(b.name)),
+      estTotal: 0,
+    });
+  }
+
+  return groups;
+}
 
 function sumPrices(items: Item[]): number {
   let total = 0;

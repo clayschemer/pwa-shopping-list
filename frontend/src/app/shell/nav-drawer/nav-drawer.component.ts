@@ -1,33 +1,27 @@
 import { ChangeDetectionStrategy, Component, inject, output } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { Store } from '@ngrx/store';
-import { CdkDropList, CdkDrag, CdkDragDrop, CdkDragHandle, moveItemInArray } from '@angular/cdk/drag-drop';
 import { MatFormField, MatLabel } from '@angular/material/form-field';
 import { MatSelect, MatOption } from '@angular/material/select';
-import { MatIcon } from '@angular/material/icon';
 import { MatDivider } from '@angular/material/divider';
 import { TranslocoPipe } from '@jsverse/transloco';
-import { selectAllShops } from '../../store/shops/shops.selectors';
+import { selectOrderedShops } from '../../store/selectors/ordered-shops.selectors';
 import { selectSelectedShopId } from '../../store/ui/ui.selectors';
-import { selectOrderedCategories } from '../../store/selectors/ordered-categories.selectors';
 import { uiActions } from '../../store/ui/ui.actions';
-import { shopsApiActions } from '../../store/shops/shops.actions';
-import { categoriesApiActions } from '../../store/categories/categories.actions';
-import type { Category } from '../../models/category.model';
-import type { CategoryId, ShopId } from '../../models/ids.model';
+import type { ShopId } from '../../models/ids.model';
+import { MatIcon } from '@angular/material/icon';
+import { MatButton } from '@angular/material/button';
 
 @Component({
   selector: 'app-nav-drawer',
   imports: [
-    CdkDropList,
-    CdkDrag,
-    CdkDragHandle,
+    MatButton,
     MatFormField,
+    MatDivider,
+    MatIcon,
     MatLabel,
     MatSelect,
     MatOption,
-    MatIcon,
-    MatDivider,
     TranslocoPipe,
   ],
   templateUrl: './nav-drawer.component.html',
@@ -37,46 +31,32 @@ import type { CategoryId, ShopId } from '../../models/ids.model';
 export class NavDrawerComponent {
   private readonly store = inject(Store);
 
-  readonly shops = toSignal(this.store.select(selectAllShops), { initialValue: [] });
+  readonly shops = toSignal(this.store.select(selectOrderedShops), { initialValue: [] });
   readonly selectedShopId = toSignal(this.store.select(selectSelectedShopId), { initialValue: null });
-  readonly orderedCategories = toSignal(this.store.select(selectOrderedCategories), { initialValue: [] });
 
-  readonly categorySelected = output<CategoryId>();
+  readonly viewCategories = output<void>();
   readonly manageShops = output<void>();
-  readonly addCategory = output<void>();
   readonly viewHistory = output<void>();
+  readonly viewSettings = output<void>();
 
   onShopChanged(shopId: string): void {
     const id = shopId === '' ? null : (shopId as ShopId);
     this.store.dispatch(uiActions.planModeShopSelected({ shopId: id }));
   }
 
-  onCategoryTap(categoryId: CategoryId): void {
-    this.categorySelected.emit(categoryId);
-  }
-
-  onCategoryDrop(event: CdkDragDrop<Category[]>): void {
-    const categories = [...this.orderedCategories()];
-    moveItemInArray(categories, event.previousIndex, event.currentIndex);
-    const orderedIds = categories.map((c) => c.id);
-
-    const shopId = this.selectedShopId();
-    if (shopId) {
-      this.store.dispatch(shopsApiActions.setShopCategoryOrderRequested({ shopId, orderedIds }));
-    } else {
-      this.store.dispatch(categoriesApiActions.setGlobalCategoryOrderRequested({ orderedIds }));
-    }
+  onViewCategories(): void {
+    this.viewCategories.emit();
   }
 
   onManageShops(): void {
     this.manageShops.emit();
   }
 
-  onAddCategory(): void {
-    this.addCategory.emit();
-  }
-
   onViewHistory(): void {
     this.viewHistory.emit();
+  }
+
+  onViewSettings(): void {
+    this.viewSettings.emit();
   }
 }

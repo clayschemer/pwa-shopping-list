@@ -104,4 +104,15 @@ export class ShopsEffects {
       ),
     ),
   );
+
+  readonly setShopOrder$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(shopsApiActions.setShopOrderRequested),
+      switchMap(({ orderedIds }) =>
+        from(this.shopApi.setShopOrder(orderedIds)).pipe(
+          map(() => accountActions.shopOrderUpdated({ orderedIds })),
+        ),
+      ),
+    ),
+  );
 }
