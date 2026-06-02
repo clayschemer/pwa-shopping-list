@@ -17,6 +17,20 @@
     </div>
   } @else if (groups().length === 0) {
     <p class="app-plan__empty">{{ 'plan.empty' | transloco }}</p>
+  } @else if (hideGrouping()) {
+    <ul class="app-plan__items app-plan__items--flat" role="list">
+      @for (row of flatRows(); track row.item.id) {
+        <li
+          class="app-plan__item app-plan__item--accent"
+          [class.app-plan__item--checked]="row.isChecked"
+          [style.--app-plan-accent]="row.categoryColor || 'transparent'"
+        >
+          <ng-container
+            *ngTemplateOutlet="itemBody; context: { item: row.item, isChecked: row.isChecked }"
+          ></ng-container>
+        </li>
+      }
+    </ul>
   } @else {
     @for (group of groups(); track group.categoryId ?? '__uncat__') {
       <section
@@ -72,88 +86,13 @@
 
         <ul class="app-plan__items" role="list">
           @for (item of group.items; track item.id) {
-            <li class="app-plan__item">
-              <button type="button" class="app-plan__item-main" (click)="openEditSheet(item)">
-                <span class="app-plan__item-name">{{ item.name }}</span>
-                <span class="app-plan__item-meta">
-                  @if (item.quantity !== null || item.unit !== null) {
-                    <span class="app-plan__item-qty">
-                      {{ item.quantity
-                      }}{{ item.unit ? ' ' + ('units.' + item.unit | transloco) : '' }}
-                    </span>
-                  }
-                </span>
-                @if (item.description) {
-                  <span class="app-plan__item-description">{{ item.description }}</span>
-                }
-              </button>
-              @if (item.price !== null) {
-                @let priceResult = item | effectivePrice;
-                @if (canInspectPrice(item)) {
-                  <button
-                    type="button"
-                    class="app-plan__item-price-btn"
-                    [class.app-plan__item-price-btn--approximate]="priceResult.kind === 'approximate'"
-                    [attr.aria-label]="'pricePopup.openLabel' | transloco: { name: item.name }"
-                    (click)="openPriceDialog(item)"
-                  >
-                    @if (priceResult.kind === 'exact') {
-                      {{ priceResult.total | money }}
-                    } @else if (priceResult.kind === 'approximate') {
-                      @if (priceResult.shelfQuantity !== null && priceResult.shelfUnit) {
-                        {{
-                          'shop.approxShelfPrice'
-                            | transloco
-                              : {
-                                  price: priceResult.shelfPrice | money,
-                                  quantity: priceResult.shelfQuantity,
-                                  unit: priceResult.shelfUnit,
-                                }
-                        }}
-                      } @else {
-                        {{
-                          'shop.approxShelfPriceNoQty'
-                            | transloco: { price: priceResult.shelfPrice | money }
-                        }}
-                      }
-                    }
-                  </button>
-                } @else {
-                  <span
-                    class="app-plan__item-price"
-                    [class.app-plan__item-price--approximate]="priceResult.kind === 'approximate'"
-                  >
-                    @if (priceResult.kind === 'exact') {
-                      {{ priceResult.total | money }}
-                    } @else if (priceResult.kind === 'approximate') {
-                      @if (priceResult.shelfQuantity !== null && priceResult.shelfUnit) {
-                        {{
-                          'shop.approxShelfPrice'
-                            | transloco
-                              : {
-                                  price: priceResult.shelfPrice | money,
-                                  quantity: priceResult.shelfQuantity,
-                                  unit: priceResult.shelfUnit,
-                                }
-                        }}
-                      } @else {
-                        {{
-                          'shop.approxShelfPriceNoQty'
-                            | transloco: { price: priceResult.shelfPrice | money }
-                        }}
-                      }
-                    }
-                  </span>
-                }
-              }
-              <button
-                type="button"
-                class="app-plan__item-remove"
-                [attr.aria-label]="'plan.removeItem' | transloco: { name: item.name }"
-                (click)="confirmRemove(item)"
-              >
-                <mat-icon aria-hidden="true">close</mat-icon>
-              </button>
+            <li
+              class="app-plan__item"
+              [class.app-plan__item--checked]="isItemChecked(item.id)"
+            >
+              <ng-container
+                *ngTemplateOutlet="itemBody; context: { item, isChecked: isItemChecked(item.id) }"
+              ></ng-container>
             </li>
           }
         </ul>
@@ -163,3 +102,87 @@
 
   <app-add-item-pill [existingNames]="existingNamesList()" (submitted)="onAddRequested($event)" />
 </section>
+
+<ng-template #itemBody let-item="item" let-isChecked="isChecked">
+  <button type="button" class="app-plan__item-main" (click)="openEditSheet(item)">
+    <span class="app-plan__item-name">{{ item.name }}</span>
+    <span class="app-plan__item-meta">
+      @if (item.quantity !== null || item.unit !== null) {
+        <span class="app-plan__item-qty">
+          {{ item.quantity
+          }}{{ item.unit ? ' ' + ('units.' + item.unit | transloco) : '' }}
+        </span>
+      }
+    </span>
+    @if (item.description) {
+      <span class="app-plan__item-description">{{ item.description }}</span>
+    }
+  </button>
+  @if (item.price !== null && !hidePrices()) {
+    @let priceResult = item | effectivePrice;
+    @if (canInspectPrice(item)) {
+      <button
+        type="button"
+        class="app-plan__item-price-btn"
+        [class.app-plan__item-price-btn--approximate]="priceResult.kind === 'approximate'"
+        [attr.aria-label]="'pricePopup.openLabel' | transloco: { name: item.name }"
+        (click)="openPriceDialog(item)"
+      >
+        @if (priceResult.kind === 'exact') {
+          {{ priceResult.total | money }}
+        } @else if (priceResult.kind === 'approximate') {
+          @if (priceResult.shelfQuantity !== null && priceResult.shelfUnit) {
+            {{
+              'shop.approxShelfPrice'
+                | transloco
+                  : {
+                      price: priceResult.shelfPrice | money,
+                      quantity: priceResult.shelfQuantity,
+                      unit: priceResult.shelfUnit,
+                    }
+            }}
+          } @else {
+            {{
+              'shop.approxShelfPriceNoQty'
+                | transloco: { price: priceResult.shelfPrice | money }
+            }}
+          }
+        }
+      </button>
+    } @else {
+      <span
+        class="app-plan__item-price"
+        [class.app-plan__item-price--approximate]="priceResult.kind === 'approximate'"
+      >
+        @if (priceResult.kind === 'exact') {
+          {{ priceResult.total | money }}
+        } @else if (priceResult.kind === 'approximate') {
+          @if (priceResult.shelfQuantity !== null && priceResult.shelfUnit) {
+            {{
+              'shop.approxShelfPrice'
+                | transloco
+                  : {
+                      price: priceResult.shelfPrice | money,
+                      quantity: priceResult.shelfQuantity,
+                      unit: priceResult.shelfUnit,
+                    }
+            }}
+          } @else {
+            {{
+              'shop.approxShelfPriceNoQty'
+                | transloco: { price: priceResult.shelfPrice | money }
+            }}
+          }
+        }
+      </span>
+    }
+  }
+  <button
+    type="button"
+    class="app-plan__item-remove"
+    [attr.aria-label]="'plan.removeItem' | transloco: { name: item.name }"
+    (click)="confirmRemove(item)"
+  >
+    <mat-icon aria-hidden="true">close</mat-icon>
+  </button>
+</ng-template>

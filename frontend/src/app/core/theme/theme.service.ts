@@ -15,6 +15,9 @@ export interface AppSettings {
   language: Language;
   currency: Currency;
   keepScreenAwake: boolean;
+  hideCategoryGrouping: boolean;
+  showCheckedItems: boolean;
+  hidePrices: boolean;
 }
 
 const LANGUAGE_MAP: Record<string, Language> = {
@@ -36,6 +39,9 @@ const DEFAULT_SETTINGS: AppSettings = {
   language: 'EN',
   currency: 'GBP',
   keepScreenAwake: true,
+  hideCategoryGrouping: false,
+  showCheckedItems: false,
+  hidePrices: false,
 };
 
 @Injectable({ providedIn: 'root' })

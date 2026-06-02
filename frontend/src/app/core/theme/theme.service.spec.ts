@@ -74,6 +74,18 @@ describe('ThemeService', () => {
       expect(service.settings().compact).toBe(false);
     });
 
+    it('should default hideCategoryGrouping to false', () => {
+      expect(service.settings().hideCategoryGrouping).toBe(false);
+    });
+
+    it('should default showCheckedItems to false', () => {
+      expect(service.settings().showCheckedItems).toBe(false);
+    });
+
+    it('should default hidePrices to false', () => {
+      expect(service.settings().hidePrices).toBe(false);
+    });
+
     it('should default darkMode to null (follow system)', () => {
       expect(service.settings().darkMode).toBeNull();
     });
@@ -111,6 +123,21 @@ describe('ThemeService', () => {
       configureTestBed();
       const newService = TestBed.inject(ThemeService);
       expect(newService.settings().language).toBe('EN');
+    });
+
+    it('should persist plan-filter toggles and restore them on reload', () => {
+      service.update({ hideCategoryGrouping: true, showCheckedItems: true, hidePrices: true });
+      const stored = JSON.parse(localStorage.getItem(SETTINGS_STORAGE_KEY)!);
+      expect(stored.hideCategoryGrouping).toBe(true);
+      expect(stored.showCheckedItems).toBe(true);
+      expect(stored.hidePrices).toBe(true);
+
+      TestBed.resetTestingModule();
+      configureTestBed();
+      const reloaded = TestBed.inject(ThemeService);
+      expect(reloaded.settings().hideCategoryGrouping).toBe(true);
+      expect(reloaded.settings().showCheckedItems).toBe(true);
+      expect(reloaded.settings().hidePrices).toBe(true);
     });
   });
 

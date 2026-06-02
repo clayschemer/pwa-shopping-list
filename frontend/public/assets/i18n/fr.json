@@ -25,7 +25,12 @@
   },
   "planFilter": {
     "title": "Filtres et disposition",
-    "placeholder": "Les options de filtres et de disposition arrivent bientôt."
+    "hideGrouping": "Masquer le regroupement par catégorie",
+    "hideGroupingHint": "Liste à plat dans l'ordre du magasin",
+    "showChecked": "Afficher les articles cochés",
+    "showCheckedHint": "Afficher les articles cochés pendant une session de courses",
+    "hidePrices": "Masquer les prix",
+    "hidePricesHint": "Prix unitaires ; les totaux et le caisson restent visibles"
   },
   "history": {
     "title": "Historique des courses",

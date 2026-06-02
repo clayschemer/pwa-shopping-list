@@ -25,7 +25,12 @@
   },
   "planFilter": {
     "title": "Filter och layout",
-    "placeholder": "Filter- och layout-kontroller kommer snart."
+    "hideGrouping": "Dölj kategoriindelning",
+    "hideGroupingHint": "Platt lista i butikslayoutens ordning",
+    "showChecked": "Visa avbockade varor",
+    "showCheckedHint": "Visa varor som bockats av under en handlingssession",
+    "hidePrices": "Dölj priser",
+    "hidePricesHint": "Per-varu-priser; summor och kassan visas fortfarande"
   },
   "history": {
     "title": "Köphistorik",

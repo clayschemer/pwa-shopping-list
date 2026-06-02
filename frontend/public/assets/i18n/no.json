@@ -25,7 +25,12 @@
   },
   "planFilter": {
     "title": "Filter og layout",
-    "placeholder": "Filter- og layout-kontroller kommer snart."
+    "hideGrouping": "Skjul kategorigruppering",
+    "hideGroupingHint": "Flat liste i butikkoppsettets rekkefølge",
+    "showChecked": "Vis avkryssede varer",
+    "showCheckedHint": "Vis varer avkrysset under en handleøkt",
+    "hidePrices": "Skjul priser",
+    "hidePricesHint": "Per-vare-priser; summer og kassen vises fortsatt"
   },
   "history": {
     "title": "Handlehistorikk",

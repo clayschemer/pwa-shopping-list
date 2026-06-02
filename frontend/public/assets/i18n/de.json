@@ -25,7 +25,12 @@
   },
   "planFilter": {
     "title": "Filter & Layout",
-    "placeholder": "Filter- und Layout-Optionen folgen bald."
+    "hideGrouping": "Kategoriegruppierung ausblenden",
+    "hideGroupingHint": "Flache Liste in Ladenanordnungsreihenfolge",
+    "showChecked": "Abgehakte Artikel anzeigen",
+    "showCheckedHint": "Während einer Einkaufssitzung abgehakte Artikel anzeigen",
+    "hidePrices": "Preise ausblenden",
+    "hidePricesHint": "Einzelpreise; Summen und Kasse bleiben sichtbar"
   },
   "history": {
     "title": "Einkaufsverlauf",

@@ -25,7 +25,12 @@
   },
   "planFilter": {
     "title": "Filter & layout",
-    "placeholder": "Filter and layout controls coming soon."
+    "hideGrouping": "Hide category grouping",
+    "hideGroupingHint": "Flat list in shop layout order",
+    "showChecked": "Show checked items",
+    "showCheckedHint": "Reveal items checked off during a shop session",
+    "hidePrices": "Hide prices",
+    "hidePricesHint": "Per-item price chips; sums and checkout stay visible"
   },
   "history": {
     "title": "Shopping history",
