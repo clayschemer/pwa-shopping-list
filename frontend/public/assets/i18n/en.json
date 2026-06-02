@@ -30,7 +30,33 @@
     "showChecked": "Show checked items",
     "showCheckedHint": "Reveal items checked off during a shop session",
     "hidePrices": "Hide prices",
-    "hidePricesHint": "Per-item price chips; sums and checkout stay visible"
+    "hidePricesHint": "Per-item price chips; sums and checkout stay visible",
+    "reorderCategories": "Reorder categories…",
+    "reorderCategoriesHint": "Edit the order for the current shop layout"
+  },
+  "categories": {
+    "title": "Categories",
+    "goBack": "Go back",
+    "orderFor": "Order for",
+    "orderForGlobal": "Global",
+    "addCategory": "Add category",
+    "dragHandle": "Drag to reorder {{name}}",
+    "empty": "No categories yet. Tap + to create one."
+  },
+  "categoryEditSheet": {
+    "createTitle": "Add category",
+    "editTitle": "Edit category",
+    "name": "Name",
+    "color": "Colour",
+    "chooseColor": "Choose colour",
+    "changeColor": "Change colour",
+    "clearColor": "Clear",
+    "availableInShops": "Available in shops",
+    "noShops": "No shops yet.",
+    "nameConflict": "A category with this name already exists",
+    "cancel": "Cancel",
+    "save": "Save",
+    "delete": "Delete category"
   },
   "history": {
     "title": "Shopping history",

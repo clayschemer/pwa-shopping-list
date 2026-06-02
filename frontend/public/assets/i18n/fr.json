@@ -30,7 +30,33 @@
     "showChecked": "Afficher les articles cochés",
     "showCheckedHint": "Afficher les articles cochés pendant une session de courses",
     "hidePrices": "Masquer les prix",
-    "hidePricesHint": "Prix unitaires ; les totaux et le caisson restent visibles"
+    "hidePricesHint": "Prix unitaires ; les totaux et le caisson restent visibles",
+    "reorderCategories": "Réorganiser les catégories…",
+    "reorderCategoriesHint": "Modifier l'ordre pour la disposition de magasin active"
+  },
+  "categories": {
+    "title": "Catégories",
+    "goBack": "Retour",
+    "orderFor": "Ordre pour",
+    "orderForGlobal": "Global",
+    "addCategory": "Ajouter une catégorie",
+    "dragHandle": "Glisser pour réorganiser {{name}}",
+    "empty": "Aucune catégorie pour le moment. Appuyez sur + pour en créer une."
+  },
+  "categoryEditSheet": {
+    "createTitle": "Ajouter une catégorie",
+    "editTitle": "Modifier la catégorie",
+    "name": "Nom",
+    "color": "Couleur",
+    "chooseColor": "Choisir une couleur",
+    "changeColor": "Changer la couleur",
+    "clearColor": "Effacer",
+    "availableInShops": "Disponible dans les magasins",
+    "noShops": "Aucun magasin pour le moment.",
+    "nameConflict": "Une catégorie avec ce nom existe déjà",
+    "cancel": "Annuler",
+    "save": "Enregistrer",
+    "delete": "Supprimer la catégorie"
   },
   "history": {
     "title": "Historique des courses",

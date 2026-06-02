@@ -14,6 +14,13 @@
     </mat-form-field>
 
     <button
+      class="app-nav-drawer__manage-shops app-nav-drawer__categories"
+      (click)="onViewCategories()"
+    >
+      {{ 'navDrawer.categories' | transloco }}
+    </button>
+
+    <button
       class="app-nav-drawer__manage-shops"
       (click)="onManageShops()"
     >
@@ -32,41 +39,6 @@
       (click)="onViewSettings()"
     >
       {{ 'navDrawer.settings' | transloco }}
-    </button>
-  </section>
-
-  <mat-divider />
-
-  <section class="app-nav-drawer__categories-section">
-    <h3 class="app-nav-drawer__categories-heading">{{ 'navDrawer.categories' | transloco }}</h3>
-
-    <div
-      cdkDropList
-      class="app-nav-drawer__category-list"
-      (cdkDropListDropped)="onCategoryDrop($event)"
-    >
-      @for (category of orderedCategories(); track category.id) {
-        <div cdkDrag class="app-nav-drawer__category-row">
-          <button
-            class="app-nav-drawer__category-name"
-            (click)="onCategoryTap(category.id)"
-          >
-            @if (category.color) {
-              <span class="app-nav-drawer__category-dot" [style.background-color]="category.color"></span>
-            }
-            {{ category.name }}
-          </button>
-          <mat-icon cdkDragHandle class="app-nav-drawer__drag-handle">drag_indicator</mat-icon>
-        </div>
-      }
-    </div>
-
-    <button
-      class="app-nav-drawer__add-category"
-      (click)="onAddCategory()"
-    >
-      <mat-icon>add</mat-icon>
-      {{ 'navDrawer.addCategory' | transloco }}
     </button>
   </section>
 </div>

@@ -30,7 +30,33 @@
     "showChecked": "Visa avbockade varor",
     "showCheckedHint": "Visa varor som bockats av under en handlingssession",
     "hidePrices": "Dölj priser",
-    "hidePricesHint": "Per-varu-priser; summor och kassan visas fortfarande"
+    "hidePricesHint": "Per-varu-priser; summor och kassan visas fortfarande",
+    "reorderCategories": "Ändra ordning på kategorier…",
+    "reorderCategoriesHint": "Redigera ordningen för den aktiva butikslayouten"
+  },
+  "categories": {
+    "title": "Kategorier",
+    "goBack": "Tillbaka",
+    "orderFor": "Ordning för",
+    "orderForGlobal": "Global",
+    "addCategory": "Lägg till kategori",
+    "dragHandle": "Dra för att ändra ordning på {{name}}",
+    "empty": "Inga kategorier ännu. Tryck + för att skapa en."
+  },
+  "categoryEditSheet": {
+    "createTitle": "Lägg till kategori",
+    "editTitle": "Redigera kategori",
+    "name": "Namn",
+    "color": "Färg",
+    "chooseColor": "Välj färg",
+    "changeColor": "Ändra färg",
+    "clearColor": "Rensa",
+    "availableInShops": "Tillgänglig i butiker",
+    "noShops": "Inga butiker ännu.",
+    "nameConflict": "En kategori med detta namn finns redan",
+    "cancel": "Avbryt",
+    "save": "Spara",
+    "delete": "Ta bort kategori"
   },
   "history": {
     "title": "Köphistorik",

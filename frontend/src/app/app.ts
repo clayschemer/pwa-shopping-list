@@ -29,11 +29,9 @@ import {
   selectAllItems,
   selectItemEntities,
 } from './store/items/items.selectors';
-import { selectAllCategories } from './store/categories/categories.selectors';
 import { uiActions } from './store/ui/ui.actions';
 import { sessionsActions, sessionsApiActions } from './store/sessions/sessions.actions';
 import { itemsApiActions } from './store/items/items.actions';
-import { categoriesApiActions } from './store/categories/categories.actions';
 import { NavDrawerComponent } from './shell/nav-drawer/nav-drawer.component';
 import {
   ShopSelectSheetComponent,
@@ -53,21 +51,16 @@ import {
   InactivityReminderDialogComponent,
   InactivityReminderResult,
 } from './features/shop/inactivity-reminder-dialog.component';
-import {
-  CategoryNameSheetComponent,
-  CategoryNameSheetData,
-  CategoryNameSheetResult,
-} from './features/categories/category-name-sheet.component';
 import { PlanFilterSheetComponent } from './features/plan/plan-filter-sheet/plan-filter-sheet.component';
 import { ThemeService } from './core/theme/theme.service';
 import { MoneyPipe } from './core/format/money.pipe';
-import type { CategoryId, ItemId, SessionId, UserId } from './models/ids.model';
+import type { ItemId, SessionId, UserId } from './models/ids.model';
 import type { Item } from './models/item.model';
 import type { Shop } from './models/shop.model';
 import type { User } from './models/user.model';
 import type { Dictionary } from '@ngrx/entity';
 
-const FULL_SCREEN_ROUTES = ['/settings', '/manage-shops', '/history'];
+const FULL_SCREEN_ROUTES = ['/settings', '/manage-shops', '/history', '/categories'];
 
 const ROUTE_TITLE_KEYS: Record<string, string> = {
   '/': '',
@@ -75,6 +68,7 @@ const ROUTE_TITLE_KEYS: Record<string, string> = {
   '/settings': 'settings.title',
   '/manage-shops': 'manageShops.title',
   '/history': 'history.title',
+  '/categories': 'categories.title',
   '/sign-in': 'signIn.title',
   '/access-denied': 'accessDenied.title',
   '/pending-verification': 'pendingVerification.title',
@@ -162,11 +156,6 @@ export class App {
     { initialValue: {} },
   );
 
-  private readonly categories = toSignal(
-    this.store.select(selectAllCategories),
-    { initialValue: [] },
-  );
-
   private readonly activeSessionShopIds = toSignal(
     this.store.select(selectShopsWithActiveSessions),
     { initialValue: new Set<import('./models/ids.model').ShopId | null>() },
@@ -231,7 +220,8 @@ export class App {
 
   private updatePageTitle(url: string): void {
     const appName = this.transloco.translate('app.name');
-    const titleKey = ROUTE_TITLE_KEYS[url];
+    const path = url.split('?')[0]!;
+    const titleKey = ROUTE_TITLE_KEYS[path];
     if (titleKey) {
       const pageTitle = this.transloco.translate(titleKey);
       this.titleService.setTitle(`${pageTitle} — ${appName}`);
@@ -274,8 +264,9 @@ export class App {
     this.store.dispatch(uiActions.navDrawerClosed());
   }
 
-  onCategorySelected(_categoryId: CategoryId): void {
+  onViewCategories(): void {
     this.store.dispatch(uiActions.navDrawerClosed());
+    this.router.navigateByUrl('/categories');
   }
 
   onManageShops(): void {
@@ -295,28 +286,6 @@ export class App {
 
   openPlanFilters(): void {
     this.bottomSheet.open(PlanFilterSheetComponent);
-  }
-
-  onAddCategory(): void {
-    this.store.dispatch(uiActions.navDrawerClosed());
-    const ref = this.bottomSheet.open<
-      CategoryNameSheetComponent,
-      CategoryNameSheetData,
-      CategoryNameSheetResult
-    >(CategoryNameSheetComponent, {
-      data: {
-        mode: 'add',
-        currentName: '',
-        currentColor: null,
-        existingNames: this.categories().map((c) => c.name),
-      },
-    });
-    ref.afterDismissed().subscribe((result) => {
-      if (!result) return;
-      this.store.dispatch(
-        categoriesApiActions.addCategoryRequested({ name: result.name, color: result.color }),
-      );
-    });
   }
 
   switchToPlan(): void {

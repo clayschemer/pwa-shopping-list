@@ -1,0 +1,73 @@
+<div class="app-categories">
+  <header class="app-categories__header">
+    <button
+      mat-icon-button
+      class="app-categories__back-btn"
+      [attr.aria-label]="'categories.goBack' | transloco"
+      (click)="goBack()"
+    >
+      <mat-icon>arrow_back</mat-icon>
+    </button>
+    <h1 class="app-categories__title">{{ 'categories.title' | transloco }}</h1>
+  </header>
+
+  <div class="app-categories__subbar">
+    <mat-form-field class="app-categories__layout-field">
+      <mat-label>{{ 'categories.orderFor' | transloco }}</mat-label>
+      <mat-select
+        [value]="layout() ?? ''"
+        (selectionChange)="onLayoutChange($event.value)"
+      >
+        <mat-option value="">{{ 'categories.orderForGlobal' | transloco }}</mat-option>
+        @for (shop of shops(); track shop.id) {
+          <mat-option [value]="shop.id">{{ shop.name }}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+  </div>
+
+  <div
+    cdkDropList
+    class="app-categories__list"
+    (cdkDropListDropped)="onCategoryDrop($event)"
+  >
+    @for (category of orderedCategories(); track category.id) {
+      <div cdkDrag class="app-categories__row">
+        <mat-icon
+          cdkDragHandle
+          class="app-categories__handle"
+          [attr.aria-label]="'categories.dragHandle' | transloco: { name: category.name }"
+        >
+          drag_indicator
+        </mat-icon>
+        <button
+          class="app-categories__row-main"
+          type="button"
+          (click)="openEdit(category)"
+        >
+          @if (category.color) {
+            <span
+              class="app-categories__row-dot"
+              [style.background-color]="category.color"
+            ></span>
+          }
+          <span class="app-categories__row-name">{{ category.name }}</span>
+        </button>
+        <mat-icon class="app-categories__row-chevron" aria-hidden="true">
+          chevron_right
+        </mat-icon>
+      </div>
+    } @empty {
+      <p class="app-categories__empty">{{ 'categories.empty' | transloco }}</p>
+    }
+  </div>
+
+  <button
+    mat-fab
+    class="app-categories__fab"
+    [attr.aria-label]="'categories.addCategory' | transloco"
+    (click)="openCreate()"
+  >
+    <mat-icon>add</mat-icon>
+  </button>
+</div>

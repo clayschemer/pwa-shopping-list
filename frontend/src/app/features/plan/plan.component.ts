@@ -6,7 +6,6 @@ import { MatBottomSheet } from '@angular/material/bottom-sheet';
 import { MatDialog } from '@angular/material/dialog';
 import { MatIcon } from '@angular/material/icon';
 import { MatIconButton } from '@angular/material/button';
-import { MatMenu, MatMenuItem, MatMenuTrigger } from '@angular/material/menu';
 import { TranslocoPipe } from '@jsverse/transloco';
 import {
   selectActiveSessionCheckedItemIds,
@@ -17,12 +16,9 @@ import {
 import { ThemeService } from '../../core/theme/theme.service';
 import { selectListDataLoaded } from '../../store/selectors/list-data-loaded.selectors';
 import { selectOrderedCategories } from '../../store/selectors/ordered-categories.selectors';
-import { selectAllCategories } from '../../store/categories/categories.selectors';
 import { selectAllShops } from '../../store/shops/shops.selectors';
 import { selectActiveItems } from '../../store/items/items.selectors';
 import { itemsApiActions } from '../../store/items/items.actions';
-import { categoriesApiActions } from '../../store/categories/categories.actions';
-import { shopsApiActions } from '../../store/shops/shops.actions';
 import {
   ItemSheetComponent,
   ItemSheetData,
@@ -40,20 +36,6 @@ import {
   AddItemPillComponent,
   AddItemRequest,
 } from './add-item-pill.component';
-import {
-  CategoryNameSheetComponent,
-  CategoryNameSheetData,
-  CategoryNameSheetResult,
-} from '../categories/category-name-sheet.component';
-import {
-  AvailableInShopsSheetComponent,
-  AvailableInShopsData,
-  AvailableInShopsResult,
-} from '../categories/available-in-shops-sheet.component';
-import {
-  DeleteCategoryDialogComponent,
-  DeleteCategoryData,
-} from '../categories/delete-category-dialog.component';
 import { MoneyPipe } from '../../core/format/money.pipe';
 import { EffectivePricePipe } from '../../core/format/effective-price.pipe';
 import type { Item } from '../../models/item.model';
@@ -71,9 +53,6 @@ interface PlanFlatRow {
     NgTemplateOutlet,
     MatIcon,
     MatIconButton,
-    MatMenu,
-    MatMenuItem,
-    MatMenuTrigger,
     TranslocoPipe,
     AddItemPillComponent,
     MoneyPipe,
@@ -140,11 +119,6 @@ export class PlanComponent {
   isItemChecked(id: ItemId): boolean {
     return this.checkedItemIds().has(id);
   }
-
-  private readonly categories = toSignal(
-    this.store.select(selectAllCategories),
-    { initialValue: [] },
-  );
 
   private readonly shopOrderedCategories = toSignal(
     this.store.select(selectOrderedCategories),
@@ -279,100 +253,4 @@ export class PlanComponent {
     });
   }
 
-  openRenameCategory(group: PlanListGroup): void {
-    if (group.categoryId === null || group.categoryName === null) return;
-    const categoryId = group.categoryId;
-    const category = this.categories().find((c) => c.id === categoryId);
-    const ref = this.bottomSheet.open<
-      CategoryNameSheetComponent,
-      CategoryNameSheetData,
-      CategoryNameSheetResult
-    >(CategoryNameSheetComponent, {
-      data: {
-        mode: 'rename',
-        currentName: group.categoryName,
-        currentColor: category?.color ?? null,
-        existingNames: this.categories()
-          .filter((c) => c.id !== categoryId)
-          .map((c) => c.name),
-      },
-    });
-
-    ref.afterDismissed().subscribe((result) => {
-      if (!result) return;
-      this.store.dispatch(
-        categoriesApiActions.renameCategoryRequested({
-          id: categoryId,
-          name: result.name,
-          color: result.color,
-        }),
-      );
-    });
-  }
-
-  openAvailableInShops(group: PlanListGroup): void {
-    if (group.categoryId === null || group.categoryName === null) return;
-    const categoryId = group.categoryId;
-    const allShops = this.shops();
-    const ref = this.bottomSheet.open<
-      AvailableInShopsSheetComponent,
-      AvailableInShopsData,
-      AvailableInShopsResult
-    >(AvailableInShopsSheetComponent, {
-      data: {
-        categoryId,
-        categoryName: group.categoryName,
-        shops: allShops.map((s) => ({
-          id: s.id,
-          name: s.name,
-          includes: s.categoryOrder.includes(categoryId),
-        })),
-      },
-    });
-
-    ref.afterDismissed().subscribe((result) => {
-      if (!result) return;
-      const shopMap = new Map(allShops.map((s) => [s.id, s]));
-      for (const shopId of result.added) {
-        const shop = shopMap.get(shopId);
-        if (!shop || shop.categoryOrder.includes(categoryId)) continue;
-        this.store.dispatch(
-          shopsApiActions.setShopCategoryOrderRequested({
-            shopId,
-            orderedIds: [...shop.categoryOrder, categoryId],
-          }),
-        );
-      }
-      for (const shopId of result.removed) {
-        const shop = shopMap.get(shopId);
-        if (!shop || !shop.categoryOrder.includes(categoryId)) continue;
-        this.store.dispatch(
-          shopsApiActions.setShopCategoryOrderRequested({
-            shopId,
-            orderedIds: shop.categoryOrder.filter((id) => id !== categoryId),
-          }),
-        );
-      }
-    });
-  }
-
-  confirmDeleteCategory(group: PlanListGroup): void {
-    if (group.categoryId === null || group.categoryName === null) return;
-    const categoryId = group.categoryId;
-    const ref = this.dialog.open<
-      DeleteCategoryDialogComponent,
-      DeleteCategoryData,
-      boolean
-    >(DeleteCategoryDialogComponent, {
-      data: { name: group.categoryName },
-    });
-
-    ref.afterClosed().subscribe((confirmed) => {
-      if (confirmed) {
-        this.store.dispatch(
-          categoriesApiActions.deleteCategoryRequested({ id: categoryId }),
-        );
-      }
-    });
-  }
 }

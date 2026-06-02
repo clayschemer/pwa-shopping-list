@@ -30,7 +30,33 @@
     "showChecked": "Abgehakte Artikel anzeigen",
     "showCheckedHint": "Während einer Einkaufssitzung abgehakte Artikel anzeigen",
     "hidePrices": "Preise ausblenden",
-    "hidePricesHint": "Einzelpreise; Summen und Kasse bleiben sichtbar"
+    "hidePricesHint": "Einzelpreise; Summen und Kasse bleiben sichtbar",
+    "reorderCategories": "Kategorien neu anordnen…",
+    "reorderCategoriesHint": "Reihenfolge der aktiven Ladenaufteilung bearbeiten"
+  },
+  "categories": {
+    "title": "Kategorien",
+    "goBack": "Zurück",
+    "orderFor": "Reihenfolge für",
+    "orderForGlobal": "Global",
+    "addCategory": "Kategorie hinzufügen",
+    "dragHandle": "Ziehen, um {{name}} neu anzuordnen",
+    "empty": "Noch keine Kategorien. Tippe auf +, um eine zu erstellen."
+  },
+  "categoryEditSheet": {
+    "createTitle": "Kategorie hinzufügen",
+    "editTitle": "Kategorie bearbeiten",
+    "name": "Name",
+    "color": "Farbe",
+    "chooseColor": "Farbe wählen",
+    "changeColor": "Farbe ändern",
+    "clearColor": "Entfernen",
+    "availableInShops": "Verfügbar in Läden",
+    "noShops": "Noch keine Läden.",
+    "nameConflict": "Eine Kategorie mit diesem Namen existiert bereits",
+    "cancel": "Abbrechen",
+    "save": "Speichern",
+    "delete": "Kategorie löschen"
   },
   "history": {
     "title": "Einkaufsverlauf",

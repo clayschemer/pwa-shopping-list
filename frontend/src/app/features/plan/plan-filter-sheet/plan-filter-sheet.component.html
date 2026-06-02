@@ -49,5 +49,23 @@
         </span>
       </mat-slide-toggle>
     </li>
+
+    <li class="app-plan-filter-sheet__row">
+      <button
+        type="button"
+        class="app-plan-filter-sheet__action"
+        (click)="reorderCategories()"
+      >
+        <span class="app-plan-filter-sheet__label">
+          {{ 'planFilter.reorderCategories' | transloco }}
+          <span class="app-plan-filter-sheet__hint">
+            {{ 'planFilter.reorderCategoriesHint' | transloco }}
+          </span>
+        </span>
+        <mat-icon class="app-plan-filter-sheet__action-icon" aria-hidden="true">
+          arrow_forward
+        </mat-icon>
+      </button>
+    </li>
   </ul>
 </div>

@@ -30,7 +30,33 @@
     "showChecked": "Vis avkryssede varer",
     "showCheckedHint": "Vis varer avkrysset under en handleøkt",
     "hidePrices": "Skjul priser",
-    "hidePricesHint": "Per-vare-priser; summer og kassen vises fortsatt"
+    "hidePricesHint": "Per-vare-priser; summer og kassen vises fortsatt",
+    "reorderCategories": "Endre rekkefølge på kategorier…",
+    "reorderCategoriesHint": "Rediger rekkefølgen for det aktive butikkoppsettet"
+  },
+  "categories": {
+    "title": "Kategorier",
+    "goBack": "Gå tilbake",
+    "orderFor": "Rekkefølge for",
+    "orderForGlobal": "Global",
+    "addCategory": "Legg til kategori",
+    "dragHandle": "Dra for å endre rekkefølge på {{name}}",
+    "empty": "Ingen kategorier ennå. Trykk + for å lage en."
+  },
+  "categoryEditSheet": {
+    "createTitle": "Legg til kategori",
+    "editTitle": "Rediger kategori",
+    "name": "Navn",
+    "color": "Farge",
+    "chooseColor": "Velg farge",
+    "changeColor": "Endre farge",
+    "clearColor": "Fjern",
+    "availableInShops": "Tilgjengelig i butikker",
+    "noShops": "Ingen butikker ennå.",
+    "nameConflict": "En kategori med dette navnet finnes allerede",
+    "cancel": "Avbryt",
+    "save": "Lagre",
+    "delete": "Slett kategori"
   },
   "history": {
     "title": "Handlehistorikk",

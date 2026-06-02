@@ -7,9 +7,8 @@
     <mat-sidenav-container class="app-root__sidenav-container">
       <mat-sidenav [opened]="navDrawerOpen()" mode="over" (closed)="onDrawerClosed()">
         <app-nav-drawer
-          (categorySelected)="onCategorySelected($event)"
+          (viewCategories)="onViewCategories()"
           (manageShops)="onManageShops()"
-          (addCategory)="onAddCategory()"
           (viewHistory)="onViewHistory()"
           (viewSettings)="onViewSettings()"
         />
