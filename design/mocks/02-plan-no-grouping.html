@@ -1,0 +1,141 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>02 · Plan — hide grouping</title>
+  <link rel="stylesheet" href="shared.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Symbols+Outlined" rel="stylesheet">
+</head>
+<body>
+  <div class="page">
+    <h1 class="page__title">02 — Plan view (hide category grouping)</h1>
+    <p class="page__subtitle">
+      Flat list in the active shop-layout order. Category headers and totals are suppressed —
+      individual items keep their category color as a slim left accent so you still know which
+      section you're in, but the section breaks are gone.
+    </p>
+
+    <div class="phone">
+      <header class="topbar">
+        <button class="topbar__icon-btn" aria-label="Open menu">
+          <span class="material-symbols-outlined">menu</span>
+        </button>
+        <nav class="topbar__mode-toggle" aria-label="Mode selection">
+          <button class="topbar__mode-btn topbar__mode-btn--active">Plan</button>
+          <button class="topbar__mode-btn">Shop</button>
+        </nav>
+        <button class="topbar__icon-btn" aria-label="Filter and layout" style="background: var(--primary-container); color: var(--on-primary-container);">
+          <span class="material-symbols-outlined">tune</span>
+        </button>
+      </header>
+
+      <main class="content">
+        <ul class="flat-list">
+          <li class="item" style="border-left: 3px solid #6d9c71;">
+            <div class="item__main">
+              <span class="item__name">Bananas</span>
+              <span class="item__qty">3 pcs</span>
+            </div>
+            <span class="item__price">£1.20</span>
+            <button class="item__remove" aria-label="Remove">
+              <span class="material-symbols-outlined" style="font-size:1.1rem;">close</span>
+            </button>
+          </li>
+          <li class="item" style="border-left: 3px solid #6d9c71;">
+            <div class="item__main">
+              <span class="item__name">Tomatoes</span>
+              <span class="item__qty">500 g</span>
+              <span class="item__description">ekologisk om möjligt</span>
+            </div>
+            <span class="item__price item__price--approximate">≈ £3.60 / kg</span>
+            <button class="item__remove" aria-label="Remove">
+              <span class="material-symbols-outlined" style="font-size:1.1rem;">close</span>
+            </button>
+          </li>
+          <li class="item" style="border-left: 3px solid #6d9c71;">
+            <div class="item__main">
+              <span class="item__name">Lime</span>
+              <span class="item__qty">2 pcs</span>
+            </div>
+            <span class="item__price">£0.60</span>
+            <button class="item__remove" aria-label="Remove">
+              <span class="material-symbols-outlined" style="font-size:1.1rem;">close</span>
+            </button>
+          </li>
+          <li class="item" style="border-left: 3px solid #87b7d2;">
+            <div class="item__main">
+              <span class="item__name">Milk</span>
+              <span class="item__qty">2 L</span>
+              <span class="item__description">inte Arla</span>
+            </div>
+            <span class="item__price">£2.40</span>
+            <button class="item__remove" aria-label="Remove">
+              <span class="material-symbols-outlined" style="font-size:1.1rem;">close</span>
+            </button>
+          </li>
+          <li class="item" style="border-left: 3px solid #87b7d2;">
+            <div class="item__main">
+              <span class="item__name">Butter</span>
+              <span class="item__qty">1 pkg</span>
+            </div>
+            <span class="item__price">£3.50</span>
+            <button class="item__remove" aria-label="Remove">
+              <span class="material-symbols-outlined" style="font-size:1.1rem;">close</span>
+            </button>
+          </li>
+          <li class="item" style="border-left: 3px solid #e1c465;">
+            <div class="item__main">
+              <span class="item__name">Sourdough</span>
+              <span class="item__qty">1 pcs</span>
+            </div>
+            <span class="item__price">£3.20</span>
+            <button class="item__remove" aria-label="Remove">
+              <span class="material-symbols-outlined" style="font-size:1.1rem;">close</span>
+            </button>
+          </li>
+          <li class="item" style="border-left: 3px solid #e1c465;">
+            <div class="item__main">
+              <span class="item__name">Brioche</span>
+              <span class="item__qty">1 pcs</span>
+            </div>
+            <span class="item__price">£2.80</span>
+            <button class="item__remove" aria-label="Remove">
+              <span class="material-symbols-outlined" style="font-size:1.1rem;">close</span>
+            </button>
+          </li>
+          <li class="item" style="border-left: 3px solid #c47a9c;">
+            <div class="item__main">
+              <span class="item__name">Salmon fillet</span>
+              <span class="item__qty">400 g</span>
+            </div>
+            <span class="item__price">£8.40</span>
+            <button class="item__remove" aria-label="Remove">
+              <span class="material-symbols-outlined" style="font-size:1.1rem;">close</span>
+            </button>
+          </li>
+        </ul>
+      </main>
+
+      <div class="add-pill">
+        <span class="material-symbols-outlined" style="color: var(--on-surface-variant);">add</span>
+        <input class="add-pill__input" placeholder="Add item…" />
+        <button class="add-pill__btn" aria-label="Add">
+          <span class="material-symbols-outlined" style="font-size:1.2rem;">arrow_forward</span>
+        </button>
+      </div>
+    </div>
+
+    <p class="caption">
+      Filter icon styled active (primary-container) to indicate at least one toggle is on.
+      <br />
+      <a href="index.html">← back to index</a> ·
+      <a href="01-plan-default.html">01 · default</a> ·
+      <a href="03-plan-show-checked.html">03 · show checked →</a>
+    </p>
+  </div>
+</body>
+</html>
