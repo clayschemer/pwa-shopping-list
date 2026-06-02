@@ -81,3 +81,19 @@ Feature: Category Management
     And a shop exists with one or more categories associated with it
     When I exclude a category from that shop
     Then that category and its items should not appear when shopping at that shop
+
+  @pending
+  Scenario: Edit multiple category attributes in one operation
+    Given I am in plan mode
+    And a category exists
+    When I change the name, the colour and the shop availability of the category in a single edit
+    And I save the changes
+    Then all three changes should be reflected throughout the application
+
+  @pending
+  Scenario: Discard category edits before saving
+    Given I am in plan mode
+    And a category exists
+    When I begin editing the category and change one or more attributes
+    And I discard the edit without saving
+    Then the category should retain its previous name, colour, and shop availability
