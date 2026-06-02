@@ -9,6 +9,7 @@
     "openMenu": "Ouvrir le menu de navigation",
     "viewChecked": "Voir les articles cochés",
     "settings": "Paramètres",
+    "openFilters": "Filtres et disposition",
     "activeSession": "Session active",
     "global": "Global",
     "sessionActive": "active"
@@ -18,8 +19,13 @@
     "globalAll": "Global (tous)",
     "manageShops": "Gérer les magasins\u2026",
     "viewHistory": "Historique\u2026",
+    "settings": "Param\u00e8tres\u2026",
     "categories": "Catégories",
     "addCategory": "Ajouter une catégorie"
+  },
+  "planFilter": {
+    "title": "Filtres et disposition",
+    "placeholder": "Les options de filtres et de disposition arrivent bientôt."
   },
   "history": {
     "title": "Historique des courses",

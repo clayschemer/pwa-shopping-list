@@ -1,0 +1,16 @@
+.app-plan-filter-sheet {
+  padding: 0.75rem var(--app-spacing-padding-inline) 1.5rem;
+
+  &__title {
+    font-size: 1rem;
+    font-weight: 500;
+    color: var(--mat-sys-on-surface);
+    margin: 0 0 0.5rem;
+  }
+
+  &__placeholder {
+    font-size: 0.875rem;
+    color: var(--mat-sys-on-surface-variant);
+    margin: 0;
+  }
+}

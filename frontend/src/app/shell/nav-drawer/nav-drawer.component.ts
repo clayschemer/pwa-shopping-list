@@ -45,6 +45,7 @@ export class NavDrawerComponent {
   readonly manageShops = output<void>();
   readonly addCategory = output<void>();
   readonly viewHistory = output<void>();
+  readonly viewSettings = output<void>();
 
   onShopChanged(shopId: string): void {
     const id = shopId === '' ? null : (shopId as ShopId);
@@ -78,5 +79,9 @@ export class NavDrawerComponent {
 
   onViewHistory(): void {
     this.viewHistory.emit();
+  }
+
+  onViewSettings(): void {
+    this.viewSettings.emit();
   }
 }

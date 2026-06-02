@@ -9,6 +9,7 @@
     "openMenu": "Open navigation menu",
     "viewChecked": "View checked items",
     "settings": "Settings",
+    "openFilters": "Filter and layout",
     "activeSession": "Active session",
     "global": "Global",
     "sessionActive": "active"
@@ -18,8 +19,13 @@
     "globalAll": "Global (all)",
     "manageShops": "Manage shops\u2026",
     "viewHistory": "History\u2026",
+    "settings": "Settings\u2026",
     "categories": "Categories",
     "addCategory": "Add category"
+  },
+  "planFilter": {
+    "title": "Filter & layout",
+    "placeholder": "Filter and layout controls coming soon."
   },
   "history": {
     "title": "Shopping history",

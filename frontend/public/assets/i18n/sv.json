@@ -9,6 +9,7 @@
     "openMenu": "Öppna navigationsmeny",
     "viewChecked": "Visa avbockade varor",
     "settings": "Inställningar",
+    "openFilters": "Filter och layout",
     "activeSession": "Aktiv session",
     "global": "Global",
     "sessionActive": "aktiv"
@@ -18,8 +19,13 @@
     "globalAll": "Global (alla)",
     "manageShops": "Hantera butiker\u2026",
     "viewHistory": "Historik\u2026",
+    "settings": "Inst\u00e4llningar\u2026",
     "categories": "Kategorier",
     "addCategory": "Lägg till kategori"
+  },
+  "planFilter": {
+    "title": "Filter och layout",
+    "placeholder": "Filter- och layout-kontroller kommer snart."
   },
   "history": {
     "title": "Köphistorik",

@@ -9,6 +9,7 @@
     "openMenu": "Navigationsmenü öffnen",
     "viewChecked": "Abgehakte Artikel anzeigen",
     "settings": "Einstellungen",
+    "openFilters": "Filter und Layout",
     "activeSession": "Aktive Sitzung",
     "global": "Global",
     "sessionActive": "aktiv"
@@ -18,8 +19,13 @@
     "globalAll": "Global (alle)",
     "manageShops": "Läden verwalten\u2026",
     "viewHistory": "Verlauf\u2026",
+    "settings": "Einstellungen\u2026",
     "categories": "Kategorien",
     "addCategory": "Kategorie hinzufügen"
+  },
+  "planFilter": {
+    "title": "Filter & Layout",
+    "placeholder": "Filter- und Layout-Optionen folgen bald."
   },
   "history": {
     "title": "Einkaufsverlauf",

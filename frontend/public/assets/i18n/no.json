@@ -9,6 +9,7 @@
     "openMenu": "Åpne navigasjonsmeny",
     "viewChecked": "Vis avkryssede varer",
     "settings": "Innstillinger",
+    "openFilters": "Filter og layout",
     "activeSession": "Aktiv økt",
     "global": "Global",
     "sessionActive": "aktiv"
@@ -18,8 +19,13 @@
     "globalAll": "Global (alle)",
     "manageShops": "Administrer butikker\u2026",
     "viewHistory": "Historikk\u2026",
+    "settings": "Innstillinger\u2026",
     "categories": "Kategorier",
     "addCategory": "Legg til kategori"
+  },
+  "planFilter": {
+    "title": "Filter og layout",
+    "placeholder": "Filter- og layout-kontroller kommer snart."
   },
   "history": {
     "title": "Handlehistorikk",

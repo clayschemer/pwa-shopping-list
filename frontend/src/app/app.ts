@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, DestroyRef, inject, computed, effect } from '@angular/core';
 import { Title } from '@angular/platform-browser';
-import { NavigationEnd, Router, RouterLink, RouterOutlet } from '@angular/router';
+import { NavigationEnd, Router, RouterOutlet } from '@angular/router';
 import { toSignal, takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { filter, map } from 'rxjs';
 import { Actions, ofType } from '@ngrx/effects';
@@ -58,6 +58,7 @@ import {
   CategoryNameSheetData,
   CategoryNameSheetResult,
 } from './features/categories/category-name-sheet.component';
+import { PlanFilterSheetComponent } from './features/plan/plan-filter-sheet/plan-filter-sheet.component';
 import { ThemeService } from './core/theme/theme.service';
 import { MoneyPipe } from './core/format/money.pipe';
 import type { CategoryId, ItemId, SessionId, UserId } from './models/ids.model';
@@ -83,7 +84,6 @@ const ROUTE_TITLE_KEYS: Record<string, string> = {
   selector: 'app-root',
   imports: [
     RouterOutlet,
-    RouterLink,
     MatIconButton,
     MatIcon,
     MatBadge,
@@ -286,6 +286,15 @@ export class App {
   onViewHistory(): void {
     this.store.dispatch(uiActions.navDrawerClosed());
     this.router.navigateByUrl('/history');
+  }
+
+  onViewSettings(): void {
+    this.store.dispatch(uiActions.navDrawerClosed());
+    this.router.navigateByUrl('/settings');
+  }
+
+  openPlanFilters(): void {
+    this.bottomSheet.open(PlanFilterSheetComponent);
   }
 
   onAddCategory(): void {

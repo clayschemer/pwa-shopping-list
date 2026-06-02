@@ -167,4 +167,22 @@ describe('NavDrawerComponent', () => {
       }),
     );
   });
+
+  it('renders a Settings link', () => {
+    const el: HTMLElement = fixture.nativeElement;
+    const link = el.querySelector('.app-nav-drawer__settings');
+    expect(link).toBeTruthy();
+    expect(link!.textContent?.trim()).toContain('Settings');
+  });
+
+  it('emits viewSettings when the Settings link is clicked', () => {
+    let emitted = false;
+    component.viewSettings.subscribe(() => (emitted = true));
+
+    const el: HTMLElement = fixture.nativeElement;
+    const link = el.querySelector('.app-nav-drawer__settings') as HTMLElement;
+    link.click();
+
+    expect(emitted).toBe(true);
+  });
 });
