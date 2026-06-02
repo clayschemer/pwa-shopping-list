@@ -17,12 +17,10 @@
   "navDrawer": {
     "shopLayout": "Nåværende butikkoppsett",
     "globalAll": "Global (alle)",
-    "manageShops": "Administrer butikker\u2026",
-    "viewHistory": "Historikk\u2026",
-    "settings": "Innstillinger\u2026",
+    "viewHistory": "Historikk…",
+    "settings": "Innstillinger…",
     "categories": "Kategorier",
-    "stores": "Butikker\u2026",
-    "addCategory": "Legg til kategori"
+    "stores": "Butikker…"
   },
   "planFilter": {
     "title": "Filter og layout",
@@ -141,7 +139,7 @@
     "email": "E-post",
     "password": "Passord",
     "signIn": "Logg inn",
-    "signingIn": "Logger inn\u2026",
+    "signingIn": "Logger inn…",
     "formLabel": "Logg inn med e-post",
     "errors": {
       "wrongPassword": "Ugyldig e-post eller passord.",
@@ -163,57 +161,6 @@
     "messageNoEmail": "Kontoen din venter på godkjenning fra listeeieren. Du får tilgang så snart den er verifisert.",
     "reload": "Jeg er godkjent — last på nytt",
     "switchAccount": "Bruk en annen konto"
-  },
-  "manageShops": {
-    "title": "Administrer butikker",
-    "goBack": "Gå tilbake",
-    "empty": "Ingen butikker ennå. Trykk + for å legge til en.",
-    "addShop": "Legg til butikk",
-    "deleteShop": "Slett {{name}}",
-    "deleteConfirm": "Slette \"{{name}}\"? Dette kan ikke angres.",
-    "setPriceUrl": "Angi prissøk-URL for {{name}}"
-  },
-  "shopPriceUrlSheet": {
-    "title": "Prissøk-URL",
-    "urlLabel": "URL til søkeside",
-    "urlPlaceholder": "https://eksempel.no/sok?q={query}",
-    "hint": "Bruk {query} som plassholder for varenavnet. La feltet stå tomt for å deaktivere.",
-    "cancel": "Avbryt",
-    "save": "Lagre"
-  },
-  "shopNameSheet": {
-    "addTitle": "Legg til butikk",
-    "renameTitle": "Gi nytt navn til butikk",
-    "shopName": "Butikknavn",
-    "nameConflict": "En butikk med dette navnet finnes allerede",
-    "cancel": "Avbryt",
-    "add": "Legg til butikk",
-    "save": "Lagre"
-  },
-  "categoryNameSheet": {
-    "addTitle": "Legg til kategori",
-    "renameTitle": "Gi nytt navn til kategori",
-    "categoryName": "Kategorinavn",
-    "nameConflict": "En kategori med dette navnet finnes allerede",
-    "color": "Farge",
-    "chooseColor": "Velg farge",
-    "changeColor": "Endre farge",
-    "clearColor": "Fjern farge",
-    "cancel": "Avbryt",
-    "add": "Legg til kategori",
-    "save": "Lagre"
-  },
-  "categoryMenu": {
-    "open": "Kategorialternativer for {{name}}",
-    "rename": "Gi nytt navn",
-    "availableInShops": "Tilgjengelig i butikker\u2026",
-    "delete": "Slett kategori"
-  },
-  "availableInShops": {
-    "title": "Tilgjengelig i butikker",
-    "subtitle": "{{name}}",
-    "empty": "Ingen butikker konfigurert.",
-    "done": "Ferdig"
   },
   "deleteCategory": {
     "title": "Slette kategori?",

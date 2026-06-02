@@ -17,12 +17,10 @@
   "navDrawer": {
     "shopLayout": "Disposition du magasin actuel",
     "globalAll": "Global (tous)",
-    "manageShops": "Gérer les magasins\u2026",
-    "viewHistory": "Historique\u2026",
-    "settings": "Param\u00e8tres\u2026",
+    "viewHistory": "Historique…",
+    "settings": "Paramètres…",
     "categories": "Catégories",
-    "stores": "Magasins…",
-    "addCategory": "Ajouter une catégorie"
+    "stores": "Magasins…"
   },
   "planFilter": {
     "title": "Filtres et disposition",
@@ -141,7 +139,7 @@
     "email": "E-mail",
     "password": "Mot de passe",
     "signIn": "Se connecter",
-    "signingIn": "Connexion en cours\u2026",
+    "signingIn": "Connexion en cours…",
     "formLabel": "Se connecter par e-mail",
     "errors": {
       "wrongPassword": "E-mail ou mot de passe invalide.",
@@ -163,57 +161,6 @@
     "messageNoEmail": "Votre compte attend l'approbation du propriétaire de la liste. Vous aurez accès dès qu'il sera vérifié.",
     "reload": "J'ai été approuvé — recharger",
     "switchAccount": "Utiliser un autre compte"
-  },
-  "manageShops": {
-    "title": "Gérer les magasins",
-    "goBack": "Retour",
-    "empty": "Aucun magasin pour le moment. Appuyez sur + pour en ajouter un.",
-    "addShop": "Ajouter un magasin",
-    "deleteShop": "Supprimer {{name}}",
-    "deleteConfirm": "Supprimer \"{{name}}\" ? Cette action est irréversible.",
-    "setPriceUrl": "Définir l'URL de recherche de prix pour {{name}}"
-  },
-  "shopPriceUrlSheet": {
-    "title": "URL de recherche de prix",
-    "urlLabel": "URL de la page de recherche",
-    "urlPlaceholder": "https://exemple.fr/recherche?q={query}",
-    "hint": "Utilisez {query} comme espace réservé pour le nom de l'article. Laisser vide pour désactiver.",
-    "cancel": "Annuler",
-    "save": "Enregistrer"
-  },
-  "shopNameSheet": {
-    "addTitle": "Ajouter un magasin",
-    "renameTitle": "Renommer le magasin",
-    "shopName": "Nom du magasin",
-    "nameConflict": "Un magasin avec ce nom existe déjà",
-    "cancel": "Annuler",
-    "add": "Ajouter un magasin",
-    "save": "Enregistrer"
-  },
-  "categoryNameSheet": {
-    "addTitle": "Ajouter une catégorie",
-    "renameTitle": "Renommer la catégorie",
-    "categoryName": "Nom de la catégorie",
-    "nameConflict": "Une catégorie portant ce nom existe déjà",
-    "color": "Couleur",
-    "chooseColor": "Choisir une couleur",
-    "changeColor": "Changer la couleur",
-    "clearColor": "Supprimer la couleur",
-    "cancel": "Annuler",
-    "add": "Ajouter la catégorie",
-    "save": "Enregistrer"
-  },
-  "categoryMenu": {
-    "open": "Options de catégorie pour {{name}}",
-    "rename": "Renommer",
-    "availableInShops": "Disponible dans les magasins\u2026",
-    "delete": "Supprimer la catégorie"
-  },
-  "availableInShops": {
-    "title": "Disponible dans les magasins",
-    "subtitle": "{{name}}",
-    "empty": "Aucun magasin configuré.",
-    "done": "Terminé"
   },
   "deleteCategory": {
     "title": "Supprimer la catégorie ?",

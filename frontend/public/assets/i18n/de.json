@@ -17,12 +17,10 @@
   "navDrawer": {
     "shopLayout": "Aktuelle Ladenaufteilung",
     "globalAll": "Global (alle)",
-    "manageShops": "Läden verwalten\u2026",
-    "viewHistory": "Verlauf\u2026",
-    "settings": "Einstellungen\u2026",
+    "viewHistory": "Verlauf…",
+    "settings": "Einstellungen…",
     "categories": "Kategorien",
-    "stores": "Läden…",
-    "addCategory": "Kategorie hinzufügen"
+    "stores": "Läden…"
   },
   "planFilter": {
     "title": "Filter & Layout",
@@ -141,7 +139,7 @@
     "email": "E-Mail",
     "password": "Passwort",
     "signIn": "Anmelden",
-    "signingIn": "Anmeldung läuft\u2026",
+    "signingIn": "Anmeldung läuft…",
     "formLabel": "Mit E-Mail anmelden",
     "errors": {
       "wrongPassword": "Ungültige E-Mail oder Passwort.",
@@ -164,60 +162,9 @@
     "reload": "Ich bin freigegeben — neu laden",
     "switchAccount": "Anderes Konto verwenden"
   },
-  "manageShops": {
-    "title": "Läden verwalten",
-    "goBack": "Zurück",
-    "empty": "Noch keine Läden. Tippe +, um einen hinzuzufügen.",
-    "addShop": "Laden hinzufügen",
-    "deleteShop": "{{name}} löschen",
-    "deleteConfirm": "\"{{name}}\" löschen? Dies kann nicht rückgängig gemacht werden.",
-    "setPriceUrl": "Preissuche-URL für {{name}} festlegen"
-  },
-  "shopPriceUrlSheet": {
-    "title": "Preissuche-URL",
-    "urlLabel": "URL der Suchseite",
-    "urlPlaceholder": "https://beispiel.de/suche?q={query}",
-    "hint": "Verwende {query} als Platzhalter für den Artikelnamen. Leer lassen zum Deaktivieren.",
-    "cancel": "Abbrechen",
-    "save": "Speichern"
-  },
-  "shopNameSheet": {
-    "addTitle": "Laden hinzufügen",
-    "renameTitle": "Laden umbenennen",
-    "shopName": "Ladenname",
-    "nameConflict": "Ein Laden mit diesem Namen existiert bereits",
-    "cancel": "Abbrechen",
-    "add": "Laden hinzufügen",
-    "save": "Speichern"
-  },
-  "categoryNameSheet": {
-    "addTitle": "Kategorie hinzufügen",
-    "renameTitle": "Kategorie umbenennen",
-    "categoryName": "Kategoriename",
-    "nameConflict": "Eine Kategorie mit diesem Namen existiert bereits",
-    "color": "Farbe",
-    "chooseColor": "Farbe wählen",
-    "changeColor": "Farbe ändern",
-    "clearColor": "Farbe entfernen",
-    "cancel": "Abbrechen",
-    "add": "Kategorie hinzufügen",
-    "save": "Speichern"
-  },
-  "categoryMenu": {
-    "open": "Kategorieoptionen für {{name}}",
-    "rename": "Umbenennen",
-    "availableInShops": "Verfügbar in Läden\u2026",
-    "delete": "Kategorie löschen"
-  },
-  "availableInShops": {
-    "title": "Verfügbar in Läden",
-    "subtitle": "{{name}}",
-    "empty": "Keine Läden konfiguriert.",
-    "done": "Fertig"
-  },
   "deleteCategory": {
     "title": "Kategorie löschen?",
-    "message": "Artikel in \u201E{{name}}\u201C werden unkategorisiert. Sie werden nicht aus der Liste entfernt.",
+    "message": "Artikel in „{{name}}“ werden unkategorisiert. Sie werden nicht aus der Liste entfernt.",
     "cancel": "Abbrechen",
     "delete": "Löschen"
   },
