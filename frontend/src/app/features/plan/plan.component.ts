@@ -5,7 +5,6 @@ import { Store } from '@ngrx/store';
 import { MatBottomSheet } from '@angular/material/bottom-sheet';
 import { MatDialog } from '@angular/material/dialog';
 import { MatIcon } from '@angular/material/icon';
-import { MatIconButton } from '@angular/material/button';
 import { TranslocoPipe } from '@jsverse/transloco';
 import {
   selectActiveSessionCheckedItemIds,
@@ -52,7 +51,6 @@ interface PlanFlatRow {
   imports: [
     NgTemplateOutlet,
     MatIcon,
-    MatIconButton,
     TranslocoPipe,
     AddItemPillComponent,
     MoneyPipe,

@@ -3,16 +3,22 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { Store } from '@ngrx/store';
 import { MatFormField, MatLabel } from '@angular/material/form-field';
 import { MatSelect, MatOption } from '@angular/material/select';
+import { MatDivider } from '@angular/material/divider';
 import { TranslocoPipe } from '@jsverse/transloco';
 import { selectOrderedShops } from '../../store/selectors/ordered-shops.selectors';
 import { selectSelectedShopId } from '../../store/ui/ui.selectors';
 import { uiActions } from '../../store/ui/ui.actions';
 import type { ShopId } from '../../models/ids.model';
+import { MatIcon } from '@angular/material/icon';
+import { MatButton } from '@angular/material/button';
 
 @Component({
   selector: 'app-nav-drawer',
   imports: [
+    MatButton,
     MatFormField,
+    MatDivider,
+    MatIcon,
     MatLabel,
     MatSelect,
     MatOption,

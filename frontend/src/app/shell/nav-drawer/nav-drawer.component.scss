@@ -7,8 +7,7 @@
   &__shop-section {
     display: flex;
     flex-direction: column;
-    gap: 0.25rem;
-    margin-bottom: 0.5rem;
+    gap: 0.5rem;
   }
 
   &__shop-field {
@@ -16,20 +15,7 @@
   }
 
   &__manage-shops {
-    all: unset;
-    cursor: pointer;
-    font-size: 0.875rem;
-    color: var(--mat-sys-primary);
-    padding: 0.25rem 0;
-
-    &:hover {
-      text-decoration: underline;
-    }
-
-    &:focus-visible {
-      outline: 2px solid var(--mat-sys-primary);
-      outline-offset: 2px;
-      border-radius: 0.25rem;
-    }
+    gap: 0.25rem;
+    justify-content: flex-start;
   }
 }
