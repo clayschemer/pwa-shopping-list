@@ -15,38 +15,38 @@
 
     <mat-divider></mat-divider>
 
-    <button matButton
+    <a matButton
       class="app-nav-drawer__manage-shops app-nav-drawer__categories"
       (click)="onViewCategories()"
     >
       <mat-icon>category</mat-icon>
       {{ 'navDrawer.categories' | transloco }}
-    </button>
+    </a>
 
-    <button matButton
+    <a matButton
       class="app-nav-drawer__manage-shops app-nav-drawer__stores"
       (click)="onManageShops()"
     >
       <mat-icon>store</mat-icon>
       {{ 'navDrawer.stores' | transloco }}
-    </button>
+    </a>
 
-    <button matButton
+    <a matButton
       class="app-nav-drawer__manage-shops"
       (click)="onViewHistory()"
     >
       <mat-icon>history</mat-icon>
       {{ 'navDrawer.viewHistory' | transloco }}
-    </button>
+    </a>
 
     <mat-divider></mat-divider>
 
-    <button matButton
+    <a matButton
       class="app-nav-drawer__manage-shops app-nav-drawer__settings"
       (click)="onViewSettings()"
     >
       <mat-icon>settings</mat-icon>
       {{ 'navDrawer.settings' | transloco }}
-    </button>
+    </a>
   </section>
 </div>

@@ -1,4 +1,5 @@
 import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
+import { NgTemplateOutlet } from '@angular/common';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { Store } from '@ngrx/store';
 import { MatDialog } from '@angular/material/dialog';
@@ -9,11 +10,15 @@ import { selectListDataLoaded } from '../../store/selectors/list-data-loaded.sel
 import { selectActiveSessionForCurrentShop } from '../../store/sessions/sessions.selectors';
 import { selectPendingChecks } from '../../store/items/items.selectors';
 import { selectAllShops } from '../../store/shops/shops.selectors';
+import { selectCategoryEntities } from '../../store/categories/categories.selectors';
+import type { Dictionary } from '@ngrx/entity';
+import type { Category } from '../../models/category.model';
 import { itemsActions, itemsApiActions } from '../../store/items/items.actions';
 import type { PendingCheck } from '../../store/items/items.reducer';
 import { MoneyPipe } from '../../core/format/money.pipe';
 import { EffectivePricePipe } from '../../core/format/effective-price.pipe';
 import { HapticsService } from '../../core/haptics/haptics.service';
+import { ThemeService } from '../../core/theme/theme.service';
 import {
   PriceProductDialogComponent,
   PriceProductDialogData,
@@ -21,9 +26,14 @@ import {
 import type { Item } from '../../models/item.model';
 import type { ItemId } from '../../models/ids.model';
 
+interface ShopFlatRow {
+  item: Item;
+  categoryColor: string | null;
+}
+
 @Component({
   selector: 'app-shop',
-  imports: [MatIcon, TranslocoPipe, MoneyPipe, EffectivePricePipe],
+  imports: [NgTemplateOutlet, MatIcon, TranslocoPipe, MoneyPipe, EffectivePricePipe],
   templateUrl: './shop.component.html',
   styleUrl: './shop.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -32,10 +42,16 @@ export class ShopComponent {
   private readonly store = inject(Store);
   private readonly haptics = inject(HapticsService);
   private readonly dialog = inject(MatDialog);
+  private readonly themeService = inject(ThemeService);
 
   private readonly shops = toSignal(this.store.select(selectAllShops), {
     initialValue: [],
   });
+
+  private readonly categoryEntities = toSignal(
+    this.store.select(selectCategoryEntities),
+    { initialValue: {} as Dictionary<Category> },
+  );
 
   readonly loaded = toSignal(this.store.select(selectListDataLoaded), {
     initialValue: false,
@@ -43,6 +59,27 @@ export class ShopComponent {
 
   readonly groups = toSignal(this.store.select(selectGroupedShopList), {
     initialValue: [],
+  });
+
+  readonly hideGrouping = computed(
+    () => this.themeService.settings().hideCategoryGrouping,
+  );
+
+  readonly flatRows = computed<ShopFlatRow[]>(() => {
+    const cats = this.categoryEntities();
+    const seen = new Set<ItemId>();
+    const rows: ShopFlatRow[] = [];
+    for (const group of this.groups()) {
+      for (const item of group.items) {
+        if (seen.has(item.id)) continue;
+        seen.add(item.id);
+        const primaryColor = item.primaryCategoryId
+          ? cats[item.primaryCategoryId]?.color ?? null
+          : null;
+        rows.push({ item, categoryColor: primaryColor });
+      }
+    }
+    return rows;
   });
 
   readonly activeSession = toSignal(

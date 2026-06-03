@@ -173,6 +173,19 @@
     gap: 0.15rem;
   }
 
+  // Flat list mode (hide grouping): no category headers / shop-coloured
+  // container. Each row carries the primary category colour as a thin
+  // leading-edge accent so grouping context isn't lost.
+  &__items--flat {
+    padding: 0.25rem 0;
+    background: transparent;
+
+    .app-shop__item {
+      background-color: var(--mat-sys-surface-container);
+      border-radius: 0 0.5rem 0.5rem 0;
+    }
+  }
+
   &__item {
     position: relative;
     display: flex;
@@ -181,6 +194,11 @@
     gap: 0.5rem;
     border-radius: 0.5rem;
     background-color: var(--mat-sys-surface-container-lowest);
+
+    &--accent {
+      border-left: 3px solid var(--app-shop-accent, transparent);
+      padding-left: 0.25rem;
+    }
 
     &--pending,
     &--checked {
