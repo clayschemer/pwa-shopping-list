@@ -54,8 +54,11 @@ describe('NavDrawerComponent', () => {
 
   it('renders Categories, Manage shops, History and Settings links', () => {
     const el: HTMLElement = fixture.nativeElement;
-    const labels = Array.from(el.querySelectorAll('.app-nav-drawer__manage-shops'))
-      .map((b) => b.textContent?.trim());
+    const labels = Array.from(el.querySelectorAll('.app-nav-drawer__manage-shops')).map((b) => {
+      const clone = b.cloneNode(true) as HTMLElement;
+      clone.querySelectorAll('mat-icon').forEach((icon) => icon.remove());
+      return clone.textContent?.trim();
+    });
     expect(labels).toEqual([
       'Categories',
       'Stores…',
