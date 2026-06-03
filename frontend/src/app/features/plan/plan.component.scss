@@ -98,7 +98,7 @@
     align-items: center;
     justify-content: space-between;
     gap: 0.5rem;
-    padding: 0 0.25rem 0 0.75rem;
+    padding: 0.5rem 0.25rem 0.25rem 0.75rem;
   }
 
   &__group-title {
@@ -162,6 +162,10 @@
   // colour as a thin leading-edge accent so grouping context isn't lost.
   &__items--flat {
     padding: 0.25rem 0;
+
+    .app-plan__item {
+      border-radius: 0 0.5rem 0.5rem 0;
+    }
   }
 
   &__item--accent {
@@ -228,7 +232,7 @@
   &__item-price {
     white-space: nowrap;
     padding: 0.25rem 0.5rem;
-    font-size: 0.875rem;
+    font-size: 0.6rem;
     color: var(--mat-sys-on-surface-variant);
 
     &--approximate {
@@ -242,7 +246,7 @@
     white-space: nowrap;
     padding: 0.25rem 0.5rem;
     border-radius: 0.25rem;
-    font-size: 0.875rem;
+    font-size: 0.6rem;
     color: var(--mat-sys-on-surface-variant);
 
     &:focus-visible {
