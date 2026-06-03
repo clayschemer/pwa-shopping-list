@@ -11,45 +11,47 @@
 // Honors prefers-reduced-motion (OS) and the explicit
 // body.theme-reduce-motion override.
 
-$vt-duration: 280ms;
-$vt-easing: cubic-bezier(0.2, 0, 0, 1);
+// Durations and easings are read from the global motion tokens declared on
+// <html> in _theme-base.scss. Under prefers-reduced-motion or
+// body.theme-reduce-motion, those tokens collapse to 0.01ms (see
+// _theme-modes.scss), so the transitions become instant without a guard.
 
 @media (prefers-reduced-motion: no-preference) {
   html:not(:has(body.theme-reduce-motion)) {
     &.app-vt-overlay-in {
       &::view-transition-old(root) {
-        animation: app-vt-stay $vt-duration linear both;
+        animation: app-vt-stay var(--app-duration-emphasized) linear both;
       }
       &::view-transition-new(root) {
-        animation: app-vt-slide-in-right $vt-duration $vt-easing both;
+        animation: app-vt-slide-in-right var(--app-duration-emphasized) var(--app-easing-standard) both;
       }
     }
 
     &.app-vt-overlay-out {
       &::view-transition-old(root) {
-        animation: app-vt-slide-out-right $vt-duration $vt-easing both;
+        animation: app-vt-slide-out-right var(--app-duration-emphasized) var(--app-easing-standard) both;
         z-index: 1;
       }
       &::view-transition-new(root) {
-        animation: app-vt-stay $vt-duration linear both;
+        animation: app-vt-stay var(--app-duration-emphasized) linear both;
       }
     }
 
     &.app-vt-swap-forward {
       &::view-transition-old(root) {
-        animation: app-vt-slide-out-left $vt-duration $vt-easing both;
+        animation: app-vt-slide-out-left var(--app-duration-emphasized) var(--app-easing-standard) both;
       }
       &::view-transition-new(root) {
-        animation: app-vt-slide-in-right $vt-duration $vt-easing both;
+        animation: app-vt-slide-in-right var(--app-duration-emphasized) var(--app-easing-standard) both;
       }
     }
 
     &.app-vt-swap-backward {
       &::view-transition-old(root) {
-        animation: app-vt-slide-out-right $vt-duration $vt-easing both;
+        animation: app-vt-slide-out-right var(--app-duration-emphasized) var(--app-easing-standard) both;
       }
       &::view-transition-new(root) {
-        animation: app-vt-slide-in-left $vt-duration $vt-easing both;
+        animation: app-vt-slide-in-left var(--app-duration-emphasized) var(--app-easing-standard) both;
       }
     }
   }

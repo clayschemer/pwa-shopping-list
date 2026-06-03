@@ -1,13 +1,16 @@
+@use '../../../styles/focus';
+
 .app-item-sheet {
   display: flex;
   flex-direction: column;
-  gap: 1rem;
-  padding: 1.5rem 1rem 1rem;
+  gap: var(--app-spacing-md);
+  padding: var(--app-spacing-lg) var(--app-spacing-md) var(--app-spacing-md);
 
   &__title {
     margin: 0;
-    font-size: 1.125rem;
+    font-size: var(--app-font-title);
     font-weight: 600;
+    line-height: var(--app-line-height-title);
     color: var(--mat-sys-on-surface);
   }
 
@@ -17,7 +20,7 @@
 
   &__row {
     display: flex;
-    gap: 0.75rem;
+    gap: var(--app-spacing-sm);
     align-items: flex-start;
   }
 
@@ -35,20 +38,26 @@
     border: none;
     padding: 0;
     margin: 0;
+    // Fieldset defaults to min-inline-size: min-content, which lets natural
+    // content widths push past the container and cause horizontal scroll.
+    // Force it to behave like a normal block.
+    min-inline-size: 0;
+    inline-size: 100%;
+    box-sizing: border-box;
     display: flex;
     flex-direction: column;
-    gap: 0.5rem;
+    gap: var(--app-spacing-xs);
   }
 
   &__group-label {
-    font-size: 0.875rem;
+    font-size: var(--app-font-label);
     font-weight: 500;
     color: var(--mat-sys-on-surface-variant);
     padding: 0;
   }
 
   &__group-hint {
-    font-size: 0.75rem;
+    font-size: var(--app-font-caption);
     color: var(--mat-sys-on-surface-variant);
     margin: 0;
   }
@@ -57,7 +66,7 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 0.75rem;
+    gap: var(--app-spacing-sm);
     flex-wrap: wrap;
   }
 
@@ -72,7 +81,7 @@
     height: 0.5rem;
     border-radius: 50%;
     flex-shrink: 0;
-    margin-inline-end: 0.25rem;
+    margin-inline-end: var(--app-spacing-xxs);
     vertical-align: middle;
   }
 
@@ -83,7 +92,7 @@
   &__secondary-section {
     display: flex;
     flex-direction: column;
-    gap: 0.5rem;
+    gap: var(--app-spacing-xs);
   }
 
   &__secondary-toggle {
@@ -92,24 +101,23 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    font-size: 0.875rem;
+    font-size: var(--app-font-label);
     font-weight: 500;
     color: var(--mat-sys-on-surface-variant);
-    padding: 0.25rem 0;
+    padding: var(--app-spacing-xxs) 0;
 
     &:focus-visible {
-      outline: 0.125rem solid var(--mat-sys-primary);
-      outline-offset: 0.125rem;
-      border-radius: 0.125rem;
+      @include focus.ring;
+      border-radius: var(--app-shape-xs);
     }
   }
 
   &__actions {
     display: flex;
     justify-content: flex-end;
-    gap: 0.5rem;
-    padding: 0.5rem;
-    border-radius: 0.5rem;
+    gap: var(--app-spacing-xs);
+    padding: var(--app-spacing-xs);
+    border-radius: var(--app-shape-sm);
     position: sticky;
     bottom: 0;
     background: var(--mat-sys-surface-container);

@@ -1,14 +1,17 @@
+@use '../../../styles/focus';
+
 .undo-history-sheet {
-  padding: 1rem;
+  padding: var(--app-spacing-md);
 
   &__title {
-    margin: 0 0 0.75rem;
-    font-size: 1rem;
+    margin: 0 0 var(--app-spacing-sm);
+    font-size: var(--app-font-title);
     font-weight: 600;
+    line-height: var(--app-line-height-title);
   }
 
   &__empty {
-    padding: 2rem 0;
+    padding: var(--app-spacing-xl) 0;
     text-align: center;
     color: var(--mat-sys-on-surface-variant);
   }
@@ -30,17 +33,16 @@
     cursor: pointer;
     display: grid;
     grid-template-columns: 2rem 1fr auto;
-    gap: 0.75rem;
+    gap: var(--app-spacing-sm);
     align-items: center;
     width: 100%;
-    min-height: 3rem;
-    padding: 0.5rem 0.25rem;
+    min-height: var(--app-spacing-row-min-height);
+    padding: var(--app-spacing-xs) var(--app-spacing-xxs);
     color: var(--mat-sys-on-surface);
 
     &:focus-visible {
-      outline: 2px solid var(--mat-sys-primary);
-      outline-offset: 2px;
-      border-radius: 0.25rem;
+      @include focus.ring;
+      border-radius: var(--app-shape-xs);
     }
   }
 
@@ -53,12 +55,12 @@
     border-radius: 50%;
     background: var(--mat-sys-secondary-container);
     color: var(--mat-sys-on-secondary-container);
-    font-size: 0.75rem;
+    font-size: var(--app-font-caption);
     font-weight: 600;
   }
 
   &__price {
-    font-size: 0.875rem;
+    font-size: var(--app-font-label);
     color: var(--mat-sys-on-surface-variant);
   }
 }

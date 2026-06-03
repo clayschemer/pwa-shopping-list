@@ -3,10 +3,10 @@
 
 @mixin pulse {
   background: var(--mat-sys-surface-container-highest);
-  border-radius: 0.25rem;
+  border-radius: var(--app-shape-xs);
 
   @media (prefers-reduced-motion: no-preference) {
-    animation: skeleton-shimmer 1.5s ease-in-out infinite;
+    animation: skeleton-shimmer var(--app-duration-skeleton) ease-in-out infinite;
   }
 }
 

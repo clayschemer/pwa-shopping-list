@@ -1,3 +1,5 @@
+@use '../styles/focus';
+
 :host {
   display: block;
   min-height: 100vh;
@@ -19,33 +21,35 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 0.75rem 1rem;
+    min-height: var(--app-top-bar-height);
+    padding: var(--app-spacing-sm) var(--app-spacing-md);
     background: color-mix(in srgb, var(--mat-sys-surface) 40%, transparent);
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
+    box-sizing: border-box;
   }
 
   &__mode-toggle {
     display: flex;
-    gap: 0.25rem;
-    padding: 0.25rem;
-    border-radius: 1.5rem;
+    gap: var(--app-spacing-xxs);
+    padding: var(--app-spacing-xxs);
+    border-radius: var(--app-shape-pill);
     background: var(--mat-sys-surface-container);
   }
 
   &__mode-btn {
     all: unset;
     cursor: pointer;
-    padding: 0.5rem 1rem;
-    border-radius: 1.25rem;
-    font-size: 0.875rem;
+    padding: var(--app-spacing-xs) var(--app-spacing-md);
+    border-radius: var(--app-shape-pill);
+    font-size: var(--app-font-label);
     font-weight: 500;
     color: var(--mat-sys-on-surface-variant);
 
     @media (prefers-reduced-motion: no-preference) {
       transition:
-        background-color 200ms ease,
-        color 200ms ease;
+        background-color var(--app-duration-standard) var(--app-easing-standard),
+        color var(--app-duration-standard) var(--app-easing-standard);
     }
 
     &--active {
@@ -54,8 +58,7 @@
     }
 
     &:focus-visible {
-      outline: 2px solid var(--mat-sys-primary);
-      outline-offset: 2px;
+      @include focus.ring;
     }
   }
 
@@ -63,33 +66,39 @@
     all: unset;
     cursor: pointer;
     display: flex;
-    gap: 0.5rem;
+    gap: var(--app-spacing-xs);
     align-items: center;
-    padding: 0.375rem 0.75rem;
-    border-radius: 1rem;
-    font-size: 0.75rem;
+    padding: var(--app-spacing-xxs) var(--app-spacing-sm);
+    border-radius: var(--app-shape-lg);
+    font-size: var(--app-font-caption);
     font-weight: 500;
     background: var(--mat-sys-primary-container);
     color: var(--mat-sys-on-primary-container);
 
     &:focus-visible {
-      outline: 2px solid var(--mat-sys-primary);
-      outline-offset: 2px;
+      @include focus.ring;
     }
   }
 
   &__session-pill-total {
-    font-size: 0.875rem;
+    font-size: var(--app-font-label);
     font-weight: 600;
   }
 
   &__session-pill-sub {
-    font-size: 0.6875rem;
+    font-size: var(--app-font-caption);
     opacity: 0.85;
   }
 
   &__content {
-    padding: 4rem var(--app-spacing-padding-inline) 5rem;
+    // Top padding clears the fixed top-bar; bottom clears any FAB / safe
+    // area. Both offsets are non-shrinking semantic tokens so compact mode
+    // doesn't pull content under the bar (the bar's own --app-top-bar-height
+    // shifts in lockstep — see _theme-modes.scss).
+    padding:
+      calc(var(--app-top-bar-height) + var(--app-spacing-xs))
+      var(--app-spacing-md)
+      var(--app-fab-clearance);
   }
 
   &__fullscreen {

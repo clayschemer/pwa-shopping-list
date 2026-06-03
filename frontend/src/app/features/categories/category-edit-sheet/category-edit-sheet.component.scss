@@ -1,13 +1,16 @@
+@use '../../../../styles/focus';
+
 .app-category-edit-sheet {
   display: flex;
   flex-direction: column;
-  gap: var(--app-spacing-stack, 1rem);
-  padding: 1.5rem 1rem 1rem;
+  gap: var(--app-spacing-md);
+  padding: var(--app-spacing-lg) var(--app-spacing-md) var(--app-spacing-md);
 
   &__title {
     margin: 0;
-    font-size: 1.125rem;
+    font-size: var(--app-font-title);
     font-weight: 600;
+    line-height: var(--app-line-height-title);
     color: var(--mat-sys-on-surface);
   }
 
@@ -18,11 +21,11 @@
   &__color-row {
     display: flex;
     flex-direction: column;
-    gap: 0.375rem;
+    gap: var(--app-spacing-xxs);
   }
 
   &__color-label {
-    font-size: 0.875rem;
+    font-size: var(--app-font-label);
     font-weight: 500;
     color: var(--mat-sys-on-surface-variant);
   }
@@ -30,7 +33,7 @@
   &__color-controls {
     display: flex;
     align-items: center;
-    gap: 0.5rem;
+    gap: var(--app-spacing-xs);
     flex-wrap: wrap;
   }
 
@@ -55,9 +58,9 @@
   &__color-picker-label {
     display: inline-flex;
     align-items: center;
-    gap: 0.375rem;
+    gap: var(--app-spacing-xxs);
     cursor: pointer;
-    font-size: 0.875rem;
+    font-size: var(--app-font-label);
     color: var(--mat-sys-primary);
   }
 
@@ -79,35 +82,34 @@
   &__color-clear {
     all: unset;
     cursor: pointer;
-    font-size: 0.8125rem;
+    font-size: var(--app-font-label);
     color: var(--mat-sys-error);
 
     &:focus-visible {
-      outline: 0.125rem solid var(--mat-sys-primary);
-      outline-offset: 0.125rem;
-      border-radius: 0.125rem;
+      @include focus.ring;
+      border-radius: var(--app-shape-xs);
     }
   }
 
   &__shops {
     border: 1px solid var(--mat-sys-outline-variant);
-    border-radius: 0.5rem;
-    padding: 0.5rem 0.75rem 0.75rem;
+    border-radius: var(--app-shape-sm);
+    padding: var(--app-spacing-xs) var(--app-spacing-sm) var(--app-spacing-sm);
     margin: 0;
 
     &-legend {
-      padding: 0 0.25rem;
-      font-size: 0.75rem;
+      padding: 0 var(--app-spacing-xxs);
+      font-size: var(--app-font-caption);
       font-weight: 600;
-      letter-spacing: 0.05em;
+      letter-spacing: var(--app-letter-spacing-caption);
       text-transform: uppercase;
       color: var(--mat-sys-on-surface-variant);
     }
 
     &-empty {
-      font-size: 0.875rem;
+      font-size: var(--app-font-label);
       color: var(--mat-sys-on-surface-variant);
-      margin: 0.25rem 0 0;
+      margin: var(--app-spacing-xxs) 0 0;
     }
 
     &-list {
@@ -128,12 +130,12 @@
   &__actions {
     display: flex;
     justify-content: flex-end;
-    gap: 0.5rem;
+    gap: var(--app-spacing-xs);
   }
 
   &__danger {
     border-top: 1px solid var(--mat-sys-outline-variant);
-    padding-top: 0.5rem;
+    padding-top: var(--app-spacing-xs);
     display: flex;
     justify-content: flex-start;
   }

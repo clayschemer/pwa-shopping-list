@@ -5,43 +5,45 @@
   justify-content: center;
   min-height: 100vh;
   min-height: 100dvh;
-  padding: 1.5rem;
+  padding: var(--app-spacing-lg);
   background: var(--mat-sys-surface);
 
   &__header {
     text-align: center;
-    margin-block-end: 2rem;
+    margin-block-end: var(--app-spacing-xl);
   }
 
   &__title {
-    font-size: clamp(1.5rem, 5vw, 2.5rem);
-    font-weight: 700;
+    font-family: var(--app-font-family-display);
+    font-size: clamp(var(--app-font-title-lg), 5vw, 2.5rem);
+    font-weight: 400;
+    line-height: var(--app-line-height-display);
     color: var(--mat-sys-on-surface);
     margin: 0;
   }
 
   &__subtitle {
-    font-size: 1rem;
+    font-size: var(--app-font-body-lg);
     color: var(--mat-sys-on-surface-variant);
-    margin: 0.5rem 0 0;
+    margin: var(--app-spacing-xs) 0 0;
   }
 
   &__actions {
     display: flex;
     flex-direction: column;
-    gap: 1.5rem;
+    gap: var(--app-spacing-lg);
     width: 100%;
     max-width: 22rem;
   }
 
   &__google-btn {
-    min-height: 2.75rem;
+    min-height: var(--app-spacing-row-min-height);
   }
 
   &__divider {
     display: flex;
     align-items: center;
-    gap: 1rem;
+    gap: var(--app-spacing-md);
     color: var(--mat-sys-on-surface-variant);
 
     &::before,
@@ -54,15 +56,15 @@
   }
 
   &__divider-text {
-    font-size: 0.75rem;
+    font-size: var(--app-font-caption);
     text-transform: uppercase;
-    letter-spacing: 0.05em;
+    letter-spacing: var(--app-letter-spacing-caption);
   }
 
   &__form {
     display: flex;
     flex-direction: column;
-    gap: 0.5rem;
+    gap: var(--app-spacing-xs);
   }
 
   &__field {
@@ -71,14 +73,14 @@
 
   &__error {
     margin: 0;
-    padding: 0.5rem 0.75rem;
-    border-radius: 0.5rem;
-    font-size: 0.875rem;
+    padding: var(--app-spacing-xs) var(--app-spacing-sm);
+    border-radius: var(--app-shape-sm);
+    font-size: var(--app-font-label);
     color: var(--mat-sys-error);
     background: var(--mat-sys-error-container);
   }
 
   &__submit-btn {
-    min-height: 2.75rem;
+    min-height: var(--app-spacing-row-min-height);
   }
 }

@@ -5,25 +5,27 @@
   justify-content: center;
   min-height: 100vh;
   min-height: 100dvh;
-  padding: 1.5rem;
+  padding: var(--app-spacing-lg);
   text-align: center;
   background: var(--mat-sys-surface);
 
   &__title {
-    font-size: 1.5rem;
-    font-weight: 700;
+    font-family: var(--app-font-family-display);
+    font-size: var(--app-font-display);
+    font-weight: 400;
+    line-height: var(--app-line-height-display);
     color: var(--mat-sys-on-surface);
     margin: 0;
   }
 
   &__message {
-    font-size: 1rem;
+    font-size: var(--app-font-body-lg);
     color: var(--mat-sys-on-surface-variant);
-    margin: 1rem 0 2rem;
+    margin: var(--app-spacing-md) 0 var(--app-spacing-xl);
     max-width: 22rem;
   }
 
   &__action {
-    min-height: 2.75rem;
+    min-height: var(--app-spacing-row-min-height);
   }
 }

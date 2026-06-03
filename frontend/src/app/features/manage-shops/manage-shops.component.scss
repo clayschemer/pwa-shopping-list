@@ -1,3 +1,5 @@
+@use '../../../styles/focus';
+
 .app-manage-shops {
   display: flex;
   flex-direction: column;
@@ -9,8 +11,8 @@
   &__header {
     display: flex;
     align-items: center;
-    gap: 0.5rem;
-    padding: 0.5rem;
+    gap: var(--app-spacing-xs);
+    padding: var(--app-spacing-xs);
     position: sticky;
     top: 0;
     z-index: 10;
@@ -20,16 +22,18 @@
 
   &__title {
     margin: 0;
-    font-family: 'DM Serif Display', serif;
+    font-family: var(--app-font-family-display);
     font-weight: 400;
-    font-size: 1.25rem;
+    font-size: var(--app-font-title-lg);
+    line-height: var(--app-line-height-title);
     color: var(--mat-sys-on-surface);
   }
 
   &__list {
     display: flex;
     flex-direction: column;
-    padding: 0 0 6rem;
+    // bottom padding clears the FAB
+    padding: 0 0 calc(var(--app-spacing-xxl) * 2);
   }
 
   &__shop-row {
@@ -41,7 +45,7 @@
     border-bottom: 1px solid var(--mat-sys-outline-variant);
 
     @media (prefers-reduced-motion: no-preference) {
-      transition: background-color 150ms ease;
+      transition: background-color var(--app-duration-quick) var(--app-easing-standard);
     }
 
     &:hover {
@@ -68,19 +72,19 @@
     cursor: pointer;
     display: flex;
     flex-direction: column;
-    gap: 0.15rem;
-    padding: 0.5rem 0.25rem;
+    gap: var(--app-spacing-xxs);
+    padding: var(--app-spacing-xs) var(--app-spacing-xxs);
     min-width: 0;
 
     &:focus-visible {
-      outline: 2px solid var(--mat-sys-primary);
-      outline-offset: -2px;
-      border-radius: 0.25rem;
+      @include focus.ring;
+      outline-offset: calc(var(--app-focus-ring-offset) * -1);
+      border-radius: var(--app-shape-xs);
     }
   }
 
   &__shop-name {
-    font-size: var(--app-font-size-body);
+    font-size: var(--app-font-body);
     font-weight: 500;
     color: var(--mat-sys-on-surface);
   }
@@ -88,8 +92,8 @@
   &__shop-url {
     display: inline-flex;
     align-items: center;
-    gap: 0.25rem;
-    font-size: 0.75rem;
+    gap: var(--app-spacing-xxs);
+    font-size: var(--app-font-caption);
     color: var(--mat-sys-on-surface-variant);
     overflow: hidden;
     text-overflow: ellipsis;
@@ -103,9 +107,9 @@
   }
 
   &__shop-url-icon {
-    font-size: 0.875rem;
-    width: 0.875rem;
-    height: 0.875rem;
+    font-size: var(--app-font-label);
+    width: var(--app-font-label);
+    height: var(--app-font-label);
     flex-shrink: 0;
   }
 
@@ -119,22 +123,22 @@
   &__empty {
     text-align: center;
     color: var(--mat-sys-on-surface-variant);
-    padding: 2rem 1rem;
-    font-size: 0.9375rem;
+    padding: var(--app-spacing-xl) var(--app-spacing-md);
+    font-size: var(--app-font-body);
   }
 
   &__fab {
     position: fixed;
-    bottom: 1.5rem;
-    right: 1.5rem;
+    bottom: var(--app-spacing-lg);
+    right: var(--app-spacing-lg);
   }
 }
 
 // CDK drag-drop styles
 .cdk-drag-preview {
   background: var(--mat-sys-surface-container-highest);
-  box-shadow: 0 0.25rem 0.75rem rgba(0, 0, 0, 0.18);
-  border-radius: 0.5rem;
+  box-shadow: var(--mat-sys-level3);
+  border-radius: var(--app-shape-sm);
   display: grid;
   grid-template-columns: 2.5rem 1fr 2rem;
   align-items: center;
@@ -147,6 +151,6 @@
 
 .cdk-drag-animating {
   @media (prefers-reduced-motion: no-preference) {
-    transition: transform 200ms ease;
+    transition: transform var(--app-duration-standard) var(--app-easing-standard);
   }
 }

@@ -1,25 +1,27 @@
+@use '../../../styles/focus';
+
 .app-price-dialog {
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  gap: var(--app-spacing-xs);
   min-width: 16rem;
 
   &__row {
     display: flex;
     flex-direction: column;
-    gap: 0.125rem;
+    gap: var(--app-spacing-xxs);
     margin: 0;
   }
 
   &__label {
-    font-size: 0.75rem;
+    font-size: var(--app-font-caption);
     color: var(--mat-sys-on-surface-variant);
     text-transform: uppercase;
-    letter-spacing: 0.03em;
+    letter-spacing: var(--app-letter-spacing-caption);
   }
 
   &__value {
-    font-size: 0.9375rem;
+    font-size: var(--app-font-body);
     color: var(--mat-sys-on-surface);
     word-break: break-word;
   }
@@ -27,21 +29,20 @@
   &__feedback-link {
     all: unset;
     cursor: pointer;
-    font-size: 0.875rem;
+    font-size: var(--app-font-label);
     color: var(--mat-sys-primary);
     text-decoration: underline;
     align-self: flex-start;
-    margin-top: 0.5rem;
+    margin-top: var(--app-spacing-xs);
 
     &:focus-visible {
-      outline: 0.125rem solid var(--mat-sys-primary);
-      outline-offset: 0.125rem;
-      border-radius: 0.125rem;
+      @include focus.ring;
+      border-radius: var(--app-shape-xs);
     }
   }
 
   &__feedback {
-    margin-top: 0.5rem;
+    margin-top: var(--app-spacing-xs);
   }
 
   &__feedback-field {
@@ -49,8 +50,8 @@
   }
 
   &__thanks {
-    margin: 0.75rem 0 0;
-    font-size: 0.9375rem;
+    margin: var(--app-spacing-sm) 0 0;
+    font-size: var(--app-font-body);
     color: var(--mat-sys-on-surface-variant);
   }
 }

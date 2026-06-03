@@ -1,19 +1,20 @@
+@use '../../../styles/focus';
+
 :host {
   position: fixed;
-  right: 1.5rem;
-  bottom: 1.5rem;
+  right: var(--app-spacing-lg);
+  bottom: var(--app-spacing-lg);
   z-index: 20;
   display: flex;
   justify-content: flex-end;
-
 }
 
 .app-add-item-pill {
   display: flex;
   flex-direction: column;
   align-items: stretch;
-  gap: 0.5rem;
-  width: min(calc(100vw - 3rem), 32rem);
+  gap: var(--app-spacing-xs);
+  width: min(calc(100vw - var(--app-spacing-xxl)), 32rem);
 
   &__fab {
     position: static;
@@ -22,13 +23,12 @@
   &__suggestions {
     list-style: none;
     margin: 0;
-    padding: 0;
+    padding: var(--app-spacing-xs);
     display: flex;
     flex-direction: column;
-    gap: 0.25rem;
+    gap: var(--app-spacing-xxs);
     background: var(--mat-sys-surface-container);
-    border-radius: 1.25rem;
-    padding: 0.5rem;
+    border-radius: var(--app-shape-xl);
     box-shadow: var(--mat-sys-level3);
   }
 
@@ -43,38 +43,41 @@
     display: flex;
     justify-content: space-between;
     align-items: baseline;
-    gap: 0.75rem;
-    min-height: 2.75rem;
-    padding: 0.5rem 0.75rem;
-    border-radius: 0.75rem;
+    gap: var(--app-spacing-sm);
+    min-height: var(--app-spacing-row-min-height);
+    padding: var(--app-spacing-xs) var(--app-spacing-sm);
+    border-radius: var(--app-shape-md);
     color: var(--mat-sys-on-surface);
+
+    @media (prefers-reduced-motion: no-preference) {
+      transition: background-color var(--app-duration-quick) var(--app-easing-standard);
+    }
 
     &:hover {
       background: var(--mat-sys-surface-container-high);
     }
 
     &:focus-visible {
-      outline: 2px solid var(--mat-sys-primary);
-      outline-offset: 2px;
+      @include focus.ring;
     }
   }
 
   &__suggestion-name {
-    font-size: 1rem;
+    font-size: var(--app-font-body-lg);
   }
 
   &__suggestion-qty {
-    font-size: 0.875rem;
+    font-size: var(--app-font-label);
     color: var(--mat-sys-on-surface-variant);
   }
 
   &__bar {
     display: flex;
     align-items: center;
-    gap: 0.5rem;
-    padding: 0.5rem 0.75rem;
+    gap: var(--app-spacing-xs);
+    padding: var(--app-spacing-xs) var(--app-spacing-sm);
     background: var(--mat-sys-surface-container-high);
-    border-radius: 2rem;
+    border-radius: var(--app-shape-pill);
     box-shadow: var(--mat-sys-level3);
     min-height: 3.5rem;
   }
@@ -83,9 +86,9 @@
     all: unset;
     flex: 1;
     min-width: 0;
-    font-size: 1rem;
+    font-size: var(--app-font-body-lg);
     color: var(--mat-sys-on-surface);
-    padding: 0.5rem 0.25rem;
+    padding: var(--app-spacing-xs) var(--app-spacing-xxs);
 
     &[aria-invalid='true'] {
       color: var(--mat-sys-error);
@@ -95,16 +98,16 @@
   &__error {
     flex-basis: 100%;
     order: 10;
-    font-size: 0.8125rem;
+    font-size: var(--app-font-label);
     color: var(--mat-sys-error);
   }
 
   &__ok {
     all: unset;
     cursor: pointer;
-    padding: 0.5rem 1.25rem;
-    border-radius: 1.5rem;
-    min-height: 2.75rem;
+    padding: var(--app-spacing-xs) var(--app-spacing-lg);
+    border-radius: var(--app-shape-pill);
+    min-height: var(--app-spacing-row-min-height);
     font-weight: 600;
     background: var(--mat-sys-tertiary, var(--mat-sys-primary));
     color: var(--mat-sys-on-tertiary, var(--mat-sys-on-primary));
@@ -115,17 +118,16 @@
     }
 
     &:focus-visible {
-      outline: 2px solid var(--mat-sys-primary);
-      outline-offset: 2px;
+      @include focus.ring;
     }
   }
 
   &__name-badge {
-    padding: 0.375rem 0.75rem;
-    border-radius: 1rem;
+    padding: var(--app-spacing-xxs) var(--app-spacing-sm);
+    border-radius: var(--app-shape-lg);
     background: var(--mat-sys-secondary-container);
     color: var(--mat-sys-on-secondary-container);
-    font-size: 0.9375rem;
+    font-size: var(--app-font-body);
     max-width: 40%;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -135,47 +137,46 @@
   &__qty {
     all: unset;
     width: 4.5rem;
-    padding: 0.5rem 0.5rem;
-    border-radius: 0.5rem;
+    padding: var(--app-spacing-xs);
+    border-radius: var(--app-shape-sm);
     background: var(--mat-sys-surface);
     color: var(--mat-sys-on-surface);
-    font-size: 1rem;
+    font-size: var(--app-font-body-lg);
     text-align: right;
 
     &:focus-visible {
-      outline: 2px solid var(--mat-sys-primary);
+      @include focus.ring;
     }
   }
 
   &__unit {
     all: unset;
     cursor: pointer;
-    padding: 0.5rem 0.5rem;
-    border-radius: 0.5rem;
+    padding: var(--app-spacing-xs);
+    border-radius: var(--app-shape-sm);
     background: var(--mat-sys-surface);
     color: var(--mat-sys-on-surface);
-    font-size: 0.9375rem;
+    font-size: var(--app-font-body);
     min-width: 4.5rem;
 
     &:focus-visible {
-      outline: 2px solid var(--mat-sys-primary);
+      @include focus.ring;
     }
   }
 
   &__add {
     all: unset;
     cursor: pointer;
-    padding: 0.5rem 1.25rem;
-    border-radius: 1.5rem;
-    min-height: 2.75rem;
+    padding: var(--app-spacing-xs) var(--app-spacing-lg);
+    border-radius: var(--app-shape-pill);
+    min-height: var(--app-spacing-row-min-height);
     font-weight: 600;
     margin-left: auto;
     background: var(--mat-sys-primary);
     color: var(--mat-sys-on-primary);
 
     &:focus-visible {
-      outline: 2px solid var(--mat-sys-primary);
-      outline-offset: 2px;
+      @include focus.ring;
     }
   }
 }

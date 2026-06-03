@@ -1,3 +1,5 @@
+@use '../../../styles/focus';
+
 .app-categories {
   display: flex;
   flex-direction: column;
@@ -8,22 +10,23 @@
   &__header {
     display: flex;
     align-items: center;
-    gap: 0.25rem;
-    padding: 0.25rem 0.25rem 0;
+    gap: var(--app-spacing-xxs);
+    padding: var(--app-spacing-xxs) var(--app-spacing-xxs) 0;
     min-height: 3.5rem;
     border-bottom: 1px solid var(--mat-sys-outline-variant);
   }
 
   &__title {
-    margin: 0 0 0 0.25rem;
-    font-family: 'DM Serif Display', serif;
+    margin: 0 0 0 var(--app-spacing-xxs);
+    font-family: var(--app-font-family-display);
     font-weight: 400;
-    font-size: 1.25rem;
+    font-size: var(--app-font-title-lg);
+    line-height: var(--app-line-height-title);
     color: var(--mat-sys-on-surface);
   }
 
   &__subbar {
-    padding: 0.75rem 1rem 0.5rem;
+    padding: var(--app-spacing-sm) var(--app-spacing-md) var(--app-spacing-xs);
     background: var(--mat-sys-surface);
   }
 
@@ -35,19 +38,20 @@
     flex: 1;
     display: flex;
     flex-direction: column;
-    padding: 0 0 6rem;
+    // bottom padding clears the FAB
+    padding: 0 0 calc(var(--app-spacing-xxl) * 2);
   }
 
   &__row {
     display: grid;
     grid-template-columns: 2.5rem 1fr 2rem;
     align-items: center;
-    min-height: 3rem;
+    min-height: var(--app-spacing-row-min-height);
     background: var(--mat-sys-surface);
     border-bottom: 1px solid var(--mat-sys-outline-variant);
 
     @media (prefers-reduced-motion: no-preference) {
-      transition: background-color 150ms ease;
+      transition: background-color var(--app-duration-quick) var(--app-easing-standard);
     }
 
     &:hover {
@@ -74,15 +78,15 @@
     cursor: pointer;
     display: flex;
     align-items: center;
-    gap: 0.5rem;
+    gap: var(--app-spacing-xs);
     height: 100%;
     color: var(--mat-sys-on-surface);
-    font-size: var(--app-font-size-body);
+    font-size: var(--app-font-body);
 
     &:focus-visible {
-      outline: 2px solid var(--mat-sys-primary);
-      outline-offset: -2px;
-      border-radius: 0.25rem;
+      @include focus.ring;
+      outline-offset: calc(var(--app-focus-ring-offset) * -1);
+      border-radius: var(--app-shape-xs);
     }
   }
 
@@ -106,27 +110,27 @@
   }
 
   &__empty {
-    padding: 2rem 1rem;
+    padding: var(--app-spacing-xl) var(--app-spacing-md);
     text-align: center;
     color: var(--mat-sys-on-surface-variant);
   }
 
   &__fab {
     position: fixed;
-    right: 1.25rem;
-    bottom: 1.5rem;
+    right: var(--app-spacing-xl);
+    bottom: var(--app-spacing-lg);
   }
 }
 
-// CDK drag-drop styles (mirrors the previous nav-drawer pattern)
+// CDK drag-drop styles
 .cdk-drag-preview {
   background: var(--mat-sys-surface-container-highest);
-  box-shadow: 0 0.25rem 0.75rem rgba(0, 0, 0, 0.18);
-  border-radius: 0.5rem;
+  box-shadow: var(--mat-sys-level3);
+  border-radius: var(--app-shape-sm);
   display: grid;
   grid-template-columns: 2.5rem 1fr 2rem;
   align-items: center;
-  min-height: 3rem;
+  min-height: var(--app-spacing-row-min-height);
 }
 
 .cdk-drag-placeholder {
@@ -135,6 +139,6 @@
 
 .cdk-drag-animating {
   @media (prefers-reduced-motion: no-preference) {
-    transition: transform 200ms ease;
+    transition: transform var(--app-duration-standard) var(--app-easing-standard);
   }
 }

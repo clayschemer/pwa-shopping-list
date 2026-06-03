@@ -2,7 +2,7 @@ import { ChangeDetectionStrategy, Component, inject, ViewEncapsulation } from '@
 import { Location } from '@angular/common';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { Store } from '@ngrx/store';
-import { MatIconButton } from '@angular/material/button';
+import { MatButton, MatIconButton } from '@angular/material/button';
 import { MatIcon } from '@angular/material/icon';
 import { MatSlideToggle, MatSlideToggleChange } from '@angular/material/slide-toggle';
 import { MatFormField, MatLabel, MatPrefix } from '@angular/material/form-field';
@@ -18,6 +18,7 @@ import { authActions } from '../../store/account/account.actions';
 @Component({
   selector: 'app-settings',
   imports: [
+    MatButton,
     MatIconButton,
     MatIcon,
     MatSlideToggle,
