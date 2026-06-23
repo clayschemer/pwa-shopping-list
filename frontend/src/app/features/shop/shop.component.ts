@@ -24,7 +24,7 @@ import {
   PriceProductDialogData,
 } from '../plan/price-product-dialog.component';
 import type { Item } from '../../models/item.model';
-import type { ItemId } from '../../models/ids.model';
+import type { ItemId, ShopId } from '../../models/ids.model';
 
 interface ShopFlatRow {
   item: Item;
@@ -87,6 +87,10 @@ export class ShopComponent {
     { initialValue: null },
   );
 
+  readonly selectedShopId = computed<ShopId | null>(
+    () => this.activeSession()?.shopId ?? null,
+  );
+
   readonly pendingChecks = toSignal(this.store.select(selectPendingChecks), {
     initialValue: {} as Record<ItemId, PendingCheck>,
   });
@@ -109,21 +113,24 @@ export class ShopComponent {
   }
 
   openPriceDialog(item: Item): void {
-    const shop = this.shops().find((s) => s.id === item.priceShopId);
+    const shopId = this.selectedShopId();
+    const shopEntry = shopId ? item.shopPrices[shopId] ?? null : null;
+    const priceShopId = shopEntry ? shopId : item.priceShopId;
+    const shop = this.shops().find((s) => s.id === priceShopId);
     this.dialog.open<PriceProductDialogComponent, PriceProductDialogData>(
       PriceProductDialogComponent,
       {
         data: {
           itemId: item.id,
           itemName: item.name,
-          productName: item.priceProductName,
-          productUrl: item.priceProductUrl,
-          searchUrl: item.priceSearchUrl,
+          productName: shopEntry?.priceProductName ?? item.priceProductName,
+          productUrl: shopEntry?.priceProductUrl ?? item.priceProductUrl,
+          searchUrl: shopEntry?.priceSearchUrl ?? item.priceSearchUrl,
           shopName: shop?.name ?? null,
-          price: item.price,
-          priceQuantity: item.priceQuantity,
-          priceUnit: item.priceUnit,
-          priceUpdatedAt: item.priceUpdatedAt,
+          price: shopEntry?.price ?? item.price,
+          priceQuantity: shopEntry?.priceQuantity ?? item.priceQuantity,
+          priceUnit: shopEntry?.priceUnit ?? item.priceUnit,
+          priceUpdatedAt: shopEntry?.priceUpdatedAt ?? item.priceUpdatedAt,
         },
       },
     );

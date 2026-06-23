@@ -7,6 +7,16 @@ export interface PriceFeedbackEntry {
   timestamp: number;
 }
 
+export interface ShopPriceEntry {
+  price: number;
+  priceQuantity: number;
+  priceUnit: string;
+  priceProductName: string | null;
+  priceProductUrl: string | null;
+  priceSearchUrl: string | null;
+  priceUpdatedAt: number;
+}
+
 export interface Item {
   id: ItemId;
   accountId: AccountId;
@@ -27,6 +37,7 @@ export interface Item {
   priceProductName: string | null;
   priceProductUrl: string | null;
   priceSearchUrl: string | null;
+  shopPrices: Record<string, ShopPriceEntry>;
   priceFeedback: PriceFeedbackEntry[];
   priceUpdatedAt: number | null;
   priceAttemptedAt: number | null;  // set by pipeline on every attempt; null = never tried

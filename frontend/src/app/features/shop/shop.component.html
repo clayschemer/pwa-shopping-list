@@ -113,63 +113,113 @@
         <span class="app-shop__item-undo-label">
           {{ 'shop.tapToUndo' | transloco }}
         </span>
-      } @else if (item.price !== null) {
-        @let priceResult = item | effectivePrice;
-        @if (canInspectPrice(item)) {
-          <button
-            type="button"
-            class="app-shop__item-price-btn"
-            [class.app-shop__item-price-btn--approximate]="priceResult.kind === 'approximate'"
-            [attr.aria-label]="'pricePopup.openLabel' | transloco: { name: item.name }"
-            (click)="openPriceDialog(item)"
-          >
-            @if (priceResult.kind === 'exact') {
-              {{ priceResult.total | money }}
-            } @else if (priceResult.kind === 'approximate') {
-              @if (priceResult.shelfQuantity !== null && priceResult.shelfUnit) {
-                {{
-                  'shop.approxShelfPrice'
-                    | transloco
-                      : {
-                          price: priceResult.shelfPrice | money,
-                          quantity: priceResult.shelfQuantity,
-                          unit: priceResult.shelfUnit,
-                        }
-                }}
-              } @else {
-                {{
-                  'shop.approxShelfPriceNoQty'
-                    | transloco: { price: priceResult.shelfPrice | money }
-                }}
+      } @else {
+        @let priceResult = item | effectivePrice: selectedShopId();
+        @if (priceResult.kind !== 'none') {
+          @if (canInspectPrice(item)) {
+            <button
+              type="button"
+              class="app-shop__item-price-btn"
+              [class.app-shop__item-price-btn--approximate]="priceResult.kind === 'approximate'"
+              [class.app-shop__item-price-btn--global-fallback]="priceResult.isGlobalFallback"
+              [attr.aria-label]="'pricePopup.openLabel' | transloco: { name: item.name }"
+              (click)="openPriceDialog(item)"
+            >
+              @if (priceResult.kind === 'exact') {
+                @if (priceResult.isGlobalFallback) {
+                  ({{ priceResult.total | money }})
+                } @else {
+                  {{ priceResult.total | money }}
+                }
+              } @else if (priceResult.kind === 'approximate') {
+                @if (priceResult.shelfQuantity !== null && priceResult.shelfUnit) {
+                  @if (priceResult.isGlobalFallback) {
+                    ({{
+                      'shop.approxShelfPrice'
+                        | transloco
+                          : {
+                              price: priceResult.shelfPrice | money,
+                              quantity: priceResult.shelfQuantity,
+                              unit: priceResult.shelfUnit,
+                            }
+                    }})
+                  } @else {
+                    {{
+                      'shop.approxShelfPrice'
+                        | transloco
+                          : {
+                              price: priceResult.shelfPrice | money,
+                              quantity: priceResult.shelfQuantity,
+                              unit: priceResult.shelfUnit,
+                            }
+                    }}
+                  }
+                } @else {
+                  @if (priceResult.isGlobalFallback) {
+                    ({{
+                      'shop.approxShelfPriceNoQty'
+                        | transloco: { price: priceResult.shelfPrice | money }
+                    }})
+                  } @else {
+                    {{
+                      'shop.approxShelfPriceNoQty'
+                        | transloco: { price: priceResult.shelfPrice | money }
+                    }}
+                  }
+                }
               }
-            }
-          </button>
-        } @else {
-          <span
-            class="app-shop__item-price"
-            [class.app-shop__item-price--approximate]="priceResult.kind === 'approximate'"
-          >
-            @if (priceResult.kind === 'exact') {
-              {{ priceResult.total | money }}
-            } @else if (priceResult.kind === 'approximate') {
-              @if (priceResult.shelfQuantity !== null && priceResult.shelfUnit) {
-                {{
-                  'shop.approxShelfPrice'
-                    | transloco
-                      : {
-                          price: priceResult.shelfPrice | money,
-                          quantity: priceResult.shelfQuantity,
-                          unit: priceResult.shelfUnit,
-                        }
-                }}
-              } @else {
-                {{
-                  'shop.approxShelfPriceNoQty'
-                    | transloco: { price: priceResult.shelfPrice | money }
-                }}
+            </button>
+          } @else {
+            <span
+              class="app-shop__item-price"
+              [class.app-shop__item-price--approximate]="priceResult.kind === 'approximate'"
+              [class.app-shop__item-price--global-fallback]="priceResult.isGlobalFallback"
+            >
+              @if (priceResult.kind === 'exact') {
+                @if (priceResult.isGlobalFallback) {
+                  ({{ priceResult.total | money }})
+                } @else {
+                  {{ priceResult.total | money }}
+                }
+              } @else if (priceResult.kind === 'approximate') {
+                @if (priceResult.shelfQuantity !== null && priceResult.shelfUnit) {
+                  @if (priceResult.isGlobalFallback) {
+                    ({{
+                      'shop.approxShelfPrice'
+                        | transloco
+                          : {
+                              price: priceResult.shelfPrice | money,
+                              quantity: priceResult.shelfQuantity,
+                              unit: priceResult.shelfUnit,
+                            }
+                    }})
+                  } @else {
+                    {{
+                      'shop.approxShelfPrice'
+                        | transloco
+                          : {
+                              price: priceResult.shelfPrice | money,
+                              quantity: priceResult.shelfQuantity,
+                              unit: priceResult.shelfUnit,
+                            }
+                    }}
+                  }
+                } @else {
+                  @if (priceResult.isGlobalFallback) {
+                    ({{
+                      'shop.approxShelfPriceNoQty'
+                        | transloco: { price: priceResult.shelfPrice | money }
+                    }})
+                  } @else {
+                    {{
+                      'shop.approxShelfPriceNoQty'
+                        | transloco: { price: priceResult.shelfPrice | money }
+                    }}
+                  }
+                }
               }
-            }
-          </span>
+            </span>
+          }
         }
       }
     </span>

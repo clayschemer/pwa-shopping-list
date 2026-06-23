@@ -103,3 +103,10 @@ Feature: Item Management
     When my check attempt is rejected because the other user was faster
     Then I should be informed that the item has already been removed
     And the item should no longer appear on my list
+
+  Scenario: Re-adding a previously bought item preserves its price and history
+    Given an item has been on the list and has a price recorded
+    And a session was completed in which that item was checked
+    When I add the item to the list again
+    Then the item should retain its recorded price
+    And its purchase count should reflect previous sessions

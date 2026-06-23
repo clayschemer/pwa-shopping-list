@@ -1,5 +1,5 @@
 import { queryStaleItems, getShopConfigs } from './query.js';
-import { writePriceResult, writeAttemptTimestamp } from './writer.js';
+import { writeShopPriceResult, writeGlobalPrice, writeAttemptTimestamp } from './writer.js';
 import { processItem } from './pipeline.js';
 import type { StaleItem } from './types.js';
 
@@ -48,18 +48,21 @@ async function runCycle(mode: 'full' | 'unpriced'): Promise<void> {
       const label = [item.name, item.quantity, item.unit].filter(Boolean).join(' ');
       console.log(`\n  "${label}"`);
 
-      const found = await processItem(item, shops);
+      const matches = await processItem(item, shops);
 
-      if (found) {
-        const { result, shop, searchUrl } = found;
-        const unitStr = result.priceUnit
-          ? `/${result.priceQuantity ?? ''}${result.priceUnit}`
-          : '';
-        const sppStr = result.sizePerPiece
-          ? `  [≈ ${result.sizePerPiece.quantity} ${result.sizePerPiece.unit}/st]`
-          : '';
-        console.log(`  ✓  ${result.price} kr${unitStr}${sppStr}  (${shop.name})`);
-        await writePriceResult(accountId, item.id, result, shop.id, searchUrl);
+      if (matches.length > 0) {
+        for (const { result, shop, searchUrl } of matches) {
+          const unitStr = result.priceUnit
+            ? `/${result.priceQuantity ?? ''}${result.priceUnit}`
+            : '';
+          const sppStr = result.sizePerPiece
+            ? `  [≈ ${result.sizePerPiece.quantity} ${result.sizePerPiece.unit}/st]`
+            : '';
+          console.log(`  ✓  ${result.price} kr${unitStr}${sppStr}  (${shop.name})`);
+          await writeShopPriceResult(accountId, item.id, result, shop.id, searchUrl);
+          await delay(ITEM_DELAY_MS);
+        }
+        await writeGlobalPrice(accountId, item.id);
       } else {
         console.log(`  ✗  No price found — will retry in ${process.env['PRICE_RETRY_DAYS'] ?? 7} days.`);
         await writeAttemptTimestamp(accountId, item.id);

@@ -21,7 +21,7 @@ Feature: AI Price Estimation
 
   Scenario: Prices are updated periodically
     Given a price is associated with an item
-    When sufficient time has passed since the price was last set
+    When 90 days have passed since the price was last set
     Then the application should refresh the price for that item
 
   Scenario: Items without a price do not affect totals
@@ -81,3 +81,34 @@ Feature: AI Price Estimation
     Given an item has a primary category assigned
     When the application looks up an estimated price for that item
     Then the item's category should inform which product is selected as the match
+
+  Scenario: Item shows the shop-specific price when a shop is in context
+    Given an item has a price recorded for a specific shop
+    When that shop is in context
+    Then the shop-specific price should be displayed for that item
+
+  Scenario: Item shows global fallback price in parentheses when no shop-specific price exists
+    Given an item has a global price but no price recorded for the shop currently in context
+    When the price for that item is displayed
+    Then the global price should be shown in parentheses to indicate it is a fallback
+
+  Scenario: Global price is the lowest price found across all shops
+    Given the application has found prices for an item at multiple shops
+    When the global price is determined
+    Then it should reflect the lowest price value found across all shops
+
+  Scenario: Pipeline records prices from all configured shops
+    Given an item needs a price update
+    And multiple shops are configured for price lookup
+    When the application looks up the price for that item
+    Then a price should be recorded for each shop where a match was found
+
+  Scenario: Manually entered price is stored against the currently selected shop
+    Given a shop is selected
+    When I manually enter a price for an item
+    Then that price should be stored as the price for the selected shop
+
+  Scenario: Manually entered price without a selected shop becomes the global price
+    Given no shop is currently selected
+    When I manually enter a price for an item
+    Then that price should be stored as the global fallback price

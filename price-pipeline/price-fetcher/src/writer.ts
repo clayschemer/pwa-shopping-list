@@ -60,36 +60,35 @@ export async function writeAttemptTimestamp(accountId: string, itemId: string): 
     .update({ priceAttemptedAt: FieldValue.serverTimestamp() });
 }
 
-export async function writePriceResult(
+/**
+ * Writes a single shop's price into the item's shopPrices sub-map.
+ * Uses dot-notation so only this shop's entry is touched.
+ */
+export async function writeShopPriceResult(
   accountId: string,
   itemId: string,
   result: PriceResult,
-  shopId: string | null,
+  shopId: string,
   searchUrl: string | null,
 ): Promise<void> {
   const db = getDb();
   const ref = db.collection(`accounts/${accountId}/items`).doc(itemId);
 
-  const update: Record<string, unknown> = {
+  const shopEntry: Record<string, unknown> = {
     price: result.price,
     priceQuantity: result.priceQuantity,
     priceUnit: result.priceUnit,
-    priceShopId: shopId,
     priceProductName: result.productName,
     priceProductUrl: result.productUrl,
-    // Search-results URL used for the successful lookup. Powers the
-    // "view search results" fallback in the inspect popup when productUrl
-    // is null (sites without JSON-LD product URLs).
     priceSearchUrl: searchUrl,
     priceUpdatedAt: FieldValue.serverTimestamp(),
-    // Successful (re-)match converged — clear the operational feedback array
-    // so the next routine scan no longer carries the rejection context.
-    // The append-only corpus log under accounts/{id}/priceFeedback is untouched.
-    priceFeedback: [],
   };
 
-  // Sticky-user-edit: only seed sizePerPiece when no value is already stored —
-  // either from a previous pipeline run or, more importantly, a manual edit.
+  const update: Record<string, unknown> = {
+    [`shopPrices.${shopId}`]: shopEntry,
+  };
+
+  // Sticky-user-edit: only seed sizePerPiece when not already set.
   if (result.sizePerPiece) {
     const snap = await ref.get();
     const data = snap.data() ?? {};
@@ -100,4 +99,47 @@ export async function writePriceResult(
   }
 
   await ref.update(update);
+}
+
+/**
+ * Reads the current shopPrices map and writes the global price fields
+ * (top-level price, priceQuantity, priceUnit, priceShopId, etc.) by picking
+ * the entry with the lowest raw price value. Also clears the operational
+ * priceFeedback array — a successful match has converged.
+ */
+export async function writeGlobalPrice(
+  accountId: string,
+  itemId: string,
+): Promise<void> {
+  const db = getDb();
+  const ref = db.collection(`accounts/${accountId}/items`).doc(itemId);
+  const snap = await ref.get();
+  const data = snap.data() ?? {};
+
+  const shopPrices = data['shopPrices'] as Record<string, Record<string, unknown>> | null ?? {};
+
+  let lowestShopId: string | null = null;
+  let lowestEntry: Record<string, unknown> | null = null;
+
+  for (const [sid, entry] of Object.entries(shopPrices)) {
+    const entryPrice = typeof entry['price'] === 'number' ? entry['price'] : null;
+    if (entryPrice === null) continue;
+    const lowestPrice = typeof lowestEntry?.['price'] === 'number' ? lowestEntry['price'] as number : Infinity;
+    if (entryPrice < lowestPrice) {
+      lowestShopId = sid;
+      lowestEntry = entry;
+    }
+  }
+
+  await ref.update({
+    price: lowestEntry?.['price'] ?? null,
+    priceQuantity: lowestEntry?.['priceQuantity'] ?? null,
+    priceUnit: lowestEntry?.['priceUnit'] ?? null,
+    priceShopId: lowestShopId,
+    priceProductName: lowestEntry?.['priceProductName'] ?? null,
+    priceProductUrl: lowestEntry?.['priceProductUrl'] ?? null,
+    priceSearchUrl: lowestEntry?.['priceSearchUrl'] ?? null,
+    priceUpdatedAt: lowestEntry ? FieldValue.serverTimestamp() : null,
+    priceFeedback: [],
+  });
 }

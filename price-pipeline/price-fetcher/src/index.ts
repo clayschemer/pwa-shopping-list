@@ -137,7 +137,7 @@ async function runFirestoreMode(mode: 'scheduler' | 'once-full' | 'once-unpriced
     await start();
   } else {
     const { queryStaleItems, getShopConfigs } = await import('./query.js');
-    const { writePriceResult, writeAttemptTimestamp } = await import('./writer.js');
+    const { writeShopPriceResult, writeGlobalPrice, writeAttemptTimestamp } = await import('./writer.js');
     const { processItem } = await import('./pipeline.js');
 
     const scanMode = mode === 'once-full' ? 'full' : 'unpriced';
@@ -146,10 +146,13 @@ async function runFirestoreMode(mode: 'scheduler' | 'once-full' | 'once-unpriced
 
     for (const item of items) {
       const shops = await getShopConfigs(item.accountId);
-      const found = await processItem(item, shops);
-      if (found) {
-        console.log(`✓ "${item.name}": ${found.result.price} kr (${found.shop.name})`);
-        await writePriceResult(item.accountId, item.id, found.result, found.shop.id, found.searchUrl);
+      const matches = await processItem(item, shops);
+      if (matches.length > 0) {
+        for (const { result, shop, searchUrl } of matches) {
+          console.log(`✓ "${item.name}": ${result.price} kr (${shop.name})`);
+          await writeShopPriceResult(item.accountId, item.id, result, shop.id, searchUrl);
+        }
+        await writeGlobalPrice(item.accountId, item.id);
       } else {
         console.log(`✗ "${item.name}": no price found — will retry in ${process.env['PRICE_RETRY_DAYS'] ?? 7} days.`);
         await writeAttemptTimestamp(item.accountId, item.id);

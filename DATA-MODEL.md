@@ -105,23 +105,39 @@ Item
   - removedAt: timestamp | null         ← set when removed, cleared when restored
   - addedBy: 'user' | 'ai'             ← origin indicator only, no functional difference
   - aiMotivation: string | null         ← populated when addedBy is 'ai'; persists for reference
-  - price: number | null               ← single price field; last writer wins (user or pipeline)
-  - priceQuantity: number | null        ← quantity the price applies to
-  - priceUnit: string | null            ← unit the price applies to
-  - priceShopId: ShopId | null          ← which shop's price is stored (Option B); null when manually
-                                          set or when the item pre-dates this field
-  - priceProductName: string | null     ← matched product name from the last successful pipeline run;
-                                          null for manually-entered prices or items pre-dating the field
-  - priceProductUrl: string | null      ← product page URL when the source exposed one; powers the
-                                          "inspect matched product" deep-link
-  - priceSearchUrl: string | null       ← search-results URL the pipeline scraped for this match;
-                                          fallback link target when priceProductUrl is unavailable
-  - priceFeedback: PriceFeedbackEntry[] ← user rejections of prior price matches; consumed by the next
-                                          pipeline run; cleared on successful re-match
-  - priceUpdatedAt: timestamp | null    ← used to determine staleness; source (user/pipeline) not recorded
+  - price: number | null               ← global price — lowest raw price across all shopPrices entries;
+                                          also set directly when no shop is in context (manual entry)
+  - priceQuantity: number | null        ← quantity for the global price
+  - priceUnit: string | null            ← unit for the global price
+  - priceShopId: ShopId | null          ← shop that holds the global (lowest) price; null when set
+                                          without a shop context
+  - priceProductName: string | null     ← matched product name for the global price entry
+  - priceProductUrl: string | null      ← product page URL for the global price entry
+  - priceSearchUrl: string | null       ← search-results URL used for the global price entry
+  - shopPrices: Record<ShopId, ShopPriceEntry>  ← per-shop price map; keyed by shopId; populated by
+                                          the pipeline (one entry per successful match) and by manual
+                                          price entry when a shop is selected
+  - priceFeedback: PriceFeedbackEntry[] ← user rejections of prior price matches; global across shops;
+                                          consumed by the next pipeline run; cleared on successful re-match
+  - priceUpdatedAt: timestamp | null    ← timestamp of the most recent successful price write (any shop)
   - sizePerPieceQuantity: number | null ← typical size of one piece; bridges pcs <-> mass/volume
   - sizePerPieceUnit: string | null     ← unit for sizePerPieceQuantity ('g', 'kg', 'ml', 'cl', 'dl', 'L')
   - purchaseCount: number               ← incremented on each session completion where item was checked
+```
+
+### ShopPriceEntry
+One price entry within an Item's `shopPrices` map. Keyed by `ShopId`. The
+pipeline writes one entry per shop that returns a successful match.
+
+```
+ShopPriceEntry
+  - price:            number
+  - priceQuantity:    number
+  - priceUnit:        string
+  - priceProductName: string | null
+  - priceProductUrl:  string | null
+  - priceSearchUrl:   string | null
+  - priceUpdatedAt:   timestamp
 ```
 
 ### PriceFeedbackEntry
@@ -140,7 +156,7 @@ PriceFeedbackEntry
 
 - `description` is optional freetext displayed beneath the item name in both modes. Also passed to the price-lookup pipeline as context — notes like "inte Arla" or "ekologisk" influence which search result is selected by the LLM validation step.
 - `removed` is set to `true` by two actors: a plan-mode deletion, or a session check. It is cleared to `false` by an uncheck action (item restored to list).
-- `price`, `priceQuantity`, `priceUnit`, `priceShopId`, and `priceUpdatedAt` form a single price record. The last writer wins — user or pipeline. No separate manual/estimated distinction. `priceShopId` identifies which shop's price is stored (Option B: single price + source shop), enabling the UI to flag staleness when the active session shop differs from `priceShopId`. Full per-shop price maps are a future enhancement.
+- `shopPrices` is the per-shop price map. The pipeline writes one entry per shop where a match is found. The top-level `price`/`priceShopId` global fields are derived from the map by selecting the entry with the lowest price value. The UI shows the shop-specific entry when a shop is in context; falls back to the global price (displayed in parentheses) when no shop-specific entry exists.
 - `priceProductName` and `priceProductUrl` capture *which* product the pipeline matched. They are set together by the pipeline whenever the LLM-returned `matchedName` resolves to an extracted JSON-LD product. Both are cleared when the price is cleared. They power the in-app price-inspection affordance — clicking a price opens a card showing the matched product with a link to its source page.
 - `priceFeedback` captures user rejections of prior matches. Each entry records the rejected match (name + URL) and the user's reason. The pipeline reads this array on the next run and instructs the LLM to avoid the listed matches and apply the reasons. The array is cleared by a successful pipeline write so feedback does not influence indefinitely. Independent of this operational state, every rejection is also append-written to an immutable corpus collection (see *Price feedback corpus* below) for future training analysis.
 - `sizePerPieceQuantity` and `sizePerPieceUnit` describe what one piece of the item typically weighs or measures — used by the frontend to convert between `pcs` and weight/volume when the user lists by piece but the shelf is priced per kg (or vice versa). The pipeline pre-fills it for produce-like items via Gemma. Sticky to user edits: once non-null, the pipeline does not overwrite. Clearing both fields lets the pipeline re-estimate on the next run.
@@ -268,7 +284,7 @@ These are computed from stored data, not stored themselves.
 | 5 | Permitted user definition | Allowlist for now; may expand to signup flow. |
 | 6 | AI suggestion motivation refresh | If AI re-suggests an item, existing motivation is reused. Updating motivation on re-suggestion is a future consideration. |
 | 7 | AI analytical scope | Starting with purchase frequency. Basket analysis, co-occurrence, spend trends etc. deferred. |
-| 8 | Store-specific prices | **Resolved (Option B).** Single price per item tagged with `priceShopId`. UI shows staleness hint when active session shop differs. Full per-shop price map deferred. |
+| 8 | Store-specific prices | **Resolved (per-shop map).** `shopPrices` map stores one entry per shop; global price is the lowest across all entries. UI shows shop-specific price when a shop is in context; global price in parentheses as fallback. |
 
 ---
 

@@ -67,8 +67,8 @@ export const selectGroupedShopList = createSelector(
 
       const sorted = [...bucket].sort((a, b) => a.name.localeCompare(b.name));
       const estTotal = sorted
-        .filter((i) => !i.removed && i.price !== null)
-        .reduce((acc, i) => acc + (effectivePrice(i) ?? 0), 0);
+        .filter((i) => !i.removed && effectivePrice(i, selectedShopId) !== null)
+        .reduce((acc, i) => acc + (effectivePrice(i, selectedShopId) ?? 0), 0);
       const sessionCheckedTotal = sorted
         .filter((i) => sessionItemIds.has(i.id))
         .reduce((acc, i) => acc + (sessionItemPrices.get(i.id) ?? 0), 0);
@@ -91,8 +91,8 @@ export const selectGroupedShopList = createSelector(
         categoryColor: null,
         items: sorted,
         estTotal: sorted
-          .filter((i) => !i.removed && i.price !== null)
-          .reduce((acc, i) => acc + (effectivePrice(i) ?? 0), 0),
+          .filter((i) => !i.removed && effectivePrice(i, selectedShopId) !== null)
+          .reduce((acc, i) => acc + (effectivePrice(i, selectedShopId) ?? 0), 0),
         sessionCheckedTotal: sorted
           .filter((i) => sessionItemIds.has(i.id))
           .reduce((acc, i) => acc + (sessionItemPrices.get(i.id) ?? 0), 0),

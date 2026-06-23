@@ -1,17 +1,24 @@
 import type { Item } from './item.model';
 
 export type PriceComputation =
-  | { kind: 'exact'; total: number }
+  | { kind: 'exact'; total: number; isGlobalFallback: boolean }
   | {
       kind: 'approximate';
       shelfPrice: number;
       shelfQuantity: number | null;
       shelfUnit: string | null;
+      isGlobalFallback: boolean;
     }
   | { kind: 'none' };
 
 /**
- * Computes the purchase price for an item.
+ * Computes the purchase price for an item, optionally scoped to a specific shop.
+ *
+ * When shopId is provided and the item has a price recorded for that shop, the
+ * shop-specific price is used. When no shop-specific price exists but a global
+ * price is available, the global price is used and `isGlobalFallback` is true —
+ * the caller should render the price in parentheses to signal it is not from
+ * the current shop.
  *
  *   exact       — the item's unit matches the shelf-price unit, or they share a
  *                 dimension (mass, volume) and can be converted deterministically.
@@ -20,29 +27,30 @@ export type PriceComputation =
  *                 outside the conversion table. The caller should render the
  *                 raw shelf price with a hint rather than fabricate a total.
  *   none        — no price has been set.
- *
- * Same-unit comparison runs after normalisation (liter→l, styck→pcs, etc.) so
- * common spelling/locale variants reduce to a single key.
  */
-export function computePrice(item: Item): PriceComputation {
-  if (item.price === null) return { kind: 'none' };
+export function computePrice(item: Item, shopId?: string | null): PriceComputation {
+  const shopEntry = shopId != null ? (item.shopPrices[shopId] ?? null) : null;
+  const isGlobalFallback = shopId != null && shopEntry === null && item.price !== null;
+
+  const price = shopEntry?.price ?? item.price;
+  const priceQtyRaw = shopEntry?.priceQuantity ?? item.priceQuantity;
+  const priceUnitRaw = shopEntry?.priceUnit ?? item.priceUnit;
+
+  if (price === null) return { kind: 'none' };
 
   const qty = item.quantity;
   if (qty === null || qty <= 0) {
-    return { kind: 'exact', total: item.price };
+    return { kind: 'exact', total: price, isGlobalFallback };
   }
 
-  // Default both sides to 'pcs' when unit is absent. This preserves the legacy
-  // behaviour where unitless items multiplied price by quantity, and matches
-  // the pipeline's new contract of defaulting priceUnit to 'pcs'.
   const itemUnit = item.unit ? normaliseUnit(item.unit) : 'pcs';
-  const priceUnit = item.priceUnit ? normaliseUnit(item.priceUnit) : 'pcs';
-  const priceQty = item.priceQuantity ?? 1;
+  const priceUnit = priceUnitRaw ? normaliseUnit(priceUnitRaw) : 'pcs';
+  const priceQty = priceQtyRaw ?? 1;
 
-  if (priceQty <= 0) return approximateOf(item);
+  if (priceQty <= 0) return approximateOf(price, priceQtyRaw, priceUnitRaw, isGlobalFallback);
 
   if (itemUnit === priceUnit) {
-    return { kind: 'exact', total: (item.price / priceQty) * qty };
+    return { kind: 'exact', total: (price / priceQty) * qty, isGlobalFallback };
   }
 
   const itemInfo = UNIT_TABLE[itemUnit];
@@ -50,7 +58,7 @@ export function computePrice(item: Item): PriceComputation {
   if (itemInfo && priceInfo && itemInfo.dimension === priceInfo.dimension) {
     const itemQtyBase = qty * itemInfo.toBase;
     const priceQtyBase = priceQty * priceInfo.toBase;
-    return { kind: 'exact', total: (item.price / priceQtyBase) * itemQtyBase };
+    return { kind: 'exact', total: (price / priceQtyBase) * itemQtyBase, isGlobalFallback };
   }
 
   // sizePerPiece bridges pcs <-> mass/volume.
@@ -59,40 +67,38 @@ export function computePrice(item: Item): PriceComputation {
   const sppUnit = sppUnitRaw ? normaliseUnit(sppUnitRaw) : null;
   const sppInfo = sppUnit ? UNIT_TABLE[sppUnit] : null;
   if (sppQty !== null && sppQty > 0 && sppInfo) {
-    // Item listed in pcs, shelf priced in mass/volume that matches sizePerPiece.
     if (itemUnit === 'pcs' && priceInfo && priceInfo.dimension === sppInfo.dimension) {
       const itemInShelfBase = qty * sppQty * sppInfo.toBase;
       const priceQtyBase = priceQty * priceInfo.toBase;
-      return { kind: 'exact', total: (item.price / priceQtyBase) * itemInShelfBase };
+      return { kind: 'exact', total: (price / priceQtyBase) * itemInShelfBase, isGlobalFallback };
     }
-    // Shelf priced per piece, item listed in mass/volume that matches sizePerPiece.
     if (priceUnit === 'pcs' && itemInfo && itemInfo.dimension === sppInfo.dimension) {
       const shelfQtyInItemBase = priceQty * sppQty * sppInfo.toBase;
       const itemQtyBase = qty * itemInfo.toBase;
-      return { kind: 'exact', total: (item.price / shelfQtyInItemBase) * itemQtyBase };
+      return { kind: 'exact', total: (price / shelfQtyInItemBase) * itemQtyBase, isGlobalFallback };
     }
   }
 
-  return approximateOf(item);
+  return approximateOf(price, priceQtyRaw, priceUnitRaw, isGlobalFallback);
 }
 
-/** Back-compat numeric accessor. Returns the total for exact prices and the
- *  raw shelf price when there is no quantity to multiply by. Approximate
- *  prices return null so that category totals do not inflate with fabricated
- *  numbers — render those via {@link computePrice} instead. */
-export function effectivePrice(item: Item): number | null {
-  const result = computePrice(item);
+/** Returns the computed total for exact prices, null for approximate or none.
+ *  Approximate prices are excluded from category totals to avoid inflated numbers.
+ *  Pass shopId to use the shop-specific price when available. */
+export function effectivePrice(item: Item, shopId?: string | null): number | null {
+  const result = computePrice(item, shopId);
   return result.kind === 'exact' ? result.total : null;
 }
 
-function approximateOf(item: Item): PriceComputation {
-  return {
-    kind: 'approximate',
-    shelfPrice: item.price as number,
-    shelfQuantity: item.priceQuantity,
-    shelfUnit: item.priceUnit,
-  };
+function approximateOf(
+  price: number,
+  priceQuantity: number | null,
+  priceUnit: string | null,
+  isGlobalFallback: boolean,
+): PriceComputation {
+  return { kind: 'approximate', shelfPrice: price, shelfQuantity: priceQuantity, shelfUnit: priceUnit, isGlobalFallback };
 }
+
 
 type Dimension = 'mass' | 'volume' | 'count';
 

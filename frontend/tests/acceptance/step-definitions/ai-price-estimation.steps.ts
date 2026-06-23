@@ -5,6 +5,12 @@ import assert from 'node:assert/strict';
 // World state
 // ---------------------------------------------------------------------------
 
+interface ShopPriceEntry {
+  price: number;
+  priceQuantity: number;
+  priceUnit: string;
+}
+
 interface PriceItem {
   id: string;
   name: string;
@@ -15,6 +21,7 @@ interface PriceItem {
   productName: string | null;
   productUrl: string | null;
   shopId: string | null;
+  shopPrices: Record<string, ShopPriceEntry>;
   priceFeedback: PriceFeedbackEntry[];
   quantity: number | null;
   unit: string | null;
@@ -48,6 +55,12 @@ interface LookupContext {
   feedback: PriceFeedbackEntry[];
 }
 
+interface ConfiguredShop {
+  id: string;
+  name: string;
+  priceSearchUrl: string | null;
+}
+
 interface AiPriceWorld {
   aiConfigured: boolean;
   items: PriceItem[];
@@ -60,6 +73,12 @@ interface AiPriceWorld {
   lastLookupContext: LookupContext | null;
   reestimationQueued: boolean;
   categoryNamesById: Record<string, string>;
+  // Per-shop price world
+  currentShopId: string | null;
+  configuredShops: ConfiguredShop[];
+  pipelineShopMatches: Record<string, boolean>;
+  selectedShopIdForManualEntry: string | null;
+  manuallyEnteredPrice: number | null;
 }
 
 function makeItem(
@@ -78,6 +97,7 @@ function makeItem(
     productName: null,
     productUrl: null,
     shopId: null,
+    shopPrices: {},
     priceFeedback: [],
     quantity: null,
     unit: null,
@@ -198,11 +218,19 @@ When('I view my session total', function (this: AiPriceWorld) {
 });
 
 When('sufficient time has passed since the price was last set', function (this: AiPriceWorld) {
-  const SIX_MONTHS_MS = 6 * 30 * 24 * 60 * 60 * 1000;
+  const NINETY_DAYS_MS = 90 * 24 * 60 * 60 * 1000;
   const item = this.items[0];
   if (item) {
-    // Simulate time passage by backdating the price timestamp
-    item.priceUpdatedAt = Date.now() - SIX_MONTHS_MS - 1;
+    item.priceUpdatedAt = Date.now() - NINETY_DAYS_MS - 1;
+    this.stalePriceSuggestion = { itemId: item.id, suggestedPrice: 1.35 };
+  }
+});
+
+When('90 days have passed since the price was last set', function (this: AiPriceWorld) {
+  const NINETY_DAYS_MS = 90 * 24 * 60 * 60 * 1000;
+  const item = this.items[0];
+  if (item) {
+    item.priceUpdatedAt = Date.now() - NINETY_DAYS_MS - 1;
     this.stalePriceSuggestion = { itemId: item.id, suggestedPrice: 1.35 };
   }
 });
@@ -271,13 +299,11 @@ Then('it should reflect the sum of prices for all items checked in my session', 
 });
 
 Then('the application should refresh the price for that item', function (this: AiPriceWorld) {
-  // Price refresh is triggered when priceUpdatedAt > staleness threshold
-  // This step verifies the staleness detection logic identifies the item as stale
-  const SIX_MONTHS_MS = 6 * 30 * 24 * 60 * 60 * 1000;
+  const NINETY_DAYS_MS = 90 * 24 * 60 * 60 * 1000;
   const item = this.items[0];
   const isStale = item?.priceUpdatedAt !== null &&
     item.priceUpdatedAt !== undefined &&
-    Date.now() - item.priceUpdatedAt > SIX_MONTHS_MS;
+    Date.now() - item.priceUpdatedAt > NINETY_DAYS_MS;
   assert.ok(isStale, 'Item with old priceUpdatedAt should be identified as stale');
 });
 
@@ -542,4 +568,196 @@ Then("the item's category should inform which product is selected as the match",
   assert.ok(this.lastLookupContext, 'a lookup context should have been built');
   assert.ok(this.lastLookupContext!.categoryName,
     'category name should be present in the lookup context');
+});
+
+// ---------------------------------------------------------------------------
+// Per-shop price scenarios
+// ---------------------------------------------------------------------------
+
+Given('an item has a price recorded for a specific shop', function (this: AiPriceWorld) {
+  this.items = [{
+    ...makeItem('item-1', 'Milk', null, 'cat-dairy'),
+    shopPrices: {
+      'shop-1': { price: 24.90, priceQuantity: 1, priceUnit: 'st' },
+    },
+  }];
+  this.checkedItems = [];
+  this.currentShopId = null;
+});
+
+Given('an item has a global price but no price recorded for the shop currently in context', function (this: AiPriceWorld) {
+  this.items = [{
+    ...makeItem('item-1', 'Milk', 24.90, 'cat-dairy'),
+    shopPrices: {
+      'shop-1': { price: 24.90, priceQuantity: 1, priceUnit: 'st' },
+    },
+  }];
+  this.checkedItems = [];
+  this.currentShopId = 'shop-2'; // shop-2 is in context but has no recorded price
+});
+
+Given('the application has found prices for an item at multiple shops', function (this: AiPriceWorld) {
+  this.items = [{
+    ...makeItem('item-1', 'Milk', null, 'cat-dairy'),
+    shopPrices: {
+      'shop-1': { price: 24.90, priceQuantity: 1, priceUnit: 'st' },
+      'shop-2': { price: 19.90, priceQuantity: 1, priceUnit: 'st' },
+      'shop-3': { price: 22.50, priceQuantity: 1, priceUnit: 'st' },
+    },
+  }];
+  this.checkedItems = [];
+});
+
+Given('an item needs a price update', function (this: AiPriceWorld) {
+  this.items = [makeItem('item-1', 'Milk', null, 'cat-dairy')];
+  this.checkedItems = [];
+  this.pipelineShopMatches = {};
+});
+
+Given('multiple shops are configured for price lookup', function (this: AiPriceWorld) {
+  this.configuredShops = [
+    { id: 'shop-1', name: 'ICA', priceSearchUrl: 'https://ica.example/search?q={query}' },
+    { id: 'shop-2', name: 'Willys', priceSearchUrl: 'https://willys.example/search?q={query}' },
+  ];
+});
+
+Given('a shop is selected', function (this: AiPriceWorld) {
+  this.selectedShopIdForManualEntry = 'shop-1';
+  this.items = [makeItem('item-1', 'Milk', null, 'cat-dairy')];
+  this.checkedItems = [];
+});
+
+Given('no shop is currently selected', function (this: AiPriceWorld) {
+  this.selectedShopIdForManualEntry = null;
+  this.items = [makeItem('item-1', 'Milk', null, 'cat-dairy')];
+  this.checkedItems = [];
+});
+
+When('that shop is in context', function (this: AiPriceWorld) {
+  const item = this.items[0];
+  if (item) {
+    const shopId = Object.keys(item.shopPrices)[0];
+    this.currentShopId = shopId;
+  }
+});
+
+When('the price for that item is displayed', function (this: AiPriceWorld) {
+  // Read-only — assertions follow
+});
+
+When('the global price is determined', function (this: AiPriceWorld) {
+  const item = this.items[0];
+  if (!item || Object.keys(item.shopPrices).length === 0) return;
+  let lowestEntry: ShopPriceEntry | null = null;
+  for (const entry of Object.values(item.shopPrices)) {
+    if (lowestEntry === null || entry.price < lowestEntry.price) {
+      lowestEntry = entry;
+    }
+  }
+  if (lowestEntry) {
+    item.price = lowestEntry.price;
+    item.priceQuantity = lowestEntry.priceQuantity;
+    item.priceUnit = lowestEntry.priceUnit;
+  }
+});
+
+When('the application looks up the price for that item', function (this: AiPriceWorld) {
+  const item = this.items[0];
+  if (!item) return;
+  const shops = this.configuredShops ?? [];
+  this.pipelineShopMatches = this.pipelineShopMatches ?? {};
+  shops.forEach((shop, idx) => {
+    if (shop.priceSearchUrl) {
+      const simulatedPrice = 20 + idx * 5;
+      item.shopPrices[shop.id] = { price: simulatedPrice, priceQuantity: 1, priceUnit: 'st' };
+      this.pipelineShopMatches[shop.id] = true;
+    }
+  });
+  let lowestEntry: ShopPriceEntry | null = null;
+  for (const entry of Object.values(item.shopPrices)) {
+    if (lowestEntry === null || entry.price < lowestEntry.price) {
+      lowestEntry = entry;
+    }
+  }
+  if (lowestEntry) {
+    item.price = lowestEntry.price;
+  }
+});
+
+When('I manually enter a price for an item', function (this: AiPriceWorld) {
+  const item = this.items[0];
+  if (!item) return;
+  this.manuallyEnteredPrice = 25.90;
+  const shopId = this.selectedShopIdForManualEntry;
+  if (shopId) {
+    item.shopPrices[shopId] = { price: this.manuallyEnteredPrice, priceQuantity: 1, priceUnit: 'st' };
+    let lowestEntry: ShopPriceEntry | null = null;
+    for (const entry of Object.values(item.shopPrices)) {
+      if (lowestEntry === null || entry.price < lowestEntry.price) {
+        lowestEntry = entry;
+      }
+    }
+    if (lowestEntry) {
+      item.price = lowestEntry.price;
+    }
+  } else {
+    item.price = this.manuallyEnteredPrice;
+    item.priceUpdatedAt = Date.now();
+  }
+});
+
+Then('the shop-specific price should be displayed for that item', function (this: AiPriceWorld) {
+  const item = this.items[0];
+  assert.ok(item, 'Item should exist');
+  assert.ok(this.currentShopId, 'A shop should be in context');
+  const shopEntry = item.shopPrices[this.currentShopId!];
+  assert.ok(shopEntry, 'Item should have a price recorded for the current shop');
+});
+
+Then('the global price should be shown in parentheses to indicate it is a fallback', function (this: AiPriceWorld) {
+  const item = this.items[0];
+  assert.ok(item, 'Item should exist');
+  assert.ok(this.currentShopId, 'A shop context should be set');
+  const shopEntry = item.shopPrices[this.currentShopId!];
+  assert.equal(shopEntry, undefined, 'No shop-specific price should exist for the current shop');
+  assert.ok(item.price !== null, 'Global fallback price should exist');
+});
+
+Then('it should reflect the lowest price value found across all shops', function (this: AiPriceWorld) {
+  const item = this.items[0];
+  assert.ok(item, 'Item should exist');
+  const allPrices = Object.values(item.shopPrices).map(e => e.price);
+  const lowest = Math.min(...allPrices);
+  assert.equal(item.price, lowest, 'Global price should equal the lowest price across all shops');
+});
+
+Then('a price should be recorded for each shop where a match was found', function (this: AiPriceWorld) {
+  const item = this.items[0];
+  assert.ok(item, 'Item should exist');
+  const shops = this.configuredShops ?? [];
+  assert.ok(shops.length > 0, 'Shops should be configured');
+  for (const shop of shops) {
+    assert.ok(item.shopPrices[shop.id] !== undefined,
+      `A price should be recorded for shop "${shop.name}" (${shop.id})`);
+  }
+});
+
+Then('that price should be stored as the price for the selected shop', function (this: AiPriceWorld) {
+  const item = this.items[0];
+  assert.ok(item, 'Item should exist');
+  const shopId = this.selectedShopIdForManualEntry;
+  assert.ok(shopId, 'A shop should have been selected');
+  const shopEntry = item.shopPrices[shopId!];
+  assert.ok(shopEntry, 'A price entry should exist for the selected shop');
+  assert.equal(shopEntry.price, this.manuallyEnteredPrice,
+    'Shop entry price should match the manually entered price');
+});
+
+Then('that price should be stored as the global fallback price', function (this: AiPriceWorld) {
+  const item = this.items[0];
+  assert.ok(item, 'Item should exist');
+  assert.equal(item.price, this.manuallyEnteredPrice,
+    'Global price should match the manually entered price');
+  assert.equal(Object.keys(item.shopPrices).length, 0,
+    'No shop-specific price entry should be created when no shop is selected');
 });

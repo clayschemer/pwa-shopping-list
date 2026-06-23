@@ -1,9 +1,8 @@
 import { Timestamp } from 'firebase-admin/firestore';
 import { getDb } from './firebase-admin.js';
-import { KNOWN_STORES } from './search-query.js';
 import type { FeedbackHint, StaleItem, ShopConfig } from './types.js';
 
-const STALE_DAYS = parseInt(process.env['PRICE_STALE_DAYS'] ?? '180', 10);
+const STALE_DAYS = parseInt(process.env['PRICE_STALE_DAYS'] ?? '90', 10);
 const RETRY_DAYS = parseInt(process.env['PRICE_RETRY_DAYS'] ?? '7', 10);
 
 /**
@@ -101,8 +100,9 @@ export async function queryStaleItems(mode: 'full' | 'unpriced'): Promise<StaleI
 
 /**
  * Resolves an ordered list of ShopConfigs for an account.
- * Checks priceSearchUrl on the shop document first (future data model field),
- * then falls back to name-matching against stores.json / KNOWN_STORES.
+ * Only shops with a priceSearchUrl set in Firestore (via Manage Shops UI) are
+ * included. Shops without a URL are skipped with a warning directing the user
+ * to configure the URL in the app.
  */
 export async function getShopConfigs(accountId: string): Promise<ShopConfig[]> {
   const db = getDb();
@@ -119,35 +119,16 @@ export async function getShopConfigs(accountId: string): Promise<ShopConfig[]> {
 
     const d = shopDoc.data()!;
     const shopName = (d['name'] as string) ?? '';
-    // priceSearchUrl will be added to the data model later; read it if present
-    const explicitUrl = (d['priceSearchUrl'] as string | null) ?? null;
-    const searchUrl = explicitUrl ?? resolveUrlByName(shopName);
+    const searchUrl = (d['priceSearchUrl'] as string | null) ?? null;
 
     if (searchUrl) {
       configs.push({ id: shopId, name: shopName, searchUrl });
     } else {
-      console.warn(`No search URL found for shop "${shopName}" (${shopId}). Add it to stores.json.`);
+      console.warn(`Shop "${shopName}" (${shopId}) has no priceSearchUrl — set it in Manage Shops to enable price lookup.`);
     }
   }
 
   return configs;
-}
-
-/** Case- and diacritic-insensitive partial match of a shop name against known store keys */
-function resolveUrlByName(shopName: string): string | null {
-  const norm = normalise(shopName);
-  for (const [key, url] of Object.entries(KNOWN_STORES)) {
-    const normKey = normalise(key);
-    if (norm.includes(normKey) || normKey.includes(norm)) return url;
-  }
-  return null;
-}
-
-function normalise(s: string): string {
-  return s.toLowerCase()
-    .replace(/ö/g, 'o')
-    .replace(/å/g, 'a')
-    .replace(/ä/g, 'a');
 }
 
 /** Defensive read of the priceFeedback array from Firestore. Filters out

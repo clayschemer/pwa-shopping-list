@@ -13,6 +13,9 @@ interface Item {
   primaryCategoryId: string | null;
   secondaryCategoryIds: string[];
   removed: boolean;
+  price: number | null;
+  priceUpdatedAt: number | null;
+  purchaseCount: number;
 }
 
 interface ItemsWorld {
@@ -41,6 +44,9 @@ function makeItem(
     primaryCategoryId: catId,
     secondaryCategoryIds: secondaryCatIds,
     removed: false,
+    price: null,
+    priceUpdatedAt: null,
+    purchaseCount: 0,
   };
 }
 
@@ -359,4 +365,50 @@ Then('I should be informed that the item has already been removed', function (th
 Then('the item should no longer appear on my list', function (this: ItemsWorld) {
   const active = activeItems(this);
   assert.ok(active.every((i) => !i.removed), 'No active items should be in removed state');
+});
+
+// ---------------------------------------------------------------------------
+// Re-adding a previously bought item
+// ---------------------------------------------------------------------------
+
+Given('an item has been on the list and has a price recorded', function (this: ItemsWorld) {
+  this.items = this.items ?? [];
+  this.categories = this.categories ?? [{ id: 'cat-1', name: 'Produce', globalSortOrder: 1 }];
+  const item = makeItem('Bananas', 'cat-1');
+  item.price = 12.90;
+  item.priceUpdatedAt = Date.now() - 86_400_000;
+  this.items.push(item);
+});
+
+Given('a session was completed in which that item was checked', function (this: ItemsWorld) {
+  const item = this.items.find((i) => i.name === 'Bananas');
+  if (item) {
+    item.removed = true;
+    item.purchaseCount = 1;
+  }
+});
+
+When('I add the item to the list again', function (this: ItemsWorld) {
+  // Simulate addItem restore logic: find removed item with same name and restore it
+  const removedItem = this.items.find((i) => i.removed && i.name === 'Bananas');
+  if (removedItem) {
+    removedItem.removed = false;
+  } else {
+    const newItem = makeItem('Bananas', 'cat-1');
+    this.items.push(newItem);
+    this.lastAddedItem = newItem;
+  }
+});
+
+Then('the item should retain its recorded price', function (this: ItemsWorld) {
+  const item = this.items.find((i) => i.name === 'Bananas' && !i.removed);
+  assert.ok(item, 'Restored item should be active on the list');
+  assert.equal(item!.price, 12.90, 'Restored item should retain its previously recorded price');
+});
+
+Then('its purchase count should reflect previous sessions', function (this: ItemsWorld) {
+  const item = this.items.find((i) => i.name === 'Bananas' && !i.removed);
+  assert.ok(item, 'Restored item should be active on the list');
+  assert.ok((item!.purchaseCount ?? 0) > 0,
+    'Purchase count should be preserved from previous sessions');
 });

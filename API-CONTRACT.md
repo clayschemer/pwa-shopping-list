@@ -148,22 +148,34 @@ Item {
   removedAt:            number | null    // Unix ms; null when item is active
   addedBy:              'user' | 'ai'
   aiMotivation:         string | null    // populated when addedBy is 'ai'
-  price:                number | null
-  priceQuantity:        number | null
-  priceUnit:            string | null
-  priceShopId:          ShopId | null    // which shop's price is stored; null when manually set
-                                         // or when the item pre-dates this field (Option B)
-  priceProductName:     string | null    // matched product name from the last successful pipeline run;
-                                         // null for manual prices or pre-existing items
-  priceProductUrl:      string | null    // matched product page URL when the source exposed one;
-                                         // null when unavailable
-  priceSearchUrl:       string | null    // search-results URL the pipeline used; powers the
-                                         // "view search results" fallback in the inspect popup
-                                         // when productUrl is absent
+  price:                number | null    // global price — lowest raw price across all shopPrices entries
+  priceQuantity:        number | null    // quantity for the global price
+  priceUnit:            string | null    // unit for the global price
+  priceShopId:          ShopId | null    // shop that holds the global (lowest) price; null for manual entry
+  priceProductName:     string | null    // matched product name for the global price
+  priceProductUrl:      string | null    // product page URL for the global price
+  priceSearchUrl:       string | null    // search-results URL used for the global price
+  shopPrices:           Record<string, ShopPriceEntry>  // per-shop price map; empty when no shop prices set
   priceFeedback:        PriceFeedbackEntry[]   // empty array when none; user rejections of prior
                                                // price matches, consumed by the next pipeline run
   priceUpdatedAt:       number | null    // Unix ms; null if price has never been set
   purchaseCount:        number
+}
+```
+
+### ShopPriceEntry
+
+One price record within an Item's `shopPrices` map. Keyed by `ShopId` (as string).
+
+```
+ShopPriceEntry {
+  price:            number        // shelf price
+  priceQuantity:    number        // quantity the price applies to (default 1)
+  priceUnit:        string        // unit (kg, L, pcs, etc.; default 'pcs')
+  priceProductName: string | null // matched product name; null for manual entries
+  priceProductUrl:  string | null // product page URL; null when unavailable
+  priceSearchUrl:   string | null // search-results URL used by the pipeline
+  priceUpdatedAt:   number        // Unix ms; when this shop's price was last set
 }
 ```
 
@@ -521,16 +533,19 @@ Errors:  NotFoundError
 
 #### setItemPrice
 ```
-Intent:  Set or update the price, reference quantity, unit, and source shop for an item.
-         Last writer wins — whether the caller is a user action or the price pipeline.
-         Passing null for price clears the price record entirely (shopId, productName,
-         and productUrl are also cleared).
+Intent:  Set or update the price for an item.
+         When shopId is non-null: writes to shopPrices[shopId] and recomputes the
+         global price fields (price, priceShopId, etc.) by picking the lowest value
+         across all shopPrices entries. Passing null for price removes the shop entry
+         and recomputes global.
+         When shopId is null: writes to the global price fields directly (no shopPrices
+         entry is created). Passing null for price clears the global fields entirely.
          The updated Item arrives via itemChanges$.
 Input:   id:            ItemId
          price:         number | null
          priceQuantity: number | null
          priceUnit:     string | null
-         shopId:        ShopId | null   // which shop's price this is; null for manual entry
+         shopId:        ShopId | null   // which shop's price this is; null = global/no-shop
 Output:  void
 Errors:  NotFoundError
 ```

@@ -2,9 +2,10 @@ import { createSelector } from '@ngrx/store';
 import { selectActiveItems, selectAllItems } from '../items/items.selectors';
 import { selectActiveSessions } from '../sessions/sessions.selectors';
 import { selectOrderedCategories } from './ordered-categories.selectors';
+import { selectSelectedShopId } from '../ui/ui.selectors';
 import { effectivePrice } from '../../models/item-price.util';
 import type { Item } from '../../models/item.model';
-import type { CategoryId, ItemId } from '../../models/ids.model';
+import type { CategoryId, ItemId, ShopId } from '../../models/ids.model';
 
 export interface PlanListGroup {
   categoryId: CategoryId | null; // null = uncategorised bucket
@@ -19,8 +20,9 @@ export const UNCATEGORISED_KEY = null;
 export const selectGroupedPlanList = createSelector(
   selectActiveItems,
   selectOrderedCategories,
-  (items, orderedCategories): PlanListGroup[] =>
-    buildGroups(items, orderedCategories),
+  selectSelectedShopId,
+  (items, orderedCategories, selectedShopId): PlanListGroup[] =>
+    buildGroups(items, orderedCategories, new Set(), selectedShopId),
 );
 
 /**
@@ -51,10 +53,11 @@ export const selectGroupedPlanListWithChecked = createSelector(
   selectActiveSessionCheckedItemIds,
   selectAllItems,
   selectOrderedCategories,
-  (active, checkedIds, all, orderedCategories): PlanListGroup[] => {
-    if (checkedIds.size === 0) return buildGroups(active, orderedCategories);
+  selectSelectedShopId,
+  (active, checkedIds, all, orderedCategories, selectedShopId): PlanListGroup[] => {
+    if (checkedIds.size === 0) return buildGroups(active, orderedCategories, new Set(), selectedShopId);
     const checked = all.filter((i) => checkedIds.has(i.id));
-    return buildGroups([...active, ...checked], orderedCategories, checkedIds);
+    return buildGroups([...active, ...checked], orderedCategories, checkedIds, selectedShopId);
   },
 );
 
@@ -62,6 +65,7 @@ function buildGroups(
   items: Item[],
   orderedCategories: { id: CategoryId; name: string; color: string | null }[],
   excludeFromTotalIds: Set<ItemId> = new Set(),
+  shopId: ShopId | null = null,
 ): PlanListGroup[] {
   const byCategory = new Map<CategoryId, Item[]>();
   const uncategorised: Item[] = [];
@@ -87,7 +91,7 @@ function buildGroups(
         categoryName: cat.name,
         categoryColor: cat.color,
         items: [...bucket].sort((a, b) => a.name.localeCompare(b.name)),
-        estTotal: sumPrices(bucket.filter((i) => !excludeFromTotalIds.has(i.id))),
+        estTotal: sumPrices(bucket.filter((i) => !excludeFromTotalIds.has(i.id)), shopId),
       });
     }
   }
@@ -105,10 +109,10 @@ function buildGroups(
   return groups;
 }
 
-function sumPrices(items: Item[]): number {
+function sumPrices(items: Item[], shopId: ShopId | null = null): number {
   let total = 0;
   for (const item of items) {
-    const p = effectivePrice(item);
+    const p = effectivePrice(item, shopId);
     if (p !== null) total += p;
   }
   return total;

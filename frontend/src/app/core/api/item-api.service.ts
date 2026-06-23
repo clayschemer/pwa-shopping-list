@@ -3,6 +3,7 @@ import { Observable } from 'rxjs';
 import {
   Firestore,
   addDoc,
+  deleteField,
   doc,
   getDocs,
   query,
@@ -14,7 +15,7 @@ import {
   where,
   arrayUnion,
 } from '@angular/fire/firestore';
-import type { Item, PriceFeedbackEntry } from '../../models/item.model';
+import type { Item, PriceFeedbackEntry, ShopPriceEntry } from '../../models/item.model';
 import type {
   AccountId,
   CategoryId,
@@ -82,6 +83,27 @@ function mapFeedback(raw: unknown): PriceFeedbackEntry[] {
   return out;
 }
 
+function mapShopPrices(raw: unknown): Record<string, ShopPriceEntry> {
+  if (raw == null || typeof raw !== 'object' || Array.isArray(raw)) return {};
+  const result: Record<string, ShopPriceEntry> = {};
+  for (const [shopId, entry] of Object.entries(raw as Record<string, unknown>)) {
+    if (entry == null || typeof entry !== 'object') continue;
+    const e = entry as Record<string, unknown>;
+    const price = typeof e['price'] === 'number' ? e['price'] : null;
+    if (price === null) continue;
+    result[shopId] = {
+      price,
+      priceQuantity: (e['priceQuantity'] as number | null) ?? 1,
+      priceUnit: (e['priceUnit'] as string | null) ?? 'pcs',
+      priceProductName: (e['priceProductName'] as string | null) ?? null,
+      priceProductUrl: (e['priceProductUrl'] as string | null) ?? null,
+      priceSearchUrl: (e['priceSearchUrl'] as string | null) ?? null,
+      priceUpdatedAt: toMillis(e['priceUpdatedAt']) ?? 0,
+    };
+  }
+  return result;
+}
+
 export function mapItem(snap: QueryDocumentSnapshot, accountId: AccountId): Item {
   const data = snap.data();
   return {
@@ -106,6 +128,7 @@ export function mapItem(snap: QueryDocumentSnapshot, accountId: AccountId): Item
     priceProductName: (data['priceProductName'] ?? null) as string | null,
     priceProductUrl: (data['priceProductUrl'] ?? null) as string | null,
     priceSearchUrl: (data['priceSearchUrl'] ?? null) as string | null,
+    shopPrices: mapShopPrices(data['shopPrices']),
     priceFeedback: mapFeedback(data['priceFeedback']),
     priceUpdatedAt: toMillis(data['priceUpdatedAt']),
     priceAttemptedAt: toMillis(data['priceAttemptedAt']),
@@ -113,6 +136,19 @@ export function mapItem(snap: QueryDocumentSnapshot, accountId: AccountId): Item
     sizePerPieceUnit: (data['sizePerPieceUnit'] ?? null) as string | null,
     purchaseCount: (data['purchaseCount'] ?? 0) as number,
   };
+}
+
+/** Returns the shopId + entry for the lowest-priced shop, or null if the map is empty. */
+function findLowestShopPrice(
+  shopPrices: Record<string, ShopPriceEntry>,
+): (ShopPriceEntry & { shopId: string }) | null {
+  let lowest: (ShopPriceEntry & { shopId: string }) | null = null;
+  for (const [shopId, entry] of Object.entries(shopPrices)) {
+    if (lowest === null || entry.price < lowest.price) {
+      lowest = { ...entry, shopId };
+    }
+  }
+  return lowest;
 }
 
 @Injectable({ providedIn: 'root' })
@@ -134,15 +170,45 @@ export class ItemApiService {
     const { accountId } = this.context.require();
     return runInInjectionContext(this.injector, async () => {
       const trimmed = input.name.trim();
-      const existing = await getDocs(
+
+      // Conflict check: reject if an active item with this name already exists.
+      const active = await getDocs(
         query(
           paths.items(this.db, accountId),
           where('name', '==', trimmed),
           where('removed', '==', false),
         ),
       );
-      if (!existing.empty) {
+      if (!active.empty) {
         return { type: 'NAME_CONFLICT', entityKind: 'item', name: trimmed };
+      }
+
+      // Restore check: if a removed item with this name exists, restore it
+      // rather than creating a new document. This preserves price data,
+      // purchaseCount, sizePerPiece, and feedback history.
+      const removedMatches = await getDocs(
+        query(
+          paths.items(this.db, accountId),
+          where('name', '==', trimmed),
+          where('removed', '==', true),
+        ),
+      );
+      if (!removedMatches.empty) {
+        const snap = removedMatches.docs[0];
+        const restoreFields = {
+          removed: false,
+          removedAt: null,
+          name: trimmed,
+          description: input.description,
+          quantity: input.quantity,
+          unit: input.unit,
+          primaryCategoryId: input.primaryCategoryId,
+          secondaryCategoryIds: input.secondaryCategoryIds,
+          sizePerPieceQuantity: input.sizePerPieceQuantity,
+          sizePerPieceUnit: input.sizePerPieceUnit,
+        };
+        await updateDoc(snap.ref, restoreFields);
+        return { ...mapItem(snap, accountId), ...restoreFields };
       }
 
       const payload = {
@@ -163,6 +229,7 @@ export class ItemApiService {
         priceProductName: null,
         priceProductUrl: null,
         priceSearchUrl: null,
+        shopPrices: {} as Record<string, ShopPriceEntry>,
         priceFeedback: [] as PriceFeedbackEntry[],
         priceUpdatedAt: null,
         priceAttemptedAt: null,
@@ -239,22 +306,83 @@ export class ItemApiService {
   ): Promise<void | NotFoundError> {
     const { accountId } = this.context.require();
     return runInInjectionContext(this.injector, async () => {
+      const ref = paths.itemDoc(this.db, accountId, id);
+
+      if (shopId === null) {
+        // Global manual price — write straight to the top-level fields.
+        // Manually-entered prices have no pipeline product metadata.
+        try {
+          await updateDoc(ref, {
+            price,
+            priceQuantity,
+            priceUnit,
+            priceShopId: null,
+            priceProductName: null,
+            priceProductUrl: null,
+            priceSearchUrl: null,
+            priceUpdatedAt: price === null ? null : serverTimestamp(),
+          });
+        } catch {
+          return { type: 'NOT_FOUND', entityKind: 'item', id };
+        }
+        return;
+      }
+
+      // Shop-specific price — write to shopPrices map and recompute global.
       try {
-        // Manually-entered prices have no pipeline-matched product, so clear
-        // productName/Url alongside the price write. Clearing also runs when
-        // price itself is cleared.
-        await updateDoc(paths.itemDoc(this.db, accountId, id), {
-          price,
-          priceQuantity,
-          priceUnit,
-          priceShopId: price === null ? null : shopId,
-          priceProductName: null,
-          priceProductUrl: null,
-          priceSearchUrl: null,
-          priceUpdatedAt: price === null ? null : serverTimestamp(),
+        await runTransaction(this.db, async (tx) => {
+          const snap = await tx.get(ref);
+          if (!snap.exists()) throw new Error('NOT_FOUND');
+
+          const updates: Record<string, unknown> = {};
+
+          if (price === null) {
+            updates[`shopPrices.${shopId}`] = deleteField();
+          } else {
+            updates[`shopPrices.${shopId}`] = {
+              price,
+              priceQuantity,
+              priceUnit,
+              priceProductName: null,
+              priceProductUrl: null,
+              priceSearchUrl: null,
+              priceUpdatedAt: serverTimestamp(),
+            };
+          }
+
+          // Derive updated shopPrices to compute the new global.
+          const current = mapShopPrices(snap.data()?.['shopPrices']);
+          if (price !== null) {
+            current[shopId] = {
+              price,
+              priceQuantity: priceQuantity ?? 1,
+              priceUnit: priceUnit ?? 'pcs',
+              priceProductName: null,
+              priceProductUrl: null,
+              priceSearchUrl: null,
+              priceUpdatedAt: Date.now(),
+            };
+          } else {
+            delete current[shopId];
+          }
+
+          const global = findLowestShopPrice(current);
+          updates['price'] = global?.price ?? null;
+          updates['priceQuantity'] = global?.priceQuantity ?? null;
+          updates['priceUnit'] = global?.priceUnit ?? null;
+          updates['priceShopId'] = global?.shopId ?? null;
+          updates['priceProductName'] = global?.priceProductName ?? null;
+          updates['priceProductUrl'] = global?.priceProductUrl ?? null;
+          updates['priceSearchUrl'] = global?.priceSearchUrl ?? null;
+          updates['priceUpdatedAt'] = global ? serverTimestamp() : null;
+
+          tx.update(ref, updates);
         });
-      } catch {
-        return { type: 'NOT_FOUND', entityKind: 'item', id };
+      } catch (err) {
+        if ((err as Error).message === 'NOT_FOUND') {
+          return { type: 'NOT_FOUND', entityKind: 'item', id };
+        }
+        throw err;
       }
       return;
     });

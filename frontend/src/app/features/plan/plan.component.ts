@@ -17,6 +17,7 @@ import { selectListDataLoaded } from '../../store/selectors/list-data-loaded.sel
 import { selectOrderedCategories } from '../../store/selectors/ordered-categories.selectors';
 import { selectAllShops } from '../../store/shops/shops.selectors';
 import { selectActiveItems } from '../../store/items/items.selectors';
+import { selectSelectedShopId } from '../../store/ui/ui.selectors';
 import { itemsApiActions } from '../../store/items/items.actions';
 import {
   ItemSheetComponent,
@@ -38,7 +39,7 @@ import {
 import { MoneyPipe } from '../../core/format/money.pipe';
 import { EffectivePricePipe } from '../../core/format/effective-price.pipe';
 import type { Item } from '../../models/item.model';
-import type { CategoryId, ItemId } from '../../models/ids.model';
+import type { CategoryId, ItemId, ShopId } from '../../models/ids.model';
 
 interface PlanFlatRow {
   item: Item;
@@ -127,6 +128,10 @@ export class PlanComponent {
     initialValue: [],
   });
 
+  readonly selectedShopId = toSignal(this.store.select(selectSelectedShopId), {
+    initialValue: null as ShopId | null,
+  });
+
   readonly activeItems = toSignal(this.store.select(selectActiveItems), {
     initialValue: [],
   });
@@ -213,21 +218,24 @@ export class PlanComponent {
   }
 
   openPriceDialog(item: Item): void {
-    const shop = this.shops().find((s) => s.id === item.priceShopId);
+    const shopId = this.selectedShopId();
+    const shopEntry = shopId ? item.shopPrices[shopId] ?? null : null;
+    const priceShopId = shopEntry ? shopId : item.priceShopId;
+    const shop = this.shops().find((s) => s.id === priceShopId);
     this.dialog.open<PriceProductDialogComponent, PriceProductDialogData>(
       PriceProductDialogComponent,
       {
         data: {
           itemId: item.id,
           itemName: item.name,
-          productName: item.priceProductName,
-          productUrl: item.priceProductUrl,
-          searchUrl: item.priceSearchUrl,
+          productName: shopEntry?.priceProductName ?? item.priceProductName,
+          productUrl: shopEntry?.priceProductUrl ?? item.priceProductUrl,
+          searchUrl: shopEntry?.priceSearchUrl ?? item.priceSearchUrl,
           shopName: shop?.name ?? null,
-          price: item.price,
-          priceQuantity: item.priceQuantity,
-          priceUnit: item.priceUnit,
-          priceUpdatedAt: item.priceUpdatedAt,
+          price: shopEntry?.price ?? item.price,
+          priceQuantity: shopEntry?.priceQuantity ?? item.priceQuantity,
+          priceUnit: shopEntry?.priceUnit ?? item.priceUnit,
+          priceUpdatedAt: shopEntry?.priceUpdatedAt ?? item.priceUpdatedAt,
         },
       },
     );

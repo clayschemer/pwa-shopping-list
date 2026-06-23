@@ -21,6 +21,11 @@ function makeItem(overrides: Partial<Item>): Item {
     priceQuantity: null,
     priceUnit: null,
     priceShopId: null,
+    priceProductName: null,
+    priceProductUrl: null,
+    priceSearchUrl: null,
+    shopPrices: {},
+    priceFeedback: [],
     priceUpdatedAt: null,
     priceAttemptedAt: null,
     sizePerPieceQuantity: null,
@@ -41,17 +46,17 @@ describe('computePrice', () => {
   describe('no quantity to scale by', () => {
     it('returns the raw price as exact when quantity is null', () => {
       const item = makeItem({ price: 25, quantity: null });
-      expect(computePrice(item)).toEqual({ kind: 'exact', total: 25 });
+      expect(computePrice(item)).toEqual({ kind: 'exact', total: 25, isGlobalFallback: false });
     });
 
     it('returns the raw price as exact when quantity is 0', () => {
       const item = makeItem({ price: 25, quantity: 0 });
-      expect(computePrice(item)).toEqual({ kind: 'exact', total: 25 });
+      expect(computePrice(item)).toEqual({ kind: 'exact', total: 25, isGlobalFallback: false });
     });
 
     it('returns the raw price as exact when quantity is negative', () => {
       const item = makeItem({ price: 25, quantity: -1 });
-      expect(computePrice(item)).toEqual({ kind: 'exact', total: 25 });
+      expect(computePrice(item)).toEqual({ kind: 'exact', total: 25, isGlobalFallback: false });
     });
   });
 
@@ -64,7 +69,7 @@ describe('computePrice', () => {
         quantity: 3,
         unit: 'pcs',
       });
-      expect(computePrice(item)).toEqual({ kind: 'exact', total: 30 });
+      expect(computePrice(item)).toEqual({ kind: 'exact', total: 30, isGlobalFallback: false });
     });
 
     it('scales for matching kg units with non-1 priceQuantity', () => {
@@ -75,7 +80,7 @@ describe('computePrice', () => {
         quantity: 1,
         unit: 'kg',
       });
-      expect(computePrice(item)).toEqual({ kind: 'exact', total: 50 });
+      expect(computePrice(item)).toEqual({ kind: 'exact', total: 50, isGlobalFallback: false });
     });
 
     it('normalises spelling variants on both sides', () => {
@@ -86,7 +91,7 @@ describe('computePrice', () => {
         quantity: 4,
         unit: 'pcs',
       });
-      expect(computePrice(item)).toEqual({ kind: 'exact', total: 120 });
+      expect(computePrice(item)).toEqual({ kind: 'exact', total: 120, isGlobalFallback: false });
     });
 
     it('treats unknown matching units as exact (no dimension required)', () => {
@@ -97,7 +102,7 @@ describe('computePrice', () => {
         quantity: 3,
         unit: 'bag',
       });
-      expect(computePrice(item)).toEqual({ kind: 'exact', total: 36 });
+      expect(computePrice(item)).toEqual({ kind: 'exact', total: 36, isGlobalFallback: false });
     });
   });
 
@@ -110,7 +115,7 @@ describe('computePrice', () => {
         quantity: 2,
         unit: 'kg',
       });
-      expect(computePrice(item)).toEqual({ kind: 'exact', total: 356 });
+      expect(computePrice(item)).toEqual({ kind: 'exact', total: 356, isGlobalFallback: false });
     });
 
     it('scales 1 kg shelf price down to 250 g of item', () => {
@@ -121,7 +126,7 @@ describe('computePrice', () => {
         quantity: 250,
         unit: 'g',
       });
-      expect(computePrice(item)).toEqual({ kind: 'exact', total: 50 });
+      expect(computePrice(item)).toEqual({ kind: 'exact', total: 50, isGlobalFallback: false });
     });
 
     it('scales mg to g', () => {
@@ -160,7 +165,7 @@ describe('computePrice', () => {
         quantity: 1,
         unit: 'dl',
       });
-      expect(computePrice(item)).toEqual({ kind: 'exact', total: 2 });
+      expect(computePrice(item)).toEqual({ kind: 'exact', total: 2, isGlobalFallback: false });
     });
 
     it('scales cl to L', () => {
@@ -171,7 +176,7 @@ describe('computePrice', () => {
         quantity: 25,
         unit: 'cl',
       });
-      expect(computePrice(item)).toEqual({ kind: 'exact', total: 12.5 });
+      expect(computePrice(item)).toEqual({ kind: 'exact', total: 12.5, isGlobalFallback: false });
     });
   });
 
@@ -189,6 +194,7 @@ describe('computePrice', () => {
         shelfPrice: 39.9,
         shelfQuantity: 1,
         shelfUnit: 'kg',
+        isGlobalFallback: false,
       });
     });
 
@@ -205,6 +211,7 @@ describe('computePrice', () => {
         shelfPrice: 50,
         shelfQuantity: 1,
         shelfUnit: 'wedge',
+        isGlobalFallback: false,
       });
     });
 
@@ -221,6 +228,7 @@ describe('computePrice', () => {
         shelfPrice: 50,
         shelfQuantity: 1,
         shelfUnit: 'kg',
+        isGlobalFallback: false,
       });
     });
 
@@ -237,6 +245,7 @@ describe('computePrice', () => {
         shelfPrice: 50,
         shelfQuantity: 0,
         shelfUnit: 'kg',
+        isGlobalFallback: false,
       });
     });
   });
@@ -282,7 +291,7 @@ describe('computePrice', () => {
         sizePerPieceQuantity: 500,
         sizePerPieceUnit: 'g',
       });
-      expect(computePrice(item)).toEqual({ kind: 'exact', total: 71.6 });
+      expect(computePrice(item)).toEqual({ kind: 'exact', total: 71.6, isGlobalFallback: false });
     });
 
     it('falls back to approximate when sizePerPiece dimension does not match', () => {
@@ -309,7 +318,7 @@ describe('computePrice', () => {
         sizePerPieceQuantity: 70,
         sizePerPieceUnit: 'g',
       });
-      expect(computePrice(item)).toEqual({ kind: 'exact', total: 15 });
+      expect(computePrice(item)).toEqual({ kind: 'exact', total: 15, isGlobalFallback: false });
     });
 
     it('falls back to approximate when sizePerPiece is incomplete', () => {
@@ -336,7 +345,7 @@ describe('computePrice', () => {
         quantity: 3,
         unit: null,
       });
-      expect(computePrice(item)).toEqual({ kind: 'exact', total: 30 });
+      expect(computePrice(item)).toEqual({ kind: 'exact', total: 30, isGlobalFallback: false });
     });
 
     it('treats pcs item with null shelf unit as exact (null defaults to pcs)', () => {
@@ -347,7 +356,7 @@ describe('computePrice', () => {
         quantity: 2,
         unit: 'pcs',
       });
-      expect(computePrice(item)).toEqual({ kind: 'exact', total: 20 });
+      expect(computePrice(item)).toEqual({ kind: 'exact', total: 20, isGlobalFallback: false });
     });
 
     it('marks kg item with null shelf unit as approximate (no longer silently multiplies)', () => {
@@ -360,6 +369,49 @@ describe('computePrice', () => {
       });
       const result = computePrice(item);
       expect(result.kind).toBe('approximate');
+    });
+  });
+
+  describe('per-shop price resolution', () => {
+    it('uses shop-specific price when shopId is provided and price exists', () => {
+      const item = makeItem({
+        price: 30,
+        priceQuantity: 1,
+        priceUnit: 'pcs',
+        quantity: 2,
+        unit: 'pcs',
+        shopPrices: {
+          'shop-1': { price: 20, priceQuantity: 1, priceUnit: 'pcs', priceProductName: null, priceProductUrl: null, priceSearchUrl: null, priceUpdatedAt: Date.now() },
+        },
+      });
+      expect(computePrice(item, 'shop-1')).toEqual({ kind: 'exact', total: 40, isGlobalFallback: false });
+    });
+
+    it('falls back to global price with isGlobalFallback=true when shop has no price', () => {
+      const item = makeItem({
+        price: 30,
+        priceQuantity: 1,
+        priceUnit: 'pcs',
+        quantity: 2,
+        unit: 'pcs',
+        shopPrices: {},
+      });
+      expect(computePrice(item, 'shop-1')).toEqual({ kind: 'exact', total: 60, isGlobalFallback: true });
+    });
+
+    it('returns kind=none when no shop price and no global price', () => {
+      const item = makeItem({ price: null, shopPrices: {} });
+      expect(computePrice(item, 'shop-1')).toEqual({ kind: 'none' });
+    });
+
+    it('isGlobalFallback is false when shopId is null', () => {
+      const item = makeItem({ price: 25, quantity: null, shopPrices: {} });
+      expect(computePrice(item, null)).toEqual({ kind: 'exact', total: 25, isGlobalFallback: false });
+    });
+
+    it('isGlobalFallback is false when shopId is undefined', () => {
+      const item = makeItem({ price: 25, quantity: null, shopPrices: {} });
+      expect(computePrice(item)).toEqual({ kind: 'exact', total: 25, isGlobalFallback: false });
     });
   });
 });
@@ -395,5 +447,19 @@ describe('effectivePrice', () => {
   it('returns the raw price when quantity is null', () => {
     const item = makeItem({ price: 25, quantity: null });
     expect(effectivePrice(item)).toBe(25);
+  });
+
+  it('uses shop-specific price when shopId provided', () => {
+    const item = makeItem({
+      price: 30,
+      priceQuantity: 1,
+      priceUnit: 'pcs',
+      quantity: 2,
+      unit: 'pcs',
+      shopPrices: {
+        'shop-1': { price: 15, priceQuantity: 1, priceUnit: 'pcs', priceProductName: null, priceProductUrl: null, priceSearchUrl: null, priceUpdatedAt: Date.now() },
+      },
+    });
+    expect(effectivePrice(item, 'shop-1')).toBe(30);
   });
 });
