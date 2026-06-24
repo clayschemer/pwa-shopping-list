@@ -2,11 +2,13 @@ import '../../../testing/init-testbed';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { TestBed } from '@angular/core/testing';
 import { provideMockActions } from '@ngrx/effects/testing';
+import { provideMockStore } from '@ngrx/store/testing';
 import { Subject } from 'rxjs';
 import { ItemsEffects } from './items.effects';
 import { itemsActions, itemsApiActions } from './items.actions';
 import { accountActions } from '../account/account.actions';
 import { ItemApiService } from '../../core/api/item-api.service';
+import { PriceQueueApiService } from '../../core/api/price-queue-api.service';
 import type { Item } from '../../models/item.model';
 import type { AccountId, ItemId, SessionId } from '../../models/ids.model';
 
@@ -61,6 +63,8 @@ describe('ItemsEffects', () => {
         ItemsEffects,
         provideMockActions(() => actions$),
         { provide: ItemApiService, useValue: itemApi },
+        { provide: PriceQueueApiService, useValue: { enqueue: vi.fn() } },
+        provideMockStore(),
       ],
     });
     effects = TestBed.inject(ItemsEffects);

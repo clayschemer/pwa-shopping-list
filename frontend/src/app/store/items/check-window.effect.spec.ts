@@ -2,10 +2,12 @@ import '../../../testing/init-testbed';
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { TestBed } from '@angular/core/testing';
 import { provideMockActions } from '@ngrx/effects/testing';
+import { provideMockStore } from '@ngrx/store/testing';
 import { Subject } from 'rxjs';
 import { ItemsEffects, CHECK_UNDO_WINDOW_MS } from './items.effects';
 import { itemsActions, itemsApiActions } from './items.actions';
 import { ItemApiService } from '../../core/api/item-api.service';
+import { PriceQueueApiService } from '../../core/api/price-queue-api.service';
 import type { ItemId, SessionId } from '../../models/ids.model';
 
 function setVisibilityState(value: 'hidden' | 'visible'): void {
@@ -38,6 +40,8 @@ describe('ItemsEffects — undo window', () => {
             uncheckItem: vi.fn(),
           },
         },
+        { provide: PriceQueueApiService, useValue: { enqueue: vi.fn() } },
+        provideMockStore(),
       ],
     });
     effects = TestBed.inject(ItemsEffects);
