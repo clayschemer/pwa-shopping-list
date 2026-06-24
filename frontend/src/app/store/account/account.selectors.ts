@@ -37,3 +37,13 @@ export const selectShopOrder = createSelector(
   selectAccount,
   (a) => a?.shopOrder ?? [],
 );
+
+export const selectAiConfig = createSelector(
+  selectAccount,
+  (a) => a?.aiConfig ?? null,
+);
+
+export const selectStalePriceDays = createSelector(
+  selectAiConfig,
+  (cfg) => cfg?.stalePriceDays ?? 90,
+);

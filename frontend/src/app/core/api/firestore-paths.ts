@@ -59,4 +59,12 @@ export const paths = {
   priceFeedback(db: Firestore, accountId: AccountId): CollectionReference {
     return collection(db, 'accounts', accountId, 'priceFeedback');
   },
+
+  priceQueue(db: Firestore, accountId: AccountId): CollectionReference {
+    return collection(db, 'accounts', accountId, 'price-queue');
+  },
+
+  priceQueueDoc(db: Firestore, accountId: AccountId, itemId: string): DocumentReference {
+    return doc(db, 'accounts', accountId, 'price-queue', itemId);
+  },
 } as const;

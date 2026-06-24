@@ -136,13 +136,12 @@ async function runFirestoreMode(mode: 'scheduler' | 'once-full' | 'once-unpriced
     const { start } = await import('./scheduler.js');
     await start();
   } else {
-    const { queryStaleItems, getShopConfigs } = await import('./query.js');
-    const { writeShopPriceResult, writeGlobalPrice, writeAttemptTimestamp } = await import('./writer.js');
+    const { queryQueuedItems, getShopConfigs } = await import('./query.js');
+    const { writeShopPriceResult, writeGlobalPrice, writeAttemptTimestamp, dequeueItem } = await import('./writer.js');
     const { processItem } = await import('./pipeline.js');
 
-    const scanMode = mode === 'once-full' ? 'full' : 'unpriced';
-    const items = await queryStaleItems(scanMode);
-    console.log(`Found ${items.length} item(s) for ${scanMode} scan.`);
+    const items = await queryQueuedItems();
+    console.log(`Found ${items.length} item(s) in queue.`);
 
     for (const item of items) {
       const shops = await getShopConfigs(item.accountId);
@@ -153,6 +152,7 @@ async function runFirestoreMode(mode: 'scheduler' | 'once-full' | 'once-unpriced
           await writeShopPriceResult(item.accountId, item.id, result, shop.id, searchUrl);
         }
         await writeGlobalPrice(item.accountId, item.id);
+        await dequeueItem(item.accountId, item.id);
       } else {
         console.log(`✗ "${item.name}": no price found — will retry in ${process.env['PRICE_RETRY_DAYS'] ?? 7} days.`);
         await writeAttemptTimestamp(item.accountId, item.id);

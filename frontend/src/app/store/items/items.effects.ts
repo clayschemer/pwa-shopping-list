@@ -1,6 +1,8 @@
 import { inject, Injectable, NgZone } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
+import { Store } from '@ngrx/store';
 import {
+  EMPTY,
   filter,
   from,
   map,
@@ -9,6 +11,7 @@ import {
   of,
   switchMap,
   takeUntil,
+  withLatestFrom,
 } from 'rxjs';
 
 export const CHECK_UNDO_WINDOW_MS = 4000;
@@ -59,6 +62,8 @@ import { itemsActions, itemsApiActions } from './items.actions';
 import { sessionsActions } from '../sessions/sessions.actions';
 import { accountActions } from '../account/account.actions';
 import { ItemApiService } from '../../core/api/item-api.service';
+import { PriceQueueApiService, type QueueReason } from '../../core/api/price-queue-api.service';
+import { selectAiConfig, selectStalePriceDays } from '../account/account.selectors';
 import type { Item } from '../../models/item.model';
 import type { ItemId } from '../../models/ids.model';
 import type {
@@ -68,10 +73,23 @@ import type {
 } from '../../models/errors.model';
 import type { CheckSuccess } from '../../core/api/item-api.service';
 
+const RETRY_MS = 7 * 86_400_000;
+
+function needsPriceLookup(item: Item, stalePriceDays: number): boolean {
+  const now = Date.now();
+  if (item.priceUpdatedAt === null) {
+    // Never priced — respect the retry window so recently-attempted failures aren't re-queued
+    return item.priceAttemptedAt === null || item.priceAttemptedAt < now - RETRY_MS;
+  }
+  return item.priceUpdatedAt < now - stalePriceDays * 86_400_000;
+}
+
 @Injectable()
 export class ItemsEffects {
   private readonly actions$ = inject(Actions);
   private readonly itemApi = inject(ItemApiService);
+  private readonly priceQueueApi = inject(PriceQueueApiService);
+  private readonly store = inject(Store);
   private readonly zone = inject(NgZone);
 
   readonly fetchActiveList$ = createEffect(() =>
@@ -208,5 +226,47 @@ export class ItemsEffects {
         ),
       ),
     ),
+  );
+
+  // Enqueue a newly added (or restored) item for price lookup if it has no
+  // price or a stale one and the account has the price pipeline configured.
+  readonly queueItemOnAdd$ = createEffect(
+    () =>
+      this.actions$.pipe(
+        ofType(itemsActions.itemAdded),
+        withLatestFrom(
+          this.store.select(selectAiConfig),
+          this.store.select(selectStalePriceDays),
+        ),
+        filter(([, aiConfig]) => aiConfig !== null),
+        mergeMap(([{ item }, , stalePriceDays]) => {
+          if (!needsPriceLookup(item, stalePriceDays)) return EMPTY;
+          const reason: QueueReason = item.priceUpdatedAt === null ? 'unpriced' : 'reactivated';
+          return from(this.priceQueueApi.enqueue(item.id, reason));
+        }),
+      ),
+    { dispatch: false },
+  );
+
+  // On boot, enqueue any active items whose price has gone stale since the
+  // last time the pipeline ran. Runs once per session after the initial fetch.
+  readonly queueStaleItemsOnBoot$ = createEffect(
+    () =>
+      this.actions$.pipe(
+        ofType(itemsActions.itemsLoaded),
+        withLatestFrom(
+          this.store.select(selectAiConfig),
+          this.store.select(selectStalePriceDays),
+        ),
+        filter(([, aiConfig]) => aiConfig !== null),
+        mergeMap(([{ items }, , stalePriceDays]) => {
+          const stale = items.filter((i) => needsPriceLookup(i, stalePriceDays));
+          if (stale.length === 0) return EMPTY;
+          return from(
+            Promise.all(stale.map((i) => this.priceQueueApi.enqueue(i.id, 'stale'))),
+          );
+        }),
+      ),
+    { dispatch: false },
   );
 }

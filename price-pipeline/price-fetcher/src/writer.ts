@@ -2,6 +2,12 @@ import { FieldValue } from 'firebase-admin/firestore';
 import { getDb } from './firebase-admin.js';
 import type { PriceResult } from './types.js';
 
+/** Removes an item from the price-queue once the pipeline has processed it. */
+export async function dequeueItem(accountId: string, itemId: string): Promise<void> {
+  const db = getDb();
+  await db.collection(`accounts/${accountId}/price-queue`).doc(itemId).delete();
+}
+
 /**
  * Resets an item so the unpriced scan will pick it up on the next cycle.
  * Sets priceUpdatedAt and priceAttemptedAt to explicit null — Firestore's

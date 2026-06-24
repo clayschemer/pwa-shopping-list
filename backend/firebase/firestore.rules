@@ -66,6 +66,14 @@ service cloud.firestore {
         allow read, create: if isMember(accountId);
         allow update, delete: if false;
       }
+
+      // Transient price-lookup queue. The Angular client writes entries when
+      // items are added or stale prices are detected; the pipeline reads and
+      // deletes them. Members may read and write; the pipeline uses a service
+      // account which bypasses these rules entirely.
+      match /price-queue/{itemId} {
+        allow read, write: if isMember(accountId);
+      }
     }
   }
 }

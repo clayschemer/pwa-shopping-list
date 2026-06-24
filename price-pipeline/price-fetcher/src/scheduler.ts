@@ -1,10 +1,8 @@
-import { queryStaleItems, getShopConfigs } from './query.js';
-import { writeShopPriceResult, writeGlobalPrice, writeAttemptTimestamp } from './writer.js';
+import { queryQueuedItems, getShopConfigs } from './query.js';
+import { writeShopPriceResult, writeGlobalPrice, writeAttemptTimestamp, dequeueItem } from './writer.js';
 import { processItem } from './pipeline.js';
 import type { StaleItem } from './types.js';
 
-// SCAN_INTERVAL_SECONDS takes precedence; SCAN_INTERVAL_MINUTES is the legacy
-// coarser knob. Use seconds for sub-minute responsiveness on small accounts.
 const INTERVAL_MS = (() => {
   const sec = process.env['SCAN_INTERVAL_SECONDS'];
   if (sec) return parseInt(sec, 10) * 1_000;
@@ -15,16 +13,16 @@ const INTERVAL_MS = (() => {
 // Politeness delay between items — avoids hammering the same store
 const ITEM_DELAY_MS = 2_500;
 
-async function runCycle(mode: 'full' | 'unpriced'): Promise<void> {
-  console.log(`\n[${ts()}] Starting ${mode} scan…`);
+async function runCycle(): Promise<void> {
+  console.log(`\n[${ts()}] Checking price queue…`);
 
-  const items = await queryStaleItems(mode);
+  const items = await queryQueuedItems();
   if (items.length === 0) {
-    console.log(`  No items to process.`);
+    console.log(`  Queue empty.`);
     return;
   }
 
-  console.log(`  ${items.length} item(s) found.\n`);
+  console.log(`  ${items.length} item(s) queued.\n`);
 
   // Group by account to avoid re-fetching shop config per item
   const byAccount = new Map<string, StaleItem[]>();
@@ -63,8 +61,11 @@ async function runCycle(mode: 'full' | 'unpriced'): Promise<void> {
           await delay(ITEM_DELAY_MS);
         }
         await writeGlobalPrice(accountId, item.id);
+        await dequeueItem(accountId, item.id);
       } else {
         console.log(`  ✗  No price found — will retry in ${process.env['PRICE_RETRY_DAYS'] ?? 7} days.`);
+        // Stamp attempt time so the retry window is respected. Item stays in
+        // the queue; the next cycle will skip it until the window expires.
         await writeAttemptTimestamp(accountId, item.id);
       }
 
@@ -75,29 +76,11 @@ async function runCycle(mode: 'full' | 'unpriced'): Promise<void> {
   console.log(`\n[${ts()}] Cycle complete.`);
 }
 
-let lastFullRunAt = 0;
-
-async function tick(): Promise<void> {
-  try {
-    await runCycle('unpriced');
-
-    // Run a full stale-price sweep once per day, starting at or after 02:00 UTC
-    const hourUTC = new Date().getUTCHours();
-    const sinceLastFull = Date.now() - lastFullRunAt;
-    if (hourUTC >= 2 && sinceLastFull > 20 * 3_600_000) {
-      await runCycle('full');
-      lastFullRunAt = Date.now();
-    }
-  } catch (err) {
-    console.error(`[${ts()}] Cycle error:`, (err as Error).message);
-  }
-}
-
 export async function start(): Promise<void> {
   const intervalLabel = INTERVAL_MS < 60_000
     ? `${Math.round(INTERVAL_MS / 1_000)} s`
     : `${Math.round(INTERVAL_MS / 60_000)} min`;
-  console.log(`Price scheduler started (interval: ${intervalLabel}, stale threshold: ${process.env['PRICE_STALE_DAYS'] ?? 180} days).`);
+  console.log(`Price scheduler started (interval: ${intervalLabel}).`);
 
   await tick();
 
@@ -105,6 +88,14 @@ export async function start(): Promise<void> {
 
   // Keep the process alive
   process.stdin.resume();
+}
+
+async function tick(): Promise<void> {
+  try {
+    await runCycle();
+  } catch (err) {
+    console.error(`[${ts()}] Cycle error:`, (err as Error).message);
+  }
 }
 
 const ts = () => new Date().toISOString();
