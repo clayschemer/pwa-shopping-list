@@ -3,7 +3,7 @@ import { TranslocoService } from '@jsverse/transloco';
 
 export const SETTINGS_STORAGE_KEY = 'app-settings';
 
-export type Language = 'EN' | 'NO' | 'SV' | 'DE' | 'FR';
+export type Language = 'EN' | 'NO' | 'SV' | 'DE' | 'FR' | 'DA';
 export type Currency = 'GBP' | 'USD' | 'EUR' | 'NOK' | 'SEK' | 'DKK';
 
 export interface AppSettings {
@@ -28,6 +28,7 @@ const LANGUAGE_MAP: Record<string, Language> = {
   sv: 'SV',
   de: 'DE',
   fr: 'FR',
+  da: 'DA',
 };
 
 const DEFAULT_SETTINGS: AppSettings = {

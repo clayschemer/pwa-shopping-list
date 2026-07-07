@@ -295,6 +295,16 @@ describe('ThemeService', () => {
       expect(newService.settings().language).toBe('FR');
     });
 
+    it('should detect Danish (da-DK) as DA', () => {
+      localStorage.clear();
+      Object.defineProperty(navigator, 'language', { value: 'da-DK', configurable: true });
+
+      TestBed.resetTestingModule();
+      configureTestBed();
+      const newService = TestBed.inject(ThemeService);
+      expect(newService.settings().language).toBe('DA');
+    });
+
     it('should not override stored language with browser language', () => {
       localStorage.setItem(SETTINGS_STORAGE_KEY, JSON.stringify({ language: 'DE' }));
       Object.defineProperty(navigator, 'language', { value: 'fr', configurable: true });

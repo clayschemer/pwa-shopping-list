@@ -49,13 +49,14 @@ export class SettingsComponent {
   });
   readonly user = toSignal(this.store.select(selectCurrentUser));
 
-  readonly languages: Language[] = ['EN', 'NO', 'SV', 'DE', 'FR'];
+  readonly languages: Language[] = ['EN', 'NO', 'SV', 'DE', 'FR', 'DA'];
   readonly languageLabels: Record<Language, string> = {
     EN: 'English',
     NO: 'Norsk',
     SV: 'Svenska',
     DE: 'Deutsch',
     FR: 'Français',
+    DA: 'Dansk',
   };
   readonly currencies: Currency[] = ['GBP', 'USD', 'EUR', 'NOK', 'SEK', 'DKK'];
 

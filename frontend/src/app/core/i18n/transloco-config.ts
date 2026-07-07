@@ -8,7 +8,7 @@ export function provideAppTransloco() {
     provideHttpClient(),
     provideTransloco({
       config: {
-        availableLangs: ['en', 'no', 'sv', 'de', 'fr'],
+        availableLangs: ['en', 'no', 'sv', 'de', 'fr', 'da'],
         defaultLang: 'en',
         reRenderOnLangChange: true,
         prodMode: !isDevMode(),
