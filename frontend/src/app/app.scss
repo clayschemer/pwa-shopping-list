@@ -14,7 +14,7 @@
 
   &__top-bar {
     position: fixed;
-    top: 0;
+    top: var(--app-shop-banner-height);
     left: 0;
     right: 0;
     z-index: 10;
@@ -85,18 +85,14 @@
     font-weight: 600;
   }
 
-  &__session-pill-sub {
-    font-size: var(--app-font-caption);
-    opacity: 0.85;
-  }
-
   &__content {
-    // Top padding clears the fixed top-bar; bottom clears any FAB / safe
-    // area. Both offsets are non-shrinking semantic tokens so compact mode
-    // doesn't pull content under the bar (the bar's own --app-top-bar-height
-    // shifts in lockstep — see _theme-modes.scss).
+    // Top padding clears the fixed shop-banner + top-bar stack; bottom
+    // clears any FAB / safe area. Offsets are non-shrinking semantic tokens
+    // so compact mode doesn't pull content under the bars (the top-bar's
+    // own --app-top-bar-height shifts in lockstep — see _theme-modes.scss;
+    // --app-shop-banner-height is fixed across modes, see _theme-base.scss).
     padding:
-      calc(var(--app-top-bar-height) + var(--app-spacing-xs))
+      calc(var(--app-shop-banner-height) + var(--app-top-bar-height) + var(--app-spacing-xs))
       var(--app-spacing-md)
       var(--app-fab-clearance);
   }
@@ -104,6 +100,10 @@
   &__fullscreen {
     min-height: 100vh;
     min-height: 100dvh;
+
+    &--with-banner {
+      padding-top: var(--app-shop-banner-height);
+    }
   }
 
   &__loading {

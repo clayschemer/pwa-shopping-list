@@ -1,6 +1,18 @@
 @if (isAuthenticated()) {
+  @if (showShopBanner()) {
+    <app-shop-banner
+      [shops]="shops()"
+      [selectedShopId]="shopId()"
+      [isShopMode]="isShopMode()"
+      (shopSelected)="onShopBannerShopSelected($event)"
+      (changeRequested)="onShopBannerChangeRequested()"
+    />
+  }
   @if (isFullScreenRoute()) {
-    <main class="app-root__fullscreen">
+    <main
+      class="app-root__fullscreen"
+      [class.app-root__fullscreen--with-banner]="showShopBanner()"
+    >
       <router-outlet />
     </main>
   } @else {
@@ -77,18 +89,9 @@
               [attr.aria-label]="'nav.activeSession' | transloco"
               (click)="onSessionPillClicked()"
             >
-              @if (sessionTotal() > 0) {
-                <span class="app-root__session-pill-total">
-                  {{ sessionTotal() | money }}
-                </span>
-                <span class="app-root__session-pill-sub">
-                  {{ sessionShopName() ?? ('nav.global' | transloco) }}
-                </span>
-              } @else {
-                <span class="app-root__session-pill-total">
-                  {{ sessionShopName() ?? ('nav.global' | transloco) }}
-                </span>
-              }
+              <span class="app-root__session-pill-total">
+                {{ sessionTotal() | money }}
+              </span>
               <mat-icon>shopping_cart_checkout</mat-icon>
             </button>
           }

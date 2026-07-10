@@ -174,12 +174,23 @@
     "uncategorised": "Uncategorised",
     "selectTitle": "Where are you shopping?",
     "global": "No specific shop (global)",
+    "changeShop": "Change shop",
     "est": "Est.",
     "tapToUndo": "tap to undo",
     "checkItem": "Check {{name}}",
     "activeSession": "Active session",
     "approxShelfPrice": "≈ {{price}} / {{quantity}} {{unit}}",
     "approxShelfPriceNoQty": "≈ {{price}}"
+  },
+  "shopModeChangeDialog": {
+    "title": "Change shop",
+    "message": "What would you like to do?",
+    "switchToPlanMode": "Switch to plan mode for this shop",
+    "startAnotherSession": "Start another session",
+    "cancel": "Cancel"
+  },
+  "shopPickerDialog": {
+    "title": "Select shop"
   },
   "pricePopup": {
     "title": "Price details",

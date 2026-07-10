@@ -174,12 +174,23 @@
     "uncategorised": "Uten kategori",
     "selectTitle": "Hvor handler du?",
     "global": "Ingen bestemt butikk (global)",
+    "changeShop": "Bytt butikk",
     "est": "Est.",
     "tapToUndo": "trykk for å angre",
     "checkItem": "Kryss av {{name}}",
     "activeSession": "Aktiv økt",
     "approxShelfPrice": "≈ {{price}} / {{quantity}} {{unit}}",
     "approxShelfPriceNoQty": "≈ {{price}}"
+  },
+  "shopModeChangeDialog": {
+    "title": "Bytt butikk",
+    "message": "Hva vil du gjøre?",
+    "switchToPlanMode": "Bytt til planleggingsmodus for denne butikken",
+    "startAnotherSession": "Start en ny økt",
+    "cancel": "Avbryt"
+  },
+  "shopPickerDialog": {
+    "title": "Velg butikk"
   },
   "pricePopup": {
     "title": "Prisdetaljer",

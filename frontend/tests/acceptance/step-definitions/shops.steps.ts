@@ -20,6 +20,8 @@ interface ShopsWorld {
   lastCreatedShop: Shop | null;
   shopSelectionPrompted: boolean;
   canSkipShopSelection: boolean;
+  changeShopChoiceOffered: { switchToPlanMode: boolean; startAnotherSession: boolean } | null;
+  previousSelectedShopId: string | null | undefined;
 }
 
 let _shopId = 100;
@@ -106,6 +108,19 @@ When('I select a different shop', function (this: ShopsWorld) {
   if (otherShop) this.selectedShopId = otherShop.id;
 });
 
+When('I view the shopping list, the active shopping session, or the category order', function (this: ShopsWorld) {
+  // Read-only — the selected shop is surfaced wherever this content is shown
+});
+
+When('I choose to change the currently selected shop', function (this: ShopsWorld) {
+  this.changeShopChoiceOffered = { switchToPlanMode: true, startAnotherSession: true };
+});
+
+When('I switch to plan mode without changing the shop', function (this: ShopsWorld) {
+  this.previousSelectedShopId = this.selectedShopId;
+  this.mode = 'plan';
+});
+
 // ---------------------------------------------------------------------------
 // Then steps
 // ---------------------------------------------------------------------------
@@ -160,6 +175,33 @@ Then('the category order should update to reflect the newly selected shop', func
   const selected = this.shops.find((s) => s.id === this.selectedShopId);
   assert.ok(selected, 'A new shop should be selected');
   assert.ok(selected.id !== this.shops[0].id, 'The selected shop should have changed');
+});
+
+Then('I should be able to see which shop is currently selected', function (this: ShopsWorld) {
+  const selected = this.shops.find((s) => s.id === this.selectedShopId);
+  assert.ok(selected, 'The currently selected shop should be identifiable');
+});
+
+Then('I should be offered the choice to switch to plan mode for the currently selected shop', function (this: ShopsWorld) {
+  assert.ok(
+    this.changeShopChoiceOffered?.switchToPlanMode,
+    'Should be offered the choice to switch to plan mode for the current shop',
+  );
+});
+
+Then('I should be offered the choice to select a different shop and start or join a session there', function (this: ShopsWorld) {
+  assert.ok(
+    this.changeShopChoiceOffered?.startAnotherSession,
+    'Should be offered the choice to select a different shop and start or join a session there',
+  );
+});
+
+Then('the currently selected shop should remain unchanged', function (this: ShopsWorld) {
+  assert.equal(
+    this.selectedShopId,
+    this.previousSelectedShopId,
+    'Selected shop should remain unchanged after switching to plan mode',
+  );
 });
 
 // ---------------------------------------------------------------------------

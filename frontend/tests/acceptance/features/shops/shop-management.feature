@@ -52,6 +52,24 @@ Feature: Shop Management
     When I select a different shop
     Then the category order should update to reflect the newly selected shop
 
+  Scenario: The selected shop is visible throughout the application
+    Given I have selected a shop
+    When I view the shopping list, the active shopping session, or the category order
+    Then I should be able to see which shop is currently selected
+
+  Scenario: Changing shop during an active session offers a choice
+    Given I am in shop mode
+    And I have selected a shop
+    When I choose to change the currently selected shop
+    Then I should be offered the choice to switch to plan mode for the currently selected shop
+    And I should be offered the choice to select a different shop and start or join a session there
+
+  Scenario: Switching to plan mode during an active session preserves the selected shop
+    Given I have an active shopping session
+    When I switch to plan mode without changing the shop
+    Then I should be in plan mode
+    And the currently selected shop should remain unchanged
+
   Scenario: Configure a price search URL for a shop
     Given I am in plan mode
     And a shop exists

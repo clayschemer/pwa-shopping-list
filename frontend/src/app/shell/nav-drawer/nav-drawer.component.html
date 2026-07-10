@@ -1,17 +1,18 @@
 <div class="app-nav-drawer">
   <section class="app-nav-drawer__shop-section">
-    <mat-form-field class="app-nav-drawer__shop-field">
-      <mat-label>{{ 'navDrawer.shopLayout' | transloco }}</mat-label>
-      <mat-select
-        [value]="selectedShopId() ?? ''"
-        (selectionChange)="onShopChanged($event.value)"
-      >
-        <mat-option value="">{{ 'navDrawer.globalAll' | transloco }}</mat-option>
-        @for (shop of shops(); track shop.id) {
-          <mat-option [value]="shop.id">{{ shop.name }}</mat-option>
-        }
-      </mat-select>
-    </mat-form-field>
+    <span class="app-nav-drawer__shop-label">{{ 'navDrawer.shopLayout' | transloco }}</span>
+    <button
+      type="button"
+      class="app-nav-drawer__shop-trigger"
+      [attr.aria-label]="'shop.changeShop' | transloco"
+      (click)="openShopPicker()"
+    >
+      <mat-icon aria-hidden="true">storefront</mat-icon>
+      <span class="app-nav-drawer__shop-trigger-label">
+        {{ selectedShopName() ?? ('nav.global' | transloco) }}
+      </span>
+      <mat-icon aria-hidden="true">chevron_right</mat-icon>
+    </button>
 
     <mat-divider></mat-divider>
 

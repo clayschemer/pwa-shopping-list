@@ -174,12 +174,23 @@
     "uncategorised": "Sans catégorie",
     "selectTitle": "Où faites-vous vos courses ?",
     "global": "Pas de magasin spécifique (global)",
+    "changeShop": "Changer de magasin",
     "est": "Est.",
     "tapToUndo": "appuyez pour annuler",
     "checkItem": "Cocher {{name}}",
     "activeSession": "Session active",
     "approxShelfPrice": "≈ {{price}} / {{quantity}} {{unit}}",
     "approxShelfPriceNoQty": "≈ {{price}}"
+  },
+  "shopModeChangeDialog": {
+    "title": "Changer de magasin",
+    "message": "Que souhaitez-vous faire ?",
+    "switchToPlanMode": "Passer en mode planification pour ce magasin",
+    "startAnotherSession": "Démarrer une autre session",
+    "cancel": "Annuler"
+  },
+  "shopPickerDialog": {
+    "title": "Choisir un magasin"
   },
   "pricePopup": {
     "title": "Détails du prix",

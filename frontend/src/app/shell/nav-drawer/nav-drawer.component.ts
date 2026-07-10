@@ -1,47 +1,54 @@
-import { ChangeDetectionStrategy, Component, inject, output } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, output } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { Store } from '@ngrx/store';
-import { MatFormField, MatLabel } from '@angular/material/form-field';
-import { MatSelect, MatOption } from '@angular/material/select';
+import { MatDialog } from '@angular/material/dialog';
 import { MatDivider } from '@angular/material/divider';
 import { TranslocoPipe } from '@jsverse/transloco';
 import { selectOrderedShops } from '../../store/selectors/ordered-shops.selectors';
 import { selectSelectedShopId } from '../../store/ui/ui.selectors';
 import { uiActions } from '../../store/ui/ui.actions';
-import type { ShopId } from '../../models/ids.model';
+import {
+  ShopPickerDialogComponent,
+  ShopPickerData,
+  ShopPickerResult,
+} from '../../features/shop/shop-picker-dialog.component';
 import { MatIcon } from '@angular/material/icon';
 import { MatButton } from '@angular/material/button';
 
 @Component({
   selector: 'app-nav-drawer',
-  imports: [
-    MatButton,
-    MatFormField,
-    MatDivider,
-    MatIcon,
-    MatLabel,
-    MatSelect,
-    MatOption,
-    TranslocoPipe,
-  ],
+  imports: [MatButton, MatDivider, MatIcon, TranslocoPipe],
   templateUrl: './nav-drawer.component.html',
   styleUrl: './nav-drawer.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class NavDrawerComponent {
   private readonly store = inject(Store);
+  private readonly dialog = inject(MatDialog);
 
   readonly shops = toSignal(this.store.select(selectOrderedShops), { initialValue: [] });
   readonly selectedShopId = toSignal(this.store.select(selectSelectedShopId), { initialValue: null });
+
+  readonly selectedShopName = computed<string | null>(() => {
+    const id = this.selectedShopId();
+    if (!id) return null;
+    return this.shops().find((s) => s.id === id)?.name ?? null;
+  });
 
   readonly viewCategories = output<void>();
   readonly manageShops = output<void>();
   readonly viewHistory = output<void>();
   readonly viewSettings = output<void>();
 
-  onShopChanged(shopId: string): void {
-    const id = shopId === '' ? null : (shopId as ShopId);
-    this.store.dispatch(uiActions.planModeShopSelected({ shopId: id }));
+  openShopPicker(): void {
+    const ref = this.dialog.open<ShopPickerDialogComponent, ShopPickerData, ShopPickerResult>(
+      ShopPickerDialogComponent,
+      { data: { shops: this.shops(), selectedShopId: this.selectedShopId() } },
+    );
+    ref.afterClosed().subscribe((result) => {
+      if (result === undefined) return;
+      this.store.dispatch(uiActions.planModeShopSelected({ shopId: result }));
+    });
   }
 
   onViewCategories(): void {

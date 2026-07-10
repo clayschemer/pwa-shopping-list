@@ -174,12 +174,23 @@
     "uncategorised": "Okategoriserad",
     "selectTitle": "Var handlar du?",
     "global": "Ingen specifik butik (global)",
+    "changeShop": "Byt butik",
     "est": "Ber.",
     "tapToUndo": "tryck för att ångra",
     "checkItem": "Bocka av {{name}}",
     "activeSession": "Aktiv session",
     "approxShelfPrice": "≈ {{price}} / {{quantity}} {{unit}}",
     "approxShelfPriceNoQty": "≈ {{price}}"
+  },
+  "shopModeChangeDialog": {
+    "title": "Byt butik",
+    "message": "Vad vill du göra?",
+    "switchToPlanMode": "Byt till planeringsläge för denna butik",
+    "startAnotherSession": "Starta en ny session",
+    "cancel": "Avbryt"
+  },
+  "shopPickerDialog": {
+    "title": "Välj butik"
   },
   "pricePopup": {
     "title": "Prisdetaljer",

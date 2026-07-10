@@ -174,12 +174,23 @@
     "uncategorised": "Ohne Kategorie",
     "selectTitle": "Wo kaufst du ein?",
     "global": "Kein bestimmter Laden (global)",
+    "changeShop": "Laden wechseln",
     "est": "Gesch.",
     "tapToUndo": "Zum Rückgängigmachen tippen",
     "checkItem": "{{name}} abhaken",
     "activeSession": "Aktive Sitzung",
     "approxShelfPrice": "≈ {{price}} / {{quantity}} {{unit}}",
     "approxShelfPriceNoQty": "≈ {{price}}"
+  },
+  "shopModeChangeDialog": {
+    "title": "Laden wechseln",
+    "message": "Was möchtest du tun?",
+    "switchToPlanMode": "Zum Planungsmodus für diesen Laden wechseln",
+    "startAnotherSession": "Neue Sitzung starten",
+    "cancel": "Abbrechen"
+  },
+  "shopPickerDialog": {
+    "title": "Geschäft auswählen"
   },
   "pricePopup": {
     "title": "Preisdetails",

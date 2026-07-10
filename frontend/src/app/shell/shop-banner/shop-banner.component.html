@@ -1,0 +1,12 @@
+<button
+  type="button"
+  class="app-shop-banner__trigger"
+  [attr.aria-label]="'shop.changeShop' | transloco"
+  (click)="onTriggerClicked()"
+>
+  <mat-icon aria-hidden="true">storefront</mat-icon>
+  <span class="app-shop-banner__trigger-label">
+    {{ shopName() ?? ('nav.global' | transloco) }}
+  </span>
+  <mat-icon aria-hidden="true">expand_more</mat-icon>
+</button>

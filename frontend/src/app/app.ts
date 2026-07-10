@@ -33,11 +33,16 @@ import { uiActions } from './store/ui/ui.actions';
 import { sessionsActions, sessionsApiActions } from './store/sessions/sessions.actions';
 import { itemsApiActions } from './store/items/items.actions';
 import { NavDrawerComponent } from './shell/nav-drawer/nav-drawer.component';
+import { ShopBannerComponent } from './shell/shop-banner/shop-banner.component';
 import {
   ShopSelectSheetComponent,
   ShopSelectData,
   ShopSelectResult,
 } from './features/shop/shop-select-sheet.component';
+import {
+  ShopModeChangeDialogComponent,
+  ShopModeChangeResult,
+} from './features/shop/shop-mode-change-dialog.component';
 import {
   CloseSessionDialogComponent,
   CloseSessionData,
@@ -54,7 +59,7 @@ import {
 import { PlanFilterSheetComponent } from './features/plan/plan-filter-sheet/plan-filter-sheet.component';
 import { ThemeService } from './core/theme/theme.service';
 import { MoneyPipe } from './core/format/money.pipe';
-import type { ItemId, SessionId, UserId } from './models/ids.model';
+import type { ItemId, SessionId, ShopId, UserId } from './models/ids.model';
 import type { Item } from './models/item.model';
 import type { Shop } from './models/shop.model';
 import type { User } from './models/user.model';
@@ -86,6 +91,7 @@ const ROUTE_TITLE_KEYS: Record<string, string> = {
     MatSidenavContainer,
     MatSidenavContent,
     NavDrawerComponent,
+    ShopBannerComponent,
     TranslocoPipe,
     MoneyPipe,
   ],
@@ -125,11 +131,11 @@ export class App {
     initialValue: false,
   });
 
-  private readonly shopId = toSignal(this.store.select(selectSelectedShopId), {
+  readonly shopId = toSignal(this.store.select(selectSelectedShopId), {
     initialValue: null,
   });
 
-  private readonly shops = toSignal(this.store.select(selectAllShops), {
+  readonly shops = toSignal(this.store.select(selectAllShops), {
     initialValue: [],
   });
 
@@ -170,8 +176,8 @@ export class App {
     () => this.activeSession()?.checkedItems.length ?? 0,
   );
 
-  readonly sessionShopName = computed(() => {
-    const id = this.activeSession()?.shopId;
+  readonly selectedShopName = computed<string | null>(() => {
+    const id = this.shopId();
     if (!id) return null;
     return this.shopEntities()[id]?.name ?? null;
   });
@@ -186,6 +192,12 @@ export class App {
 
   readonly isFullScreenRoute = computed(() =>
     FULL_SCREEN_ROUTES.some((r) => this.currentUrl().startsWith(r)),
+  );
+
+  readonly showShopBanner = computed(
+    () =>
+      (!this.isFullScreenRoute() || this.currentUrl().startsWith('/categories')) &&
+      !this.navDrawerOpen(),
   );
 
   constructor() {
@@ -298,11 +310,36 @@ export class App {
       this.store.dispatch(uiActions.switchToShopModeWithShop({ shopId: null }));
       return;
     }
+    this.openShopSelectSheet();
+  }
+
+  onShopBannerShopSelected(shopId: ShopId | null): void {
+    this.store.dispatch(uiActions.planModeShopSelected({ shopId }));
+  }
+
+  onShopBannerChangeRequested(): void {
+    const ref = this.dialog.open<
+      ShopModeChangeDialogComponent,
+      void,
+      ShopModeChangeResult
+    >(ShopModeChangeDialogComponent);
+    ref.afterClosed().subscribe((result) => {
+      if (result === 'switch-to-plan') {
+        this.store.dispatch(uiActions.switchToPlanMode());
+      } else if (result === 'start-session') {
+        this.openShopSelectSheet();
+      }
+    });
+  }
+
+  private openShopSelectSheet(): void {
     const ref = this.bottomSheet.open<
       ShopSelectSheetComponent,
       ShopSelectData,
       ShopSelectResult
-    >(ShopSelectSheetComponent, { data: { shops, activeSessionShopIds: this.activeSessionShopIds() } });
+    >(ShopSelectSheetComponent, {
+      data: { shops: this.shops(), activeSessionShopIds: this.activeSessionShopIds() },
+    });
     ref.afterDismissed().subscribe((result) => {
       if (!result) return;
       this.store.dispatch(
