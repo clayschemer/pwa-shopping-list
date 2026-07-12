@@ -89,6 +89,13 @@ Feature: Shopping Sessions
     And the session should be recorded in history
     And neither user should have an active session for that shop any longer
 
+  Scenario: A session close that cannot be saved is reported
+    Given I have an active shopping session
+    And the connection to the backend is temporarily unavailable
+    When I attempt to close the session
+    Then I should be informed that the session could not be closed
+    And the session should remain active
+
   Scenario: Inactive session triggers a reminder to close
     Given I have an active shopping session
     When the session has had no activity for thirty minutes

@@ -23,9 +23,22 @@ export const selectPendingChecks = createSelector(
   (state) => state.pendingChecks,
 );
 
+export const selectRecentChecks = createSelector(
+  selectItemsState,
+  (state) => state.recentChecks,
+);
+
+// The shop list as the checking user sees it: active items, plus checked
+// items whose write is still in flight or whose undo window is still open.
 export const selectVisibleActiveItems = createSelector(
   selectAllItems,
   selectPendingChecks,
-  (items, pending) =>
-    items.filter((i) => !i.removed || pending[i.id] !== undefined),
+  selectRecentChecks,
+  (items, pending, recent) =>
+    items.filter(
+      (i) =>
+        !i.removed ||
+        pending[i.id] !== undefined ||
+        recent[i.id] !== undefined,
+    ),
 );

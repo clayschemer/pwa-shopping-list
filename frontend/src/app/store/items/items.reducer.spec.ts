@@ -1,8 +1,8 @@
 import { describe, it, expect } from 'vitest';
 import { itemsReducer, initialItemsState } from './items.reducer';
-import { itemsActions } from './items.actions';
+import { itemsActions, itemsApiActions } from './items.actions';
 import type { Item } from '../../models/item.model';
-import type { AccountId, CategoryId, ItemId } from '../../models/ids.model';
+import type { AccountId, CategoryId, ItemId, SessionId } from '../../models/ids.model';
 
 const item = (id: string, name: string, removed = false): Item => ({
   id: id as ItemId,
@@ -89,6 +89,66 @@ describe('itemsReducer', () => {
     );
     expect(state.entities['i1']!.removed).toBe(false);
     expect(state.entities['i1']!.removedAt).toBeNull();
+  });
+
+  // Immediate-check behaviour: the check commits on tap. `pendingChecks`
+  // tracks the in-flight write; `recentChecks` keeps the committed item
+  // visible for the undo window.
+  const checkRequested = () =>
+    itemsApiActions.checkItemRequested({
+      id: 'i1' as ItemId,
+      sessionId: 's1' as SessionId,
+    });
+
+  it('records an in-flight check on checkItemRequested', () => {
+    const state = itemsReducer(initialItemsState, checkRequested());
+    expect(state.pendingChecks['i1' as ItemId]).toBeDefined();
+  });
+
+  it('rolls back the in-flight check on itemCheckFailed so the item can be retried', () => {
+    const pending = itemsReducer(initialItemsState, checkRequested());
+    const state = itemsReducer(
+      pending,
+      itemsActions.itemCheckFailed({ id: 'i1' as ItemId }),
+    );
+    expect(state.pendingChecks['i1' as ItemId]).toBeUndefined();
+  });
+
+  it('moves a committed check from pending into the recent undo window on itemChecked', () => {
+    const pending = itemsReducer(initialItemsState, checkRequested());
+    const state = itemsReducer(
+      pending,
+      itemsActions.itemChecked({ item: item('i1', 'Apples', true) }),
+    );
+    expect(state.pendingChecks['i1' as ItemId]).toBeUndefined();
+    expect(state.recentChecks['i1' as ItemId]).toBeDefined();
+  });
+
+  it('clears the recent undo window on checkUndoWindowElapsed', () => {
+    const pending = itemsReducer(initialItemsState, checkRequested());
+    const checked = itemsReducer(
+      pending,
+      itemsActions.itemChecked({ item: item('i1', 'Apples', true) }),
+    );
+    const state = itemsReducer(
+      checked,
+      itemsActions.checkUndoWindowElapsed({ id: 'i1' as ItemId }),
+    );
+    expect(state.recentChecks['i1' as ItemId]).toBeUndefined();
+  });
+
+  it('clears the recent undo window when the item is unchecked', () => {
+    const pending = itemsReducer(initialItemsState, checkRequested());
+    const checked = itemsReducer(
+      pending,
+      itemsActions.itemChecked({ item: item('i1', 'Apples', true) }),
+    );
+    const state = itemsReducer(
+      checked,
+      itemsActions.itemUnchecked({ id: 'i1' as ItemId }),
+    );
+    expect(state.recentChecks['i1' as ItemId]).toBeUndefined();
+    expect(state.entities['i1']!.removed).toBe(false);
   });
 
   it('applies itemChangesReceived with added + removed', () => {

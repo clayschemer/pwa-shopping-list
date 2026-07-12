@@ -1,12 +1,12 @@
 import { inject, Injectable } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
-import { EMPTY, filter, from, map, switchMap, take, tap, timer } from 'rxjs';
+import { catchError, EMPTY, filter, from, map, of, switchMap, take, tap, timer } from 'rxjs';
 import { sessionsActions, sessionsApiActions } from './sessions.actions';
 import { selectActiveSessionForCurrentShop } from './sessions.selectors';
 import { accountActions } from '../account/account.actions';
 import { uiActions } from '../ui/ui.actions';
-import { itemsActions } from '../items/items.actions';
+import { itemsActions, itemsApiActions } from '../items/items.actions';
 import { SessionApiService } from '../../core/api/session-api.service';
 import type { Session } from '../../models/session.model';
 import type { SessionId } from '../../models/ids.model';
@@ -69,6 +69,9 @@ export class SessionsEffects {
             }
             return sessionsActions.sessionStarted({ session: result as Session });
           }),
+          // Rejection (offline / flaky connectivity) must not kill the
+          // effect stream — see the same pattern in items.effects.ts.
+          catchError(() => of(sessionsActions.sessionStartFailed())),
         ),
       ),
     ),
@@ -87,6 +90,7 @@ export class SessionsEffects {
               session: result as Session,
             });
           }),
+          catchError(() => of(sessionsActions.sessionStartFailed())),
         ),
       ),
     ),
@@ -98,6 +102,7 @@ export class SessionsEffects {
       switchMap(({ sessionId }) =>
         from(this.sessionApi.closeSession(sessionId)).pipe(
           map(() => sessionsActions.sessionClosed({ id: sessionId })),
+          catchError(() => of(sessionsActions.sessionCloseFailed({ sessionId }))),
         ),
       ),
     ),
@@ -109,6 +114,7 @@ export class SessionsEffects {
       switchMap(({ sessionId }) =>
         from(this.sessionApi.discardSession(sessionId)).pipe(
           map(() => sessionsActions.sessionDiscarded({ id: sessionId })),
+          catchError(() => of(sessionsActions.sessionDiscardFailed({ sessionId }))),
         ),
       ),
     ),
@@ -128,8 +134,8 @@ export class SessionsEffects {
         sessionsActions.sessionJoined,
         sessionsActions.sessionUpdated,
         sessionsActions.sessionInactivityDismissed,
-        itemsActions.checkItemPending,
-        itemsActions.checkItemUndoneDuringWindow,
+        itemsApiActions.checkItemRequested,
+        itemsActions.itemUnchecked,
       ),
       tap((action) => {
         // Treat dismissal as fresh activity so the timer resets to a full 30 min

@@ -1,6 +1,6 @@
 ---
 name: ship
-description: Finalise a change before commit. Runs the full quality gate — i18n parity across all 5 locales, unit tests (Vitest), acceptance tests (Cucumber), and the production build — then proposes a conventional-commit message. Invoke whenever wrapping up a feature or bug fix, or whenever the user says "ship", "finalise", "ready to commit", or similar.
+description: Finalise a change before commit. Runs the full quality gate — i18n parity across all 6 locales, unit tests (Vitest), acceptance tests (Cucumber), and the production build — then proposes a conventional-commit message. Invoke whenever wrapping up a feature or bug fix, or whenever the user says "ship", "finalise", "ready to commit", or similar.
 ---
 
 # /ship — Finalise a change
@@ -11,7 +11,7 @@ Use this skill when wrapping up any change before commit. Run the steps in order
 
 ## 1. i18n parity
 
-Every user-facing string lives in **all five** translation files: `en.json`, `no.json`, `sv.json`, `de.json`, `fr.json` under `frontend/public/assets/i18n/`.
+Every user-facing string lives in **all six** translation files: `en.json`, `no.json`, `sv.json`, `de.json`, `fr.json`, `da.json` under `frontend/public/assets/i18n/`.
 
 - Diff the keys across locales. Any key present in `en.json` but missing in any other locale is a regression — translate and add it.
 - Quotes inside translation values must be escaped (`\"`). Unescaped quotes silently break the build (most often `de.json`).

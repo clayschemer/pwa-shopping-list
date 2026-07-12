@@ -291,5 +291,13 @@
     "account": "Account",
     "signedInAs": "Signed in as",
     "signOut": "Sign out"
+  },
+  "errors": {
+    "saveFailed": "Your change could not be saved. Check your connection and try again.",
+    "checkFailed": "The item could not be checked off. Check your connection and try again.",
+    "uncheckFailed": "The item could not be unchecked. Check your connection and try again.",
+    "sessionStartFailed": "The session could not be started. Check your connection and try again.",
+    "sessionCloseFailed": "The session could not be closed. Check your connection and try again.",
+    "sessionDiscardFailed": "The session could not be discarded. Check your connection and try again."
   }
 }

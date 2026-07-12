@@ -291,5 +291,13 @@
     "account": "Konto",
     "signedInAs": "Inloggad som",
     "signOut": "Logga ut"
+  },
+  "errors": {
+    "saveFailed": "Din ändring kunde inte sparas. Kontrollera anslutningen och försök igen.",
+    "checkFailed": "Varan kunde inte bockas av. Kontrollera anslutningen och försök igen.",
+    "uncheckFailed": "Avbockningen kunde inte ångras. Kontrollera anslutningen och försök igen.",
+    "sessionStartFailed": "Sessionen kunde inte startas. Kontrollera anslutningen och försök igen.",
+    "sessionCloseFailed": "Sessionen kunde inte avslutas. Kontrollera anslutningen och försök igen.",
+    "sessionDiscardFailed": "Sessionen kunde inte förkastas. Kontrollera anslutningen och försök igen."
   }
 }

@@ -291,5 +291,13 @@
     "account": "Konto",
     "signedInAs": "Logget inn som",
     "signOut": "Logg ut"
+  },
+  "errors": {
+    "saveFailed": "Endringen din kunne ikke lagres. Sjekk tilkoblingen og prøv igjen.",
+    "checkFailed": "Varen kunne ikke krysses av. Sjekk tilkoblingen og prøv igjen.",
+    "uncheckFailed": "Avkryssingen kunne ikke angres. Sjekk tilkoblingen og prøv igjen.",
+    "sessionStartFailed": "Økten kunne ikke startes. Sjekk tilkoblingen og prøv igjen.",
+    "sessionCloseFailed": "Økten kunne ikke avsluttes. Sjekk tilkoblingen og prøv igjen.",
+    "sessionDiscardFailed": "Økten kunne ikke forkastes. Sjekk tilkoblingen og prøv igjen."
   }
 }

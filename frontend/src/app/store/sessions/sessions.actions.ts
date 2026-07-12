@@ -18,6 +18,10 @@ export const sessionsActions = createActionGroup({
     }>(),
     'Session Inactive': props<{ sessionId: SessionId }>(),
     'Session Inactivity Dismissed': props<{ sessionId: SessionId }>(),
+    // Failure events for rejected API calls (offline / flaky connectivity).
+    'Session Start Failed': emptyProps(),
+    'Session Close Failed': props<{ sessionId: SessionId }>(),
+    'Session Discard Failed': props<{ sessionId: SessionId }>(),
   },
 });
 

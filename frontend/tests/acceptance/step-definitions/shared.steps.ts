@@ -75,6 +75,10 @@ When('the other user accesses the shopping list', function (this: SharedWorld) {
   // Shared list — items/categories/shops are visible to all users via stream
 });
 
+Given('the connection to the backend is temporarily unavailable', function (this: SharedWorld) {
+  this['backendUnavailable'] = true;
+});
+
 Then('I should be informed that the name is already in use', function (this: SharedWorld) {
   const world = this as unknown as { addError: string | null };
   assert.equal(world.addError, 'NAME_CONFLICT');

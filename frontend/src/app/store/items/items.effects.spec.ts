@@ -203,4 +203,157 @@ describe('ItemsEffects', () => {
       itemsActions.itemUnchecked({ id: 'i1' as ItemId }),
     ]);
   });
+
+  // A rejected API call (offline / flaky in-store connectivity) must never
+  // kill the effect stream. Each spec fails the first call, then verifies a
+  // failure action was dispatched AND that a subsequent request still works.
+  describe('failure resilience', () => {
+    const checkReq = () =>
+      itemsApiActions.checkItemRequested({
+        id: 'i1' as ItemId,
+        sessionId: 's1' as SessionId,
+      });
+
+    it('checkItem$ dispatches itemCheckFailed and survives a rejected call', async () => {
+      itemApi.checkItem
+        .mockRejectedValueOnce(new Error('client is offline'))
+        .mockResolvedValueOnce({ item: mockItem, session: {} });
+      const results: unknown[] = [];
+      let errored = false;
+      effects.checkItem$.subscribe({
+        next: (a) => results.push(a),
+        error: () => (errored = true),
+      });
+
+      actions$.next(checkReq());
+      await flush();
+      expect(errored).toBe(false);
+      expect(results).toEqual([
+        itemsActions.itemCheckFailed({ id: 'i1' as ItemId }),
+      ]);
+
+      actions$.next(checkReq());
+      await flush();
+      expect((results[1] as { type: string }).type).toContain('Item Checked');
+    });
+
+    it('updateItem$ dispatches itemSaveFailed and survives a rejected call', async () => {
+      itemApi.updateItem
+        .mockRejectedValueOnce(new Error('client is offline'))
+        .mockResolvedValueOnce(mockItem);
+      const results: unknown[] = [];
+      let errored = false;
+      effects.updateItem$.subscribe({
+        next: (a) => results.push(a),
+        error: () => (errored = true),
+      });
+      const req = itemsApiActions.updateItemRequested({
+        id: 'i1' as ItemId,
+        name: 'Milk',
+        description: null,
+        quantity: null,
+        unit: null,
+        primaryCategoryId: null,
+        secondaryCategoryIds: [],
+        sizePerPieceQuantity: null,
+        sizePerPieceUnit: null,
+      });
+
+      actions$.next(req);
+      await flush();
+      expect(errored).toBe(false);
+      expect(results).toEqual([
+        itemsActions.itemSaveFailed({ id: 'i1' as ItemId }),
+      ]);
+
+      actions$.next(req);
+      await flush();
+      expect((results[1] as { type: string }).type).toContain('Item Updated');
+    });
+
+    it('addItem$ dispatches itemSaveFailed and survives a rejected call', async () => {
+      itemApi.addItem
+        .mockRejectedValueOnce(new Error('client is offline'))
+        .mockResolvedValueOnce(mockItem);
+      const results: unknown[] = [];
+      let errored = false;
+      effects.addItem$.subscribe({
+        next: (a) => results.push(a),
+        error: () => (errored = true),
+      });
+      const req = itemsApiActions.addItemRequested({
+        name: 'Milk',
+        description: null,
+        quantity: null,
+        unit: null,
+        primaryCategoryId: null,
+        secondaryCategoryIds: [],
+        sizePerPieceQuantity: null,
+        sizePerPieceUnit: null,
+      });
+
+      actions$.next(req);
+      await flush();
+      expect(errored).toBe(false);
+      expect(results).toEqual([itemsActions.itemSaveFailed({ id: null })]);
+
+      actions$.next(req);
+      await flush();
+      expect((results[1] as { type: string }).type).toContain('Item Added');
+    });
+
+    it('removeItem$ dispatches itemSaveFailed and survives a rejected call', async () => {
+      itemApi.removeItem
+        .mockRejectedValueOnce(new Error('client is offline'))
+        .mockResolvedValueOnce(undefined);
+      const results: unknown[] = [];
+      let errored = false;
+      effects.removeItem$.subscribe({
+        next: (a) => results.push(a),
+        error: () => (errored = true),
+      });
+
+      actions$.next(itemsApiActions.removeItemRequested({ id: 'i1' as ItemId }));
+      await flush();
+      expect(errored).toBe(false);
+      expect(results).toEqual([
+        itemsActions.itemSaveFailed({ id: 'i1' as ItemId }),
+      ]);
+
+      actions$.next(itemsApiActions.removeItemRequested({ id: 'i1' as ItemId }));
+      await flush();
+      expect(results[1]).toEqual(
+        itemsActions.itemRemoved({ id: 'i1' as ItemId }),
+      );
+    });
+
+    it('uncheckItem$ dispatches itemUncheckFailed and survives a rejected call', async () => {
+      itemApi.uncheckItem
+        .mockRejectedValueOnce(new Error('client is offline'))
+        .mockResolvedValueOnce(undefined);
+      const results: unknown[] = [];
+      let errored = false;
+      effects.uncheckItem$.subscribe({
+        next: (a) => results.push(a),
+        error: () => (errored = true),
+      });
+      const req = itemsApiActions.uncheckItemRequested({
+        id: 'i1' as ItemId,
+        sessionId: 's1' as SessionId,
+      });
+
+      actions$.next(req);
+      await flush();
+      expect(errored).toBe(false);
+      expect(results).toEqual([
+        itemsActions.itemUncheckFailed({ id: 'i1' as ItemId }),
+      ]);
+
+      actions$.next(req);
+      await flush();
+      expect(results[1]).toEqual(
+        itemsActions.itemUnchecked({ id: 'i1' as ItemId }),
+      );
+    });
+  });
 });

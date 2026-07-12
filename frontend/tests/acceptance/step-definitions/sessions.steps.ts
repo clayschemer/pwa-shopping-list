@@ -32,6 +32,8 @@ interface SessionsWorld {
   inactivityWarning: boolean;
   sessionHistory: Session[];
   items: { id: string; name: string; removed: boolean; price: number | null }[];
+  backendUnavailable: boolean;
+  failureNotice: string | null;
 }
 
 let _sessionId = 1;
@@ -370,8 +372,17 @@ When('the other user views the undo history', function (this: SessionsWorld) {
 });
 
 When('I check an item', function (this: SessionsWorld) {
+  this.items = this.items ?? [];
+  if (!this.items.some((i) => !i.removed)) {
+    this.items.push({ id: 'item-check-attempt', name: 'Attempted Item', removed: false, price: null });
+  }
+  if (this.backendUnavailable) {
+    // The write is rejected — the item stays unchecked and the user is informed.
+    this.failureNotice = 'check';
+    return;
+  }
   const session = activeSession(this, this.user1Id ?? 'user-1');
-  const item = this.items?.find((i) => !i.removed);
+  const item = this.items.find((i) => !i.removed);
   if (session && item) {
     item.removed = true;
     session.checkedItems.push({
@@ -686,4 +697,61 @@ Then('sessions with no checked items should not be visible', function (this: Ses
   const empty = (this.sessionHistory ?? []).filter((s) => s.checkedItems.length === 0);
   assert.ok(empty.length > 0, 'There should be at least one discarded session in raw history');
   assert.equal(visible.length, 0, 'No sessions with zero checked items should be shown');
+});
+
+// ---------------------------------------------------------------------------
+// Failure resilience — rejected writes are reported and leave state untouched
+// ---------------------------------------------------------------------------
+
+Then('I should be informed that the item could not be checked', function (this: SessionsWorld) {
+  assert.equal(this.failureNotice, 'check', 'A check-failure notice should be shown');
+});
+
+Then('the item should remain unchecked on the list', function (this: SessionsWorld) {
+  assert.ok(
+    (this.items ?? []).every((i) => !i.removed),
+    'No item should be checked after a failed write',
+  );
+});
+
+Then('checking should work again once the connection is restored', function (this: SessionsWorld) {
+  this.backendUnavailable = false;
+  this.failureNotice = null;
+  if (!activeSession(this, this.user1Id ?? 'user-1')) {
+    this.sessions = this.sessions ?? [];
+    this.sessions.push(makeSession(this.user1Id ?? 'user-1'));
+  }
+  const item = (this.items ?? []).find((i) => !i.removed);
+  assert.ok(item, 'The item from the failed attempt should still be on the list');
+  const session = activeSession(this, this.user1Id ?? 'user-1')!;
+  item!.removed = true;
+  session.checkedItems.push({
+    itemId: item!.id,
+    checkedBy: this.user1Id ?? 'user-1',
+    checkedAt: Date.now(),
+    priceSnapshot: item!.price,
+  });
+  assert.ok(this.items.some((i) => i.removed), 'The retried check should succeed');
+});
+
+When('I attempt to close the session', function (this: SessionsWorld) {
+  const session = activeSession(this, this.user1Id ?? 'user-1');
+  assert.ok(session, 'An active session must exist');
+  if (this.backendUnavailable) {
+    // The write is rejected — the session stays active and the user is informed.
+    this.failureNotice = 'sessionClose';
+    return;
+  }
+  session!.completedAt = Date.now();
+});
+
+Then('I should be informed that the session could not be closed', function (this: SessionsWorld) {
+  assert.equal(this.failureNotice, 'sessionClose', 'A close-failure notice should be shown');
+});
+
+Then('the session should remain active', function (this: SessionsWorld) {
+  assert.ok(
+    activeSession(this, this.user1Id ?? 'user-1'),
+    'The session should still be active after the failed close',
+  );
 });

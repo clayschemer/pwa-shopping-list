@@ -22,10 +22,16 @@ export const itemsActions = createActionGroup({
     'Item Removed': props<{ id: ItemId }>(),
     'Item Checked': props<{ item: Item }>(),
     'Item Unchecked': props<{ id: ItemId }>(),
-    'Check Item Pending': props<{ id: ItemId; sessionId: SessionId }>(),
-    'Check Item Undone During Window': props<{ id: ItemId }>(),
+    // The committed check's "has been checked" undo window has ended —
+    // the item stops lingering on the checking user's list.
+    'Check Undo Window Elapsed': props<{ id: ItemId }>(),
     'Item Check Conflict': props<{ id: ItemId }>(),
     'Item Name Conflict': props<{ name: string }>(),
+    // Failure events for rejected API calls (offline / flaky connectivity).
+    // `id` is null when the failed operation was an add (no id exists yet).
+    'Item Save Failed': props<{ id: ItemId | null }>(),
+    'Item Check Failed': props<{ id: ItemId }>(),
+    'Item Uncheck Failed': props<{ id: ItemId }>(),
     'Item Changes Received': props<{ items: Item[]; removed: ItemId[] }>(),
   },
 });

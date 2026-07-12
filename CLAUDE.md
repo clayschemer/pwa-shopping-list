@@ -59,6 +59,7 @@ These rules are baked in. They reflect recurring lessons; do not skip them.
 - A task is not complete until `npm test` (Vitest) and `npm run test:acceptance` (Cucumber) both pass. The build (`npm run build`) must succeed too — type errors are blocking.
 - Don't silence or skip failing tests to "ship" — fix the underlying cause.
 - For complex framework-level work (route snapshots, async injection contexts, `visualViewport`, viewport overlays, Firestore stream lifecycle), trace the actual runtime path before writing code. Verify with a failing test first; "looks right" implementations have repeatedly missed the runtime path here.
+- **Test for regressions.** Every user-visible flow that has ever broken gets a test that would have caught it — passing suites are only meaningful if they cover the flows users actually exercise. In particular: failure paths are behaviour too. Every effect that calls the API must have a spec for the rejected-promise case (the effect must survive and surface feedback, never die silently), and cross-cutting invariants (i18n key parity, effects error-resilience) get dedicated guard specs so a regression fails the suite instead of shipping.
 
 ### Gherkin Scenarios
 - **Always pause for user review before proceeding** whenever a Gherkin scenario is added, changed, or deleted — show the full scenario diff and wait for explicit approval before writing any step definitions or production code that depends on it. The feature file is the contract; the user must sign off on the contract before implementation begins.
@@ -70,7 +71,7 @@ These rules are baked in. They reflect recurring lessons; do not skip them.
 - All spacing, line-height, and font-size in component SCSS goes through `--app-*` custom properties so compact mode and theming work uniformly.
 
 ### i18n
-- Every user-facing string lives in **all five** translation files: `frontend/public/assets/i18n/{en,no,sv,de,fr}.json`. Adding a key to one without the others is a regression.
+- Every user-facing string lives in **all six** translation files: `frontend/public/assets/i18n/{en,no,sv,de,fr,da}.json`. Adding a key to one without the others is a regression — the `i18n-parity.spec.ts` guard test enforces this.
 - Templates use the `transloco` pipe; TS uses `TranslocoService.translate()`. **Nothing user-visible may be hard-coded** — that includes English words, separators (`, ` / `:` / ` · `), composed format strings (e.g. `${qty} ${unit}`), and any punctuation that joins or wraps interpolated values. If a user can see it, it ships as a translation key with placeholders so locales can rewrite the separator and order as needed (e.g. `"qtyWithUnit": ", {{quantity}} {{unit}}"`).
 - When adding or editing a feature, audit every user-visible render path for hard-coded text *or formatting* and route the whole pattern through transloco — not just the words.
 - Escape quotes inside translation values (`\"`) — unescaped quotes have broken `de.json` builds before.

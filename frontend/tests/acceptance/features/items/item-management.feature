@@ -62,7 +62,16 @@ Feature: Item Management
     Given I am in shop mode
     And an item exists on the list that has not been checked
     When I check the item
-    Then the item should be marked as checked on the list for both users
+    Then the item should be recorded as checked immediately for both users
+    And the item should remain visible to me as checked for a short undo period
+    And after the undo period the item should disappear from my active list
+
+  Scenario: Undoing a check during the undo period
+    Given I am in shop mode
+    And I have just checked an item
+    When I undo the check within the undo period
+    Then the item should be restored as unchecked for both users
+    And the session should no longer record the item as checked
 
   Scenario: Uncheck an item in shop mode
     Given I am in shop mode
@@ -103,6 +112,21 @@ Feature: Item Management
     When my check attempt is rejected because the other user was faster
     Then I should be informed that the item has already been removed
     And the item should no longer appear on my list
+
+  Scenario: A check that cannot be saved is rolled back and reported
+    Given I am in shop mode
+    And the connection to the backend is temporarily unavailable
+    When I check an item
+    Then I should be informed that the item could not be checked
+    And the item should remain unchecked on the list
+    And checking should work again once the connection is restored
+
+  Scenario: An item edit that cannot be saved is reported
+    Given I am in plan mode
+    And the connection to the backend is temporarily unavailable
+    When I edit an item's details
+    Then I should be informed that my change could not be saved
+    And the item should retain its previous details
 
   Scenario: Re-adding a previously bought item preserves its price and history
     Given an item has been on the list and has a price recorded

@@ -179,7 +179,8 @@
     "checkItem": "Kryds {{name}} af",
     "activeSession": "Aktiv session",
     "approxShelfPrice": "≈ {{price}} / {{quantity}} {{unit}}",
-    "approxShelfPriceNoQty": "≈ {{price}}"
+    "approxShelfPriceNoQty": "≈ {{price}}",
+    "changeShop": "Skift butik"
   },
   "pricePopup": {
     "title": "Prisdetaljer",
@@ -280,5 +281,23 @@
     "account": "Konto",
     "signedInAs": "Logget ind som",
     "signOut": "Log ud"
+  },
+  "shopModeChangeDialog": {
+    "title": "Skift butik",
+    "message": "Hvad vil du gøre?",
+    "switchToPlanMode": "Skift til planlægningstilstand for denne butik",
+    "startAnotherSession": "Start en ny session",
+    "cancel": "Annuller"
+  },
+  "shopPickerDialog": {
+    "title": "Vælg butik"
+  },
+  "errors": {
+    "saveFailed": "Din ændring kunne ikke gemmes. Tjek forbindelsen og prøv igen.",
+    "checkFailed": "Varen kunne ikke krydses af. Tjek forbindelsen og prøv igen.",
+    "uncheckFailed": "Afkrydsningen kunne ikke fortrydes. Tjek forbindelsen og prøv igen.",
+    "sessionStartFailed": "Sessionen kunne ikke startes. Tjek forbindelsen og prøv igen.",
+    "sessionCloseFailed": "Sessionen kunne ikke afsluttes. Tjek forbindelsen og prøv igen.",
+    "sessionDiscardFailed": "Sessionen kunne ikke kasseres. Tjek forbindelsen og prøv igen."
   }
 }

@@ -291,5 +291,13 @@
     "account": "Compte",
     "signedInAs": "Connecté en tant que",
     "signOut": "Se déconnecter"
+  },
+  "errors": {
+    "saveFailed": "Votre modification n'a pas pu être enregistrée. Vérifiez votre connexion et réessayez.",
+    "checkFailed": "L'article n'a pas pu être coché. Vérifiez votre connexion et réessayez.",
+    "uncheckFailed": "L'article n'a pas pu être décoché. Vérifiez votre connexion et réessayez.",
+    "sessionStartFailed": "La session n'a pas pu être démarrée. Vérifiez votre connexion et réessayez.",
+    "sessionCloseFailed": "La session n'a pas pu être fermée. Vérifiez votre connexion et réessayez.",
+    "sessionDiscardFailed": "La session n'a pas pu être abandonnée. Vérifiez votre connexion et réessayez."
   }
 }

@@ -40,6 +40,7 @@ describe('SessionsEffects', () => {
     startSession: ReturnType<typeof vi.fn>;
     joinSession: ReturnType<typeof vi.fn>;
     closeSession: ReturnType<typeof vi.fn>;
+    discardSession: ReturnType<typeof vi.fn>;
   };
 
   beforeEach(() => {
@@ -49,6 +50,7 @@ describe('SessionsEffects', () => {
       startSession: vi.fn(),
       joinSession: vi.fn(),
       closeSession: vi.fn(),
+      discardSession: vi.fn(),
     };
     TestBed.configureTestingModule({
       providers: [
@@ -158,5 +160,92 @@ describe('SessionsEffects', () => {
     actions$.next(sessionsActions.sessionClosed({ id: 's1' as SessionId }));
     await flush();
     expect(results).toEqual([uiActions.switchToPlanMode()]);
+  });
+
+  // A rejected API call (offline / flaky in-store connectivity) must never
+  // kill the effect stream: fail once, verify the failure action, then verify
+  // the next request still goes through.
+  describe('failure resilience', () => {
+    it('closeSession$ dispatches sessionCloseFailed and survives a rejected call', async () => {
+      api.closeSession
+        .mockRejectedValueOnce(new Error('client is offline'))
+        .mockResolvedValueOnce(undefined);
+      const results: unknown[] = [];
+      let errored = false;
+      effects.closeSession$.subscribe({
+        next: (a) => results.push(a),
+        error: () => (errored = true),
+      });
+      const req = sessionsApiActions.closeSessionRequested({
+        sessionId: 's1' as SessionId,
+      });
+
+      actions$.next(req);
+      await flush();
+      expect(errored).toBe(false);
+      expect(results).toEqual([
+        sessionsActions.sessionCloseFailed({ sessionId: 's1' as SessionId }),
+      ]);
+
+      actions$.next(req);
+      await flush();
+      expect(results[1]).toEqual(
+        sessionsActions.sessionClosed({ id: 's1' as SessionId }),
+      );
+    });
+
+    it('discardSession$ dispatches sessionDiscardFailed and survives a rejected call', async () => {
+      api.discardSession
+        .mockRejectedValueOnce(new Error('client is offline'))
+        .mockResolvedValueOnce(undefined);
+      const results: unknown[] = [];
+      let errored = false;
+      effects.discardSession$.subscribe({
+        next: (a) => results.push(a),
+        error: () => (errored = true),
+      });
+      const req = sessionsApiActions.discardSessionRequested({
+        sessionId: 's1' as SessionId,
+      });
+
+      actions$.next(req);
+      await flush();
+      expect(errored).toBe(false);
+      expect(results).toEqual([
+        sessionsActions.sessionDiscardFailed({ sessionId: 's1' as SessionId }),
+      ]);
+
+      actions$.next(req);
+      await flush();
+      expect(results[1]).toEqual(
+        sessionsActions.sessionDiscarded({ id: 's1' as SessionId }),
+      );
+    });
+
+    it('startSession$ dispatches sessionStartFailed and survives a rejected call', async () => {
+      api.startSession
+        .mockRejectedValueOnce(new Error('client is offline'))
+        .mockResolvedValueOnce(mockSession);
+      const results: unknown[] = [];
+      let errored = false;
+      effects.startSession$.subscribe({
+        next: (a) => results.push(a),
+        error: () => (errored = true),
+      });
+      const req = sessionsApiActions.startSessionRequested({
+        shopId: 'shop-1' as ShopId,
+      });
+
+      actions$.next(req);
+      await flush();
+      expect(errored).toBe(false);
+      expect(results).toEqual([sessionsActions.sessionStartFailed()]);
+
+      actions$.next(req);
+      await flush();
+      expect(results[1]).toEqual(
+        sessionsActions.sessionStarted({ session: mockSession }),
+      );
+    });
   });
 });

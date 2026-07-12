@@ -8,12 +8,12 @@ import { TranslocoPipe } from '@jsverse/transloco';
 import { selectGroupedShopList } from '../../store/selectors/grouped-shop-list.selectors';
 import { selectListDataLoaded } from '../../store/selectors/list-data-loaded.selectors';
 import { selectActiveSessionForCurrentShop } from '../../store/sessions/sessions.selectors';
-import { selectPendingChecks } from '../../store/items/items.selectors';
+import { selectPendingChecks, selectRecentChecks } from '../../store/items/items.selectors';
 import { selectAllShops } from '../../store/shops/shops.selectors';
 import { selectCategoryEntities } from '../../store/categories/categories.selectors';
 import type { Dictionary } from '@ngrx/entity';
 import type { Category } from '../../models/category.model';
-import { itemsActions, itemsApiActions } from '../../store/items/items.actions';
+import { itemsApiActions } from '../../store/items/items.actions';
 import type { PendingCheck } from '../../store/items/items.reducer';
 import { MoneyPipe } from '../../core/format/money.pipe';
 import { EffectivePricePipe } from '../../core/format/effective-price.pipe';
@@ -95,6 +95,10 @@ export class ShopComponent {
     initialValue: {} as Record<ItemId, PendingCheck>,
   });
 
+  readonly recentChecks = toSignal(this.store.select(selectRecentChecks), {
+    initialValue: {} as Record<ItemId, number>,
+  });
+
   readonly checkedItemIds = computed(() => {
     const session = this.activeSession();
     return new Set((session?.checkedItems ?? []).map((c) => c.itemId));
@@ -106,6 +110,15 @@ export class ShopComponent {
 
   isChecked(itemId: ItemId): boolean {
     return this.checkedItemIds().has(itemId);
+  }
+
+  // "Tap to undo" shows while the check write is in flight and for the
+  // undo window after it commits.
+  showsUndoHint(itemId: ItemId): boolean {
+    return (
+      this.pendingChecks()[itemId] !== undefined ||
+      this.recentChecks()[itemId] !== undefined
+    );
   }
 
   canInspectPrice(item: Item): boolean {
@@ -140,13 +153,12 @@ export class ShopComponent {
     const session = this.activeSession();
     if (!session) return;
 
+    // The commit is already in flight — ignore taps until it resolves.
     if (this.isPending(item.id)) {
-      this.store.dispatch(
-        itemsActions.checkItemUndoneDuringWindow({ id: item.id }),
-      );
       return;
     }
 
+    // Undo (during the window or from a checked row) is a real uncheck.
     if (this.isChecked(item.id)) {
       this.store.dispatch(
         itemsApiActions.uncheckItemRequested({
@@ -159,7 +171,7 @@ export class ShopComponent {
 
     this.haptics.checkConfirm();
     this.store.dispatch(
-      itemsActions.checkItemPending({ id: item.id, sessionId: session.id }),
+      itemsApiActions.checkItemRequested({ id: item.id, sessionId: session.id }),
     );
   }
 }

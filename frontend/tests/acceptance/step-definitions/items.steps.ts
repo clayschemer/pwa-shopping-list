@@ -27,6 +27,18 @@ interface ItemsWorld {
   addError: string | null;
   lastAddedItem: Item | null;
   checkConflict: boolean;
+  // Immediate-check model: a check commits at once (removed + session record)
+  // and the item stays visible to the checking user for a short undo period.
+  sessionCheckedIds: string[];
+  recentlyCheckedIds: string[];
+  backendUnavailable: boolean;
+  failureNotice: string | null;
+}
+
+/** The list as the checking user sees it: active items plus items still inside the undo period. */
+function visibleItems(world: ItemsWorld): Item[] {
+  const recent = world.recentlyCheckedIds ?? [];
+  return world.items.filter((i) => !i.removed || recent.includes(i.id));
 }
 
 let _nextId = 1;
@@ -74,6 +86,15 @@ Given('an item exists on the list', function (this: ItemsWorld) {
 Given('an item exists on the list that has not been checked', function (this: ItemsWorld) {
   this.items = this.items ?? [];
   this.items.push(makeItem('Unchecked Item'));
+});
+
+Given('I have just checked an item', function (this: ItemsWorld) {
+  this.items = this.items ?? [];
+  const item = makeItem('Just Checked Item');
+  item.removed = true;
+  this.items.push(item);
+  this.sessionCheckedIds = [...(this.sessionCheckedIds ?? []), item.id];
+  this.recentlyCheckedIds = [...(this.recentlyCheckedIds ?? []), item.id];
 });
 
 Given('an item exists on the list that has been checked', function (this: ItemsWorld) {
@@ -216,7 +237,11 @@ When('I view the shopping list in either mode', function (this: ItemsWorld) {
 
 When('I check the item', function (this: ItemsWorld) {
   const item = activeItems(this)[0];
-  if (item) item.removed = true;
+  if (!item) return;
+  // The check commits immediately: removed flag + session record in one step.
+  item.removed = true;
+  this.sessionCheckedIds = [...(this.sessionCheckedIds ?? []), item.id];
+  this.recentlyCheckedIds = [...(this.recentlyCheckedIds ?? []), item.id];
 });
 
 When('I check the item under any one of its categories', function (this: ItemsWorld) {
@@ -229,14 +254,41 @@ When('I remove the item', function (this: ItemsWorld) {
   if (item) item.removed = true;
 });
 
+function editItemDetails(world: ItemsWorld): void {
+  world.items = world.items ?? [];
+  if (!world.items.some((i) => !i.removed)) {
+    world.items.push(makeItem('Unedited Item'));
+  }
+  const item = activeItems(world)[0]!;
+  if (world.backendUnavailable) {
+    // The write is rejected — nothing changes and the user is informed.
+    world.failureNotice = 'save';
+    return;
+  }
+  item.name = `${item.name} (edited)`;
+}
+
 When('I edit the item\'s details', function (this: ItemsWorld) {
-  const item = activeItems(this)[0];
-  if (item) item.name = `${item.name} (edited)`;
+  editItemDetails(this);
+});
+
+When('I edit an item\'s details', function (this: ItemsWorld) {
+  editItemDetails(this);
 });
 
 When('I uncheck the item', function (this: ItemsWorld) {
   const checked = this.items.find((i) => i.removed);
   if (checked) checked.removed = false;
+});
+
+When('I undo the check within the undo period', function (this: ItemsWorld) {
+  const id = (this.recentlyCheckedIds ?? [])[0];
+  assert.ok(id, 'The undo period must still be active');
+  const item = this.items.find((i) => i.id === id)!;
+  // Undo is a real uncheck: the committed check is reversed for everyone.
+  item.removed = false;
+  this.sessionCheckedIds = (this.sessionCheckedIds ?? []).filter((x) => x !== id);
+  this.recentlyCheckedIds = (this.recentlyCheckedIds ?? []).filter((x) => x !== id);
 });
 
 When('I switch between plan mode and shop mode', function (this: ItemsWorld) {
@@ -312,10 +364,65 @@ Then('the item should reflect the updated details on the list', function (this: 
   assert.ok(edited, 'Edited item should have updated name');
 });
 
-Then('the item should be marked as checked on the list for both users', function (this: ItemsWorld) {
-  // Removed flag is global — same for all users via stream
+Then('the item should be restored as unchecked for both users', function (this: ItemsWorld) {
+  assert.ok(
+    this.items.some((i) => !i.removed),
+    'The undone item should be active (unchecked) for all users',
+  );
+});
+
+Then('the session should no longer record the item as checked', function (this: ItemsWorld) {
+  assert.equal(
+    (this.sessionCheckedIds ?? []).length,
+    0,
+    'The session record for the check should be removed on undo',
+  );
+});
+
+Then('I should be informed that my change could not be saved', function (this: ItemsWorld) {
+  assert.equal(this.failureNotice, 'save', 'A save-failure notice should be shown');
+});
+
+Then('the item should retain its previous details', function (this: ItemsWorld) {
+  assert.ok(
+    !this.items.some((i) => i.name.includes('(edited)')),
+    'No item should carry the edit that failed to save',
+  );
+});
+
+Then('the item should be recorded as checked immediately for both users', function (this: ItemsWorld) {
+  // The commit happens at check time — removed flag AND session record are
+  // both in place before any undo period elapses.
   const checked = this.items.find((i) => i.removed);
   assert.ok(checked, 'Item should be removed (checked) for all users');
+  assert.ok(
+    (this.sessionCheckedIds ?? []).includes(checked!.id),
+    'The session should record the check at check time, not after a delay',
+  );
+});
+
+Then('the item should remain visible to me as checked for a short undo period', function (this: ItemsWorld) {
+  const checked = this.items.find((i) => i.removed);
+  assert.ok(checked, 'A checked item should exist');
+  assert.ok(
+    (this.recentlyCheckedIds ?? []).includes(checked!.id),
+    'The checked item should be inside the undo period',
+  );
+  assert.ok(
+    visibleItems(this).some((i) => i.id === checked!.id),
+    'The checked item should still be visible to the checking user',
+  );
+});
+
+Then('after the undo period the item should disappear from my active list', function (this: ItemsWorld) {
+  const checked = this.items.find((i) => i.removed);
+  assert.ok(checked, 'A checked item should exist');
+  // The undo period elapses
+  this.recentlyCheckedIds = (this.recentlyCheckedIds ?? []).filter((id) => id !== checked!.id);
+  assert.ok(
+    !visibleItems(this).some((i) => i.id === checked!.id),
+    'The checked item should leave the list once the undo period ends',
+  );
 });
 
 Then('the item should be marked as unchecked on the list for both users', function (this: ItemsWorld) {

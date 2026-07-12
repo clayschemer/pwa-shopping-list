@@ -1,6 +1,6 @@
 import { createReducer, on } from '@ngrx/store';
 import { createEntityAdapter, EntityState } from '@ngrx/entity';
-import { itemsActions } from './items.actions';
+import { itemsActions, itemsApiActions } from './items.actions';
 import type { Item } from '../../models/item.model';
 import type { ItemId, SessionId } from '../../models/ids.model';
 
@@ -15,12 +15,19 @@ export interface PendingCheck {
 
 export interface ItemsState extends EntityState<Item> {
   loaded: boolean;
+  // Check writes currently in flight (tap → commit). Cleared on success,
+  // failure, or conflict.
   pendingChecks: Record<ItemId, PendingCheck>;
+  // Committed checks still inside the "has been checked" undo window —
+  // the item lingers on the checking user's list until the window elapses.
+  // Client-local by design: the other user sees the item leave immediately.
+  recentChecks: Record<ItemId, number>;
 }
 
 export const initialItemsState: ItemsState = itemsAdapter.getInitialState({
   loaded: false,
   pendingChecks: {} as Record<ItemId, PendingCheck>,
+  recentChecks: {} as Record<ItemId, number>,
 });
 
 export const itemsReducer = createReducer(
@@ -47,10 +54,14 @@ export const itemsReducer = createReducer(
 
   on(itemsActions.itemChecked, (state, { item }) => {
     const { [item.id]: _pending, ...remaining } = state.pendingChecks;
-    return itemsAdapter.upsertOne(item, { ...state, pendingChecks: remaining });
+    return itemsAdapter.upsertOne(item, {
+      ...state,
+      pendingChecks: remaining,
+      recentChecks: { ...state.recentChecks, [item.id]: Date.now() },
+    });
   }),
 
-  on(itemsActions.checkItemPending, (state, { id, sessionId }) => ({
+  on(itemsApiActions.checkItemRequested, (state, { id, sessionId }) => ({
     ...state,
     pendingChecks: {
       ...state.pendingChecks,
@@ -58,9 +69,9 @@ export const itemsReducer = createReducer(
     },
   })),
 
-  on(itemsActions.checkItemUndoneDuringWindow, (state, { id }) => {
-    const { [id]: _, ...remaining } = state.pendingChecks;
-    return { ...state, pendingChecks: remaining };
+  on(itemsActions.checkUndoWindowElapsed, (state, { id }) => {
+    const { [id]: _, ...remaining } = state.recentChecks;
+    return { ...state, recentChecks: remaining };
   }),
 
   on(itemsActions.itemCheckConflict, (state, { id }) => {
@@ -68,12 +79,20 @@ export const itemsReducer = createReducer(
     return { ...state, pendingChecks: remaining };
   }),
 
-  on(itemsActions.itemUnchecked, (state, { id }) =>
-    itemsAdapter.updateOne(
+  // Roll back the optimistic pending state when the commit write fails, so
+  // the item returns to its unchecked appearance and can be re-tapped.
+  on(itemsActions.itemCheckFailed, (state, { id }) => {
+    const { [id]: _, ...remaining } = state.pendingChecks;
+    return { ...state, pendingChecks: remaining };
+  }),
+
+  on(itemsActions.itemUnchecked, (state, { id }) => {
+    const { [id]: _, ...remaining } = state.recentChecks;
+    return itemsAdapter.updateOne(
       { id, changes: { removed: false, removedAt: null } },
-      state,
-    ),
-  ),
+      { ...state, recentChecks: remaining },
+    );
+  }),
 
   on(itemsActions.itemChangesReceived, (state, { items, removed }) => {
     const afterRemove = itemsAdapter.removeMany(removed, state);

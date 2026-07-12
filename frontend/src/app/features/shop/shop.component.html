@@ -109,7 +109,7 @@
           }}{{ item.unit ? ' ' + ('units.' + item.unit | transloco) : '' }}
         </span>
       }
-      @if (isPending(item.id)) {
+      @if (showsUndoHint(item.id)) {
         <span class="app-shop__item-undo-label">
           {{ 'shop.tapToUndo' | transloco }}
         </span>

@@ -291,5 +291,13 @@
     "account": "Konto",
     "signedInAs": "Angemeldet als",
     "signOut": "Abmelden"
+  },
+  "errors": {
+    "saveFailed": "Deine Änderung konnte nicht gespeichert werden. Prüfe die Verbindung und versuche es erneut.",
+    "checkFailed": "Der Artikel konnte nicht abgehakt werden. Prüfe die Verbindung und versuche es erneut.",
+    "uncheckFailed": "Das Abhaken konnte nicht rückgängig gemacht werden. Prüfe die Verbindung und versuche es erneut.",
+    "sessionStartFailed": "Die Sitzung konnte nicht gestartet werden. Prüfe die Verbindung und versuche es erneut.",
+    "sessionCloseFailed": "Die Sitzung konnte nicht beendet werden. Prüfe die Verbindung und versuche es erneut.",
+    "sessionDiscardFailed": "Die Sitzung konnte nicht verworfen werden. Prüfe die Verbindung und versuche es erneut."
   }
 }
