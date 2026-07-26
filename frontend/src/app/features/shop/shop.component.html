@@ -30,10 +30,13 @@
           [class.app-shop__item--pending]="isPending(row.item.id)"
           [class.app-shop__item--checked]="isChecked(row.item.id)"
           [style.--app-shop-accent]="row.categoryColor || 'transparent'"
+          animate.leave="app-shop__item--leaving"
         >
-          <ng-container
-            *ngTemplateOutlet="itemBody; context: { item: row.item }"
-          ></ng-container>
+          <div class="app-shop__item-collapse">
+            <ng-container
+              *ngTemplateOutlet="itemBody; context: { item: row.item }"
+            ></ng-container>
+          </div>
         </li>
       }
     </ul>
@@ -42,57 +45,63 @@
       <section
         class="app-shop__group"
         [class.app-shop__group--uncategorised]="group.categoryId === null"
+        animate.leave="app-shop__group--leaving"
       >
-        @if (group.categoryColor) {
-          <span
-            class="app-shop__group-color-element"
-            [style.background]="`linear-gradient(90deg, ${group.categoryColor}, transparent)`"
-          ></span>
-        }
-        <header class="app-shop__group-header">
-          <h2 class="app-shop__group-title">
-            @if (group.categoryColor) {
-              <span
-                class="app-shop__group-dot"
-                [style.background-color]="group.categoryColor"
-              ></span>
-            }
-            {{ group.categoryName ?? ('shop.uncategorised' | transloco) }}
-          </h2>
-          <div class="app-shop__group-totals">
-            @if (group.estTotal > 0) {
-              <span class="app-shop__group-est">
-                {{ 'shop.est' | transloco }} {{ group.estTotal | money }}
-              </span>
-            }
-            @if (group.sessionCheckedTotal > 0) {
-              <span class="app-shop__group-session">
-                ✓ {{ group.sessionCheckedTotal | money }}
-              </span>
-            }
-          </div>
-        </header>
-
-        <div class="app-shop__items-wrapper">
+        <div class="app-shop__group-collapse">
           @if (group.categoryColor) {
             <span
               class="app-shop__group-color-element"
               [style.background]="`linear-gradient(90deg, ${group.categoryColor}, transparent)`"
             ></span>
           }
-          <ul class="app-shop__items" role="list">
-            @for (item of group.items; track item.id) {
-              <li
-                class="app-shop__item"
-                [class.app-shop__item--pending]="isPending(item.id)"
-                [class.app-shop__item--checked]="isChecked(item.id)"
-              >
-                <ng-container
-                  *ngTemplateOutlet="itemBody; context: { item }"
-                ></ng-container>
-              </li>
+          <header class="app-shop__group-header">
+            <h2 class="app-shop__group-title">
+              @if (group.categoryColor) {
+                <span
+                  class="app-shop__group-dot"
+                  [style.background-color]="group.categoryColor"
+                ></span>
+              }
+              {{ group.categoryName ?? ('shop.uncategorised' | transloco) }}
+            </h2>
+            <div class="app-shop__group-totals">
+              @if (group.estTotal > 0) {
+                <span class="app-shop__group-est">
+                  {{ 'shop.est' | transloco }} {{ group.estTotal | money }}
+                </span>
+              }
+              @if (group.sessionCheckedTotal > 0) {
+                <span class="app-shop__group-session">
+                  ✓ {{ group.sessionCheckedTotal | money }}
+                </span>
+              }
+            </div>
+          </header>
+
+          <div class="app-shop__items-wrapper">
+            @if (group.categoryColor) {
+              <span
+                class="app-shop__group-color-element"
+                [style.background]="`linear-gradient(90deg, ${group.categoryColor}, transparent)`"
+              ></span>
             }
-          </ul>
+            <ul class="app-shop__items" role="list">
+              @for (item of group.items; track item.id) {
+                <li
+                  class="app-shop__item"
+                  [class.app-shop__item--pending]="isPending(item.id)"
+                  [class.app-shop__item--checked]="isChecked(item.id)"
+                  animate.leave="app-shop__item--leaving"
+                >
+                  <div class="app-shop__item-collapse">
+                    <ng-container
+                      *ngTemplateOutlet="itemBody; context: { item }"
+                    ></ng-container>
+                  </div>
+                </li>
+              }
+            </ul>
+          </div>
         </div>
       </section>
     }

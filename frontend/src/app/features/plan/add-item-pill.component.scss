@@ -42,12 +42,13 @@
     flex: 1;
     display: flex;
     justify-content: space-between;
-    align-items: baseline;
+    align-items: center;
     gap: var(--app-spacing-sm);
     min-height: var(--app-spacing-row-min-height);
     padding: var(--app-spacing-xs) var(--app-spacing-sm);
     border-radius: var(--app-shape-md);
     color: var(--mat-sys-on-surface);
+    background-color: var(--mat-sys-surface-container-high);
 
     @media (prefers-reduced-motion: no-preference) {
       transition: background-color var(--app-duration-quick) var(--app-easing-standard);

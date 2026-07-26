@@ -24,10 +24,13 @@
           class="app-plan__item app-plan__item--accent"
           [class.app-plan__item--checked]="row.isChecked"
           [style.--app-plan-accent]="row.categoryColor || 'transparent'"
+          animate.leave="app-plan__item--leaving"
         >
-          <ng-container
-            *ngTemplateOutlet="itemBody; context: { item: row.item, isChecked: row.isChecked }"
-          ></ng-container>
+          <div class="app-plan__item-collapse">
+            <ng-container
+              *ngTemplateOutlet="itemBody; context: { item: row.item, isChecked: row.isChecked }"
+            ></ng-container>
+          </div>
         </li>
       }
     </ul>
@@ -36,44 +39,50 @@
       <section
         class="app-plan__group"
         [class.app-plan__group--uncategorised]="group.categoryId === null"
+        animate.leave="app-plan__group--leaving"
       >
-        @if (group.categoryColor) {
-          <span
-            class="app-plan__group-color-element"
-            [style.background]="`linear-gradient(90deg, ${group.categoryColor}, transparent)`"
-          ></span>
-        }
-        <header class="app-plan__group-header">
-          <h2 class="app-plan__group-title">
-            @if (group.categoryColor) {
-              <span
-                class="app-plan__group-dot"
-                [style.background-color]="group.categoryColor"
-              ></span>
-            }
-            {{ group.categoryName ?? ('plan.uncategorised' | transloco) }}
-          </h2>
-          <div class="app-plan__group-meta">
-            @if (group.estTotal > 0) {
-              <span class="app-plan__group-total">
-                {{ group.estTotal | money }}
-              </span>
-            }
-          </div>
-        </header>
-
-        <ul class="app-plan__items" role="list">
-          @for (item of group.items; track item.id) {
-            <li
-              class="app-plan__item"
-              [class.app-plan__item--checked]="isItemChecked(item.id)"
-            >
-              <ng-container
-                *ngTemplateOutlet="itemBody; context: { item, isChecked: isItemChecked(item.id) }"
-              ></ng-container>
-            </li>
+        <div class="app-plan__group-collapse">
+          @if (group.categoryColor) {
+            <span
+              class="app-plan__group-color-element"
+              [style.background]="`linear-gradient(90deg, ${group.categoryColor}, transparent)`"
+            ></span>
           }
-        </ul>
+          <header class="app-plan__group-header">
+            <h2 class="app-plan__group-title">
+              @if (group.categoryColor) {
+                <span
+                  class="app-plan__group-dot"
+                  [style.background-color]="group.categoryColor"
+                ></span>
+              }
+              {{ group.categoryName ?? ('plan.uncategorised' | transloco) }}
+            </h2>
+            <div class="app-plan__group-meta">
+              @if (group.estTotal > 0) {
+                <span class="app-plan__group-total">
+                  {{ group.estTotal | money }}
+                </span>
+              }
+            </div>
+          </header>
+
+          <ul class="app-plan__items" role="list">
+            @for (item of group.items; track item.id) {
+              <li
+                class="app-plan__item"
+                [class.app-plan__item--checked]="isItemChecked(item.id)"
+                animate.leave="app-plan__item--leaving"
+              >
+                <div class="app-plan__item-collapse">
+                  <ng-container
+                    *ngTemplateOutlet="itemBody; context: { item, isChecked: isItemChecked(item.id) }"
+                  ></ng-container>
+                </div>
+              </li>
+            }
+          </ul>
+        </div>
       </section>
     }
   }

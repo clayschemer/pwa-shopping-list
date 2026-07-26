@@ -65,15 +65,43 @@
     color: var(--mat-sys-on-surface-variant);
   }
 
+  // Same grid-collapse technique as &__item (see comment above it), applied
+  // one level up so a category emptied down to its last item collapses the
+  // whole group — header included — instead of the section vanishing
+  // outright and jumping the groups below it into place.
   &__group {
-    display: flex;
-    overflow: hidden;
     position: relative;
-    flex-direction: column;
-    gap: var(--app-spacing-xxs);
+    display: grid;
+    grid-template-rows: 1fr;
+    overflow: hidden;
     background: var(--mat-sys-surface-container);
-    padding: 0 var(--app-spacing-xxs) var(--app-spacing-xxs);
     border-radius: var(--app-shape-sm);
+
+    @media (prefers-reduced-motion: no-preference) {
+      transition:
+        grid-template-rows var(--app-duration-relaxed) var(--app-easing-standard),
+        opacity var(--app-duration-relaxed) var(--app-easing-standard),
+        transform var(--app-duration-relaxed) var(--app-easing-standard);
+
+      @starting-style {
+        grid-template-rows: 0fr;
+        opacity: 0;
+        transform: scale(0.96);
+      }
+    }
+
+    &--leaving {
+      grid-template-rows: 0fr;
+      opacity: 0;
+      transform: scale(0.96);
+
+      @media (prefers-reduced-motion: no-preference) {
+        transition:
+          grid-template-rows var(--app-duration-relaxed) var(--app-easing-standard),
+          opacity var(--app-duration-relaxed) var(--app-easing-standard),
+          transform var(--app-duration-relaxed) var(--app-easing-standard);
+      }
+    }
 
     &--uncategorised {
       .app-plan__group-header {
@@ -84,6 +112,15 @@
         opacity: 0.5;
       }
     }
+  }
+
+  &__group-collapse {
+    display: flex;
+    flex-direction: column;
+    gap: var(--app-spacing-xxs);
+    padding: 0 var(--app-spacing-xxs) var(--app-spacing-xxs);
+    min-height: 0;
+    overflow: hidden;
   }
 
   &__group-color-element {
@@ -150,13 +187,52 @@
     gap: var(--app-spacing-xxs);
   }
 
+  // Grid + a collapsing child is the CSS-only way to transition an
+  // auto-height row: grid-template-rows can animate between an explicit
+  // 1fr (natural height) and 0fr, unlike `height: auto`. The direct child
+  // (&__item-collapse) must have overflow: hidden so its automatic minimum
+  // size resolves to 0 instead of its content's min-content height, letting
+  // the track actually reach 0fr. This is what makes the surrounding rows
+  // slide smoothly into the closing/opening gap instead of snapping.
   &__item {
-    display: flex;
-    align-items: center;
-    min-height: var(--app-spacing-row-min-height);
-    gap: var(--app-spacing-xs);
+    display: grid;
+    grid-template-rows: 1fr;
     border-radius: var(--app-shape-sm);
     background-color: var(--mat-sys-surface-container-lowest);
+
+    @media (prefers-reduced-motion: no-preference) {
+      transition:
+        grid-template-rows var(--app-duration-relaxed) var(--app-easing-standard),
+        opacity var(--app-duration-relaxed) var(--app-easing-standard),
+        transform var(--app-duration-relaxed) var(--app-easing-standard);
+
+      @starting-style {
+        grid-template-rows: 0fr;
+        opacity: 0;
+        transform: scale(0.96);
+      }
+    }
+
+    &--leaving {
+      grid-template-rows: 0fr;
+      opacity: 0;
+      transform: scale(0.96);
+
+      @media (prefers-reduced-motion: no-preference) {
+        transition:
+          grid-template-rows var(--app-duration-relaxed) var(--app-easing-standard),
+          opacity var(--app-duration-relaxed) var(--app-easing-standard),
+          transform var(--app-duration-relaxed) var(--app-easing-standard);
+      }
+    }
+  }
+
+  &__item-collapse {
+    display: flex;
+    align-items: center;
+    gap: var(--app-spacing-xs);
+    min-height: 0;
+    overflow: hidden;
   }
 
   // Flat list mode (hide grouping): each row carries the primary category

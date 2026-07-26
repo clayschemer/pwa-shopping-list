@@ -90,12 +90,42 @@
     color: var(--mat-sys-on-surface-variant);
   }
 
+  // Same grid-collapse technique as &__item (see comment above it), applied
+  // one level up so a category emptied down to its last item collapses the
+  // whole group — header included — instead of the section vanishing
+  // outright and jumping the groups below it into place.
   &__group {
     position: relative;
-    display: flex;
-    flex-direction: column;
+    display: grid;
+    grid-template-rows: 1fr;
     border-radius: var(--app-shape-sm);
     overflow: hidden;
+
+    @media (prefers-reduced-motion: no-preference) {
+      transition:
+        grid-template-rows var(--app-duration-relaxed) var(--app-easing-standard),
+        opacity var(--app-duration-relaxed) var(--app-easing-standard),
+        transform var(--app-duration-relaxed) var(--app-easing-standard);
+
+      @starting-style {
+        grid-template-rows: 0fr;
+        opacity: 0;
+        transform: scale(0.96);
+      }
+    }
+
+    &--leaving {
+      grid-template-rows: 0fr;
+      opacity: 0;
+      transform: scale(0.96);
+
+      @media (prefers-reduced-motion: no-preference) {
+        transition:
+          grid-template-rows var(--app-duration-relaxed) var(--app-easing-standard),
+          opacity var(--app-duration-relaxed) var(--app-easing-standard),
+          transform var(--app-duration-relaxed) var(--app-easing-standard);
+      }
+    }
 
     &--uncategorised {
       .app-shop__group-title {
@@ -103,6 +133,13 @@
         color: var(--mat-sys-on-surface);
       }
     }
+  }
+
+  &__group-collapse {
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    overflow: hidden;
   }
 
   &__group-color-element {
@@ -189,19 +226,31 @@
     }
   }
 
+  // Grid + a collapsing child is the CSS-only way to transition an
+  // auto-height row: grid-template-rows can animate between an explicit
+  // 1fr (natural height) and 0fr, unlike `height: auto`. The direct child
+  // (&__item-collapse) must have overflow: hidden so its automatic minimum
+  // size resolves to 0 instead of its content's min-content height, letting
+  // the track actually reach 0fr. This is what makes the surrounding rows
+  // slide smoothly into the closing/opening gap instead of snapping.
   &__item {
     position: relative;
-    display: flex;
-    align-items: center;
-    min-height: var(--app-spacing-row-min-height);
-    gap: var(--app-spacing-xs);
+    display: grid;
+    grid-template-rows: 1fr;
     border-radius: var(--app-shape-sm);
     background-color: var(--mat-sys-surface-container-lowest);
 
     @media (prefers-reduced-motion: no-preference) {
       transition:
-        opacity var(--app-duration-quick) var(--app-easing-standard),
-        transform var(--app-duration-quick) var(--app-easing-standard);
+        grid-template-rows var(--app-duration-relaxed) var(--app-easing-standard),
+        opacity var(--app-duration-relaxed) var(--app-easing-standard),
+        transform var(--app-duration-relaxed) var(--app-easing-standard);
+
+      @starting-style {
+        grid-template-rows: 0fr;
+        opacity: 0;
+        transform: scale(0.96);
+      }
     }
 
     &--accent {
@@ -218,6 +267,30 @@
         text-decoration: line-through;
       }
     }
+
+    // Overrides --pending/--checked on final removal (after the undo window
+    // elapses) so the row collapses and fades out instead of vanishing when
+    // @for removes it.
+    &--leaving {
+      grid-template-rows: 0fr;
+      opacity: 0;
+      transform: scale(0.96);
+
+      @media (prefers-reduced-motion: no-preference) {
+        transition:
+          grid-template-rows var(--app-duration-relaxed) var(--app-easing-standard),
+          opacity var(--app-duration-relaxed) var(--app-easing-standard),
+          transform var(--app-duration-relaxed) var(--app-easing-standard);
+      }
+    }
+  }
+
+  &__item-collapse {
+    display: flex;
+    align-items: center;
+    gap: var(--app-spacing-xs);
+    min-height: 0;
+    overflow: hidden;
   }
 
   &__item-main {

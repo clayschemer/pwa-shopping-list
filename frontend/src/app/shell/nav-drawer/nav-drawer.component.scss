@@ -28,7 +28,10 @@
     cursor: pointer;
     font-size: var(--app-font-body-lg);
     font-weight: 700;
-    color: var(--mat-sys-on-surface);
+    color: var(--mat-sys-on-secondary-container);
+    background: var(--mat-sys-secondary-container);
+    padding-inline: var(--app-spacing-xs);
+    border-radius: var(--app-shape-sm);
 
     &:focus-visible {
       @include focus.ring;
