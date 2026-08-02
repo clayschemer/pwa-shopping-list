@@ -8,6 +8,11 @@ import type { Item } from '../../models/item.model';
 import type { Category } from '../../models/category.model';
 import type { Session } from '../../models/session.model';
 import type { AccountId, CategoryId, ItemId, SessionId, ShopId, UserId } from '../../models/ids.model';
+import { initialUiState } from '../ui/ui.reducer';
+import { initialCategoriesState } from '../categories/categories.reducer';
+import { initialShopsState } from '../shops/shops.reducer';
+import { initialItemsState } from '../items/items.reducer';
+import { initialSessionsState } from '../sessions/sessions.reducer';
 
 const item = (id: string, name: string, primary: string | null): Item =>
   ({
@@ -26,6 +31,7 @@ const item = (id: string, name: string, primary: string | null): Item =>
     price: null,
     priceQuantity: null,
     priceUnit: null,
+    shopPrices: {},
     priceUpdatedAt: null,
     sizePerPieceQuantity: null,
     sizePerPieceUnit: null,
@@ -201,5 +207,57 @@ describe('selectGroupedPlanListWithChecked', () => {
       [cat('c1', 'Produce')],
     );
     expect(groups[0]!.estTotal).toBeCloseTo(2);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Wiring regression: the plan list must consume the shop-availability-filtered
+// category selector, not the ordering-only one. Projector tests above cannot
+// catch this — they inject the category list directly.
+// ---------------------------------------------------------------------------
+
+describe('selectGroupedPlanList (composed against real state)', () => {
+  const entityState = <T extends { id: string }>(list: T[]) => ({
+    ids: list.map((e) => e.id),
+    entities: Object.fromEntries(list.map((e) => [e.id, e])),
+  });
+
+  const stateWith = (selectedShopId: string | null) => ({
+    ...({} as Record<string, unknown>),
+    ui: { ...initialUiState, selectedShopId: selectedShopId as ShopId | null },
+    categories: {
+      ...initialCategoriesState,
+      ...entityState([cat('c-produce', 'Produce'), cat('c-bakery', 'Bakery')]),
+    },
+    shops: {
+      ...initialShopsState,
+      // Bakery has been excluded from this shop.
+      ...entityState([
+        {
+          id: 's1',
+          accountId: 'a1' as AccountId,
+          name: 'Lidl',
+          categoryOrder: ['c-produce'] as CategoryId[],
+        },
+      ]),
+    },
+    items: {
+      ...initialItemsState,
+      ...entityState([item('i1', 'Apples', 'c-produce'), item('i2', 'Bread', 'c-bakery')]),
+    },
+    sessions: initialSessionsState,
+  });
+
+  it('hides a category excluded from the selected shop, along with its items', () => {
+    const groups = selectGroupedPlanList(stateWith('s1') as never);
+
+    expect(groups.map((g) => g.categoryId)).toEqual(['c-produce']);
+    expect(groups.flatMap((g) => g.items.map((i) => i.name))).toEqual(['Apples']);
+  });
+
+  it('shows every category again when no shop is selected', () => {
+    const groups = selectGroupedPlanList(stateWith(null) as never);
+
+    expect(groups.map((g) => g.categoryId)).toEqual(['c-produce', 'c-bakery']);
   });
 });

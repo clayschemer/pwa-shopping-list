@@ -82,6 +82,12 @@ Feature: Category Management
     When I exclude a category from that shop
     Then that category and its items should not appear when shopping at that shop
 
+  Scenario: An excluded category is hidden while planning for that shop
+    Given a category is excluded from a shop
+    When I plan my shopping for that shop
+    Then that category and its items should not appear in the plan
+    And they should reappear when I plan without a specific shop
+
   @pending
   Scenario: Edit multiple category attributes in one operation
     Given I am in plan mode

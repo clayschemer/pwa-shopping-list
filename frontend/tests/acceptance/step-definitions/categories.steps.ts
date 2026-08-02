@@ -21,6 +21,34 @@ interface CategoriesWorld {
   lastCreatedCategory: Category | null;
   items: { id: string; name: string; primaryCategoryId: string | null; secondaryCategoryIds: string[] }[];
   secondaryExpanded: boolean;
+  excludedCategoryId: string | null;
+}
+
+/**
+ * What the list shows for the currently selected shop. A shop's category order
+ * doubles as its availability list — a category absent from it is excluded, so
+ * neither it nor its items are listed while that shop is selected. With no shop
+ * selected, everything is available.
+ */
+function visibleList(world: CategoriesWorld): { categoryNames: string[]; itemNames: string[] } {
+  const shop = world.selectedShopId
+    ? world.shops.find((s) => s.id === world.selectedShopId)
+    : null;
+
+  const available = shop
+    ? shop.categoryOrder
+        .map((id) => world.categories.find((c) => c.id === id))
+        .filter((c): c is Category => c !== undefined)
+    : world.categories;
+
+  const availableIds = new Set(available.map((c) => c.id));
+
+  return {
+    categoryNames: available.map((c) => c.name),
+    itemNames: (world.items ?? [])
+      .filter((i) => i.primaryCategoryId !== null && availableIds.has(i.primaryCategoryId))
+      .map((i) => i.name),
+  };
 }
 
 let _catId = 1;
@@ -271,6 +299,49 @@ Then('that category and its items should not appear when shopping at that shop',
     const excludedCatId = this.categories[this.categories.length - 1].id;
     assert.ok(!shop.categoryOrder.includes(excludedCatId), 'Excluded category should not be in shop order');
   }
+});
+
+Given('a category is excluded from a shop', function (this: CategoriesWorld) {
+  const produce = makeCategory('Produce', 1);
+  const bakery = makeCategory('Bakery', 2);
+  this.categories = [produce, bakery];
+  this.items = [
+    { id: 'item-1', name: 'Apples', primaryCategoryId: produce.id, secondaryCategoryIds: [] },
+    { id: 'item-2', name: 'Bread', primaryCategoryId: bakery.id, secondaryCategoryIds: [] },
+  ];
+  // Bakery is excluded: it is absent from this shop's category order.
+  this.shops = [{ id: `shop-${_shopId++}`, name: 'Test Shop', categoryOrder: [produce.id] }];
+  this.excludedCategoryId = bakery.id;
+  this.selectedShopId = null;
+});
+
+When('I plan my shopping for that shop', function (this: CategoriesWorld) {
+  this.mode = 'plan';
+  this.selectedShopId = this.shops[0].id;
+});
+
+Then('that category and its items should not appear in the plan', function (this: CategoriesWorld) {
+  const excluded = this.categories.find((c) => c.id === this.excludedCategoryId);
+  assert.ok(excluded, 'The excluded category should still exist');
+
+  const visible = visibleList(this);
+  assert.ok(
+    !visible.categoryNames.includes(excluded.name),
+    `Excluded category ${excluded.name} should not be listed when planning for that shop`,
+  );
+  assert.deepEqual(visible.itemNames, ['Apples'], 'Items of the excluded category should be hidden too');
+});
+
+Then('they should reappear when I plan without a specific shop', function (this: CategoriesWorld) {
+  this.selectedShopId = null;
+
+  const excluded = this.categories.find((c) => c.id === this.excludedCategoryId)!;
+  const visible = visibleList(this);
+  assert.ok(
+    visible.categoryNames.includes(excluded.name),
+    'Excluded category should be listed again when no shop is selected',
+  );
+  assert.deepEqual(visible.itemNames, ['Apples', 'Bread']);
 });
 
 // ---------------------------------------------------------------------------

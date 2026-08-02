@@ -1,7 +1,7 @@
 import { createSelector } from '@ngrx/store';
 import { selectActiveItems, selectAllItems } from '../items/items.selectors';
 import { selectActiveSessions } from '../sessions/sessions.selectors';
-import { selectOrderedCategories } from './ordered-categories.selectors';
+import { selectShopAvailableCategories } from './ordered-categories.selectors';
 import { selectSelectedShopId } from '../ui/ui.selectors';
 import { effectivePrice } from '../../models/item-price.util';
 import type { Item } from '../../models/item.model';
@@ -19,7 +19,7 @@ export const UNCATEGORISED_KEY = null;
 
 export const selectGroupedPlanList = createSelector(
   selectActiveItems,
-  selectOrderedCategories,
+  selectShopAvailableCategories,
   selectSelectedShopId,
   (items, orderedCategories, selectedShopId): PlanListGroup[] =>
     buildGroups(items, orderedCategories, new Set(), selectedShopId),
@@ -52,7 +52,7 @@ export const selectGroupedPlanListWithChecked = createSelector(
   selectActiveItems,
   selectActiveSessionCheckedItemIds,
   selectAllItems,
-  selectOrderedCategories,
+  selectShopAvailableCategories,
   selectSelectedShopId,
   (active, checkedIds, all, orderedCategories, selectedShopId): PlanListGroup[] => {
     if (checkedIds.size === 0) return buildGroups(active, orderedCategories, new Set(), selectedShopId);

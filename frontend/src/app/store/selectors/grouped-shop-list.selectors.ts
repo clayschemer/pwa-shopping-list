@@ -1,8 +1,7 @@
 import { createSelector } from '@ngrx/store';
 import { selectVisibleActiveItems } from '../items/items.selectors';
-import { selectOrderedCategories } from './ordered-categories.selectors';
+import { selectShopAvailableCategories } from './ordered-categories.selectors';
 import { selectActiveSessionForCurrentShop } from '../sessions/sessions.selectors';
-import { selectShopEntities } from '../shops/shops.selectors';
 import { selectSelectedShopId } from '../ui/ui.selectors';
 import { effectivePrice } from '../../models/item-price.util';
 import type { Item } from '../../models/item.model';
@@ -19,15 +18,12 @@ export interface ShopListGroup {
 
 export const selectGroupedShopList = createSelector(
   selectVisibleActiveItems,
-  selectOrderedCategories,
+  selectShopAvailableCategories,
   selectActiveSessionForCurrentShop,
-  selectShopEntities,
   selectSelectedShopId,
-  (items, categories, activeSession, shopEntities, selectedShopId): ShopListGroup[] => {
-    const shop = selectedShopId ? shopEntities[selectedShopId] : null;
-    const includedCategoryIds = shop
-      ? new Set(shop.categoryOrder)
-      : new Set(categories.map((c) => c.id));
+  (items, categories, activeSession, selectedShopId): ShopListGroup[] => {
+    // `categories` is already filtered to what the selected shop stocks.
+    const includedCategoryIds = new Set(categories.map((c) => c.id));
 
     const uncategorised: Item[] = [];
     const byCategory = new Map<CategoryId, Item[]>();
@@ -61,7 +57,6 @@ export const selectGroupedShopList = createSelector(
     const groups: ShopListGroup[] = [];
 
     for (const cat of categories) {
-      if (!includedCategoryIds.has(cat.id)) continue;
       const bucket = byCategory.get(cat.id);
       if (!bucket || bucket.length === 0) continue;
 

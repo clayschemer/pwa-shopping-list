@@ -1,5 +1,8 @@
 import { describe, it, expect } from 'vitest';
-import { selectOrderedCategories } from './ordered-categories.selectors';
+import {
+  selectOrderedCategories,
+  selectShopAvailableCategories,
+} from './ordered-categories.selectors';
 import type { Category } from '../../models/category.model';
 import type { Shop } from '../../models/shop.model';
 import type { AccountId, CategoryId, ShopId } from '../../models/ids.model';
@@ -61,6 +64,52 @@ describe('selectOrderedCategories', () => {
 
   it('returns empty array when no categories exist', () => {
     const result = selectOrderedCategories.projector([], {}, null);
+    expect(result).toEqual([]);
+  });
+});
+
+describe('selectShopAvailableCategories', () => {
+  const categories = [cat('c1', 'Produce', 0), cat('c2', 'Dairy', 1), cat('c3', 'Bakery', 2)];
+
+  it('returns every category when no shop is selected', () => {
+    const result = selectShopAvailableCategories.projector(categories, {}, null);
+    expect(result.map((c) => c.id)).toEqual(['c1', 'c2', 'c3']);
+  });
+
+  it('drops categories excluded from the selected shop', () => {
+    const shopEntities: Dictionary<Shop> = {
+      s1: shop('s1', 'Tesco', ['c2', 'c1']),
+    };
+    const result = selectShopAvailableCategories.projector(categories, shopEntities, 's1' as ShopId);
+    expect(result.map((c) => c.id)).toEqual(['c2', 'c1']);
+  });
+
+  it('keeps the shop-specific order for the categories it retains', () => {
+    const shopEntities: Dictionary<Shop> = {
+      s1: shop('s1', 'Tesco', ['c3', 'c1', 'c2']),
+    };
+    const result = selectShopAvailableCategories.projector(categories, shopEntities, 's1' as ShopId);
+    expect(result.map((c) => c.id)).toEqual(['c3', 'c1', 'c2']);
+  });
+
+  it('returns every category when the selected shop is not found', () => {
+    const result = selectShopAvailableCategories.projector(categories, {}, 'missing' as ShopId);
+    expect(result.map((c) => c.id)).toEqual(['c1', 'c2', 'c3']);
+  });
+
+  it('skips category IDs in shop categoryOrder that no longer exist', () => {
+    const shopEntities: Dictionary<Shop> = {
+      s1: shop('s1', 'Tesco', ['c3', 'deleted', 'c1']),
+    };
+    const result = selectShopAvailableCategories.projector(categories, shopEntities, 's1' as ShopId);
+    expect(result.map((c) => c.id)).toEqual(['c3', 'c1']);
+  });
+
+  it('returns no categories when the shop excludes all of them', () => {
+    const shopEntities: Dictionary<Shop> = {
+      s1: shop('s1', 'Tesco', []),
+    };
+    const result = selectShopAvailableCategories.projector(categories, shopEntities, 's1' as ShopId);
     expect(result).toEqual([]);
   });
 });
