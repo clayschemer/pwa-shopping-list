@@ -142,6 +142,9 @@
     overflow: hidden;
   }
 
+  // Decorative only. It is absolutely positioned over the group — including
+  // the item rows — so without this it swallows taps on the leading edge of
+  // every row it covers.
   &__group-color-element {
     position: absolute;
     left: 0;
@@ -149,6 +152,7 @@
     bottom: 0;
     width: 4.5rem;
     opacity: 0.2;
+    pointer-events: none;
   }
 
   &__group-header {
@@ -322,9 +326,24 @@
     color: var(--mat-sys-on-surface-variant);
   }
 
-  &__item-undo-label {
+  // The undo hint is the affordance it names: tapping it unchecks the item.
+  // Sized to stay a reachable target on a phone held one-handed mid-shop,
+  // where it is the row's primary control during the undo window.
+  &__item-undo {
+    all: unset;
+    cursor: pointer;
     color: var(--mat-sys-primary);
     font-weight: 500;
+    white-space: nowrap;
+    display: inline-flex;
+    align-items: center;
+    min-height: var(--app-spacing-row-min-height);
+    padding: var(--app-spacing-xxs) var(--app-spacing-xs);
+    border-radius: var(--app-shape-xs);
+
+    &:focus-visible {
+      @include focus.ring;
+    }
   }
 
   &__item-price {

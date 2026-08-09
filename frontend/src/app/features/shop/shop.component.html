@@ -119,9 +119,14 @@
         </span>
       }
       @if (showsUndoHint(item.id)) {
-        <span class="app-shop__item-undo-label">
+        <button
+          type="button"
+          class="app-shop__item-undo"
+          [attr.aria-label]="'undoHistory.uncheck' | transloco: { name: item.name }"
+          (click)="onToggleCheck(item)"
+        >
           {{ 'shop.tapToUndo' | transloco }}
-        </span>
+        </button>
       } @else {
         @let priceResult = item | effectivePrice: selectedShopId();
         @if (priceResult.kind !== 'none') {

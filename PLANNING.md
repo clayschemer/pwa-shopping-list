@@ -21,7 +21,7 @@ Built (test-first, behind the API service layer):
 - Items: store + plan-mode list, add-pill flow, edit sheet, remove confirm dialog
 - Shops: store + Manage Shops screen with add / rename / delete sheets
 - Categories: store + plan-mode header ⋯ menu (rename / available-in-shops / delete), nav-drawer drag reorder dispatches `setShopCategoryOrder` per shop or `setGlobalCategoryOrder` when "Global" is selected, add-category sheet from drawer
-- Sessions + shop mode: session API + store, auto-start on shop select, shop-mode list with grouped Est. and session totals, 4 s client-side undo window, undo-history sheet, close-session dialog, 30-min inactivity reminder dialog (close session or keep shopping)
+- Sessions + shop mode: session API + store, auto-start on shop select, shop-mode list with grouped Est. and session totals, 2 s client-side undo window, undo-history sheet, close-session dialog, 30-min inactivity reminder dialog (close session or keep shopping)
 - Session history: `/history` route loads completed sessions via `fetchSessionHistory`, expansion panels show shop, completed-at, total, and per-item snapshots
 - PWA shell: `@angular/service-worker` with `ngsw-config.json`, `manifest.webmanifest`, default icon set under `frontend/public/icons/`
 
@@ -920,7 +920,7 @@ Feature: Autocomplete on Item Add
 |---|---|---|
 | 1 | Permitted user definition | Allowlist for now; may expand to signup flow |
 | 2 | Uncategorised items label | Resolved: "Uncategorised", muted style, always last, no context menu |
-| 3 | Checked item undo window | Resolved: 4s, client-side only, checking user only |
+| 3 | Checked item undo window | Resolved: 2s, client-side only, checking user only |
 | 4 | AI analytical scope | Starting with purchase frequency. Basket analysis, co-occurrence, spend trends deferred. |
 | 5 | Price staleness threshold | Working assumption 6–12 months. Exact value TBD. |
 | 6 | AI price lookup mechanics | Beyond shop priority order — exact mechanics TBD. |
@@ -935,7 +935,7 @@ Feature: Autocomplete on Item Add
 
 ## Design Notes
 
-- **Checked item UX**: When an item is checked in shop mode it dims to ~42% opacity with strikethrough and a "tap to undo" label for 4 seconds. Tapping the checkbox again within that window unchecks it. After 4 seconds with no action the item disappears from the list. Undo is client-side only and visible only to the user who performed the check.
+- **Checked item UX**: When an item is checked in shop mode it dims to ~42% opacity with strikethrough and a "tap to undo" button for 2 seconds. Tapping either that button or the checkbox within that window unchecks it. After 2 seconds with no action the item disappears from the list. Undo is client-side only and visible only to the user who performed the check.
 - **Mode difference**: Plan and shop mode share the same underlying list and data. The difference is purely visual, with the addition of shopping session history tracked only in shop mode.
 - **Categories as tags**: Categories are not containers. They appear in the list only when at least one item is assigned to them.
 - **Uncategorised items**: Appear as a distinct group at the bottom of the list, labelled "Uncategorised" in a muted style. No context menu. Always last.

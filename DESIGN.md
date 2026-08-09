@@ -256,10 +256,10 @@ Est. total drops when any session checks an item. Session total rises.
 ### Check Interaction
 - Tap checkbox (56px touch strip, far right of row) to check
 - Item dims to ~42% opacity + strikethrough immediately (pending state)
-- "tap to undo" label appears inside the price area
-- After 4 seconds with no action: item disappears from list
-- Re-tap checkbox within the 4-second window: item unchecks, returns to full opacity
-- Full row tap (outside checkbox): inert
+- "tap to undo" button appears inside the price area — tapping it unchecks the item
+- After 2 seconds with no action: item disappears from list
+- Re-tap checkbox within the 2-second window: item unchecks, returns to full opacity
+- Full row tap (outside checkbox and the "tap to undo" button): inert
 
 ### Undo History Menu
 Opened via [undo] icon in top-bar left slot. Badge shows count of checked items this session.
@@ -457,7 +457,7 @@ Access check occurs at `getAccount()` in the bootup sequence, not at the OAuth s
 - All AI features inactive unless `Account.aiConfig` is set — gate in service layer, not components
 - Mode (plan/shop) is client-side NgRx store state only — not persisted, not synced
 - Settings stored in `localStorage` — not in backend
-- Check interaction undo window is client-side only — no API call until the 4s window expires
+- Check interaction undo window is client-side only — no API call until the 2s window expires
 - Session auto-start on shop selection orchestrated by NgRx effect calling `startSession`
 - Left-handed mode: CSS class on root, explicit `left`/`right` overrides on checkbox column only
 - Nav drawer "Add category" → `addCategory` API operation. New category auto-appended to all shops' `categoryOrder` arrays (handled server-side per API contract)

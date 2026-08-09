@@ -74,7 +74,7 @@ describe('ItemsEffects — recent-check undo window', () => {
     const results: unknown[] = [];
     effects.recentCheckWindow$.subscribe((a) => results.push(a));
     actions$.next(itemsActions.itemChecked({ item: checkedItem('i1') }));
-    vi.advanceTimersByTime(2000);
+    vi.advanceTimersByTime(CHECK_UNDO_WINDOW_MS / 2);
     actions$.next(itemsActions.itemUnchecked({ id: 'i1' as ItemId }));
     vi.advanceTimersByTime(CHECK_UNDO_WINDOW_MS);
     expect(results).toEqual([]);
@@ -120,7 +120,9 @@ describe('ItemsEffects — recent-check undo window', () => {
     setVisibilityState('hidden');
     document.dispatchEvent(new Event('visibilitychange'));
 
-    vi.setSystemTime(1_000_000 + 3000);
+    // Hidden for all but the last second of the window, so exactly 1000ms
+    // of wall-clock time should remain when the page comes back.
+    vi.setSystemTime(1_000_000 + (CHECK_UNDO_WINDOW_MS - 1000));
     setVisibilityState('visible');
     document.dispatchEvent(new Event('visibilitychange'));
 

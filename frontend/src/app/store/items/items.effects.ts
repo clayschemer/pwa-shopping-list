@@ -15,7 +15,7 @@ import {
   withLatestFrom,
 } from 'rxjs';
 
-export const CHECK_UNDO_WINDOW_MS = 4000;
+export const CHECK_UNDO_WINDOW_MS = 2000;
 
 function wallClockTimer(durationMs: number, zone: NgZone): Observable<void> {
   return new Observable<void>((subscriber) => {
