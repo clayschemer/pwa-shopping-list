@@ -14,6 +14,7 @@ const cat = (id: string, name: string, order: number): Category => ({
   name,
   color: null,
   globalSortOrder: order,
+  groupIds: [],
 });
 
 function makeState(categories: Category[], loaded = true): CategoriesState {

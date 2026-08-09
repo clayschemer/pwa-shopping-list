@@ -8,6 +8,9 @@ import { TranslocoService } from '@jsverse/transloco';
 import { UiFeedbackEffects } from './ui-feedback.effects';
 import { itemsActions } from '../items/items.actions';
 import { sessionsActions } from '../sessions/sessions.actions';
+import { categoriesActions } from '../categories/categories.actions';
+import { categoryGroupsActions } from '../category-groups/category-groups.actions';
+import { shopsActions } from '../shops/shops.actions';
 import type { ItemId, SessionId } from '../../models/ids.model';
 
 describe('UiFeedbackEffects', () => {
@@ -61,6 +64,21 @@ describe('UiFeedbackEffects', () => {
       'sessionDiscardFailed',
       sessionsActions.sessionDiscardFailed({ sessionId: 's1' as SessionId }),
       'errors.sessionDiscardFailed',
+    ],
+    [
+      'categorySaveFailed',
+      categoriesActions.categorySaveFailed({ id: null }),
+      'errors.saveFailed',
+    ],
+    [
+      'shopSaveFailed',
+      shopsActions.shopSaveFailed({ id: null }),
+      'errors.saveFailed',
+    ],
+    [
+      'categoryGroupSaveFailed',
+      categoryGroupsActions.categoryGroupSaveFailed({ id: null }),
+      'errors.saveFailed',
     ],
   ];
 

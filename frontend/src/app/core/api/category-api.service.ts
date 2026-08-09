@@ -3,18 +3,18 @@ import { Observable } from 'rxjs';
 import {
   Firestore,
   addDoc,
-  deleteDoc,
+  arrayRemove,
+  arrayUnion,
   getDocs,
   query,
   QueryDocumentSnapshot,
-  runTransaction,
   updateDoc,
   where,
   writeBatch,
   orderBy,
 } from '@angular/fire/firestore';
 import type { Category } from '../../models/category.model';
-import type { AccountId, CategoryId, ShopId } from '../../models/ids.model';
+import type { AccountId, CategoryGroupId, CategoryId } from '../../models/ids.model';
 import type { NameConflictError, NotFoundError } from '../../models/errors.model';
 import { AccountContext } from './account-context';
 import { StreamErrorService } from './stream-error.service';
@@ -29,6 +29,8 @@ function mapCategory(snap: QueryDocumentSnapshot, accountId: AccountId): Categor
     name: (data['name'] ?? '') as string,
     color: (data['color'] ?? null) as string | null,
     globalSortOrder: (data['globalSortOrder'] ?? 0) as number,
+    // Categories created before groups existed have no field at all — not null.
+    groupIds: (data['groupIds'] ?? []) as CategoryGroupId[],
   };
 }
 
@@ -69,6 +71,7 @@ export class CategoryApiService {
         name: trimmed,
         color,
         globalSortOrder: nextOrder,
+        groupIds: [],
       });
 
       // Append the new category to every shop's categoryOrder.
@@ -90,6 +93,7 @@ export class CategoryApiService {
         name: trimmed,
         color,
         globalSortOrder: nextOrder,
+        groupIds: [],
       };
     });
   }
@@ -185,28 +189,43 @@ export class CategoryApiService {
     });
   }
 
-  async setShopCategoryOrder(
-    shopId: ShopId,
-    orderedIds: CategoryId[],
-  ): Promise<void | NotFoundError> {
+  /**
+   * Bulk group assignment. One `writeBatch` of `arrayUnion` — atomic, and
+   * immune to the read-modify-write race a whole-array replace would hit when
+   * both users assign groups at the same time. The 500-write batch ceiling is
+   * far above any realistic category count.
+   */
+  async addCategoriesToGroup(
+    ids: CategoryId[],
+    groupId: CategoryGroupId,
+  ): Promise<void> {
+    if (ids.length === 0) return;
     const { accountId } = this.context.require();
-    return runInInjectionContext(this.injector, async () => {
-      try {
-        await runTransaction(this.db, async (tx) => {
-          const ref = paths.shopDoc(this.db, accountId, shopId);
-          const snap = await tx.get(ref);
-          if (!snap.exists()) {
-            throw new Error('NOT_FOUND');
-          }
-          tx.update(ref, { categoryOrder: orderedIds });
+    await runInInjectionContext(this.injector, async () => {
+      const batch = writeBatch(this.db);
+      for (const id of ids) {
+        batch.update(paths.categoryDoc(this.db, accountId, id), {
+          groupIds: arrayUnion(groupId),
         });
-      } catch (err) {
-        if ((err as Error).message === 'NOT_FOUND') {
-          return { type: 'NOT_FOUND', entityKind: 'shop', id: shopId };
-        }
-        throw err;
       }
-      return;
+      await batch.commit();
+    });
+  }
+
+  async removeCategoriesFromGroup(
+    ids: CategoryId[],
+    groupId: CategoryGroupId,
+  ): Promise<void> {
+    if (ids.length === 0) return;
+    const { accountId } = this.context.require();
+    await runInInjectionContext(this.injector, async () => {
+      const batch = writeBatch(this.db);
+      for (const id of ids) {
+        batch.update(paths.categoryDoc(this.db, accountId, id), {
+          groupIds: arrayRemove(groupId),
+        });
+      }
+      await batch.commit();
     });
   }
 

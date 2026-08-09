@@ -12,6 +12,8 @@ export const shopsActions = createActionGroup({
     'Shop Category Order Set': props<{ shopId: ShopId; orderedIds: CategoryId[] }>(),
     'Shop Price Url Set': props<{ id: ShopId; url: string | null }>(),
     'Shop Changes Received': props<{ shops: Shop[]; removed: ShopId[] }>(),
+    /** A write was rejected (offline / flaky connection). `id` is null for creates and bulk order writes. */
+    'Shop Save Failed': props<{ id: ShopId | null }>(),
   },
 });
 

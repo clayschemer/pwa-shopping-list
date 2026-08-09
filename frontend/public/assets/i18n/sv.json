@@ -40,7 +40,17 @@
     "orderForGlobal": "Global",
     "addCategory": "Lägg till kategori",
     "dragHandle": "Dra för att ändra ordning på {{name}}",
-    "empty": "Inga kategorier ännu. Tryck + för att skapa en."
+    "empty": "Inga kategorier ännu. Tryck + för att skapa en.",
+    "select": "Välj",
+    "cancelSelection": "Avbryt",
+    "selectAll": "Välj alla",
+    "nSelected": "{{count}} valda",
+    "addToGroup": "Lägg till i grupp …",
+    "removeFromGroup": "Ta bort från grupp …",
+    "newGroup": "+ Grupp",
+    "editGroup": "Redigera gruppen {{name}}",
+    "inGroups": "I {{groups}}",
+    "groupSeparator": ", "
   },
   "categoryEditSheet": {
     "createTitle": "Lägg till kategori",
@@ -56,6 +66,31 @@
     "cancel": "Avbryt",
     "save": "Spara",
     "delete": "Ta bort kategori"
+  },
+  "deleteCategoryGroup": {
+    "title": "Ta bort gruppen?",
+    "message": "Kategorierna i \"{{name}}\" blir utan grupp. De tas inte bort.",
+    "cancel": "Avbryt",
+    "delete": "Ta bort"
+  },
+  "groupPickerSheet": {
+    "addTitle": "Lägg till i grupp",
+    "removeTitle": "Ta bort från grupp",
+    "empty": "Inga grupper än. Skapa en med + Grupp.",
+    "cancel": "Avbryt"
+  },
+  "categoryGroupEditSheet": {
+    "createTitle": "Ny grupp",
+    "editTitle": "Redigera grupp",
+    "name": "Namn",
+    "nameConflict": "Det finns redan en grupp med det här namnet",
+    "availableInShops": "Tillgänglig i butiker",
+    "noShops": "Inga butiker än.",
+    "noMembers": "Den här gruppen har inga kategorier än. Välj kategorier och lägg till dem i gruppen.",
+    "memberCount": "{{count}} kategorier i den här gruppen",
+    "cancel": "Avbryt",
+    "save": "Spara",
+    "delete": "Ta bort grupp"
   },
   "stores": {
     "title": "Butiker",

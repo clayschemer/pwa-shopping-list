@@ -86,7 +86,26 @@ Category
   - name                                ← unique within account
   - color: string | null                ← optional hex color (e.g. '#FF5733'); null = no color
   - globalSortOrder: number             ← fallback order when no shop is selected
+  - groupIds: CategoryGroupId[]         ← groups this category belongs to; many-to-many
 ```
+
+### CategoryGroup
+A named set of categories — "Grocery", "Furniture" — whose only purpose is to make many categories available or unavailable at a shop in one action. Adding a new shop attaches every category to it, and a group is how the irrelevant ones get removed in bulk.
+
+```
+CategoryGroup
+  - id
+  - accountId: AccountId
+  - name                                ← unique within account
+```
+
+**Groups carry no ordering.** Category order is untouched by grouping — `Shop.categoryOrder` and `Category.globalSortOrder` remain the only ordering inputs, and groups appear nowhere in plan or shop mode.
+
+**Membership is many-to-many** and lives on the category (`Category.groupIds`), not on the group. A category relevant to several kinds of shop — cleaning products, lightbulbs, batteries — belongs to several groups.
+
+**Groups are imperative shortcuts, not declarative rules.** "Make a group available at a shop" writes its members into that shop's `categoryOrder`; "make it unavailable" strips them out. Where two groups share a category the last action wins — making Furniture available and then Grocery unavailable leaves a shared category unavailable. There is no resolution rule and nothing is re-evaluated later.
+
+The group is its own entity rather than a string tag on the category so it can be renamed atomically, can exist while empty, and can be listed without scanning every category. Deleting a group detaches it from its members; it never deletes categories.
 
 ### Item
 The core entity. Items are never hard deleted. Removal from the active list is expressed through the `removed` flag.

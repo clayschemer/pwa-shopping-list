@@ -10,10 +10,25 @@ interface Category {
   name: string;
   color: string | null;
   globalSortOrder: number;
+  /** Many-to-many: a category relevant to several kinds of shop sits in several groups. */
+  groupIds: string[];
+}
+
+interface CategoryGroup {
+  id: string;
+  name: string;
 }
 
 interface CategoriesWorld {
   categories: Category[];
+  groups: CategoryGroup[];
+  lastCreatedGroup: CategoryGroup | null;
+  /** Ids captured by a step so a later step can assert on the same set. */
+  subjectCategoryIds: string[];
+  /** Category names as listed before a grouping action, for the order guard. */
+  orderBefore: string[];
+  /** What reviewing a group's shop availability reported. */
+  reportedAvailability: 'all' | 'some' | 'none' | null;
   shops: { id: string; name: string; categoryOrder: string[] }[];
   mode: 'plan' | 'shop';
   selectedShopId: string | null;
@@ -55,7 +70,7 @@ let _catId = 1;
 let _shopId = 1;
 
 function makeCategory(name: string, order = 0, color: string | null = null): Category {
-  return { id: `cat-${_catId++}`, name, color, globalSortOrder: order };
+  return { id: `cat-${_catId++}`, name, color, globalSortOrder: order, groupIds: [] };
 }
 
 // ---------------------------------------------------------------------------
@@ -501,4 +516,441 @@ Then('I should see the available secondary category options', function (this: Ca
 
 Then('the secondary categories section should be expanded', function (this: CategoriesWorld) {
   assert.equal(this.secondaryExpanded, true, 'Secondary categories should be auto-expanded');
+});
+
+// ---------------------------------------------------------------------------
+// Category Group steps
+// ---------------------------------------------------------------------------
+//
+// Groups are imperative bulk shortcuts: they carry no ordering, and a shop's
+// category order doubles as its availability list, so "make a group available
+// at a shop" means "put every member id into that shop's order".
+//
+// Note: 'I am in plan mode', 'I have access to the shopping list',
+// 'the other user accesses the shopping list' and 'I should be informed that
+// the name is already in use' are all defined in shared.steps.ts.
+// Note: 'two or more shops exist' is defined above in this file.
+
+let _groupId = 1;
+
+function makeGroup(name: string): CategoryGroup {
+  return { id: `grp-${_groupId++}`, name };
+}
+
+function initGroups(world: CategoriesWorld): void {
+  world.categories = world.categories ?? [];
+  world.groups = world.groups ?? [];
+  world.shops = world.shops ?? [];
+  world.subjectCategoryIds = world.subjectCategoryIds ?? [];
+}
+
+/** Members of a group, in list order. */
+function membersOf(world: CategoriesWorld, groupId: string): Category[] {
+  return world.categories.filter((c) => c.groupIds.includes(groupId));
+}
+
+function addToGroup(world: CategoriesWorld, ids: string[], groupId: string): void {
+  for (const id of ids) {
+    const cat = world.categories.find((c) => c.id === id);
+    if (cat && !cat.groupIds.includes(groupId)) cat.groupIds.push(groupId);
+  }
+}
+
+function removeFromGroup(world: CategoriesWorld, ids: string[], groupId: string): void {
+  for (const id of ids) {
+    const cat = world.categories.find((c) => c.id === id);
+    if (cat) cat.groupIds = cat.groupIds.filter((g) => g !== groupId);
+  }
+}
+
+function isAvailableAt(
+  world: CategoriesWorld,
+  categoryId: string,
+  shopId: string,
+): boolean {
+  const shop = world.shops.find((s) => s.id === shopId);
+  return !!shop && shop.categoryOrder.includes(categoryId);
+}
+
+/** 'all' | 'some' | 'none' of a group's members sit in the shop's order. */
+function groupAvailability(
+  world: CategoriesWorld,
+  groupId: string,
+  shopId: string,
+): 'all' | 'some' | 'none' {
+  const members = membersOf(world, groupId);
+  if (members.length === 0) return 'none';
+  const present = members.filter((c) => isAvailableAt(world, c.id, shopId)).length;
+  if (present === 0) return 'none';
+  return present === members.length ? 'all' : 'some';
+}
+
+function makeGroupAvailable(world: CategoriesWorld, groupId: string, shopId: string): void {
+  const shop = world.shops.find((s) => s.id === shopId);
+  if (!shop) return;
+  for (const member of membersOf(world, groupId)) {
+    if (!shop.categoryOrder.includes(member.id)) shop.categoryOrder.push(member.id);
+  }
+}
+
+function makeGroupUnavailable(world: CategoriesWorld, groupId: string, shopId: string): void {
+  const shop = world.shops.find((s) => s.id === shopId);
+  if (!shop) return;
+  const memberIds = new Set(membersOf(world, groupId).map((c) => c.id));
+  shop.categoryOrder = shop.categoryOrder.filter((id) => !memberIds.has(id));
+}
+
+// --- Given ----------------------------------------------------------------
+
+Given('a category group exists', function (this: CategoriesWorld) {
+  initGroups(this);
+  this.groups.push(makeGroup('Grocery'));
+});
+
+Given('a category group with a given name already exists', function (this: CategoriesWorld) {
+  initGroups(this);
+  this.groups.push(makeGroup('Grocery'));
+});
+
+Given('two category groups exist', function (this: CategoriesWorld) {
+  initGroups(this);
+  this.groups.push(makeGroup('Grocery'), makeGroup('Furniture'));
+});
+
+Given('two or more categories exist that belong to no group', function (this: CategoriesWorld) {
+  initGroups(this);
+  const a = makeCategory('Produce', 1);
+  const b = makeCategory('Dairy', 2);
+  this.categories.push(a, b);
+  this.subjectCategoryIds = [a.id, b.id];
+});
+
+Given('a category group exists with categories assigned', function (this: CategoriesWorld) {
+  initGroups(this);
+  const group = makeGroup('Grocery');
+  this.groups.push(group);
+  const a = makeCategory('Produce', 1);
+  const b = makeCategory('Dairy', 2);
+  this.categories.push(a, b);
+  addToGroup(this, [a.id, b.id], group.id);
+  this.subjectCategoryIds = [a.id, b.id];
+});
+
+Given('a category group exists with no categories assigned', function (this: CategoriesWorld) {
+  initGroups(this);
+  this.groups.push(makeGroup('Furniture'));
+});
+
+Given('a category belongs to the first group', function (this: CategoriesWorld) {
+  initGroups(this);
+  const cat = makeCategory('Cleaning', 1);
+  this.categories.push(cat);
+  addToGroup(this, [cat.id], this.groups[0].id);
+  this.subjectCategoryIds = [cat.id];
+});
+
+Given('a category belongs to two groups', function (this: CategoriesWorld) {
+  initGroups(this);
+  this.groups.push(makeGroup('Grocery'), makeGroup('Furniture'));
+  const cat = makeCategory('Cleaning', 1);
+  this.categories.push(cat);
+  addToGroup(this, [cat.id], this.groups[0].id);
+  addToGroup(this, [cat.id], this.groups[1].id);
+  this.subjectCategoryIds = [cat.id];
+});
+
+Given('the category is available at a shop', function (this: CategoriesWorld) {
+  initGroups(this);
+  const shop = {
+    id: `shop-${_shopId++}`,
+    name: 'Test Shop',
+    categoryOrder: [...this.subjectCategoryIds],
+  };
+  this.shops.push(shop);
+  this.selectedShopId = shop.id;
+});
+
+Given(
+  'a shop exists where only some of those categories are available',
+  function (this: CategoriesWorld) {
+    initGroups(this);
+    const members = membersOf(this, this.groups[0].id);
+    const shop = {
+      id: `shop-${_shopId++}`,
+      name: 'Partial Shop',
+      // Only the first member is stocked here.
+      categoryOrder: [members[0].id],
+    };
+    this.shops.push(shop);
+    this.selectedShopId = shop.id;
+  },
+);
+
+Given(
+  'a shop exists where every category in the group is available',
+  function (this: CategoriesWorld) {
+    initGroups(this);
+    const members = membersOf(this, this.groups[0].id);
+    const shop = {
+      id: `shop-${_shopId++}`,
+      name: 'Full Shop',
+      categoryOrder: members.map((c) => c.id),
+    };
+    this.shops.push(shop);
+    this.selectedShopId = shop.id;
+  },
+);
+
+Given('two or more categories exist in a known order', function (this: CategoriesWorld) {
+  initGroups(this);
+  this.categories = [
+    makeCategory('Produce', 1),
+    makeCategory('Dairy', 2),
+    makeCategory('Bakery', 3),
+  ];
+  this.orderBefore = this.categories.map((c) => c.name);
+});
+
+Given('a user creates a category group', function (this: CategoriesWorld) {
+  initGroups(this);
+  const group = makeGroup('Shared Group');
+  this.groups.push(group);
+  this.lastCreatedGroup = group;
+});
+
+// --- When -----------------------------------------------------------------
+
+When('I create a new category group with a valid name', function (this: CategoriesWorld) {
+  initGroups(this);
+  const group = makeGroup('Furniture');
+  this.groups.push(group);
+  this.lastCreatedGroup = group;
+});
+
+When(
+  'I attempt to create another category group with the same name',
+  function (this: CategoriesWorld) {
+    initGroups(this);
+    const name = this.groups[0].name;
+    if (this.groups.some((g) => g.name.toLowerCase() === name.toLowerCase())) {
+      this.addError = 'NAME_CONFLICT';
+      return;
+    }
+    this.groups.push(makeGroup(name));
+  },
+);
+
+When(
+  'I add those categories to the group in a single action',
+  function (this: CategoriesWorld) {
+    addToGroup(this, this.subjectCategoryIds, this.groups[0].id);
+  },
+);
+
+When(
+  'I remove those categories from the group in a single action',
+  function (this: CategoriesWorld) {
+    removeFromGroup(this, this.subjectCategoryIds, this.groups[0].id);
+  },
+);
+
+When('I add the category to the second group', function (this: CategoriesWorld) {
+  addToGroup(this, this.subjectCategoryIds, this.groups[1].id);
+});
+
+When('I add some of those categories to a group', function (this: CategoriesWorld) {
+  initGroups(this);
+  const group = makeGroup('Grocery');
+  this.groups.push(group);
+  // Deliberately not the first ones in list order — grouping must not reorder.
+  addToGroup(this, [this.categories[2].id, this.categories[0].id], group.id);
+});
+
+When('I rename the group to a valid new name', function (this: CategoriesWorld) {
+  this.groups[0].name = 'Aisles';
+});
+
+When('I make the group available at that shop', function (this: CategoriesWorld) {
+  makeGroupAvailable(this, this.groups[0].id, this.selectedShopId as string);
+});
+
+When('I make the group unavailable at that shop', function (this: CategoriesWorld) {
+  makeGroupUnavailable(this, this.groups[0].id, this.selectedShopId as string);
+});
+
+When('I make the second group available at that shop', function (this: CategoriesWorld) {
+  makeGroupAvailable(this, this.groups[1].id, this.selectedShopId as string);
+});
+
+When('I make the first group unavailable at that shop', function (this: CategoriesWorld) {
+  makeGroupUnavailable(this, this.groups[0].id, this.selectedShopId as string);
+});
+
+When('I review where the group is available', function (this: CategoriesWorld) {
+  this.reportedAvailability = groupAvailability(
+    this,
+    this.groups[0].id,
+    this.selectedShopId as string,
+  );
+});
+
+When('I delete the group', function (this: CategoriesWorld) {
+  const groupId = this.groups[0].id;
+  this.subjectCategoryIds = membersOf(this, groupId).map((c) => c.id);
+  // Deleting a group detaches it from its members — it never deletes them.
+  removeFromGroup(this, this.subjectCategoryIds, groupId);
+  this.groups = this.groups.filter((g) => g.id !== groupId);
+});
+
+When('I review my category groups', function (this: CategoriesWorld) {
+  initGroups(this);
+});
+
+// --- Then -----------------------------------------------------------------
+
+Then('the group should exist with no categories in it', function (this: CategoriesWorld) {
+  assert.ok(this.lastCreatedGroup, 'Expected a group to have been created');
+  const created = this.lastCreatedGroup;
+  const group = this.groups.find((g) => g.id === created.id);
+  assert.ok(group, 'Created group should exist');
+  assert.equal(membersOf(this, group.id).length, 0, 'A new group should be empty');
+});
+
+Then('the new group should not be created', function (this: CategoriesWorld) {
+  const names = this.groups.map((g) => g.name.toLowerCase());
+  assert.equal(new Set(names).size, names.length, 'Group names must be unique');
+});
+
+Then(
+  'every one of those categories should belong to the group',
+  function (this: CategoriesWorld) {
+    const groupId = this.groups[0].id;
+    for (const id of this.subjectCategoryIds) {
+      const cat = this.categories.find((c) => c.id === id);
+      assert.ok(cat, 'Category should still exist');
+      assert.ok(cat.groupIds.includes(groupId), `${cat.name} should belong to the group`);
+    }
+  },
+);
+
+Then(
+  'none of those categories should belong to the group',
+  function (this: CategoriesWorld) {
+    const groupId = this.groups[0].id;
+    for (const id of this.subjectCategoryIds) {
+      const cat = this.categories.find((c) => c.id === id);
+      assert.ok(cat, 'Category should still exist');
+      assert.ok(!cat.groupIds.includes(groupId), `${cat.name} should not belong to the group`);
+    }
+  },
+);
+
+Then('the categories should still exist', function (this: CategoriesWorld) {
+  for (const id of this.subjectCategoryIds) {
+    assert.ok(
+      this.categories.some((c) => c.id === id),
+      'Category should not have been deleted',
+    );
+  }
+});
+
+Then('the category should belong to both groups', function (this: CategoriesWorld) {
+  const cat = this.categories.find((c) => c.id === this.subjectCategoryIds[0]);
+  assert.ok(cat, 'Category should exist');
+  assert.ok(cat.groupIds.includes(this.groups[0].id), 'Should belong to the first group');
+  assert.ok(cat.groupIds.includes(this.groups[1].id), 'Should belong to the second group');
+});
+
+Then(
+  'the categories should still be listed in the same order as before',
+  function (this: CategoriesWorld) {
+    assert.deepEqual(
+      this.categories.map((c) => c.name),
+      this.orderBefore,
+      'Group membership must not affect list order',
+    );
+  },
+);
+
+Then('the group should be known by its new name', function (this: CategoriesWorld) {
+  assert.equal(this.groups[0].name, 'Aisles');
+});
+
+Then('the same categories should still belong to it', function (this: CategoriesWorld) {
+  const members = membersOf(this, this.groups[0].id).map((c) => c.id);
+  assert.deepEqual([...members].sort(), [...this.subjectCategoryIds].sort());
+});
+
+Then(
+  'every category in the group should be available at that shop',
+  function (this: CategoriesWorld) {
+    const shopId = this.selectedShopId as string;
+    for (const member of membersOf(this, this.groups[0].id)) {
+      assert.ok(
+        isAvailableAt(this, member.id, shopId),
+        `${member.name} should be available at the shop`,
+      );
+    }
+  },
+);
+
+Then(
+  'none of the categories in the group should be available at that shop',
+  function (this: CategoriesWorld) {
+    const shopId = this.selectedShopId as string;
+    for (const member of membersOf(this, this.groups[0].id)) {
+      assert.ok(
+        !isAvailableAt(this, member.id, shopId),
+        `${member.name} should not be available at the shop`,
+      );
+    }
+  },
+);
+
+Then(
+  'the group should be reported as partially available at that shop',
+  function (this: CategoriesWorld) {
+    assert.equal(this.reportedAvailability, 'some');
+  },
+);
+
+Then('the category should not be available at that shop', function (this: CategoriesWorld) {
+  const shopId = this.selectedShopId as string;
+  assert.ok(
+    !isAvailableAt(this, this.subjectCategoryIds[0], shopId),
+    'Last action wins — the category should have been removed with the first group',
+  );
+});
+
+Then('the group should no longer exist', function (this: CategoriesWorld) {
+  assert.ok(
+    !this.groups.some((g) => g.name === 'Grocery'),
+    'Deleted group should be gone',
+  );
+});
+
+Then(
+  'every category that belonged to it should still exist and belong to no group',
+  function (this: CategoriesWorld) {
+    for (const id of this.subjectCategoryIds) {
+      const cat = this.categories.find((c) => c.id === id);
+      assert.ok(cat, 'Category should not have been deleted');
+      assert.equal(cat.groupIds.length, 0, `${cat.name} should belong to no group`);
+    }
+  },
+);
+
+Then('the empty group should still be listed', function (this: CategoriesWorld) {
+  const group = this.groups.find((g) => g.name === 'Furniture');
+  assert.ok(group, 'Empty group should still be listed');
+  assert.equal(membersOf(this, group.id).length, 0);
+});
+
+Then('they should see the newly created group', function (this: CategoriesWorld) {
+  assert.ok(this.lastCreatedGroup, 'Expected a group to have been created');
+  const created = this.lastCreatedGroup;
+  assert.ok(
+    this.groups.some((g) => g.id === created.id),
+    'Shared groups stream to every account member',
+  );
 });

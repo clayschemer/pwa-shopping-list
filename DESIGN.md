@@ -370,6 +370,33 @@ Inline error on name conflict. Save button disabled when conflict exists.
 ### Delete Category
 Confirm dialog shown. Copy warns user that items in this category will become uncategorised and will not be removed from the list. [Cancel] [Delete] (Delete styled as destructive).
 
+### Category Groups (Categories screen)
+
+Groups exist to make shop setup bearable. Adding a shop attaches every category to it, so a new furniture shop arrives carrying forty grocery categories. A group — "Grocery", "Furniture" — is how the irrelevant ones come off in one action.
+
+Groups are **not** a second layer of organisation. They carry no ordering, never appear in plan or shop mode, and the categories list stays flat and in its configured order whether or not groups exist.
+
+**Chip row.** Below the "Order for" selector, a horizontally scrolling row of chips — one per group, ordered by name — plus a dashed "+ Group" chip at the end. Tapping a group chip opens the group sheet; tapping "+ Group" opens it in create mode. The row scrolls on its own; the page never scrolls sideways.
+
+**Group sheet.** Name field with inline conflict error, then an "Available in shops" checkbox list, then [Cancel] [Save] and a destructive "Delete group".
+
+The checkboxes are **tri-state**, because a group's categories can be individually excluded from a shop:
+- checked — every category in the group is available at that shop
+- indeterminate — only some are
+- unchecked — none are
+
+Tapping an indeterminate *or* unchecked box makes the whole group available; tapping a checked box removes the whole group. A box left indeterminate changes nothing. A group with no categories shows a hint in place of the list rather than inert controls.
+
+**Selection mode.** A "Select" text button sits beside the "Order for" selector. In selection mode each row swaps its drag handle for a checkbox, tapping a row toggles selection instead of opening the edit sheet, reordering is disabled, and the FAB is hidden. A bar shows "N selected" with [Select all] [Add to group…] [Remove from group…]. Select all matters — the common case is putting forty of forty-five categories into one group.
+
+Long-press is deliberately *not* the entry point: it collides with drag initiation on touch.
+
+**Row caption.** A category belonging to one or more groups shows their names as a caption under its name. Without it, bulk assignment is invisible and unverifiable. The separator is a translated string, not a hard-coded comma.
+
+**Deleting a group** detaches it from its categories; it never deletes categories, and it does not change what is available at any shop. The confirm dialog says so explicitly.
+
+**Overlap is last-action-wins.** A category can belong to several groups — cleaning products belong in both a supermarket and a furniture shop. Making one group available and then another unavailable leaves a shared category unavailable. Groups are bulk shortcuts, not rules that get re-evaluated.
+
 ---
 
 ## Auth (Screen 6)

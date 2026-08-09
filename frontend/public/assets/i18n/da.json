@@ -40,7 +40,17 @@
     "orderForGlobal": "Global",
     "addCategory": "Tilføj kategori",
     "dragHandle": "Træk for at ændre rækkefølgen på {{name}}",
-    "empty": "Ingen kategorier endnu. Tryk på + for at oprette en."
+    "empty": "Ingen kategorier endnu. Tryk på + for at oprette en.",
+    "select": "Vælg",
+    "cancelSelection": "Annuller",
+    "selectAll": "Vælg alle",
+    "nSelected": "{{count}} valgt",
+    "addToGroup": "Føj til gruppe …",
+    "removeFromGroup": "Fjern fra gruppe …",
+    "newGroup": "+ Gruppe",
+    "editGroup": "Rediger gruppen {{name}}",
+    "inGroups": "I {{groups}}",
+    "groupSeparator": ", "
   },
   "categoryEditSheet": {
     "createTitle": "Tilføj kategori",
@@ -56,6 +66,31 @@
     "cancel": "Annuller",
     "save": "Gem",
     "delete": "Slet kategori"
+  },
+  "deleteCategoryGroup": {
+    "title": "Slet gruppen?",
+    "message": "Kategorierne i \"{{name}}\" mister deres gruppe. De bliver ikke slettet.",
+    "cancel": "Annuller",
+    "delete": "Slet"
+  },
+  "groupPickerSheet": {
+    "addTitle": "Føj til gruppe",
+    "removeTitle": "Fjern fra gruppe",
+    "empty": "Ingen grupper endnu. Opret en med + Gruppe.",
+    "cancel": "Annuller"
+  },
+  "categoryGroupEditSheet": {
+    "createTitle": "Ny gruppe",
+    "editTitle": "Rediger gruppe",
+    "name": "Navn",
+    "nameConflict": "Der findes allerede en gruppe med dette navn",
+    "availableInShops": "Tilgængelig i butikker",
+    "noShops": "Ingen butikker endnu.",
+    "noMembers": "Denne gruppe har ingen kategorier endnu. Vælg kategorier, og føj dem til gruppen.",
+    "memberCount": "{{count}} kategorier i denne gruppe",
+    "cancel": "Annuller",
+    "save": "Gem",
+    "delete": "Slet gruppe"
   },
   "stores": {
     "title": "Butikker",

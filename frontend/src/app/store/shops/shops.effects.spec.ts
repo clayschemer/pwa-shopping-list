@@ -11,11 +11,11 @@ import type { Shop } from '../../models/shop.model';
 import type { AccountId, CategoryId, ShopId } from '../../models/ids.model';
 
 const mockShops: Shop[] = [
-  { id: 's1' as ShopId, accountId: 'a1' as AccountId, name: 'Tesco', categoryOrder: [] },
-  { id: 's2' as ShopId, accountId: 'a1' as AccountId, name: 'Lidl', categoryOrder: [] },
+  { id: 's1' as ShopId, accountId: 'a1' as AccountId, name: 'Tesco', categoryOrder: [], priceSearchUrl: null },
+  { id: 's2' as ShopId, accountId: 'a1' as AccountId, name: 'Lidl', categoryOrder: [], priceSearchUrl: null },
 ];
 
-const mockAccount = { id: 'a1' as AccountId, name: 'Test', aiConfig: null };
+const mockAccount = { id: 'a1' as AccountId, name: 'Test', shopOrder: [], aiConfig: null };
 
 describe('ShopsEffects', () => {
   let effects: ShopsEffects;
@@ -26,6 +26,8 @@ describe('ShopsEffects', () => {
     renameShop: ReturnType<typeof vi.fn>;
     deleteShop: ReturnType<typeof vi.fn>;
     setShopCategoryOrder: ReturnType<typeof vi.fn>;
+    setShopPriceUrl: ReturnType<typeof vi.fn>;
+    setShopOrder: ReturnType<typeof vi.fn>;
   };
 
   beforeEach(() => {
@@ -36,6 +38,8 @@ describe('ShopsEffects', () => {
       renameShop: vi.fn(),
       deleteShop: vi.fn(),
       setShopCategoryOrder: vi.fn(),
+      setShopPriceUrl: vi.fn(),
+      setShopOrder: vi.fn(),
     };
 
     TestBed.configureTestingModule({
@@ -104,6 +108,7 @@ describe('ShopsEffects', () => {
         accountId: 'a1' as AccountId,
         name: 'Aldi',
         categoryOrder: [],
+        priceSearchUrl: null,
       };
       shopApi.addShop.mockResolvedValue(newShop);
 
@@ -186,6 +191,184 @@ describe('ShopsEffects', () => {
           resolve();
         });
       });
+    });
+  });
+
+  describe('failure resilience', () => {
+    const flush = () => new Promise<void>((r) => setTimeout(r));
+
+    it('setShopCategoryOrder$ dispatches shopSaveFailed and survives a rejected call', async () => {
+      shopApi.setShopCategoryOrder
+        .mockRejectedValueOnce(new Error('client is offline'))
+        .mockResolvedValueOnce(undefined);
+      const results: unknown[] = [];
+      let errored = false;
+      effects.setShopCategoryOrder$.subscribe({
+        next: (a) => results.push(a),
+        error: () => (errored = true),
+      });
+      const req = shopsApiActions.setShopCategoryOrderRequested({
+        shopId: 's1' as ShopId,
+        orderedIds: ['c2', 'c1'] as CategoryId[],
+      });
+
+      actions$.next(req);
+      await flush();
+      expect(errored).toBe(false);
+      expect(results).toEqual([
+        shopsActions.shopSaveFailed({ id: 's1' as ShopId }),
+      ]);
+
+      actions$.next(req);
+      await flush();
+      expect((results[1] as { type: string }).type).toContain(
+        'Shop Category Order Set',
+      );
+    });
+
+    it('addShop$ dispatches shopSaveFailed and survives a rejected call', async () => {
+      shopApi.addShop
+        .mockRejectedValueOnce(new Error('client is offline'))
+        .mockResolvedValueOnce(mockShops[0]);
+      const results: unknown[] = [];
+      let errored = false;
+      effects.addShop$.subscribe({
+        next: (a) => results.push(a),
+        error: () => (errored = true),
+      });
+      const req = shopsApiActions.addShopRequested({ name: 'Aldi' });
+
+      actions$.next(req);
+      await flush();
+      expect(errored).toBe(false);
+      expect(results).toEqual([shopsActions.shopSaveFailed({ id: null })]);
+
+      actions$.next(req);
+      await flush();
+      expect((results[1] as { type: string }).type).toContain('Shop Added');
+    });
+
+    it('renameShop$ dispatches shopSaveFailed and survives a rejected call', async () => {
+      shopApi.renameShop
+        .mockRejectedValueOnce(new Error('client is offline'))
+        .mockResolvedValueOnce(undefined);
+      const results: unknown[] = [];
+      let errored = false;
+      effects.renameShop$.subscribe({
+        next: (a) => results.push(a),
+        error: () => (errored = true),
+      });
+      const req = shopsApiActions.renameShopRequested({
+        id: 's1' as ShopId,
+        name: 'Tesco Express',
+      });
+
+      actions$.next(req);
+      await flush();
+      expect(errored).toBe(false);
+      expect(results).toEqual([
+        shopsActions.shopSaveFailed({ id: 's1' as ShopId }),
+      ]);
+
+      actions$.next(req);
+      await flush();
+      expect((results[1] as { type: string }).type).toContain('Shop Renamed');
+    });
+
+    it('deleteShop$ dispatches shopSaveFailed and survives a rejected call', async () => {
+      shopApi.deleteShop
+        .mockRejectedValueOnce(new Error('client is offline'))
+        .mockResolvedValueOnce(undefined);
+      const results: unknown[] = [];
+      let errored = false;
+      effects.deleteShop$.subscribe({
+        next: (a) => results.push(a),
+        error: () => (errored = true),
+      });
+      const req = shopsApiActions.deleteShopRequested({ id: 's1' as ShopId });
+
+      actions$.next(req);
+      await flush();
+      expect(errored).toBe(false);
+      expect(results).toEqual([
+        shopsActions.shopSaveFailed({ id: 's1' as ShopId }),
+      ]);
+
+      actions$.next(req);
+      await flush();
+      expect((results[1] as { type: string }).type).toContain('Shop Deleted');
+    });
+
+    it('setShopPriceUrl$ dispatches shopSaveFailed and survives a rejected call', async () => {
+      shopApi.setShopPriceUrl
+        .mockRejectedValueOnce(new Error('client is offline'))
+        .mockResolvedValueOnce(undefined);
+      const results: unknown[] = [];
+      let errored = false;
+      effects.setShopPriceUrl$.subscribe({
+        next: (a) => results.push(a),
+        error: () => (errored = true),
+      });
+      const req = shopsApiActions.setShopPriceUrlRequested({
+        id: 's1' as ShopId,
+        url: 'https://example.test/?q={query}',
+      });
+
+      actions$.next(req);
+      await flush();
+      expect(errored).toBe(false);
+      expect(results).toEqual([
+        shopsActions.shopSaveFailed({ id: 's1' as ShopId }),
+      ]);
+
+      actions$.next(req);
+      await flush();
+      expect((results[1] as { type: string }).type).toContain('Shop Price Url Set');
+    });
+
+    it('setShopOrder$ dispatches shopSaveFailed and survives a rejected call', async () => {
+      shopApi.setShopOrder
+        .mockRejectedValueOnce(new Error('client is offline'))
+        .mockResolvedValueOnce(undefined);
+      const results: unknown[] = [];
+      let errored = false;
+      effects.setShopOrder$.subscribe({
+        next: (a) => results.push(a),
+        error: () => (errored = true),
+      });
+      const req = shopsApiActions.setShopOrderRequested({
+        orderedIds: ['s2', 's1'] as ShopId[],
+      });
+
+      actions$.next(req);
+      await flush();
+      expect(errored).toBe(false);
+      expect(results).toEqual([shopsActions.shopSaveFailed({ id: null })]);
+
+      actions$.next(req);
+      await flush();
+      expect((results[1] as { type: string }).type).toContain('Shop Order Updated');
+    });
+
+    // The list skeleton is gated on every slice reporting loaded. A rejected
+    // initial fetch must still mark the slice loaded (with no shops) or the
+    // whole list hangs on a skeleton for the rest of the session.
+    it('fetchAllShops$ fails open to an empty shopsLoaded', async () => {
+      shopApi.fetchAllShops.mockRejectedValueOnce(new Error('client is offline'));
+      const results: unknown[] = [];
+      let errored = false;
+      effects.fetchAllShops$.subscribe({
+        next: (a) => results.push(a),
+        error: () => (errored = true),
+      });
+
+      actions$.next(
+        accountActions.accountLoaded({ account: mockAccount, selectedShopId: null }),
+      );
+      await flush();
+
+      expect(errored).toBe(false);
+      expect(results).toEqual([shopsActions.shopsLoaded({ shops: [] })]);
     });
   });
 });

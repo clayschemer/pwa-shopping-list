@@ -14,6 +14,7 @@ const cat = (id: string, name: string, order: number): Category => ({
   name,
   color: null,
   globalSortOrder: order,
+  groupIds: [],
 });
 
 const shop = (id: string, name: string, categoryOrder: string[]): Shop => ({
@@ -21,6 +22,7 @@ const shop = (id: string, name: string, categoryOrder: string[]): Shop => ({
   accountId: 'a1' as AccountId,
   name,
   categoryOrder: categoryOrder as CategoryId[],
+  priceSearchUrl: null,
 });
 
 describe('selectOrderedCategories', () => {

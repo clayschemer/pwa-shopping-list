@@ -244,7 +244,9 @@ AiConfig      { provider, apiKeyRef, priceLookupShopOrder: ShopId[], autoAddEnab
 User          { id, accountId, email, displayName }
 Shop          { id, accountId, name, categoryOrder: CategoryId[],
                 priceSearchUrl: string | null }
-Category      { id, accountId, name, color, globalSortOrder }
+Category      { id, accountId, name, color, globalSortOrder,
+                groupIds: CategoryGroupId[] }
+CategoryGroup { id, accountId, name }
 Item          { id, accountId, name, description, quantity, unit,
                 primaryCategoryId, secondaryCategoryIds,
                 removed, removedAt, addedBy, aiMotivation,
@@ -267,7 +269,7 @@ SessionCheckedItem { itemId, checkedBy, checkedAt,
 - **First-write-wins on concurrent checks.** Slower write receives `CheckConflictError`. UI shows inline message; item's updated state arrives via `itemChanges$`.
 - **Session log is source of truth** for purchase history and totals. Price, qty, unit snapshotted at check time.
 - **One active session per shop per account.** Users at the same shop share a session via start-or-join semantics. Users at different shops have independent sessions.
-- **Undo on check has two layers.** 4-second pending window is client-side only (visible only to the checking user). Committed undo history (`session.checkedItems`) is shared — any participant can undo any check.
+- **Undo on check has two layers.** 2-second pending window is client-side only (visible only to the checking user). Committed undo history (`session.checkedItems`) is shared — any participant can undo any check.
 - **Single price field on Item (Option B).** Last writer wins (user or price pipeline). `priceShopId` records which shop's price is stored — enables the UI to show a staleness hint when the active session shop differs. Full per-shop price map deferred. Staleness by `priceUpdatedAt` alone.
 - **`sizePerPiece` (quantity + unit) bridges `pcs` ↔ mass/volume.** Needed for items listed by piece but shelf-priced by weight (lime, banana, egg, bread, milk carton) and the reverse. Pipeline pre-fills via Gemma; user edits stick (pipeline never overwrites once non-null — clear both fields to let it re-estimate). Without it, mismatched-dimension prices render as approximate (`≈ shelf price / unit`) and drop out of category totals rather than fabricating bogus multiplications.
 - **`description` is passed to the price pipeline LLM** as shopper context. Notes like "inte Arla" or "ekologisk" influence which search result Gemma selects.
@@ -276,6 +278,7 @@ SessionCheckedItem { itemId, checkedBy, checkedAt,
 - **AI gated by `AiConfig`.** Service layer enforces the gate — components never check this directly.
 - **`purchaseCount` incremented on session close** for all items in `checkedItems`. Drives autocomplete ranking.
 - **Category order per-shop with global fallback.** Drawer reorder → `setShopCategoryOrder`. Global order → `setGlobalCategoryOrder`.
+- **Category groups are bulk shortcuts for shop setup, nothing more.** `addShop` attaches every category to the new shop; a group ("Grocery", "Furniture") is how the irrelevant ones come off in one action. Membership is many-to-many on `Category.groupIds`. Groups carry **no ordering**, appear nowhere in plan or shop mode, and no selector consults them. Making a group available/unavailable at a shop resolves its members and issues one `setShopCategoryOrder` per shop — where two groups share a category, **last action wins**; there is no resolution rule. Assignment is via a selection mode on `/categories` (Select → Select all → Add/Remove group), batched into one `arrayUnion`/`arrayRemove` write. Deleting a group detaches it from members; it never deletes categories.
 - **Nav drawer "Add category"** → `addCategory` API call. Backend auto-appends to all shops' `categoryOrder`.
 - **Nav drawer reorder** → single `setShopCategoryOrder` write on drag release, not on every move.
 - **Settings in `localStorage`**, not backend. Except AI auto-add which is account-level (`toggleAiAutoAdd`).
@@ -354,7 +357,8 @@ Built (test-first, behind the API service layer):
 - Items: store + plan-mode list, add-pill flow, edit sheet, remove confirm dialog
 - Shops: store + Manage Shops screen with add / rename / delete sheets + price search URL sheet (link icon per row opens bottom sheet to set or clear `priceSearchUrl`; empty on save = null)
 - Categories: store + plan-mode header ⋯ menu (rename / available-in-shops / delete), nav-drawer drag reorder dispatches `setShopCategoryOrder` per shop or `setGlobalCategoryOrder` when "Global" is selected, add-category sheet from drawer
-- Sessions + shop mode: session API + store, auto-start on shop select, shop-mode list with grouped Est. and session totals, 4 s client-side undo window, undo-history sheet, close-session dialog, 30-min inactivity reminder dialog (close session or keep shopping)
+- Category groups: `categoryGroups` subcollection + store slice; group chip row on `/categories` opens a group sheet (rename / tri-state available-in-shops / delete); selection mode on the same route bulk-adds and bulk-removes the selection to/from a group in one batched write
+- Sessions + shop mode: session API + store, auto-start on shop select, shop-mode list with grouped Est. and session totals, 2 s client-side undo window, undo-history sheet, close-session dialog, 30-min inactivity reminder dialog (close session or keep shopping)
 - Session history: `/history` route loads completed sessions via `fetchSessionHistory`, expansion panels show shop, completed-at, total, and per-item snapshots
 - PWA shell: `@angular/service-worker` with `ngsw-config.json`, `manifest.webmanifest`, default icon set under `frontend/public/icons/`, hosting headers configured for SW + manifest in `backend/firebase/firebase.json`
 

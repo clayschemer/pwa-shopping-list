@@ -26,12 +26,93 @@
   }
 
   &__subbar {
+    display: flex;
+    align-items: center;
+    gap: var(--app-spacing-xs);
     padding: var(--app-spacing-sm) var(--app-spacing-md) var(--app-spacing-xs);
     background: var(--mat-sys-surface);
   }
 
   &__layout-field {
-    width: 100%;
+    flex: 1;
+    min-width: 0;
+  }
+
+  &__select-btn {
+    flex-shrink: 0;
+  }
+
+  &__chips {
+    display: flex;
+    align-items: center;
+    gap: var(--app-spacing-xs);
+    padding: 0 var(--app-spacing-md) var(--app-spacing-sm);
+    // Many groups must scroll the chip row, never the page.
+    overflow-x: auto;
+    scrollbar-width: none;
+
+    &::-webkit-scrollbar {
+      display: none;
+    }
+  }
+
+  &__chip {
+    all: unset;
+    box-sizing: border-box;
+    flex-shrink: 0;
+    cursor: pointer;
+    padding: var(--app-spacing-xxs) var(--app-spacing-sm);
+    border: 1px solid var(--mat-sys-outline-variant);
+    border-radius: var(--app-shape-pill);
+    background: var(--mat-sys-surface-container);
+    color: var(--mat-sys-on-surface);
+    font-size: var(--app-font-label);
+    line-height: var(--app-line-height-label);
+
+    @media (prefers-reduced-motion: no-preference) {
+      transition: background-color var(--app-duration-quick) var(--app-easing-standard);
+    }
+
+    &:hover {
+      background: var(--mat-sys-surface-container-highest);
+    }
+
+    &:focus-visible {
+      @include focus.ring;
+    }
+
+    &--add {
+      background: transparent;
+      border-style: dashed;
+      color: var(--mat-sys-primary);
+    }
+  }
+
+  &__selection-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: var(--app-spacing-xxs);
+    padding: var(--app-spacing-xxs) var(--app-spacing-md);
+    background: var(--mat-sys-surface-container);
+    border-block: 1px solid var(--mat-sys-outline-variant);
+    position: sticky;
+    top: 0;
+    z-index: 1;
+  }
+
+  &__selection-count {
+    font-size: var(--app-font-label);
+    font-weight: 600;
+    color: var(--mat-sys-on-surface);
+  }
+
+  &__selection-actions {
+    display: flex;
+    align-items: center;
+    gap: var(--app-spacing-xxs);
+    flex-wrap: wrap;
   }
 
   &__list {
@@ -57,6 +138,41 @@
     &:hover {
       background: var(--mat-sys-surface-container);
     }
+
+    &--selecting {
+      // No chevron column while selecting — the row is a toggle, not a link.
+      grid-template-columns: 2.5rem 1fr;
+    }
+
+    &--selected {
+      background: var(--mat-sys-secondary-container);
+
+      &:hover {
+        background: var(--mat-sys-secondary-container);
+      }
+    }
+  }
+
+  &__row-check {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.5rem;
+  }
+
+  &__row-text {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+  }
+
+  &__row-groups {
+    font-size: var(--app-font-caption);
+    line-height: var(--app-line-height-label);
+    color: var(--mat-sys-on-surface-variant);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 
   &__handle {

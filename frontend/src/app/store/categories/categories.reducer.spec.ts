@@ -1,15 +1,23 @@
 import { describe, it, expect } from 'vitest';
 import { categoriesReducer, initialCategoriesState } from './categories.reducer';
 import { categoriesActions } from './categories.actions';
+import { categoryGroupsActions } from '../category-groups/category-groups.actions';
 import type { Category } from '../../models/category.model';
-import type { AccountId, CategoryId } from '../../models/ids.model';
+import type { AccountId, CategoryGroupId, CategoryId } from '../../models/ids.model';
 
-const cat = (id: string, name: string, order: number, color: string | null = null): Category => ({
+const cat = (
+  id: string,
+  name: string,
+  order: number,
+  color: string | null = null,
+  groupIds: CategoryGroupId[] = [],
+): Category => ({
   id: id as CategoryId,
   accountId: 'a1' as AccountId,
   name,
   color,
   globalSortOrder: order,
+  groupIds,
 });
 
 describe('categoriesReducer', () => {
@@ -153,5 +161,75 @@ describe('categoriesReducer', () => {
       }),
     );
     expect(state.ids).toEqual(['c2']);
+  });
+
+  describe('group membership', () => {
+    const g1 = 'g1' as CategoryGroupId;
+    const g2 = 'g2' as CategoryGroupId;
+    const seeded = () =>
+      categoriesReducer(
+        initialCategoriesState,
+        categoriesActions.categoriesLoaded({
+          categories: [cat('c1', 'Produce', 0), cat('c2', 'Dairy', 1, null, [g1])],
+        }),
+      );
+
+    it('adds every selected category to the group in one action', () => {
+      const state = categoriesReducer(
+        seeded(),
+        categoriesActions.categoriesAddedToGroup({
+          ids: ['c1' as CategoryId, 'c2' as CategoryId],
+          groupId: g1,
+        }),
+      );
+      expect(state.entities['c1']!.groupIds).toEqual([g1]);
+      // Already a member — must not be duplicated.
+      expect(state.entities['c2']!.groupIds).toEqual([g1]);
+    });
+
+    it('keeps other group memberships when adding', () => {
+      const state = categoriesReducer(
+        seeded(),
+        categoriesActions.categoriesAddedToGroup({
+          ids: ['c2' as CategoryId],
+          groupId: g2,
+        }),
+      );
+      expect(state.entities['c2']!.groupIds).toEqual([g1, g2]);
+    });
+
+    it('removes every selected category from the group in one action', () => {
+      const state = categoriesReducer(
+        seeded(),
+        categoriesActions.categoriesRemovedFromGroup({
+          ids: ['c1' as CategoryId, 'c2' as CategoryId],
+          groupId: g1,
+        }),
+      );
+      expect(state.entities['c1']!.groupIds).toEqual([]);
+      expect(state.entities['c2']!.groupIds).toEqual([]);
+    });
+
+    it('ignores ids that are not in the store', () => {
+      const state = categoriesReducer(
+        seeded(),
+        categoriesActions.categoriesAddedToGroup({
+          ids: ['missing' as CategoryId],
+          groupId: g1,
+        }),
+      );
+      expect(state.ids).toEqual(['c1', 'c2']);
+    });
+
+    // Deleting a group detaches it from its members server-side too, but the
+    // categories slice must not wait for that stream to land or the UI shows a
+    // caption for a group that no longer exists.
+    it('detaches a deleted group from every member', () => {
+      const state = categoriesReducer(
+        seeded(),
+        categoryGroupsActions.categoryGroupDeleted({ id: g1 }),
+      );
+      expect(state.entities['c2']!.groupIds).toEqual([]);
+    });
   });
 });

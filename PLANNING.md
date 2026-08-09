@@ -167,6 +167,10 @@ Shop
 Category
   - id, accountId, name
   - globalSortOrder: number
+  - groupIds: CategoryGroupId[]      ← many-to-many; no effect on ordering
+
+CategoryGroup
+  - id, accountId, name
 
 Item
   - id, accountId, name
@@ -450,6 +454,24 @@ Feature: Category Management
     Then the new category should be automatically associated with all existing shops
     And it should be explicitly excluded from a shop if not relevant to it
 ```
+
+---
+
+### Feature: Category Groups
+
+Groups exist for one job: shop setup. `addShop` attaches every category to the new shop, and a group is how the irrelevant ones come off in one action. They carry no ordering, appear nowhere in plan or shop mode, and no selector consults them.
+
+Membership is many-to-many on `Category.groupIds` — a category relevant to several kinds of shop (cleaning products, lightbulbs) belongs to several groups. Groups are imperative bulk shortcuts, not declarative rules: where two groups share a category, the last action wins and nothing is re-evaluated.
+
+Full scenarios live in `frontend/tests/acceptance/features/categories/category-groups.feature` (14 scenarios, all implemented). Behaviour pinned there:
+
+- Create, rename (membership survives), and delete a group — deleting detaches members, never deletes categories
+- Names unique within the account; empty groups are retained
+- Bulk add and bulk remove of a selection, in a single action
+- A category can belong to several groups
+- **Group membership does not affect the order categories are listed in** — a guard scenario, since an earlier draft of this feature had groups drive ordering
+- Make a whole group available / unavailable at a shop; partial availability is reported as such
+- Making one group unavailable removes a category held by another group too (last-action-wins, asserted deliberately)
 
 ---
 

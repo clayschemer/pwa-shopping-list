@@ -40,7 +40,17 @@
     "orderForGlobal": "Global",
     "addCategory": "Ajouter une catégorie",
     "dragHandle": "Glisser pour réorganiser {{name}}",
-    "empty": "Aucune catégorie pour le moment. Appuyez sur + pour en créer une."
+    "empty": "Aucune catégorie pour le moment. Appuyez sur + pour en créer une.",
+    "select": "Sélectionner",
+    "cancelSelection": "Annuler",
+    "selectAll": "Tout sélectionner",
+    "nSelected": "{{count}} sélectionnées",
+    "addToGroup": "Ajouter au groupe …",
+    "removeFromGroup": "Retirer du groupe …",
+    "newGroup": "+ Groupe",
+    "editGroup": "Modifier le groupe {{name}}",
+    "inGroups": "Dans {{groups}}",
+    "groupSeparator": ", "
   },
   "categoryEditSheet": {
     "createTitle": "Ajouter une catégorie",
@@ -56,6 +66,31 @@
     "cancel": "Annuler",
     "save": "Enregistrer",
     "delete": "Supprimer la catégorie"
+  },
+  "deleteCategoryGroup": {
+    "title": "Supprimer le groupe ?",
+    "message": "Les catégories de \"{{name}}\" n'appartiendront plus à aucun groupe. Elles ne seront pas supprimées.",
+    "cancel": "Annuler",
+    "delete": "Supprimer"
+  },
+  "groupPickerSheet": {
+    "addTitle": "Ajouter au groupe",
+    "removeTitle": "Retirer du groupe",
+    "empty": "Aucun groupe pour l'instant. Créez-en un avec + Groupe.",
+    "cancel": "Annuler"
+  },
+  "categoryGroupEditSheet": {
+    "createTitle": "Ajouter un groupe",
+    "editTitle": "Modifier le groupe",
+    "name": "Nom",
+    "nameConflict": "Un groupe portant ce nom existe déjà",
+    "availableInShops": "Disponible dans les magasins",
+    "noShops": "Aucun magasin pour l'instant.",
+    "noMembers": "Ce groupe n'a encore aucune catégorie. Sélectionnez des catégories et ajoutez-les au groupe.",
+    "memberCount": "{{count}} catégories dans ce groupe",
+    "cancel": "Annuler",
+    "save": "Enregistrer",
+    "delete": "Supprimer le groupe"
   },
   "stores": {
     "title": "Magasins",

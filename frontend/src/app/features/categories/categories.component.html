@@ -24,26 +24,96 @@
         }
       </mat-select>
     </mat-form-field>
+
+    <button
+      mat-button
+      class="app-categories__select-btn"
+      (click)="toggleSelectionMode()"
+    >
+      {{ (selecting() ? 'categories.cancelSelection' : 'categories.select') | transloco }}
+    </button>
   </div>
+
+  <div class="app-categories__chips" role="list">
+    @for (group of groups(); track group.id) {
+      <button
+        type="button"
+        role="listitem"
+        class="app-categories__chip"
+        [attr.aria-label]="'categories.editGroup' | transloco: { name: group.name }"
+        (click)="openGroupEdit(group)"
+      >
+        {{ group.name }}
+      </button>
+    }
+    <button
+      type="button"
+      class="app-categories__chip app-categories__chip--add"
+      (click)="openGroupCreate()"
+    >
+      {{ 'categories.newGroup' | transloco }}
+    </button>
+  </div>
+
+  @if (selecting()) {
+    <div class="app-categories__selection-bar">
+      <span class="app-categories__selection-count">
+        {{ 'categories.nSelected' | transloco: { count: selectedCount() } }}
+      </span>
+      <div class="app-categories__selection-actions">
+        <button mat-button (click)="selectAll()">
+          {{ 'categories.selectAll' | transloco }}
+        </button>
+        <button
+          mat-button
+          [disabled]="selectedCount() === 0"
+          (click)="openBulkAddToGroup()"
+        >
+          {{ 'categories.addToGroup' | transloco }}
+        </button>
+        <button
+          mat-button
+          [disabled]="selectedCount() === 0"
+          (click)="openBulkRemoveFromGroup()"
+        >
+          {{ 'categories.removeFromGroup' | transloco }}
+        </button>
+      </div>
+    </div>
+  }
 
   <div
     cdkDropList
     class="app-categories__list"
+    [cdkDropListDisabled]="selecting()"
     (cdkDropListDropped)="onCategoryDrop($event)"
   >
     @for (category of orderedCategories(); track category.id) {
-      <div cdkDrag class="app-categories__row">
-        <mat-icon
-          cdkDragHandle
-          class="app-categories__handle"
-          [attr.aria-label]="'categories.dragHandle' | transloco: { name: category.name }"
-        >
-          drag_indicator
-        </mat-icon>
+      <div
+        cdkDrag
+        class="app-categories__row"
+        [class.app-categories__row--selected]="isSelected(category.id)"
+        [class.app-categories__row--selecting]="selecting()"
+      >
+        @if (selecting()) {
+          <mat-checkbox
+            class="app-categories__row-check"
+            [checked]="isSelected(category.id)"
+            (change)="toggleSelected(category.id)"
+          ></mat-checkbox>
+        } @else {
+          <mat-icon
+            cdkDragHandle
+            class="app-categories__handle"
+            [attr.aria-label]="'categories.dragHandle' | transloco: { name: category.name }"
+          >
+            drag_indicator
+          </mat-icon>
+        }
         <button
           class="app-categories__row-main"
           type="button"
-          (click)="openEdit(category)"
+          (click)="onRowClick(category)"
         >
           @if (category.color) {
             <span
@@ -51,23 +121,34 @@
               [style.background-color]="category.color"
             ></span>
           }
-          <span class="app-categories__row-name">{{ category.name }}</span>
+          <span class="app-categories__row-text">
+            <span class="app-categories__row-name">{{ category.name }}</span>
+            @if (groupNamesFor(category)) {
+              <span class="app-categories__row-groups">
+                {{ 'categories.inGroups' | transloco: { groups: groupNamesFor(category) } }}
+              </span>
+            }
+          </span>
         </button>
-        <mat-icon class="app-categories__row-chevron" aria-hidden="true">
-          chevron_right
-        </mat-icon>
+        @if (!selecting()) {
+          <mat-icon class="app-categories__row-chevron" aria-hidden="true">
+            chevron_right
+          </mat-icon>
+        }
       </div>
     } @empty {
       <p class="app-categories__empty">{{ 'categories.empty' | transloco }}</p>
     }
   </div>
 
-  <button
-    mat-fab
-    class="app-categories__fab"
-    [attr.aria-label]="'categories.addCategory' | transloco"
-    (click)="openCreate()"
-  >
-    <mat-icon>add</mat-icon>
-  </button>
+  @if (!selecting()) {
+    <button
+      mat-fab
+      class="app-categories__fab"
+      [attr.aria-label]="'categories.addCategory' | transloco"
+      (click)="openCreate()"
+    >
+      <mat-icon>add</mat-icon>
+    </button>
+  }
 </div>

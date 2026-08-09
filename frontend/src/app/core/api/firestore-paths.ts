@@ -32,6 +32,14 @@ export const paths = {
     return doc(db, 'accounts', accountId, 'categories', id);
   },
 
+  categoryGroups(db: Firestore, accountId: AccountId): CollectionReference {
+    return collection(db, 'accounts', accountId, 'categoryGroups');
+  },
+
+  categoryGroupDoc(db: Firestore, accountId: AccountId, id: string): DocumentReference {
+    return doc(db, 'accounts', accountId, 'categoryGroups', id);
+  },
+
   shops(db: Firestore, accountId: AccountId): CollectionReference {
     return collection(db, 'accounts', accountId, 'shops');
   },

@@ -40,7 +40,17 @@
     "orderForGlobal": "Global",
     "addCategory": "Add category",
     "dragHandle": "Drag to reorder {{name}}",
-    "empty": "No categories yet. Tap + to create one."
+    "empty": "No categories yet. Tap + to create one.",
+    "select": "Select",
+    "cancelSelection": "Cancel",
+    "selectAll": "Select all",
+    "nSelected": "{{count}} selected",
+    "addToGroup": "Add to group…",
+    "removeFromGroup": "Remove from group…",
+    "newGroup": "+ Group",
+    "editGroup": "Edit group {{name}}",
+    "inGroups": "In {{groups}}",
+    "groupSeparator": ", "
   },
   "categoryEditSheet": {
     "createTitle": "Add category",
@@ -56,6 +66,31 @@
     "cancel": "Cancel",
     "save": "Save",
     "delete": "Delete category"
+  },
+  "deleteCategoryGroup": {
+    "title": "Delete group?",
+    "message": "Categories in \"{{name}}\" will become ungrouped. They will not be deleted.",
+    "cancel": "Cancel",
+    "delete": "Delete"
+  },
+  "groupPickerSheet": {
+    "addTitle": "Add to group",
+    "removeTitle": "Remove from group",
+    "empty": "No groups yet. Create one with + Group.",
+    "cancel": "Cancel"
+  },
+  "categoryGroupEditSheet": {
+    "createTitle": "Add group",
+    "editTitle": "Edit group",
+    "name": "Name",
+    "nameConflict": "A group with this name already exists",
+    "availableInShops": "Available in shops",
+    "noShops": "No shops yet.",
+    "noMembers": "This group has no categories yet. Select categories and add them to the group.",
+    "memberCount": "{{count}} categories in this group",
+    "cancel": "Cancel",
+    "save": "Save",
+    "delete": "Delete group"
   },
   "stores": {
     "title": "Stores",

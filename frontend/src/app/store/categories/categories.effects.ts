@@ -1,6 +1,6 @@
 import { inject, Injectable } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
-import { from, map, switchMap } from 'rxjs';
+import { catchError, from, map, of, switchMap } from 'rxjs';
 import { categoriesActions, categoriesApiActions } from './categories.actions';
 import { accountActions } from '../account/account.actions';
 import { CategoryApiService } from '../../core/api/category-api.service';
@@ -13,12 +13,19 @@ export class CategoriesEffects {
   private readonly actions$ = inject(Actions);
   private readonly categoryApi = inject(CategoryApiService);
 
+  // The initial fetch fails OPEN: `selectListDataLoaded` gates the whole list
+  // on every slice reporting loaded, so a rejected fetch that dispatched a
+  // failure action instead would hang the list on a skeleton for the rest of
+  // the session.
   readonly fetchAllCategories$ = createEffect(() =>
     this.actions$.pipe(
       ofType(accountActions.accountLoaded),
       switchMap(() =>
         from(this.categoryApi.fetchAllCategories()).pipe(
           map((categories) => categoriesActions.categoriesLoaded({ categories })),
+          catchError(() =>
+            of(categoriesActions.categoriesLoaded({ categories: [] })),
+          ),
         ),
       ),
     ),
@@ -43,6 +50,11 @@ export class CategoriesEffects {
     ),
   );
 
+  // Every API-calling effect handles rejection INSIDE the flattening operator:
+  // a rejected promise (offline / flaky in-store connectivity) must dispatch a
+  // failure action, never error the outer stream — an errored effect is
+  // resubscribed at most 10 times by NgRx and then dies silently for the rest
+  // of the session.
   readonly addCategory$ = createEffect(() =>
     this.actions$.pipe(
       ofType(categoriesApiActions.addCategoryRequested),
@@ -54,6 +66,7 @@ export class CategoriesEffects {
             }
             return categoriesActions.categoryAdded({ category: result as Category });
           }),
+          catchError(() => of(categoriesActions.categorySaveFailed({ id: null }))),
         ),
       ),
     ),
@@ -72,6 +85,7 @@ export class CategoriesEffects {
               category: { id, name } as Category,
             });
           }),
+          catchError(() => of(categoriesActions.categorySaveFailed({ id }))),
         ),
       ),
     ),
@@ -83,6 +97,7 @@ export class CategoriesEffects {
       switchMap(({ id }) =>
         from(this.categoryApi.deleteCategory(id)).pipe(
           map(() => categoriesActions.categoryDeleted({ id })),
+          catchError(() => of(categoriesActions.categorySaveFailed({ id }))),
         ),
       ),
     ),
@@ -94,6 +109,33 @@ export class CategoriesEffects {
       switchMap(({ orderedIds }) =>
         from(this.categoryApi.setGlobalCategoryOrder(orderedIds)).pipe(
           map(() => categoriesActions.globalCategoryOrderSet({ orderedIds })),
+          catchError(() => of(categoriesActions.categorySaveFailed({ id: null }))),
+        ),
+      ),
+    ),
+  );
+
+  // Bulk group assignment is one API call for the whole selection, not one per
+  // category — a single writeBatch of arrayUnion/arrayRemove.
+  readonly addCategoriesToGroup$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(categoriesApiActions.addCategoriesToGroupRequested),
+      switchMap(({ ids, groupId }) =>
+        from(this.categoryApi.addCategoriesToGroup(ids, groupId)).pipe(
+          map(() => categoriesActions.categoriesAddedToGroup({ ids, groupId })),
+          catchError(() => of(categoriesActions.categorySaveFailed({ id: null }))),
+        ),
+      ),
+    ),
+  );
+
+  readonly removeCategoriesFromGroup$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(categoriesApiActions.removeCategoriesFromGroupRequested),
+      switchMap(({ ids, groupId }) =>
+        from(this.categoryApi.removeCategoriesFromGroup(ids, groupId)).pipe(
+          map(() => categoriesActions.categoriesRemovedFromGroup({ ids, groupId })),
+          catchError(() => of(categoriesActions.categorySaveFailed({ id: null }))),
         ),
       ),
     ),

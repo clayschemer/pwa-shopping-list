@@ -18,6 +18,8 @@ import { UiEffects } from './store/ui/ui.effects';
 import { UiFeedbackEffects } from './store/ui/ui-feedback.effects';
 import { categoriesReducer } from './store/categories/categories.reducer';
 import { CategoriesEffects } from './store/categories/categories.effects';
+import { categoryGroupsReducer } from './store/category-groups/category-groups.reducer';
+import { CategoryGroupsEffects } from './store/category-groups/category-groups.effects';
 import { shopsReducer } from './store/shops/shops.reducer';
 import { ShopsEffects } from './store/shops/shops.effects';
 import { itemsReducer } from './store/items/items.reducer';
@@ -83,6 +85,7 @@ export const appConfig: ApplicationConfig = {
       account: accountReducer,
       ui: uiReducer,
       categories: categoriesReducer,
+      categoryGroups: categoryGroupsReducer,
       shops: shopsReducer,
       items: itemsReducer,
       sessions: sessionsReducer,
@@ -93,6 +96,7 @@ export const appConfig: ApplicationConfig = {
       UiEffects,
       UiFeedbackEffects,
       CategoriesEffects,
+      CategoryGroupsEffects,
       ShopsEffects,
       ItemsEffects,
       SessionsEffects,

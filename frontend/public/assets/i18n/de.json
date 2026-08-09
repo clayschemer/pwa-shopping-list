@@ -40,7 +40,17 @@
     "orderForGlobal": "Global",
     "addCategory": "Kategorie hinzufügen",
     "dragHandle": "Ziehen, um {{name}} neu anzuordnen",
-    "empty": "Noch keine Kategorien. Tippe auf +, um eine zu erstellen."
+    "empty": "Noch keine Kategorien. Tippe auf +, um eine zu erstellen.",
+    "select": "Auswählen",
+    "cancelSelection": "Abbrechen",
+    "selectAll": "Alle auswählen",
+    "nSelected": "{{count}} ausgewählt",
+    "addToGroup": "Zu Gruppe hinzufügen …",
+    "removeFromGroup": "Aus Gruppe entfernen …",
+    "newGroup": "+ Gruppe",
+    "editGroup": "Gruppe {{name}} bearbeiten",
+    "inGroups": "In {{groups}}",
+    "groupSeparator": ", "
   },
   "categoryEditSheet": {
     "createTitle": "Kategorie hinzufügen",
@@ -56,6 +66,31 @@
     "cancel": "Abbrechen",
     "save": "Speichern",
     "delete": "Kategorie löschen"
+  },
+  "deleteCategoryGroup": {
+    "title": "Gruppe löschen?",
+    "message": "Kategorien in \"{{name}}\" gehören dann zu keiner Gruppe mehr. Sie werden nicht gelöscht.",
+    "cancel": "Abbrechen",
+    "delete": "Löschen"
+  },
+  "groupPickerSheet": {
+    "addTitle": "Zu Gruppe hinzufügen",
+    "removeTitle": "Aus Gruppe entfernen",
+    "empty": "Noch keine Gruppen. Erstelle eine mit + Gruppe.",
+    "cancel": "Abbrechen"
+  },
+  "categoryGroupEditSheet": {
+    "createTitle": "Gruppe hinzufügen",
+    "editTitle": "Gruppe bearbeiten",
+    "name": "Name",
+    "nameConflict": "Eine Gruppe mit diesem Namen existiert bereits",
+    "availableInShops": "Verfügbar in Geschäften",
+    "noShops": "Noch keine Geschäfte.",
+    "noMembers": "Diese Gruppe hat noch keine Kategorien. Wähle Kategorien aus und füge sie der Gruppe hinzu.",
+    "memberCount": "{{count}} Kategorien in dieser Gruppe",
+    "cancel": "Abbrechen",
+    "save": "Speichern",
+    "delete": "Gruppe löschen"
   },
   "stores": {
     "title": "Läden",

@@ -2,7 +2,7 @@ import type { ItemId } from './ids.model';
 
 export interface NameConflictError {
   type: 'NAME_CONFLICT';
-  entityKind: 'item' | 'category' | 'shop';
+  entityKind: 'item' | 'category' | 'categoryGroup' | 'shop';
   name: string;
 }
 
@@ -17,7 +17,7 @@ export interface SessionConflictError {
 
 export interface NotFoundError {
   type: 'NOT_FOUND';
-  entityKind: 'item' | 'category' | 'shop' | 'session';
+  entityKind: 'item' | 'category' | 'categoryGroup' | 'shop' | 'session';
   id: string;
 }
 

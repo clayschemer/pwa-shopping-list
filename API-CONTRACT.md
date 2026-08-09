@@ -51,6 +51,7 @@ AccountId  — brand: 'account'
 UserId     — brand: 'user'
 ShopId     — brand: 'shop'
 CategoryId — brand: 'category'
+CategoryGroupId — brand: 'categoryGroup'
 ItemId     — brand: 'item'
 SessionId  — brand: 'session'
 ```
@@ -62,6 +63,7 @@ type AccountId  = string & { readonly __brand: 'account'  }
 type UserId     = string & { readonly __brand: 'user'      }
 type ShopId     = string & { readonly __brand: 'shop'      }
 type CategoryId = string & { readonly __brand: 'category'  }
+type CategoryGroupId = string & { readonly __brand: 'categoryGroup' }
 type ItemId     = string & { readonly __brand: 'item'      }
 type SessionId  = string & { readonly __brand: 'session'   }
 ```
@@ -129,8 +131,21 @@ Category {
   name:            string
   color:           string | null   // hex color, e.g. '#FF5733'; null = no color
   globalSortOrder: number
+  groupIds:        CategoryGroupId[]  // many-to-many; no effect on ordering
 }
 ```
+
+### CategoryGroup
+
+```
+CategoryGroup {
+  id:        CategoryGroupId
+  accountId: AccountId
+  name:      string          // unique within account
+}
+```
+
+Groups carry no ordering field — clients list them by name.
 
 ### Item
 
@@ -329,6 +344,7 @@ assembles the full entity before emitting.
 ```
 itemChanges$:     Observable<EntityChangeBatch<Item>>
 categoryChanges$: Observable<EntityChangeBatch<Category>>
+categoryGroupChanges$: Observable<EntityChangeBatch<CategoryGroup>>
 shopChanges$:     Observable<EntityChangeBatch<Shop>>
 sessionChanges$:  Observable<EntityChangeBatch<Session>>
 accountChanges$:  Observable<EntityChangeBatch<Account>>
@@ -634,6 +650,7 @@ Intent:  Create a new category.
          existing shops. Explicit exclusion from a shop is a separate operation.
          The new Category arrives via categoryChanges$ as a batch of one.
          All affected Shops arrive via shopChanges$ as a single batch.
+         The new category belongs to no group (groupIds is empty).
 Input:   name:  string
          color: string | null   // optional hex color; null = no color
 Output:  Category
@@ -677,9 +694,83 @@ Output:  void
 Errors:  none
 ```
 
+#### addCategoriesToGroup
+```
+Intent:  Add every listed category to a group, in one atomic write.
+         Categories already in the group are unaffected — membership is a set.
+         Does not change category order, item assignment, or shop availability.
+         All affected Categories arrive via categoryChanges$ as a single batch.
+Input:   ids:     CategoryId[]
+         groupId: CategoryGroupId
+Output:  void
+Errors:  none
+```
+
+#### removeCategoriesFromGroup
+```
+Intent:  Remove every listed category from a group, in one atomic write.
+         Categories not in the group are unaffected. Categories are never deleted,
+         and their other group memberships are untouched.
+         All affected Categories arrive via categoryChanges$ as a single batch.
+Input:   ids:     CategoryId[]
+         groupId: CategoryGroupId
+Output:  void
+Errors:  none
+```
+
 ---
 
-### 5.6 Shops
+### 5.6 Category Groups
+
+Groups exist to make many categories available or unavailable at a shop in one
+action. Making a group available at a shop is not its own operation — the caller
+resolves the group's members and issues a single `setShopCategoryOrder` per shop.
+
+#### fetchAllCategoryGroups
+```
+Intent:  Load every category group for the account, ordered by name.
+         Called once during boot.
+Input:   none
+Output:  CategoryGroup[]
+Errors:  none
+```
+
+#### addCategoryGroup
+```
+Intent:  Create a new, empty category group.
+         The new CategoryGroup arrives via categoryGroupChanges$ as a batch of one.
+Input:   name: string
+Output:  CategoryGroup
+Errors:  NameConflictError
+```
+
+#### renameCategoryGroup
+```
+Intent:  Rename an existing group. Membership is unaffected — it is keyed by id.
+         The updated CategoryGroup arrives via categoryGroupChanges$ as a batch of one.
+Input:   id:   CategoryGroupId
+         name: string
+Output:  CategoryGroup
+Errors:  NotFoundError
+         NameConflictError
+```
+
+#### deleteCategoryGroup
+```
+Intent:  Delete a group and detach it from every category that belonged to it.
+         Categories are never deleted and keep their other group memberships.
+         Shop availability is not changed — categories made available through this
+         group stay available.
+         The deleted CategoryGroup arrives via categoryGroupChanges$ as a batch of one.
+         All affected Categories arrive via categoryChanges$ as a single batch.
+Input:   id: CategoryGroupId
+Output:  void
+Errors:  NotFoundError
+```
+
+---
+
+### 5.7 Shops
 
 #### fetchAllShops
 ```
@@ -752,7 +843,7 @@ Errors:  NotFoundError
 
 ---
 
-### 5.7 Sessions
+### 5.8 Sessions
 
 #### fetchActiveSessions
 ```
@@ -816,7 +907,7 @@ Errors:  NotFoundError
 
 ---
 
-### 5.8 Autocomplete
+### 5.9 Autocomplete
 
 #### fetchAutocompleteItems
 ```
@@ -842,7 +933,7 @@ The full Item entity is not returned here.
 
 ---
 
-### 5.9 AI Operations
+### 5.10 AI Operations
 
 All operations in this domain are no-ops if `Account.aiConfig` is null.
 The service implementation enforces this gate — callers do not need to check.
@@ -895,6 +986,7 @@ sequence through the service layer:
 3. Parallel fetch (Promise.all):
    fetchActiveList()       — seed items into store
    fetchAllCategories()    — seed categories into store
+   fetchAllCategoryGroups() — seed category groups into store
    fetchAllShops()         — seed shops into store
    fetchActiveSessions()   — seed active sessions into store
    fetchAccountUsers()     — seed users into store (for display name/initials resolution)
@@ -902,6 +994,7 @@ sequence through the service layer:
 4. Subscribe to all change Observables:
    itemChanges$
    categoryChanges$
+   categoryGroupChanges$
    shopChanges$
    sessionChanges$
    accountChanges$

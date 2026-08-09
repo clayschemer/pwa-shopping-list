@@ -5,6 +5,9 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { TranslocoService } from '@jsverse/transloco';
 import { itemsActions } from '../items/items.actions';
 import { sessionsActions } from '../sessions/sessions.actions';
+import { categoriesActions } from '../categories/categories.actions';
+import { categoryGroupsActions } from '../category-groups/category-groups.actions';
+import { shopsActions } from '../shops/shops.actions';
 
 const SNACKBAR_DURATION_MS = 6000;
 
@@ -29,6 +32,9 @@ export class UiFeedbackEffects {
           sessionsActions.sessionStartFailed,
           sessionsActions.sessionCloseFailed,
           sessionsActions.sessionDiscardFailed,
+          categoriesActions.categorySaveFailed,
+          categoryGroupsActions.categoryGroupSaveFailed,
+          shopsActions.shopSaveFailed,
         ),
         tap((action) => {
           this.snackBar.open(
