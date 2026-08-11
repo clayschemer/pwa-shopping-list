@@ -106,6 +106,73 @@ describe('computePrice', () => {
     });
   });
 
+  describe('container unit', () => {
+    it('scales a per-package shelf price for a container item', () => {
+      const item = makeItem({
+        price: 25,
+        priceQuantity: 1,
+        priceUnit: 'förp',
+        quantity: 2,
+        unit: 'container',
+      });
+      expect(computePrice(item)).toEqual({ kind: 'exact', total: 50, isGlobalFallback: false });
+    });
+
+    it('normalises package spellings on both sides', () => {
+      const item = makeItem({
+        price: 18,
+        priceQuantity: 1,
+        priceUnit: 'frp',
+        quantity: 3,
+        unit: 'pack',
+      });
+      expect(computePrice(item)).toEqual({ kind: 'exact', total: 54, isGlobalFallback: false });
+    });
+
+    it('does not treat a package price as a per-piece price', () => {
+      const item = makeItem({
+        price: 25,
+        priceQuantity: 1,
+        priceUnit: 'förp',
+        quantity: 6,
+        unit: 'pcs',
+      });
+      expect(computePrice(item)).toEqual({
+        kind: 'approximate',
+        shelfPrice: 25,
+        shelfQuantity: 1,
+        shelfUnit: 'förp',
+        isGlobalFallback: false,
+      });
+    });
+
+    it('bridges a container item to a mass shelf price via sizePerPiece', () => {
+      const item = makeItem({
+        price: 20,
+        priceQuantity: 1,
+        priceUnit: 'kg',
+        quantity: 2,
+        unit: 'container',
+        sizePerPieceQuantity: 500,
+        sizePerPieceUnit: 'g',
+      });
+      expect(computePrice(item)).toEqual({ kind: 'exact', total: 20, isGlobalFallback: false });
+    });
+
+    it('bridges a mass item to a per-container shelf price via sizePerPiece', () => {
+      const item = makeItem({
+        price: 20,
+        priceQuantity: 1,
+        priceUnit: 'container',
+        quantity: 1,
+        unit: 'kg',
+        sizePerPieceQuantity: 500,
+        sizePerPieceUnit: 'g',
+      });
+      expect(computePrice(item)).toEqual({ kind: 'exact', total: 40, isGlobalFallback: false });
+    });
+  });
+
   describe('SI conversion within mass', () => {
     it('scales 500 g shelf price for a 2 kg item', () => {
       const item = makeItem({

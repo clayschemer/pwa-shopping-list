@@ -61,18 +61,18 @@ export function computePrice(item: Item, shopId?: string | null): PriceComputati
     return { kind: 'exact', total: (price / priceQtyBase) * itemQtyBase, isGlobalFallback };
   }
 
-  // sizePerPiece bridges pcs <-> mass/volume.
+  // sizePerPiece bridges pcs/container <-> mass/volume.
   const sppQty = item.sizePerPieceQuantity;
   const sppUnitRaw = item.sizePerPieceUnit;
   const sppUnit = sppUnitRaw ? normaliseUnit(sppUnitRaw) : null;
   const sppInfo = sppUnit ? UNIT_TABLE[sppUnit] : null;
   if (sppQty !== null && sppQty > 0 && sppInfo) {
-    if (itemUnit === 'pcs' && priceInfo && priceInfo.dimension === sppInfo.dimension) {
+    if (PER_PIECE_UNITS.has(itemUnit) && priceInfo && priceInfo.dimension === sppInfo.dimension) {
       const itemInShelfBase = qty * sppQty * sppInfo.toBase;
       const priceQtyBase = priceQty * priceInfo.toBase;
       return { kind: 'exact', total: (price / priceQtyBase) * itemInShelfBase, isGlobalFallback };
     }
-    if (priceUnit === 'pcs' && itemInfo && itemInfo.dimension === sppInfo.dimension) {
+    if (PER_PIECE_UNITS.has(priceUnit) && itemInfo && itemInfo.dimension === sppInfo.dimension) {
       const shelfQtyInItemBase = priceQty * sppQty * sppInfo.toBase;
       const itemQtyBase = qty * itemInfo.toBase;
       return { kind: 'exact', total: (price / shelfQtyInItemBase) * itemQtyBase, isGlobalFallback };
@@ -100,7 +100,7 @@ function approximateOf(
 }
 
 
-type Dimension = 'mass' | 'volume' | 'count';
+type Dimension = 'mass' | 'volume' | 'count' | 'container';
 
 interface UnitInfo {
   dimension: Dimension;
@@ -117,6 +117,9 @@ const UNIT_TABLE: Record<string, UnitInfo> = {
   dl: { dimension: 'volume', toBase: 100 },
   l: { dimension: 'volume', toBase: 1000 },
   pcs: { dimension: 'count', toBase: 1 },
+  // A package is its own dimension: how many pieces it holds is unknown, so a
+  // per-package shelf price must never be scaled by a per-piece quantity.
+  container: { dimension: 'container', toBase: 1 },
 };
 
 const UNIT_ALIASES: Record<string, string> = {
@@ -126,9 +129,14 @@ const UNIT_ALIASES: Record<string, string> = {
   hekto: 'hg', hectogram: 'hg',
   deciliter: 'dl', decilitre: 'dl',
   milliliter: 'ml', millilitre: 'ml',
-  förp: 'pcs', förpackning: 'pcs', pack: 'pcs', paket: 'pcs',
-  st: 'pcs', styck: 'pcs', stycken: 'pcs',
+  förp: 'container', förpackning: 'container', frp: 'container',
+  pack: 'container', packung: 'container', pkg: 'container',
+  paket: 'container', pakke: 'container', paquet: 'container',
+  st: 'pcs', styck: 'pcs', stycken: 'pcs', stk: 'pcs',
 };
+
+/** Units that denote "one whole thing" — sizePerPiece bridges these to mass/volume. */
+const PER_PIECE_UNITS: ReadonlySet<string> = new Set(['pcs', 'container']);
 
 function normaliseUnit(unit: string): string {
   const u = unit.toLowerCase().trim();

@@ -327,19 +327,28 @@
   }
 
   // The undo hint is the affordance it names: tapping it unchecks the item.
-  // Sized to stay a reachable target on a phone held one-handed mid-shop,
-  // where it is the row's primary control during the undo window.
+  // It swaps in for the price during the undo window, so its box must match
+  // what it replaces — any min-height here grows the row the moment an item is
+  // checked. The reachable target on a phone held one-handed mid-shop comes
+  // from an overlay instead, which extends the hit area without taking space.
   &__item-undo {
     all: unset;
+    position: relative;
     cursor: pointer;
     color: var(--mat-sys-primary);
     font-weight: 500;
     white-space: nowrap;
-    display: inline-flex;
-    align-items: center;
-    min-height: var(--app-spacing-row-min-height);
     padding: var(--app-spacing-xxs) var(--app-spacing-xs);
     border-radius: var(--app-shape-xs);
+
+    &::after {
+      content: '';
+      position: absolute;
+      inset-inline: 0;
+      top: 50%;
+      block-size: var(--app-spacing-row-min-height);
+      transform: translateY(-50%);
+    }
 
     &:focus-visible {
       @include focus.ring;

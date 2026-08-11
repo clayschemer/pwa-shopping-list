@@ -141,10 +141,10 @@ Rules:
 2. Apply any notes from the shopper (e.g. brand exclusions, organic preference) when choosing.
 3. If previous user feedback is listed above, pick a DIFFERENT product than those rejected, and apply the reasons given.
 4. Return the price EXACTLY AS LISTED. Do not calculate, divide, or multiply prices.
-5. priceUnit is the physical package unit the price covers — e.g. "kg", "L", "st", "förp", "pack". NEVER use a currency ("kr", "SEK") as priceUnit. If the price covers a single item with no meaningful unit, set priceUnit to "pcs".
-6. priceQuantity is the number of that unit the listed price covers (e.g. 6 if the price is for a 6-pack). If a price covers a single piece or package, set priceQuantity to 1.
+5. priceUnit is the physical unit the price covers — e.g. "kg", "L", "st", "förp". NEVER use a currency ("kr", "SEK") as priceUnit. Distinguish the two count units: use "st" when the price covers ONE LOOSE PIECE sold individually (a single lime, a single banana), and "förp" when the price covers ONE SEALED PACKAGE regardless of how many pieces are inside (a carton of eggs, a bag of crisps, a six-pack of yoghurt). When in doubt for a packaged product, use "förp".
+6. priceQuantity is the number of that unit the listed price covers. It is 1 for a single piece or a single package — a 6-pack sold as one package is priceQuantity 1 with priceUnit "förp", NOT priceQuantity 6. Use a number above 1 only when the listed price genuinely covers several of that unit (e.g. "2 för 49 kr" → priceQuantity 2).
 7. priceUnit and priceQuantity must be set whenever price is set — never null.
-8. sizePerPiece is the typical size of ONE PIECE for items that shoppers usually buy by piece even though the shelf prices them by weight or volume (e.g. lime ≈ 70 g, banana ≈ 120 g, egg ≈ 60 g, loaf of bread ≈ 500 g, carton of milk ≈ 1 L). Set { "quantity": <number>, "unit": "g"|"kg"|"ml"|"cl"|"dl"|"L" }. Use null when the item is not typically sold by piece (rice, oil, pasta), or when you are not confident.
+8. sizePerPiece is the typical size of ONE PIECE OR PACKAGE for items that shoppers usually buy by piece or by package even though the shelf prices them by weight or volume (e.g. lime ≈ 70 g, banana ≈ 120 g, egg ≈ 60 g, loaf of bread ≈ 500 g, carton of milk ≈ 1 L). Set { "quantity": <number>, "unit": "g"|"kg"|"ml"|"cl"|"dl"|"L" }. Use null when the item is not typically sold by piece (rice, oil, pasta), or when you are not confident.
 9. matchedName MUST be the product's name EXACTLY as listed above — copy it verbatim so the system can locate the product.
 
 Return ONLY valid JSON, nothing else:
@@ -174,10 +174,10 @@ ${pageText}
 Find the price for "${itemName}" in this text. The item's category is a strong hint about which product type is correct. Apply any shopper notes when selecting. If previous user feedback is listed above, pick a DIFFERENT product than those rejected and apply the reasons given.
 Prices are in Swedish kronor (kr/SEK). Price formats: "29,90 kr", "29.90", "29:-", "2 för 49 kr".
 Return the price EXACTLY AS LISTED. Do not calculate, divide, or multiply.
-priceUnit is the physical package unit (kg, L, st, förp, pack) — NEVER a currency. Use "pcs" if the price covers a single piece with no meaningful unit.
-priceQuantity is the number of that unit the listed price covers (1 for a single piece or package).
+priceUnit is the physical unit the price covers (kg, L, st, förp) — NEVER a currency. Use "st" when the price covers ONE LOOSE PIECE sold individually, and "förp" when it covers ONE SEALED PACKAGE however many pieces are inside. When in doubt for a packaged product, use "förp".
+priceQuantity is the number of that unit the listed price covers — 1 for a single piece or a single package. A 6-pack sold as one package is priceQuantity 1 with priceUnit "förp", not priceQuantity 6.
 priceUnit and priceQuantity must be set whenever price is set — never null.
-sizePerPiece is the typical size of ONE PIECE for items shoppers usually buy by piece but the shelf prices by weight or volume (e.g. lime ≈ 70 g, egg ≈ 60 g, milk carton ≈ 1 L). Set {"quantity": <number>, "unit": "g"|"kg"|"ml"|"cl"|"dl"|"L"} or null when not applicable.
+sizePerPiece is the typical size of ONE PIECE OR PACKAGE for items shoppers usually buy by piece or package but the shelf prices by weight or volume (e.g. lime ≈ 70 g, egg ≈ 60 g, milk carton ≈ 1 L). Set {"quantity": <number>, "unit": "g"|"kg"|"ml"|"cl"|"dl"|"L"} or null when not applicable.
 
 Return ONLY valid JSON, nothing else:
 {"price": <number or null>, "priceQuantity": <number>, "priceUnit": "<string>", "sizePerPiece": {"quantity": <number>, "unit": "<string>"} | null, "matchedName": "<string>"}

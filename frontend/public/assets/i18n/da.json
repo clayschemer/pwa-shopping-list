@@ -258,6 +258,7 @@
   },
   "units": {
     "pcs": "stk",
+    "container": "pk",
     "g": "g",
     "kg": "kg",
     "mg": "mg",

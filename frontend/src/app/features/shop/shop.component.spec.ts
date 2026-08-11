@@ -1,4 +1,5 @@
 import '../../../testing/init-testbed';
+import { readFileSync } from 'node:fs';
 import { describe, it, expect, vi } from 'vitest';
 import { TestBed } from '@angular/core/testing';
 import { provideMockStore, MockStore } from '@ngrx/store/testing';
@@ -162,5 +163,49 @@ describe('ShopComponent — undo within the check window', () => {
         sessionId: 's-1' as SessionId,
       }),
     );
+  });
+});
+
+/**
+ * Component styles are not compiled into the jsdom test environment, so the
+ * row's height cannot be measured here. These assert the source declarations
+ * that decide it instead: the undo affordance replaces the price inside the
+ * meta row, so anything that makes its box taller than the price button's makes
+ * the row jump the moment an item is checked.
+ */
+describe('ShopComponent — undo hint keeps the row height stable', () => {
+  const scss = readFileSync(
+    'src/app/features/shop/shop.component.scss',
+    'utf8',
+  );
+
+  /** Returns the body of an SCSS rule, nested rules included. */
+  function block(selector: string): string {
+    const start = scss.indexOf(`${selector} {`);
+    expect(start, `${selector} not found in shop.component.scss`).toBeGreaterThan(-1);
+
+    const open = scss.indexOf('{', start);
+    let depth = 0;
+    for (let i = open; i < scss.length; i++) {
+      if (scss[i] === '{') depth++;
+      if (scss[i] === '}' && --depth === 0) return scss.slice(open + 1, i);
+    }
+    throw new Error(`unterminated block for ${selector}`);
+  }
+
+  /** The rule's own declarations, with nested rules stripped out. */
+  function ownDeclarations(selector: string): string {
+    return block(selector).replace(/&[^{]*\{[^}]*\}/gs, '');
+  }
+
+  it('does not reserve vertical space on the undo affordance', () => {
+    expect(ownDeclarations('&__item-undo')).not.toMatch(/(min-)?height:/);
+  });
+
+  it('keeps a full-height tap target via an overlay that costs no layout space', () => {
+    const overlay = block('&__item-undo').match(/&::after \{(.*?)\}/s)?.[1] ?? '';
+
+    expect(overlay).toContain('position: absolute');
+    expect(overlay).toContain('block-size: var(--app-spacing-row-min-height)');
   });
 });
