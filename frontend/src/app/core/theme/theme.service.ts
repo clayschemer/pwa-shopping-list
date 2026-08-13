@@ -1,6 +1,10 @@
 import { Injectable, signal, computed, DOCUMENT, inject, effect } from '@angular/core';
 import { TranslocoService } from '@jsverse/transloco';
 
+/**
+ * Also read by the pre-bootstrap script in `src/index.html`, which applies the
+ * dark/light override before first paint. Keep both in sync.
+ */
 export const SETTINGS_STORAGE_KEY = 'app-settings';
 
 export type Language = 'EN' | 'NO' | 'SV' | 'DE' | 'FR' | 'DA';

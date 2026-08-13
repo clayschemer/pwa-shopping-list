@@ -9,7 +9,6 @@ import { TranslocoService } from '@jsverse/transloco';
 import { MatIconButton } from '@angular/material/button';
 import { MatIcon } from '@angular/material/icon';
 import { MatBadge } from '@angular/material/badge';
-import { MatProgressSpinner } from '@angular/material/progress-spinner';
 import { MatSidenav, MatSidenavContainer, MatSidenavContent } from '@angular/material/sidenav';
 import { MatBottomSheet } from '@angular/material/bottom-sheet';
 import { MatDialog } from '@angular/material/dialog';
@@ -34,6 +33,7 @@ import { sessionsActions, sessionsApiActions } from './store/sessions/sessions.a
 import { itemsApiActions } from './store/items/items.actions';
 import { NavDrawerComponent } from './shell/nav-drawer/nav-drawer.component';
 import { ShopBannerComponent } from './shell/shop-banner/shop-banner.component';
+import { AppShellSkeletonComponent } from './shell/app-shell-skeleton/app-shell-skeleton.component';
 import {
   ShopSelectSheetComponent,
   ShopSelectData,
@@ -86,12 +86,12 @@ const ROUTE_TITLE_KEYS: Record<string, string> = {
     MatIconButton,
     MatIcon,
     MatBadge,
-    MatProgressSpinner,
     MatSidenav,
     MatSidenavContainer,
     MatSidenavContent,
     NavDrawerComponent,
     ShopBannerComponent,
+    AppShellSkeletonComponent,
     TranslocoPipe,
     MoneyPipe,
   ],

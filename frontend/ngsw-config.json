@@ -16,6 +16,22 @@
       }
     },
     {
+      "name": "fonts",
+      "installMode": "prefetch",
+      "updateMode": "prefetch",
+      "resources": {
+        "files": ["/fonts/**"]
+      }
+    },
+    {
+      "name": "i18n",
+      "installMode": "prefetch",
+      "updateMode": "prefetch",
+      "resources": {
+        "files": ["/assets/i18n/*.json"]
+      }
+    },
+    {
       "name": "assets",
       "installMode": "lazy",
       "updateMode": "prefetch",
@@ -25,18 +41,6 @@
           "/assets/**",
           "/*.(svg|cur|jpg|jpeg|png|apng|webp|avif|gif|otf|ttf|woff|woff2)"
         ]
-      }
-    }
-  ],
-  "dataGroups": [
-    {
-      "name": "i18n",
-      "urls": ["/assets/i18n/*.json"],
-      "cacheConfig": {
-        "strategy": "freshness",
-        "maxSize": 10,
-        "maxAge": "30d",
-        "timeout": "3s"
       }
     }
   ]

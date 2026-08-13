@@ -106,10 +106,9 @@
     }
   }
 
+  // Wraps the shell skeleton, which fills the viewport itself — no centring here.
   &__loading {
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    display: block;
     min-height: 100vh;
     min-height: 100dvh;
   }

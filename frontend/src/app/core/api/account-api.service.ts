@@ -1,7 +1,6 @@
 import { inject, Injectable, Injector, runInInjectionContext } from '@angular/core';
 import {
   Auth,
-  getRedirectResult,
   GoogleAuthProvider,
   onAuthStateChanged,
   signInWithEmailAndPassword,
@@ -15,7 +14,7 @@ import {
   serverTimestamp,
   setDoc,
 } from '@angular/fire/firestore';
-import { Observable, from, switchMap } from 'rxjs';
+import { Observable } from 'rxjs';
 import type { User } from '../../models/user.model';
 import type { Account } from '../../models/account.model';
 import type {
@@ -37,33 +36,28 @@ export class AccountApiService {
   private readonly injector = inject(Injector);
   private readonly context = inject(AccountContext);
 
+  /**
+   * Sign-in goes through `signInWithPopup` only, so there is deliberately no
+   * `getRedirectResult` call here — awaiting one would gate auth resolution, and with
+   * it every downstream Firestore read, on a flow this app never uses.
+   */
   getAuthState(): Observable<User | null> {
-    const redirectDone$ = from(
-      runInInjectionContext(this.injector, () =>
-        getRedirectResult(this.auth).catch(() => null),
-      ),
-    );
-
-    return redirectDone$.pipe(
-      switchMap(() =>
-        new Observable<User | null>((subscriber) => {
-          const unsubscribe = onAuthStateChanged(this.auth, (firebaseUser) => {
-            if (!firebaseUser) {
-              this.context.clear();
-              subscriber.next(null);
-            } else {
-              subscriber.next({
-                id: firebaseUser.uid as UserId,
-                accountId: '' as AccountId,
-                email: firebaseUser.email ?? '',
-                displayName: firebaseUser.displayName ?? firebaseUser.email ?? '',
-              });
-            }
+    return new Observable<User | null>((subscriber) => {
+      const unsubscribe = onAuthStateChanged(this.auth, (firebaseUser) => {
+        if (!firebaseUser) {
+          this.context.clear();
+          subscriber.next(null);
+        } else {
+          subscriber.next({
+            id: firebaseUser.uid as UserId,
+            accountId: '' as AccountId,
+            email: firebaseUser.email ?? '',
+            displayName: firebaseUser.displayName ?? firebaseUser.email ?? '',
           });
-          return unsubscribe;
-        }),
-      ),
-    );
+        }
+      });
+      return unsubscribe;
+    });
   }
 
   async signInWithGoogle(): Promise<void> {

@@ -99,6 +99,19 @@ describe('App', () => {
     expect(el.querySelector('.app-root__loading')).toBeTruthy();
   });
 
+  // DESIGN.md: spinners are for inline action feedback only, never page-level loading.
+  it('uses a shell skeleton rather than a spinner while auth is checking', async () => {
+    await createTestBed();
+    const fixture = TestBed.createComponent(App);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    const el = fixture.nativeElement as HTMLElement;
+    expect(el.querySelector('app-shell-skeleton')).toBeTruthy();
+    expect(el.querySelector('mat-spinner')).toBeFalsy();
+  });
+
   it('shows top bar when authenticated', async () => {
     await createTestBed();
     const store = TestBed.inject(Store);

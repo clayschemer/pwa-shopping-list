@@ -9,15 +9,315 @@
     <link rel="icon" type="image/x-icon" href="favicon.ico" />
     <link rel="manifest" href="manifest.webmanifest" />
     <link rel="apple-touch-icon" href="icons/icon-192x192.png" />
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap"
-      rel="stylesheet"
+      rel="preload"
+      href="fonts/plus-jakarta-sans-latin.woff2"
+      as="font"
+      type="font/woff2"
+      crossorigin
     />
-    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
+
+    <!--
+      Fonts are self-hosted under public/fonts/ rather than fetched from Google's CDN:
+      it keeps two third-party origins off the critical path and lets the service worker
+      prefetch them (see ngsw-config.json), so typography survives offline.
+      Declared here rather than in styles.scss because beasties defers that stylesheet —
+      inlining keeps font discovery on the first frame. URLs are relative so they resolve
+      against <base href>, which the GH Pages build rewrites to /pwa-shopping-list/.
+    -->
+    <style>
+      @font-face {
+        font-family: 'Plus Jakarta Sans';
+        font-style: normal;
+        font-weight: 300 700;
+        font-display: swap;
+        src: url(fonts/plus-jakarta-sans-latin.woff2) format('woff2');
+        unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA,
+          U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193,
+          U+2212, U+2215, U+FEFF, U+FFFD;
+      }
+
+      @font-face {
+        font-family: 'Plus Jakarta Sans';
+        font-style: normal;
+        font-weight: 300 700;
+        font-display: swap;
+        src: url(fonts/plus-jakarta-sans-latin-ext.woff2) format('woff2');
+        unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF,
+          U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020,
+          U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+      }
+
+      @font-face {
+        font-family: 'DM Serif Display';
+        font-style: normal;
+        font-weight: 400;
+        font-display: swap;
+        src: url(fonts/dm-serif-display-latin.woff2) format('woff2');
+        unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA,
+          U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193,
+          U+2212, U+2215, U+FEFF, U+FFFD;
+      }
+
+      @font-face {
+        font-family: 'DM Serif Display';
+        font-style: normal;
+        font-weight: 400;
+        font-display: swap;
+        src: url(fonts/dm-serif-display-latin-ext.woff2) format('woff2');
+        unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF,
+          U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020,
+          U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+      }
+
+      /*
+        `block`, not `swap`: these glyphs are keyed by ligature name, so a fallback face
+        renders the literal words "menu" / "undo" instead of icons. Self-hosted and
+        SW-prefetched, the block period is imperceptible after the first load.
+      */
+      @font-face {
+        font-family: 'Material Icons';
+        font-style: normal;
+        font-weight: 400;
+        font-display: block;
+        src: url(fonts/material-icons.woff2) format('woff2');
+      }
+
+      .material-icons {
+        font-family: 'Material Icons';
+        font-weight: normal;
+        font-style: normal;
+        font-size: 24px;
+        line-height: 1;
+        letter-spacing: normal;
+        text-transform: none;
+        display: inline-block;
+        white-space: nowrap;
+        word-wrap: normal;
+        direction: ltr;
+        -webkit-font-feature-settings: 'liga';
+        -webkit-font-smoothing: antialiased;
+      }
+    </style>
+
+    <!--
+      First-frame placeholder. Self-contained on purpose: this paints before styles.css
+      loads and before ThemeService applies any class, so it cannot use --mat-sys-* or
+      --app-* custom properties. The literal values below are copied from
+      styles/_theme-colors.scss and styles/_theme-base.scss; geometry mirrors
+      shell/app-shell-skeleton so the hand-off is invisible.
+      Compact mode is not reflected here — it is a localStorage setting applied after
+      bootstrap, and the resulting shift is a few pixels at most.
+    -->
+    <style>
+      .app-splash {
+        --splash-surface: #fff8f5;
+        --splash-group: #ffeadc;
+        --splash-row: #ffffff;
+        --splash-placeholder: #f4ded0;
+
+        position: fixed;
+        inset: 0;
+        z-index: 9999;
+        display: flex;
+        flex-direction: column;
+        background: var(--splash-surface);
+        opacity: 1;
+      }
+
+      @media (prefers-color-scheme: dark) {
+        .app-splash {
+          --splash-surface: #1b1109;
+          --splash-group: #291d14;
+          --splash-row: #160c05;
+          --splash-placeholder: #3f3228;
+        }
+      }
+
+      /* An explicit in-app override beats the OS preference, matching ThemeService. */
+      :root.theme-light .app-splash {
+        --splash-surface: #fff8f5;
+        --splash-group: #ffeadc;
+        --splash-row: #ffffff;
+        --splash-placeholder: #f4ded0;
+      }
+
+      :root.theme-dark .app-splash {
+        --splash-surface: #1b1109;
+        --splash-group: #291d14;
+        --splash-row: #160c05;
+        --splash-placeholder: #3f3228;
+      }
+
+      .app-splash--out {
+        opacity: 0;
+        transition: opacity 160ms cubic-bezier(0.4, 0, 1, 1);
+      }
+
+      .app-splash__top-bar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        box-sizing: border-box;
+        margin-top: 1.5rem;
+        min-height: 4.25rem;
+        padding: 0.75rem 1rem;
+      }
+
+      .app-splash__icon,
+      .app-splash__toggle,
+      .app-splash__title,
+      .app-splash__name,
+      .app-splash__qty {
+        background: var(--splash-placeholder);
+        border-radius: 0.25rem;
+      }
+
+      .app-splash__icon {
+        width: 2.5rem;
+        height: 2.5rem;
+        border-radius: 999rem;
+      }
+
+      .app-splash__toggle {
+        width: 9rem;
+        height: 2.25rem;
+        border-radius: 999rem;
+      }
+
+      .app-splash__content {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+        padding: 0.5rem 1rem;
+      }
+
+      .app-splash__group {
+        display: flex;
+        flex-direction: column;
+        gap: 0.25rem;
+        padding: 0 0.25rem 0.25rem;
+        border-radius: 0.5rem;
+        background: var(--splash-group);
+      }
+
+      .app-splash__header {
+        padding: 0.75rem 0.75rem 0.5rem;
+      }
+
+      .app-splash__title {
+        width: 5rem;
+        height: 0.75rem;
+      }
+
+      .app-splash__item {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        min-height: 3rem;
+        padding: 0.75rem;
+        border-radius: 0.5rem;
+        background-color: var(--splash-row);
+      }
+
+      .app-splash__name {
+        width: 40%;
+        height: 1rem;
+      }
+
+      .app-splash__item:nth-child(3) .app-splash__name {
+        width: 60%;
+      }
+
+      .app-splash__item:nth-child(4) .app-splash__name {
+        width: 30%;
+      }
+
+      .app-splash__qty {
+        width: 2.5rem;
+        height: 0.8125rem;
+      }
+
+      @media (prefers-reduced-motion: no-preference) {
+        .app-splash__icon,
+        .app-splash__toggle,
+        .app-splash__title,
+        .app-splash__name,
+        .app-splash__qty {
+          animation: app-splash-pulse 1.5s ease-in-out infinite;
+        }
+      }
+
+      @keyframes app-splash-pulse {
+        0%,
+        100% {
+          opacity: 1;
+        }
+
+        50% {
+          opacity: 0.4;
+        }
+      }
+    </style>
+
+    <!--
+      Apply an explicit dark/light override before first paint. ThemeService does the
+      same thing (see core/theme/theme.service.ts) but only once Angular has bootstrapped,
+      which would flash the wrong palette on the splash. Keep the storage key in sync
+      with SETTINGS_STORAGE_KEY.
+    -->
+    <script>
+      try {
+        var darkMode = JSON.parse(localStorage.getItem('app-settings') || '{}').darkMode;
+        if (darkMode === true) {
+          document.documentElement.classList.add('theme-dark');
+        } else if (darkMode === false) {
+          document.documentElement.classList.add('theme-light');
+        }
+      } catch (e) {
+        /* No stored preference — fall back to the OS setting. */
+      }
+    </script>
   </head>
   <body>
-    <app-root></app-root>
+    <app-root aria-busy="true"></app-root>
+
+    <div id="app-splash" class="app-splash" aria-hidden="true">
+      <div class="app-splash__top-bar">
+        <div class="app-splash__icon"></div>
+        <div class="app-splash__toggle"></div>
+        <div class="app-splash__icon"></div>
+      </div>
+
+      <div class="app-splash__content">
+        <div class="app-splash__group">
+          <div class="app-splash__header"><div class="app-splash__title"></div></div>
+          <div class="app-splash__item">
+            <div class="app-splash__name"></div>
+            <div class="app-splash__qty"></div>
+          </div>
+          <div class="app-splash__item">
+            <div class="app-splash__name"></div>
+            <div class="app-splash__qty"></div>
+          </div>
+          <div class="app-splash__item">
+            <div class="app-splash__name"></div>
+            <div class="app-splash__qty"></div>
+          </div>
+        </div>
+
+        <div class="app-splash__group">
+          <div class="app-splash__header"><div class="app-splash__title"></div></div>
+          <div class="app-splash__item">
+            <div class="app-splash__name"></div>
+            <div class="app-splash__qty"></div>
+          </div>
+          <div class="app-splash__item">
+            <div class="app-splash__name"></div>
+            <div class="app-splash__qty"></div>
+          </div>
+        </div>
+      </div>
+    </div>
   </body>
 </html>

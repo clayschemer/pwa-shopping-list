@@ -1,5 +1,11 @@
 import { ApplicationConfig, isDevMode, provideBrowserGlobalErrorListeners } from '@angular/core';
-import { provideRouter, withViewTransitions, ActivatedRouteSnapshot } from '@angular/router';
+import {
+  provideRouter,
+  withViewTransitions,
+  withPreloading,
+  PreloadAllModules,
+  ActivatedRouteSnapshot,
+} from '@angular/router';
 import { provideStore } from '@ngrx/store';
 import { provideEffects } from '@ngrx/effects';
 import { initializeApp, provideFirebaseApp } from '@angular/fire/app';
@@ -66,6 +72,9 @@ export const appConfig: ApplicationConfig = {
     provideBrowserGlobalErrorListeners(),
     provideRouter(
       routes,
+      // Pull the remaining route chunks down once the first navigation settles, so
+      // switching mode or opening Settings costs no network round-trip.
+      withPreloading(PreloadAllModules),
       withViewTransitions({
         skipInitialTransition: true,
         onViewTransitionCreated: ({ transition, from, to }) => {

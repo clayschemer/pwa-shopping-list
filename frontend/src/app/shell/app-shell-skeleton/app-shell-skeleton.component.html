@@ -1,0 +1,23 @@
+<div class="app-shell-skeleton" aria-hidden="true">
+  <div class="app-shell-skeleton__top-bar">
+    <div class="app-shell-skeleton__icon"></div>
+    <div class="app-shell-skeleton__toggle"></div>
+    <div class="app-shell-skeleton__icon"></div>
+  </div>
+
+  <div class="app-shell-skeleton__content">
+    @for (group of groups; track $index) {
+      <div class="app-shell-skeleton__group">
+        <div class="app-shell-skeleton__header">
+          <div class="app-shell-skeleton__title"></div>
+        </div>
+        @for (row of group; track $index) {
+          <div class="app-shell-skeleton__item">
+            <div class="app-shell-skeleton__name"></div>
+            <div class="app-shell-skeleton__qty"></div>
+          </div>
+        }
+      </div>
+    }
+  </div>
+</div>
