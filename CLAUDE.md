@@ -220,7 +220,7 @@ Two modes, switchable per user independently. Mode is **not persisted** — alwa
 ### Plan Mode (default)
 - Full list management: add, edit, remove items; manage categories and shops
 - Categories act as tags — appear only when at least one item is assigned
-- Items displayed once, under primary category
+- Items displayed once, under primary category — falling back to the first secondary category the selected shop stocks (in shop layout order) when the shop excludes the primary. Only an item with no stocked category at all stays hidden.
 - Global category order unless shop-specific order configured
 
 ### Shop Mode

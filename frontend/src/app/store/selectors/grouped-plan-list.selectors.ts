@@ -70,14 +70,24 @@ function buildGroups(
   const byCategory = new Map<CategoryId, Item[]>();
   const uncategorised: Item[] = [];
 
+  // Layout position of every category the selected shop stocks. With no shop
+  // selected this is simply every category in global order.
+  const layoutIndex = new Map<CategoryId, number>();
+  orderedCategories.forEach((cat, i) => layoutIndex.set(cat.id, i));
+
   for (const item of items) {
-    const catId = item.primaryCategoryId;
-    if (catId === null) {
-      uncategorised.push(item);
-    } else {
+    const catId = resolveCategory(item, layoutIndex);
+    if (catId !== null) {
       const bucket = byCategory.get(catId) ?? [];
       bucket.push(item);
       byCategory.set(catId, bucket);
+      continue;
+    }
+    // No stocked category resolved. An item with no assignments at all belongs
+    // in the uncategorised bucket; one whose categories are all excluded from
+    // the selected shop stays hidden while that shop is selected.
+    if (item.primaryCategoryId === null && item.secondaryCategoryIds.length === 0) {
+      uncategorised.push(item);
     }
   }
 
@@ -107,6 +117,33 @@ function buildGroups(
   }
 
   return groups;
+}
+
+/**
+ * The single category a plan-mode item is listed under: its primary category
+ * when the selected shop stocks it, otherwise the first of its secondary
+ * categories the shop does stock, resolved in shop layout order rather than
+ * assignment order (`secondaryCategoryIds` order is arbitrary). Returns null
+ * when the shop stocks none of the item's categories — unlike shop mode, plan
+ * mode never lists an item twice.
+ */
+function resolveCategory(
+  item: Item,
+  layoutIndex: Map<CategoryId, number>,
+): CategoryId | null {
+  const primary = item.primaryCategoryId;
+  if (primary !== null && layoutIndex.has(primary)) return primary;
+
+  let fallback: CategoryId | null = null;
+  let fallbackIndex = Infinity;
+  for (const secondary of item.secondaryCategoryIds) {
+    const index = layoutIndex.get(secondary);
+    if (index !== undefined && index < fallbackIndex) {
+      fallback = secondary;
+      fallbackIndex = index;
+    }
+  }
+  return fallback;
 }
 
 function sumPrices(items: Item[], shopId: ShopId | null = null): number {

@@ -33,6 +33,7 @@ interface ItemsWorld {
   recentlyCheckedIds: string[];
   backendUnavailable: boolean;
   failureNotice: string | null;
+  expectedFallbackCategoryId: string | null;
 }
 
 /** The list as the checking user sees it: active items plus items still inside the undo period. */
@@ -64,6 +65,50 @@ function makeItem(
 
 function activeItems(world: ItemsWorld): Item[] {
   return world.items.filter((i) => !i.removed);
+}
+
+/** Categories the selected shop stocks, in its layout order. No shop selected: every category, global order. */
+function shopLayout(world: ItemsWorld): string[] {
+  const shop = world.shops?.find((s) => s.id === world.selectedShopId);
+  if (shop) return shop.categoryOrder;
+  return [...(world.categories ?? [])]
+    .sort((a, b) => a.globalSortOrder - b.globalSortOrder)
+    .map((c) => c.id);
+}
+
+/**
+ * Where plan mode places each visible item — exactly one row per item. An item
+ * sits under its primary category when the selected shop stocks it, otherwise
+ * under the first of its secondary categories the shop does stock (layout
+ * order). Items with no stocked category are absent; items with no category at
+ * all fall into the uncategorised bucket (categoryId null).
+ */
+function planPlacements(world: ItemsWorld): { item: Item; categoryId: string | null }[] {
+  const layout = shopLayout(world);
+  const placements: { item: Item; categoryId: string | null }[] = [];
+
+  for (const item of activeItems(world)) {
+    if (item.primaryCategoryId && layout.includes(item.primaryCategoryId)) {
+      placements.push({ item, categoryId: item.primaryCategoryId });
+      continue;
+    }
+    const fallback = layout.find((id) => item.secondaryCategoryIds.includes(id));
+    if (fallback) {
+      placements.push({ item, categoryId: fallback });
+      continue;
+    }
+    if (!item.primaryCategoryId && item.secondaryCategoryIds.length === 0) {
+      placements.push({ item, categoryId: null });
+    }
+  }
+
+  return placements;
+}
+
+function multiCategoryItem(world: ItemsWorld): Item {
+  const item = world.items.find((i) => i.secondaryCategoryIds.length > 0);
+  assert.ok(item, 'A multi-category item should exist');
+  return item;
 }
 
 // ---------------------------------------------------------------------------
@@ -118,6 +163,42 @@ Given('an item exists with a primary category and one or more secondary categori
     { id: 'cat-2', name: 'Dairy', globalSortOrder: 2 },
   ];
   this.items.push(makeItem('Multi-category Item', 'cat-1', ['cat-2']));
+});
+
+Given("the selected shop does not stock the item's primary category", function (this: ItemsWorld) {
+  const item = multiCategoryItem(this);
+  this.shops = [
+    {
+      id: 'shop-1',
+      name: 'Superstore',
+      categoryOrder: this.categories
+        .map((c) => c.id)
+        .filter((id) => id !== item.primaryCategoryId),
+    },
+  ];
+  this.selectedShopId = 'shop-1';
+});
+
+Given("the selected shop stocks one of the item's secondary categories", function (this: ItemsWorld) {
+  const item = multiCategoryItem(this);
+  const shop = this.shops.find((s) => s.id === this.selectedShopId);
+  assert.ok(shop, 'A shop should be selected');
+  const secondary = item.secondaryCategoryIds[0]!;
+  if (!shop.categoryOrder.includes(secondary)) shop.categoryOrder.push(secondary);
+  this.expectedFallbackCategoryId = secondary;
+});
+
+Given("the selected shop stocks none of the item's categories", function (this: ItemsWorld) {
+  const item = multiCategoryItem(this);
+  const assigned = new Set([item.primaryCategoryId, ...item.secondaryCategoryIds]);
+  this.shops = [
+    {
+      id: 'shop-1',
+      name: 'Superstore',
+      categoryOrder: this.categories.map((c) => c.id).filter((id) => !assigned.has(id)),
+    },
+  ];
+  this.selectedShopId = 'shop-1';
 });
 
 Given('an item appears under more than one category', function (this: ItemsWorld) {
@@ -341,6 +422,26 @@ Then('the item should appear under each of its assigned categories', function (t
   assert.ok(multi, 'Multi-category item should exist');
   const allCats = [multi!.primaryCategoryId, ...multi!.secondaryCategoryIds].filter(Boolean);
   assert.ok(allCats.length > 1, 'Item should be in multiple categories');
+});
+
+Then('the item should appear exactly once, under that secondary category', function (this: ItemsWorld) {
+  assert.equal(this.mode, 'plan', 'This placement rule applies to plan mode');
+  const item = multiCategoryItem(this);
+  const placements = planPlacements(this).filter((p) => p.item.id === item.id);
+  assert.equal(placements.length, 1, 'Plan mode should list the item exactly once');
+  assert.equal(
+    placements[0]!.categoryId,
+    this.expectedFallbackCategoryId,
+    'The item should be listed under the stocked secondary category',
+  );
+});
+
+Then('the item should not appear on the shopping list', function (this: ItemsWorld) {
+  const item = multiCategoryItem(this);
+  assert.ok(
+    !planPlacements(this).some((p) => p.item.id === item.id),
+    'An item with no stocked category should not be listed',
+  );
 });
 
 Then('the item should appear as checked under all of its categories', function (this: ItemsWorld) {

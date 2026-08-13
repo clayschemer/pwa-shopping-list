@@ -575,6 +575,21 @@ Feature: Item Management
     When I view the shopping list
     Then the item should appear under each of its assigned categories
 
+  Scenario: An item falls back to a secondary category when the shop does not stock its primary
+    Given I am in plan mode
+    And an item exists with a primary category and one or more secondary categories
+    And the selected shop does not stock the item's primary category
+    And the selected shop stocks one of the item's secondary categories
+    When I view the shopping list
+    Then the item should appear exactly once, under that secondary category
+
+  Scenario: An item is hidden when the shop stocks none of its categories
+    Given I am in plan mode
+    And an item exists with a primary category and one or more secondary categories
+    And the selected shop stocks none of the item's categories
+    When I view the shopping list
+    Then the item should not appear on the shopping list
+
   Scenario: Checking an item in one category marks it as checked across all categories
     Given I am in shop mode
     And an item appears under more than one category

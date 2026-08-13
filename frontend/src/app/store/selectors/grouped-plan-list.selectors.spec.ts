@@ -14,7 +14,12 @@ import { initialShopsState } from '../shops/shops.reducer';
 import { initialItemsState } from '../items/items.reducer';
 import { initialSessionsState } from '../sessions/sessions.reducer';
 
-const item = (id: string, name: string, primary: string | null): Item =>
+const item = (
+  id: string,
+  name: string,
+  primary: string | null,
+  secondaries: string[] = [],
+): Item =>
   ({
     id: id as ItemId,
     accountId: 'a1' as AccountId,
@@ -23,7 +28,7 @@ const item = (id: string, name: string, primary: string | null): Item =>
     quantity: null,
     unit: null,
     primaryCategoryId: primary ? (primary as CategoryId) : null,
-    secondaryCategoryIds: [],
+    secondaryCategoryIds: secondaries as CategoryId[],
     removed: false,
     removedAt: null,
     addedBy: 'user',
@@ -132,6 +137,93 @@ describe('selectGroupedPlanList', () => {
   });
 });
 
+// ---------------------------------------------------------------------------
+// Secondary-category fallback. Plan mode lists an item exactly once: under its
+// primary category, or — when the selected shop does not stock that category —
+// under the first of its secondary categories the shop does stock, resolved in
+// shop layout order. `categories` here is already shop-filtered and ordered by
+// selectShopAvailableCategories.
+// ---------------------------------------------------------------------------
+
+describe('selectGroupedPlanList (secondary category fallback)', () => {
+  it('falls back to a stocked secondary when the shop does not stock the primary', () => {
+    const items = [item('i1', 'Cat food', 'c-pets', ['c-dairy'])];
+    // Shop does not stock Pets.
+    const categories = [cat('c-dairy', 'Dairy')];
+
+    const groups = selectGroupedPlanList.projector(items, categories);
+
+    expect(groups.map((g) => g.categoryId)).toEqual(['c-dairy']);
+    expect(groups[0]!.items.map((i) => i.name)).toEqual(['Cat food']);
+  });
+
+  it('lists the item exactly once when several of its categories are stocked', () => {
+    const items = [item('i1', 'Cat food', 'c-pets', ['c-dairy', 'c-bakery'])];
+    const categories = [
+      cat('c-dairy', 'Dairy'),
+      cat('c-bakery', 'Bakery'),
+      cat('c-pets', 'Pets'),
+    ];
+
+    const groups = selectGroupedPlanList.projector(items, categories);
+
+    // Primary is stocked, so no fallback applies and it appears only there.
+    expect(groups.map((g) => g.categoryId)).toEqual(['c-pets']);
+    expect(groups.flatMap((g) => g.items)).toHaveLength(1);
+  });
+
+  it('resolves in shop layout order when several secondaries are stocked', () => {
+    const items = [item('i1', 'Cat food', 'c-pets', ['c-bakery', 'c-dairy'])];
+    // Dairy comes before Bakery in this shop's layout, so Dairy wins even
+    // though Bakery is listed first on the item.
+    const categories = [cat('c-dairy', 'Dairy'), cat('c-bakery', 'Bakery')];
+
+    const groups = selectGroupedPlanList.projector(items, categories);
+
+    expect(groups.map((g) => g.categoryId)).toEqual(['c-dairy']);
+  });
+
+  it('hides the item when the shop stocks none of its categories', () => {
+    const items = [item('i1', 'Cat food', 'c-pets', ['c-frozen'])];
+    const categories = [cat('c-dairy', 'Dairy')];
+
+    const groups = selectGroupedPlanList.projector(items, categories);
+
+    expect(groups).toEqual([]);
+  });
+
+  it('uses a stocked secondary for an item that has no primary category', () => {
+    const items = [item('i1', 'Cat food', null, ['c-dairy'])];
+    const categories = [cat('c-dairy', 'Dairy')];
+
+    const groups = selectGroupedPlanList.projector(items, categories);
+
+    expect(groups.map((g) => g.categoryId)).toEqual(['c-dairy']);
+  });
+
+  it('keeps an item with no categories at all in the uncategorised group', () => {
+    const items = [item('i1', 'Loose thing', null, [])];
+    const categories = [cat('c-dairy', 'Dairy')];
+
+    const groups = selectGroupedPlanList.projector(items, categories);
+
+    expect(groups.map((g) => g.categoryId)).toEqual([null]);
+  });
+
+  it('counts a fallen-back item in the fallback category total only', () => {
+    const items = [
+      { ...item('i1', 'Cat food', 'c-pets', ['c-dairy', 'c-bakery']), price: 4 },
+      { ...item('i2', 'Milk', 'c-dairy'), price: 1 },
+    ] as Item[];
+    const categories = [cat('c-dairy', 'Dairy'), cat('c-bakery', 'Bakery')];
+
+    const groups = selectGroupedPlanList.projector(items, categories);
+
+    expect(groups.map((g) => g.categoryId)).toEqual(['c-dairy']);
+    expect(groups[0]!.estTotal).toBeCloseTo(5);
+  });
+});
+
 const removed = (i: Item): Item => ({ ...i, removed: true, removedAt: 1 } as Item);
 
 const session = (id: string, shopId: string | null, checkedItemIds: string[]): Session => ({
@@ -194,6 +286,18 @@ describe('selectGroupedPlanListWithChecked', () => {
       [cat('c1', 'Produce')],
     );
     expect(groups[0]!.items.map((i) => i.name)).toEqual(['Apples', 'Bananas']);
+  });
+
+  it('applies the secondary-category fallback to checked items too', () => {
+    const checked = removed(item('i2', 'Cat food', 'c-pets', ['c-dairy']));
+    const groups = selectGroupedPlanListWithChecked.projector(
+      [],
+      new Set<ItemId>(['i2' as ItemId]),
+      [checked],
+      [cat('c-dairy', 'Dairy')],
+    );
+    expect(groups.map((g) => g.categoryId)).toEqual(['c-dairy']);
+    expect(groups[0]!.items.map((i) => i.name)).toEqual(['Cat food']);
   });
 
   it('excludes session-checked items from the category total', () => {
@@ -259,5 +363,30 @@ describe('selectGroupedPlanList (composed against real state)', () => {
     const groups = selectGroupedPlanList(stateWith(null) as never);
 
     expect(groups.map((g) => g.categoryId)).toEqual(['c-produce', 'c-bakery']);
+  });
+
+  const fallbackState = (selectedShopId: string | null) => {
+    const state = stateWith(selectedShopId) as Record<string, unknown>;
+    return {
+      ...state,
+      items: {
+        ...initialItemsState,
+        // Primary Bakery is excluded from shop s1; secondary Produce is not.
+        ...entityState([item('i3', 'Cat food', 'c-bakery', ['c-produce'])]),
+      },
+    };
+  };
+
+  it('surfaces an item under its secondary when the shop excludes its primary', () => {
+    const groups = selectGroupedPlanList(fallbackState('s1') as never);
+
+    expect(groups.map((g) => g.categoryId)).toEqual(['c-produce']);
+    expect(groups[0]!.items.map((i) => i.name)).toEqual(['Cat food']);
+  });
+
+  it('uses the primary category when no shop is selected', () => {
+    const groups = selectGroupedPlanList(fallbackState(null) as never);
+
+    expect(groups.map((g) => g.categoryId)).toEqual(['c-bakery']);
   });
 });
