@@ -1,9 +1,10 @@
 import { inject, Injectable } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
-import { catchError, from, map, of, switchMap } from 'rxjs';
+import { catchError, from, map, switchMap } from 'rxjs';
 import { categoryGroupsActions, categoryGroupsApiActions } from './category-groups.actions';
 import { accountActions } from '../account/account.actions';
 import { CategoryGroupApiService } from '../../core/api/category-group-api.service';
+import { onApiFailure } from '../../core/diagnostics/api-failure';
 import type { CategoryGroup } from '../../models/category-group.model';
 import type { CategoryGroupId } from '../../models/ids.model';
 import type { NameConflictError } from '../../models/errors.model';
@@ -22,8 +23,10 @@ export class CategoryGroupsEffects {
       switchMap(() =>
         from(this.api.fetchAllCategoryGroups()).pipe(
           map((groups) => categoryGroupsActions.categoryGroupsLoaded({ groups })),
-          catchError(() =>
-            of(categoryGroupsActions.categoryGroupsLoaded({ groups: [] })),
+          catchError(
+            onApiFailure('categoryGroups.fetchAll', () =>
+              categoryGroupsActions.categoryGroupsLoaded({ groups: [] }),
+            ),
           ),
         ),
       ),
@@ -66,8 +69,10 @@ export class CategoryGroupsEffects {
               group: result as CategoryGroup,
             });
           }),
-          catchError(() =>
-            of(categoryGroupsActions.categoryGroupSaveFailed({ id: null })),
+          catchError(
+            onApiFailure('categoryGroups.addCategoryGroup', () =>
+              categoryGroupsActions.categoryGroupSaveFailed({ id: null }),
+            ),
           ),
         ),
       ),
@@ -87,7 +92,11 @@ export class CategoryGroupsEffects {
               group: result as CategoryGroup,
             });
           }),
-          catchError(() => of(categoryGroupsActions.categoryGroupSaveFailed({ id }))),
+          catchError(
+            onApiFailure('categoryGroups.renameCategoryGroup', () =>
+              categoryGroupsActions.categoryGroupSaveFailed({ id }),
+            ),
+          ),
         ),
       ),
     ),
@@ -99,7 +108,11 @@ export class CategoryGroupsEffects {
       switchMap(({ id }) =>
         from(this.api.deleteCategoryGroup(id)).pipe(
           map(() => categoryGroupsActions.categoryGroupDeleted({ id })),
-          catchError(() => of(categoryGroupsActions.categoryGroupSaveFailed({ id }))),
+          catchError(
+            onApiFailure('categoryGroups.deleteCategoryGroup', () =>
+              categoryGroupsActions.categoryGroupSaveFailed({ id }),
+            ),
+          ),
         ),
       ),
     ),

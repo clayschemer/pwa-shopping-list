@@ -6,7 +6,6 @@ import {
   getDocs,
   query,
   QueryDocumentSnapshot,
-  runTransaction,
   updateDoc,
   where,
   orderBy,
@@ -124,6 +123,14 @@ export class ShopApiService {
     });
   }
 
+  /**
+   * Writes a shop's category layout. Plain `updateDoc` rather than a
+   * transaction for the same reason as `ItemApiService.updateItem`: the
+   * payload is absolute, so there is nothing to read-modify-write, and a
+   * transaction would turn every drawer reorder and every category
+   * availability change into an operation that hard-fails on a dead
+   * connection instead of queueing locally.
+   */
   async setShopCategoryOrder(
     shopId: ShopId,
     orderedIds: CategoryId[],
@@ -131,16 +138,11 @@ export class ShopApiService {
     const { accountId } = this.context.require();
     return runInInjectionContext(this.injector, async () => {
       try {
-        await runTransaction(this.db, async (tx) => {
-          const ref = paths.shopDoc(this.db, accountId, shopId);
-          const snap = await tx.get(ref);
-          if (!snap.exists()) {
-            throw new Error('NOT_FOUND');
-          }
-          tx.update(ref, { categoryOrder: orderedIds });
+        await updateDoc(paths.shopDoc(this.db, accountId, shopId), {
+          categoryOrder: orderedIds,
         });
       } catch (err) {
-        if ((err as Error).message === 'NOT_FOUND') {
+        if ((err as { code?: string }).code === 'not-found') {
           return { type: 'NOT_FOUND', entityKind: 'shop', id: shopId };
         }
         throw err;

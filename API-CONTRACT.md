@@ -410,6 +410,31 @@ operations arrive via the Observables in Part 4 — write operations do not retu
 updated entity unless it is needed immediately by the caller (e.g. `addItem` returns the
 created Item so the UI can reference it before the stream confirms).
 
+### Write behaviour when the connection is lost (not part of the contract)
+
+The contract says nothing about connectivity, but implementations must not let two
+operations of the same kind behave differently when the connection drops — that
+asymmetry is invisible in the contract and very visible to the user.
+
+**Firebase implementation.** A plain write (`addDoc`, `updateDoc`, `writeBatch`) is
+applied to the local cache immediately, echoes to the snapshot listeners, and leaves its
+Promise *pending* until the backend acknowledges it. A transaction cannot do that: it
+needs a live server read, so it retries and then *rejects*. An operation implemented as a
+transaction therefore hard-fails on a dead connection where the equivalent plain write
+would queue and sync on reconnect.
+
+The rule: **use a transaction only where the write genuinely needs read-modify-write
+atomicity.** An existence check is not a reason — a write to a missing document fails on
+its own. `updateItem` and `setShopCategoryOrder` were both written as existence-check
+transactions and, in an active shopping session on a flaky connection, produced exactly
+that split: adding an item appeared to work while editing it or reordering categories
+failed with "check your connection".
+
+Operations that legitimately remain transactional: `checkItem` and `uncheckItem`
+(first-write-wins across item and session), `setItemPrice` with a `shopId` (recomputes
+the global price from the shop map), and `submitPriceFeedback` (item update plus corpus
+entry). Failing loudly there is correct — the caller must know the write did not land.
+
 ---
 
 ### 5.1 Auth

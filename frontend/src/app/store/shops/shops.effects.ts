@@ -1,9 +1,10 @@
 import { inject, Injectable } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
-import { catchError, from, map, of, switchMap } from 'rxjs';
+import { catchError, from, map, switchMap } from 'rxjs';
 import { shopsActions, shopsApiActions } from './shops.actions';
 import { accountActions } from '../account/account.actions';
 import { ShopApiService } from '../../core/api/shop-api.service';
+import { onApiFailure } from '../../core/diagnostics/api-failure';
 import type { Shop } from '../../models/shop.model';
 import type { ShopId } from '../../models/ids.model';
 import type { NameConflictError } from '../../models/errors.model';
@@ -23,7 +24,11 @@ export class ShopsEffects {
       switchMap(() =>
         from(this.shopApi.fetchAllShops()).pipe(
           map((shops) => shopsActions.shopsLoaded({ shops })),
-          catchError(() => of(shopsActions.shopsLoaded({ shops: [] }))),
+          catchError(
+            onApiFailure('shops.fetchAllShops', () =>
+              shopsActions.shopsLoaded({ shops: [] }),
+            ),
+          ),
         ),
       ),
     ),
@@ -64,7 +69,9 @@ export class ShopsEffects {
             }
             return shopsActions.shopAdded({ shop: result as Shop });
           }),
-          catchError(() => of(shopsActions.shopSaveFailed({ id: null }))),
+          catchError(
+            onApiFailure('shops.addShop', () => shopsActions.shopSaveFailed({ id: null })),
+          ),
         ),
       ),
     ),
@@ -76,7 +83,9 @@ export class ShopsEffects {
       switchMap(({ id, name }) =>
         from(this.shopApi.renameShop(id, name)).pipe(
           map(() => shopsActions.shopRenamed({ shop: { id, name } as Shop })),
-          catchError(() => of(shopsActions.shopSaveFailed({ id }))),
+          catchError(
+            onApiFailure('shops.renameShop', () => shopsActions.shopSaveFailed({ id })),
+          ),
         ),
       ),
     ),
@@ -88,7 +97,9 @@ export class ShopsEffects {
       switchMap(({ id }) =>
         from(this.shopApi.deleteShop(id)).pipe(
           map(() => shopsActions.shopDeleted({ id })),
-          catchError(() => of(shopsActions.shopSaveFailed({ id }))),
+          catchError(
+            onApiFailure('shops.deleteShop', () => shopsActions.shopSaveFailed({ id })),
+          ),
         ),
       ),
     ),
@@ -100,7 +111,11 @@ export class ShopsEffects {
       switchMap(({ shopId, orderedIds }) =>
         from(this.shopApi.setShopCategoryOrder(shopId, orderedIds)).pipe(
           map(() => shopsActions.shopCategoryOrderSet({ shopId, orderedIds })),
-          catchError(() => of(shopsActions.shopSaveFailed({ id: shopId }))),
+          catchError(
+            onApiFailure('shops.setShopCategoryOrder', () =>
+              shopsActions.shopSaveFailed({ id: shopId }),
+            ),
+          ),
         ),
       ),
     ),
@@ -112,7 +127,11 @@ export class ShopsEffects {
       switchMap(({ id, url }) =>
         from(this.shopApi.setShopPriceUrl(id, url)).pipe(
           map(() => shopsActions.shopPriceUrlSet({ id, url })),
-          catchError(() => of(shopsActions.shopSaveFailed({ id }))),
+          catchError(
+            onApiFailure('shops.setShopPriceUrl', () =>
+              shopsActions.shopSaveFailed({ id }),
+            ),
+          ),
         ),
       ),
     ),
@@ -124,7 +143,11 @@ export class ShopsEffects {
       switchMap(({ orderedIds }) =>
         from(this.shopApi.setShopOrder(orderedIds)).pipe(
           map(() => accountActions.shopOrderUpdated({ orderedIds })),
-          catchError(() => of(shopsActions.shopSaveFailed({ id: null }))),
+          catchError(
+            onApiFailure('shops.setShopOrder', () =>
+              shopsActions.shopSaveFailed({ id: null }),
+            ),
+          ),
         ),
       ),
     ),

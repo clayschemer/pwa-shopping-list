@@ -1,9 +1,10 @@
 import { inject, Injectable } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
-import { catchError, from, map, of, switchMap } from 'rxjs';
+import { catchError, from, map, switchMap } from 'rxjs';
 import { categoriesActions, categoriesApiActions } from './categories.actions';
 import { accountActions } from '../account/account.actions';
 import { CategoryApiService } from '../../core/api/category-api.service';
+import { onApiFailure } from '../../core/diagnostics/api-failure';
 import type { Category } from '../../models/category.model';
 import type { CategoryId } from '../../models/ids.model';
 import type { NameConflictError } from '../../models/errors.model';
@@ -23,8 +24,10 @@ export class CategoriesEffects {
       switchMap(() =>
         from(this.categoryApi.fetchAllCategories()).pipe(
           map((categories) => categoriesActions.categoriesLoaded({ categories })),
-          catchError(() =>
-            of(categoriesActions.categoriesLoaded({ categories: [] })),
+          catchError(
+            onApiFailure('categories.fetchAllCategories', () =>
+              categoriesActions.categoriesLoaded({ categories: [] }),
+            ),
           ),
         ),
       ),
@@ -66,7 +69,11 @@ export class CategoriesEffects {
             }
             return categoriesActions.categoryAdded({ category: result as Category });
           }),
-          catchError(() => of(categoriesActions.categorySaveFailed({ id: null }))),
+          catchError(
+            onApiFailure('categories.addCategory', () =>
+              categoriesActions.categorySaveFailed({ id: null }),
+            ),
+          ),
         ),
       ),
     ),
@@ -85,7 +92,11 @@ export class CategoriesEffects {
               category: { id, name } as Category,
             });
           }),
-          catchError(() => of(categoriesActions.categorySaveFailed({ id }))),
+          catchError(
+            onApiFailure('categories.renameCategory', () =>
+              categoriesActions.categorySaveFailed({ id }),
+            ),
+          ),
         ),
       ),
     ),
@@ -97,7 +108,11 @@ export class CategoriesEffects {
       switchMap(({ id }) =>
         from(this.categoryApi.deleteCategory(id)).pipe(
           map(() => categoriesActions.categoryDeleted({ id })),
-          catchError(() => of(categoriesActions.categorySaveFailed({ id }))),
+          catchError(
+            onApiFailure('categories.deleteCategory', () =>
+              categoriesActions.categorySaveFailed({ id }),
+            ),
+          ),
         ),
       ),
     ),
@@ -109,7 +124,11 @@ export class CategoriesEffects {
       switchMap(({ orderedIds }) =>
         from(this.categoryApi.setGlobalCategoryOrder(orderedIds)).pipe(
           map(() => categoriesActions.globalCategoryOrderSet({ orderedIds })),
-          catchError(() => of(categoriesActions.categorySaveFailed({ id: null }))),
+          catchError(
+            onApiFailure('categories.setGlobalCategoryOrder', () =>
+              categoriesActions.categorySaveFailed({ id: null }),
+            ),
+          ),
         ),
       ),
     ),
@@ -123,7 +142,11 @@ export class CategoriesEffects {
       switchMap(({ ids, groupId }) =>
         from(this.categoryApi.addCategoriesToGroup(ids, groupId)).pipe(
           map(() => categoriesActions.categoriesAddedToGroup({ ids, groupId })),
-          catchError(() => of(categoriesActions.categorySaveFailed({ id: null }))),
+          catchError(
+            onApiFailure('categories.addCategoriesToGroup', () =>
+              categoriesActions.categorySaveFailed({ id: null }),
+            ),
+          ),
         ),
       ),
     ),
@@ -135,7 +158,11 @@ export class CategoriesEffects {
       switchMap(({ ids, groupId }) =>
         from(this.categoryApi.removeCategoriesFromGroup(ids, groupId)).pipe(
           map(() => categoriesActions.categoriesRemovedFromGroup({ ids, groupId })),
-          catchError(() => of(categoriesActions.categorySaveFailed({ id: null }))),
+          catchError(
+            onApiFailure('categories.removeCategoriesFromGroup', () =>
+              categoriesActions.categorySaveFailed({ id: null }),
+            ),
+          ),
         ),
       ),
     ),

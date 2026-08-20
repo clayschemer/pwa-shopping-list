@@ -60,6 +60,7 @@ function wallClockTimer(durationMs: number, zone: NgZone): Observable<void> {
   });
 }
 import { itemsActions, itemsApiActions } from './items.actions';
+import { ignoreApiFailure, onApiFailure } from '../../core/diagnostics/api-failure';
 import { sessionsActions } from '../sessions/sessions.actions';
 import { accountActions } from '../account/account.actions';
 import { ItemApiService } from '../../core/api/item-api.service';
@@ -139,7 +140,9 @@ export class ItemsEffects {
             }
             return itemsActions.itemAdded({ item: result as Item });
           }),
-          catchError(() => of(itemsActions.itemSaveFailed({ id: null }))),
+          catchError(
+            onApiFailure('items.addItem', () => itemsActions.itemSaveFailed({ id: null })),
+          ),
         ),
       ),
     ),
@@ -160,7 +163,11 @@ export class ItemsEffects {
             }
             return itemsActions.itemUpdated({ item: result as Item });
           }),
-          catchError(() => of(itemsActions.itemSaveFailed({ id: input.id }))),
+          catchError(
+            onApiFailure('items.updateItem', () =>
+              itemsActions.itemSaveFailed({ id: input.id }),
+            ),
+          ),
         ),
       ),
     ),
@@ -172,7 +179,9 @@ export class ItemsEffects {
       switchMap(({ id }) =>
         from(this.itemApi.removeItem(id)).pipe(
           map(() => itemsActions.itemRemoved({ id })),
-          catchError(() => of(itemsActions.itemSaveFailed({ id }))),
+          catchError(
+            onApiFailure('items.removeItem', () => itemsActions.itemSaveFailed({ id })),
+          ),
         ),
       ),
     ),
@@ -193,7 +202,9 @@ export class ItemsEffects {
               sessionsActions.sessionUpdated({ session: success.session }),
             );
           }),
-          catchError(() => of(itemsActions.itemCheckFailed({ id }))),
+          catchError(
+            onApiFailure('items.checkItem', () => itemsActions.itemCheckFailed({ id })),
+          ),
         ),
       ),
     ),
@@ -225,7 +236,11 @@ export class ItemsEffects {
       switchMap(({ id, sessionId }) =>
         from(this.itemApi.uncheckItem(id, sessionId)).pipe(
           map(() => itemsActions.itemUnchecked({ id })),
-          catchError(() => of(itemsActions.itemUncheckFailed({ id }))),
+          catchError(
+            onApiFailure('items.uncheckItem', () =>
+              itemsActions.itemUncheckFailed({ id }),
+            ),
+          ),
         ),
       ),
     ),
@@ -237,7 +252,7 @@ export class ItemsEffects {
       mergeMap(({ id, reason }) =>
         from(this.itemApi.submitPriceFeedback(id, reason)).pipe(
           map(() => itemsApiActions.submitPriceFeedbackSucceeded({ id })),
-          catchError(() => EMPTY),
+          catchError(ignoreApiFailure('items.submitPriceFeedback')),
         ),
       ),
     ),
@@ -259,7 +274,7 @@ export class ItemsEffects {
           const reason: QueueReason = item.priceUpdatedAt === null ? 'unpriced' : 'reactivated';
           // Best-effort background write — a failure must not kill the effect.
           return from(this.priceQueueApi.enqueue(item.id, reason)).pipe(
-            catchError(() => EMPTY),
+            catchError(ignoreApiFailure('priceQueue.enqueueOnAdd')),
           );
         }),
       ),
@@ -283,7 +298,7 @@ export class ItemsEffects {
           // Best-effort background write — a failure must not kill the effect.
           return from(
             Promise.all(stale.map((i) => this.priceQueueApi.enqueue(i.id, 'stale'))),
-          ).pipe(catchError(() => EMPTY));
+          ).pipe(catchError(ignoreApiFailure('priceQueue.enqueueStaleOnBoot')));
         }),
       ),
     { dispatch: false },

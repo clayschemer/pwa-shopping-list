@@ -1,13 +1,14 @@
 import { inject, Injectable } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
-import { catchError, EMPTY, filter, from, map, of, switchMap, take, tap, timer } from 'rxjs';
+import { catchError, EMPTY, filter, from, map, switchMap, take, tap, timer } from 'rxjs';
 import { sessionsActions, sessionsApiActions } from './sessions.actions';
 import { selectActiveSessionForCurrentShop } from './sessions.selectors';
 import { accountActions } from '../account/account.actions';
 import { uiActions } from '../ui/ui.actions';
 import { itemsActions, itemsApiActions } from '../items/items.actions';
 import { SessionApiService } from '../../core/api/session-api.service';
+import { onApiFailure } from '../../core/diagnostics/api-failure';
 import type { Session } from '../../models/session.model';
 import type { SessionId } from '../../models/ids.model';
 import type { NotFoundError, SessionConflictError } from '../../models/errors.model';
@@ -71,7 +72,11 @@ export class SessionsEffects {
           }),
           // Rejection (offline / flaky connectivity) must not kill the
           // effect stream — see the same pattern in items.effects.ts.
-          catchError(() => of(sessionsActions.sessionStartFailed())),
+          catchError(
+            onApiFailure('sessions.startSession', () =>
+              sessionsActions.sessionStartFailed(),
+            ),
+          ),
         ),
       ),
     ),
@@ -90,7 +95,11 @@ export class SessionsEffects {
               session: result as Session,
             });
           }),
-          catchError(() => of(sessionsActions.sessionStartFailed())),
+          catchError(
+            onApiFailure('sessions.joinSession', () =>
+              sessionsActions.sessionStartFailed(),
+            ),
+          ),
         ),
       ),
     ),
@@ -102,7 +111,11 @@ export class SessionsEffects {
       switchMap(({ sessionId }) =>
         from(this.sessionApi.closeSession(sessionId)).pipe(
           map(() => sessionsActions.sessionClosed({ id: sessionId })),
-          catchError(() => of(sessionsActions.sessionCloseFailed({ sessionId }))),
+          catchError(
+            onApiFailure('sessions.closeSession', () =>
+              sessionsActions.sessionCloseFailed({ sessionId }),
+            ),
+          ),
         ),
       ),
     ),
@@ -114,7 +127,11 @@ export class SessionsEffects {
       switchMap(({ sessionId }) =>
         from(this.sessionApi.discardSession(sessionId)).pipe(
           map(() => sessionsActions.sessionDiscarded({ id: sessionId })),
-          catchError(() => of(sessionsActions.sessionDiscardFailed({ sessionId }))),
+          catchError(
+            onApiFailure('sessions.discardSession', () =>
+              sessionsActions.sessionDiscardFailed({ sessionId }),
+            ),
+          ),
         ),
       ),
     ),

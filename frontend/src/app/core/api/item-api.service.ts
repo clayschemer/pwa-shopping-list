@@ -5,6 +5,8 @@ import {
   addDoc,
   deleteField,
   doc,
+  DocumentSnapshot,
+  getDoc,
   getDocs,
   query,
   QueryDocumentSnapshot,
@@ -104,8 +106,11 @@ function mapShopPrices(raw: unknown): Record<string, ShopPriceEntry> {
   return result;
 }
 
-export function mapItem(snap: QueryDocumentSnapshot, accountId: AccountId): Item {
-  const data = snap.data();
+export function mapItem(
+  snap: QueryDocumentSnapshot | DocumentSnapshot,
+  accountId: AccountId,
+): Item {
+  const data = (snap.data() ?? {}) as Record<string, unknown>;
   return {
     id: snap.id as ItemId,
     accountId,
@@ -248,6 +253,18 @@ export class ItemApiService {
     });
   }
 
+  /**
+   * Edits an item's user-editable fields.
+   *
+   * Deliberately a plain `updateDoc`, not a transaction. There is nothing to
+   * read-modify-write here — the payload is absolute — and a transaction
+   * needs a live server round-trip, so it retries and then rejects whenever
+   * the connection is dead. Adding and removing items use plain writes, which
+   * land in the local cache immediately and stay pending until the backend
+   * acknowledges them; an edit must degrade the same way, or a shopper on a
+   * flaky in-store connection sees adds succeed and edits fail with
+   * "check your connection".
+   */
   async updateItem(
     input: UpdateItemInput,
   ): Promise<Item | NotFoundError | NameConflictError> {
@@ -265,35 +282,36 @@ export class ItemApiService {
         return { type: 'NAME_CONFLICT', entityKind: 'item', name: trimmed };
       }
 
+      // Read the current document so the returned Item carries the fields the
+      // edit does not touch (price, purchaseCount, feedback). Served from the
+      // local cache when offline.
+      const ref = paths.itemDoc(this.db, accountId, input.id);
+      const current = await getDoc(ref);
+      if (!current.exists()) {
+        return { type: 'NOT_FOUND', entityKind: 'item', id: input.id };
+      }
+
+      const fields = {
+        name: trimmed,
+        description: input.description,
+        quantity: input.quantity,
+        unit: input.unit,
+        primaryCategoryId: input.primaryCategoryId,
+        secondaryCategoryIds: input.secondaryCategoryIds,
+        sizePerPieceQuantity: input.sizePerPieceQuantity,
+        sizePerPieceUnit: input.sizePerPieceUnit,
+      };
+
       try {
-        await runTransaction(this.db, async (tx) => {
-          const ref = paths.itemDoc(this.db, accountId, input.id);
-          const snap = await tx.get(ref);
-          if (!snap.exists()) throw new Error('NOT_FOUND');
-          tx.update(ref, {
-            name: trimmed,
-            description: input.description,
-            quantity: input.quantity,
-            unit: input.unit,
-            primaryCategoryId: input.primaryCategoryId,
-            secondaryCategoryIds: input.secondaryCategoryIds,
-            sizePerPieceQuantity: input.sizePerPieceQuantity,
-            sizePerPieceUnit: input.sizePerPieceUnit,
-          });
-        });
+        await updateDoc(ref, fields);
       } catch (err) {
-        if ((err as Error).message === 'NOT_FOUND') {
+        if ((err as { code?: string }).code === 'not-found') {
           return { type: 'NOT_FOUND', entityKind: 'item', id: input.id };
         }
         throw err;
       }
 
-      const snap = await getDocs(
-        query(paths.items(this.db, accountId), where('name', '==', trimmed)),
-      );
-      const doc = snap.docs.find((d) => d.id === input.id);
-      if (!doc) return { type: 'NOT_FOUND', entityKind: 'item', id: input.id };
-      return mapItem(doc, accountId);
+      return { ...mapItem(current, accountId), ...fields };
     });
   }
 

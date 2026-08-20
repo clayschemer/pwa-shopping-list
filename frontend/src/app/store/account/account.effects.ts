@@ -1,9 +1,10 @@
 import { inject, Injectable } from '@angular/core';
 import { Router } from '@angular/router';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
-import { catchError, defer, from, map, of, switchMap, tap } from 'rxjs';
+import { catchError, defer, from, map, switchMap, tap } from 'rxjs';
 import { authActions, accountActions } from './account.actions';
 import { AccountApiService } from '../../core/api/account-api.service';
+import { onApiFailure } from '../../core/diagnostics/api-failure';
 import { StreamErrorService } from '../../core/api/stream-error.service';
 import type { Account } from '../../models/account.model';
 import type { ShopId } from '../../models/ids.model';
@@ -65,7 +66,12 @@ export class AccountEffects {
             };
             return accountActions.accountLoaded({ account, selectedShopId });
           }),
-          catchError(() => of(accountActions.accessDenied())),
+          // Logged loudly: an undeployed-rules `permission-denied` here is
+          // indistinguishable from a genuine access denial in the UI, and has
+          // previously presented as users being silently signed out.
+          catchError(
+            onApiFailure('account.getAccount', () => accountActions.accessDenied()),
+          ),
         ),
       ),
     ),
@@ -94,7 +100,11 @@ export class AccountEffects {
             // Success — authState observable will emit the new user
             return { type: '[Auth] Email Sign In Success (noop)' };
           }),
-          catchError(() => of(authActions.signInFailed({ code: 'auth/unknown' }))),
+          catchError(
+            onApiFailure('auth.signInWithEmail', () =>
+              authActions.signInFailed({ code: 'auth/unknown' }),
+            ),
+          ),
         ),
       ),
     ),
