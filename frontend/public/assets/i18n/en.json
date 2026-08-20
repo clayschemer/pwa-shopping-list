@@ -335,5 +335,13 @@
     "sessionStartFailed": "The session could not be started. Check your connection and try again.",
     "sessionCloseFailed": "The session could not be closed. Check your connection and try again.",
     "sessionDiscardFailed": "The session could not be discarded. Check your connection and try again."
+  },
+  "boot": {
+    "progressLabel": "Loading progress",
+    "preparing": "Preparing translations",
+    "signingIn": "Signing in",
+    "loadingAccount": "Loading your account",
+    "loadingList": "Loading your list",
+    "ready": "Ready"
   }
 }

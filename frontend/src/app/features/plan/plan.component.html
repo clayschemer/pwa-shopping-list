@@ -1,6 +1,10 @@
 <section class="app-plan" [attr.aria-label]="'plan.listLabel' | transloco">
   @if (!loaded()) {
-    <div class="app-plan__skeleton" aria-hidden="true">
+    <div
+      class="app-plan__skeleton"
+      aria-hidden="true"
+      animate.leave="app-plan__skeleton--leaving"
+    >
       @for (g of [1, 2]; track g) {
         <div class="app-plan__skeleton-group">
           <div class="app-plan__skeleton-header">

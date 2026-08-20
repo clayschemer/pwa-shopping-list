@@ -35,6 +35,14 @@ describe('AppShellSkeletonComponent', () => {
     expect(el.querySelector('.app-shell-skeleton__top-bar')).toBeTruthy();
   });
 
+  /**
+   * The shop banner is a coloured strip, not a grey placeholder — reserving the space
+   * with an empty margin made it appear to drop in from nowhere once it mounted.
+   */
+  it('renders a shop-banner strip above the top bar', () => {
+    expect(el.querySelector('.app-shell-skeleton__banner')).toBeTruthy();
+  });
+
   it('renders the same group and row counts as the index.html splash', () => {
     expect(el.querySelectorAll('.app-shell-skeleton__group')).toHaveLength(
       SPLASH_GROUP_COUNT,

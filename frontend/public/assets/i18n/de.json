@@ -335,5 +335,13 @@
     "sessionStartFailed": "Die Sitzung konnte nicht gestartet werden. Prüfe die Verbindung und versuche es erneut.",
     "sessionCloseFailed": "Die Sitzung konnte nicht beendet werden. Prüfe die Verbindung und versuche es erneut.",
     "sessionDiscardFailed": "Die Sitzung konnte nicht verworfen werden. Prüfe die Verbindung und versuche es erneut."
+  },
+  "boot": {
+    "progressLabel": "Ladefortschritt",
+    "preparing": "Übersetzungen werden vorbereitet",
+    "signingIn": "Anmeldung läuft",
+    "loadingAccount": "Konto wird geladen",
+    "loadingList": "Liste wird geladen",
+    "ready": "Fertig"
   }
 }

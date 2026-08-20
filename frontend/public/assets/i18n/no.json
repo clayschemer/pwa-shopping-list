@@ -335,5 +335,13 @@
     "sessionStartFailed": "Økten kunne ikke startes. Sjekk tilkoblingen og prøv igjen.",
     "sessionCloseFailed": "Økten kunne ikke avsluttes. Sjekk tilkoblingen og prøv igjen.",
     "sessionDiscardFailed": "Økten kunne ikke forkastes. Sjekk tilkoblingen og prøv igjen."
+  },
+  "boot": {
+    "progressLabel": "Fremdrift for lasting",
+    "preparing": "Forbereder oversettelser",
+    "signingIn": "Logger inn",
+    "loadingAccount": "Laster kontoen din",
+    "loadingList": "Laster listen din",
+    "ready": "Klar"
   }
 }

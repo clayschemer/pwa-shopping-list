@@ -115,6 +115,11 @@
         --splash-group: #ffeadc;
         --splash-row: #ffffff;
         --splash-placeholder: #f4ded0;
+        --splash-banner: #bdefbe;
+        --splash-card: #fae4d5;
+        --splash-track: #f4ded0;
+        --splash-accent: #b02f00;
+        --splash-muted: #5a413a;
 
         position: fixed;
         inset: 0;
@@ -131,6 +136,11 @@
           --splash-group: #291d14;
           --splash-row: #160c05;
           --splash-placeholder: #3f3228;
+          --splash-banner: #23502c;
+          --splash-card: #34281e;
+          --splash-track: #3f3228;
+          --splash-accent: #ffb5a0;
+          --splash-muted: #ffdbd1;
         }
       }
 
@@ -140,6 +150,11 @@
         --splash-group: #ffeadc;
         --splash-row: #ffffff;
         --splash-placeholder: #f4ded0;
+        --splash-banner: #bdefbe;
+        --splash-card: #fae4d5;
+        --splash-track: #f4ded0;
+        --splash-accent: #b02f00;
+        --splash-muted: #5a413a;
       }
 
       :root.theme-dark .app-splash {
@@ -147,6 +162,11 @@
         --splash-group: #291d14;
         --splash-row: #160c05;
         --splash-placeholder: #3f3228;
+        --splash-banner: #23502c;
+        --splash-card: #34281e;
+        --splash-track: #3f3228;
+        --splash-accent: #ffb5a0;
+        --splash-muted: #ffdbd1;
       }
 
       .app-splash--out {
@@ -154,12 +174,16 @@
         transition: opacity 160ms cubic-bezier(0.4, 0, 1, 1);
       }
 
+      .app-splash__banner {
+        height: 1.5rem;
+        background: var(--splash-banner);
+      }
+
       .app-splash__top-bar {
         display: flex;
         align-items: center;
         justify-content: space-between;
         box-sizing: border-box;
-        margin-top: 1.5rem;
         min-height: 4.25rem;
         padding: 0.75rem 1rem;
       }
@@ -238,6 +262,73 @@
         height: 0.8125rem;
       }
 
+      /*
+        Progress card. Mirrors shell/boot-progress so the hand-off to the Angular card
+        does not resize: the phase headline has no text to show yet (transloco is not
+        loaded) but still reserves its line, and the counter sits where the Angular
+        card's counter sits.
+      */
+      .app-splash__progress {
+        position: fixed;
+        inset: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 1rem;
+        pointer-events: none;
+      }
+
+      .app-splash__card {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+        width: min(20rem, 100%);
+        box-sizing: border-box;
+        padding: 1rem;
+        border-radius: 1rem;
+        background: var(--splash-card);
+        box-shadow:
+          0px 3px 5px -1px rgba(0, 0, 0, 0.2),
+          0px 6px 10px 0px rgba(0, 0, 0, 0.14),
+          0px 1px 18px 0px rgba(0, 0, 0, 0.12);
+      }
+
+      .app-splash__track {
+        height: 0.25rem;
+        border-radius: 999rem;
+        background: var(--splash-track);
+        overflow: hidden;
+      }
+
+      .app-splash__fill {
+        width: 0;
+        height: 100%;
+        border-radius: inherit;
+        background: var(--splash-accent);
+      }
+
+      @media (prefers-reduced-motion: no-preference) {
+        .app-splash__fill {
+          transition: width 0.32s cubic-bezier(0.2, 0, 0, 1);
+        }
+      }
+
+      /* Empty, but holds the headline's line so the Angular card is the same height. */
+      .app-splash__phase {
+        margin: 0;
+        min-height: 1.40625rem;
+      }
+
+      .app-splash__diagnostics {
+        display: flex;
+        justify-content: flex-end;
+        margin: 0;
+        font-size: 0.75rem;
+        line-height: 1.4;
+        color: var(--splash-muted);
+        font-variant-numeric: tabular-nums;
+      }
+
       @media (prefers-reduced-motion: no-preference) {
         .app-splash__icon,
         .app-splash__toggle,
@@ -283,6 +374,8 @@
     <app-root aria-busy="true"></app-root>
 
     <div id="app-splash" class="app-splash" aria-hidden="true">
+      <div class="app-splash__banner"></div>
+
       <div class="app-splash__top-bar">
         <div class="app-splash__icon"></div>
         <div class="app-splash__toggle"></div>
@@ -318,6 +411,89 @@
           </div>
         </div>
       </div>
+
+      <div class="app-splash__progress">
+        <div class="app-splash__card">
+          <div class="app-splash__track">
+            <div id="app-splash-fill" class="app-splash__fill"></div>
+          </div>
+          <p class="app-splash__phase"></p>
+          <p class="app-splash__diagnostics">
+            <span id="app-splash-counter"></span>
+          </p>
+        </div>
+      </div>
     </div>
+
+    <!--
+      Pre-bootstrap half of the progress bar. Runs here, at the end of the body, so the
+      splash DOM exists; `buffered: true` picks up resources that finished during parse.
+      Hands the running tally to BootProgressService via window.__bootProgress, which
+      continues the same counters rather than resetting them.
+    -->
+    <script>
+      (function () {
+        var fill = document.getElementById('app-splash-fill');
+        var counter = document.getElementById('app-splash-counter');
+        if (!fill) {
+          return;
+        }
+
+        // The Angular half of the bar starts here — see PHASE_BASE in core/boot.
+        var CEILING = 35;
+        var state = { files: 0, bytes: 0 };
+        window.__bootProgress = state;
+
+        var numberFormat;
+        try {
+          numberFormat = new Intl.NumberFormat(navigator.language, {
+            maximumFractionDigits: 1,
+          });
+        } catch (e) {
+          numberFormat = new Intl.NumberFormat('en', { maximumFractionDigits: 1 });
+        }
+
+        function size(bytes) {
+          if (bytes >= 1e6) {
+            return numberFormat.format(bytes / 1e6) + ' MB';
+          }
+          if (bytes >= 1e3) {
+            return numberFormat.format(bytes / 1e3) + ' kB';
+          }
+          return numberFormat.format(bytes) + ' B';
+        }
+
+        function render() {
+          // No denominator is knowable before the app is parsed — the initial chunk
+          // count is not in the HTML. So approach the ceiling on a decelerating curve
+          // driven by real completions rather than inventing a fraction: the bar moves
+          // when resources land and stalls when the network does.
+          var percent = CEILING * (1 - Math.pow(0.9, state.files));
+          fill.style.width = percent.toFixed(1) + '%';
+          counter.textContent = state.files
+            ? numberFormat.format(state.files) + ' · ' + size(state.bytes)
+            : '';
+        }
+
+        if (typeof PerformanceObserver === 'undefined') {
+          return;
+        }
+
+        var observer = new PerformanceObserver(function (list) {
+          var entries = list.getEntries();
+          for (var i = 0; i < entries.length; i++) {
+            state.files += 1;
+            state.bytes += entries[i].transferSize || entries[i].encodedBodySize || 0;
+          }
+          render();
+        });
+
+        state.stop = function () {
+          observer.disconnect();
+        };
+
+        observer.observe({ type: 'resource', buffered: true });
+      })();
+    </script>
   </body>
 </html>

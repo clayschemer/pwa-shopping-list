@@ -335,5 +335,13 @@
     "sessionStartFailed": "La session n'a pas pu être démarrée. Vérifiez votre connexion et réessayez.",
     "sessionCloseFailed": "La session n'a pas pu être fermée. Vérifiez votre connexion et réessayez.",
     "sessionDiscardFailed": "La session n'a pas pu être abandonnée. Vérifiez votre connexion et réessayez."
+  },
+  "boot": {
+    "progressLabel": "Progression du chargement",
+    "preparing": "Préparation des traductions",
+    "signingIn": "Connexion en cours",
+    "loadingAccount": "Chargement de votre compte",
+    "loadingList": "Chargement de votre liste",
+    "ready": "Prêt"
   }
 }

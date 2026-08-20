@@ -6,13 +6,19 @@
   min-height: 100vh;
   min-height: 100dvh;
 
+  // Stands in for app-shop-banner, which is a coloured strip rather than a grey
+  // placeholder — reserving the space with a bare margin made the real banner look
+  // like it dropped in from nowhere once it mounted.
+  &__banner {
+    height: var(--app-shop-banner-height);
+    background: var(--mat-sys-secondary-container);
+  }
+
   &__top-bar {
     display: flex;
     align-items: center;
     justify-content: space-between;
     box-sizing: border-box;
-    // Offset by the shop-banner strip so the real top bar lands in the same place.
-    margin-top: var(--app-shop-banner-height);
     min-height: var(--app-top-bar-height);
     padding: var(--app-spacing-sm) var(--app-spacing-md);
   }

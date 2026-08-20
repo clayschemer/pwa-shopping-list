@@ -1,3 +1,7 @@
+@if (showBootProgress()) {
+  <app-boot-progress animate.leave="app-boot-progress--leaving" />
+}
+
 @if (isAuthenticated()) {
   @if (showShopBanner()) {
     <app-shop-banner

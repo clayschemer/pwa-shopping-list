@@ -1,0 +1,81 @@
+// Fades out as the list crossfades in, rather than blinking out of existence.
+// Applied by animate.leave from app.html, so it lands on the host element.
+:host(.app-boot-progress--leaving) .app-boot-progress {
+  opacity: 0;
+
+  @media (prefers-reduced-motion: no-preference) {
+    transition: opacity var(--app-duration-standard) var(--app-easing-exit);
+  }
+}
+
+.app-boot-progress {
+  position: fixed;
+  inset: 0;
+  z-index: 12;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--app-spacing-md);
+  // The skeleton beneath stays legible — this is an overlay, not a curtain.
+  pointer-events: none;
+
+  &__card {
+    display: flex;
+    flex-direction: column;
+    gap: var(--app-spacing-xs);
+    width: min(20rem, 100%);
+    box-sizing: border-box;
+    padding: var(--app-spacing-md);
+    border-radius: var(--app-shape-lg);
+    background: var(--mat-sys-surface-container-high);
+    color: var(--mat-sys-on-surface);
+    box-shadow: var(--mat-sys-level3);
+  }
+
+  &__track {
+    height: 0.25rem;
+    border-radius: var(--app-shape-pill);
+    background: var(--mat-sys-surface-container-highest);
+    overflow: hidden;
+  }
+
+  &__fill {
+    height: 100%;
+    border-radius: inherit;
+    background: var(--mat-sys-primary);
+
+    @media (prefers-reduced-motion: no-preference) {
+      transition: width var(--app-duration-emphasized) var(--app-easing-standard);
+    }
+  }
+
+  &__phase {
+    margin: 0;
+    font-size: var(--app-font-body);
+    line-height: var(--app-line-height-body);
+    font-weight: 500;
+  }
+
+  &__diagnostics {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: var(--app-spacing-xs);
+    margin: 0;
+    // Technical detail, deliberately quieter than the headline.
+    font-size: var(--app-font-caption);
+    line-height: var(--app-line-height-label);
+    color: var(--mat-sys-on-surface-variant);
+    font-variant-numeric: tabular-nums;
+  }
+
+  &__detail {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  &__counter {
+    flex-shrink: 0;
+  }
+}

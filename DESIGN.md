@@ -83,6 +83,19 @@ Shared pulse mixin lives in `frontend/src/styles/_skeleton.scss`. Components imp
 
 Spinners (`MatProgressSpinner`) are acceptable only for inline action feedback — e.g. a submit button in progress. They are not used for page-level content loading.
 
+### Loading States — Boot Progress Card
+
+App start-up is the one loading state where a skeleton alone is not enough: it spans several seconds and several distinct waits (app code, translations, auth, account, list data), and a static skeleton cannot distinguish "working" from "stuck". A **determinate progress card** is centred over the boot skeleton for the duration.
+
+- **Composition:** a 0.25rem track with a `--mat-sys-primary` fill, a phase headline, and a quieter diagnostics line
+- **Overlay, not curtain:** `pointer-events: none`, and the skeleton stays visible beneath it
+- **Determinate, and honest.** Progress is a weighted sum of real milestones — never a timer. Milestones are tracked independently rather than as a sequence, because translations load in parallel with auth and the boot reads fan out together; a strict state machine would show the bar stalling while work was happening. Weights live in `frontend/src/app/core/boot/boot-metrics.ts`
+- **The headline names the most significant outstanding milestone**, and is the only part announced (`role="status"`)
+- **Boot ends when the user must act.** The sign-in, access-denied, and pending-verification screens are destinations, not loading states — the card clears rather than covering them
+- **Two halves, one scale.** The pre-bootstrap segment is drawn by the inline script in `frontend/src/index.html` and owns 0–35%; `BootProgressService` continues from 35%. The splash card reserves the headline's line so the hand-off does not resize. Before bootstrap there is no denominator to divide by — the initial chunk count is not in the HTML — so that segment approaches its ceiling on a decelerating curve driven by real resource completions
+
+**Exception to the i18n rule:** the diagnostics line (`items · categories · shops · sessions`, `41 · 1.6 MB`) is deliberately **not** translated. It is language-neutral technical detail — collection names, file names, counts — aimed at diagnosing a slow start, and it carries `aria-hidden`. Numbers still go through `Intl.NumberFormat` for the active locale, so a Swedish or German reader gets a decimal comma. This is the only place in the app where user-visible text bypasses transloco, and it is confined to the boot card.
+
 ---
 
 ## App Shell & Navigation (Screen 1)

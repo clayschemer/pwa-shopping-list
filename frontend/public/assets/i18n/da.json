@@ -335,5 +335,13 @@
     "sessionStartFailed": "Sessionen kunne ikke startes. Tjek forbindelsen og prøv igen.",
     "sessionCloseFailed": "Sessionen kunne ikke afsluttes. Tjek forbindelsen og prøv igen.",
     "sessionDiscardFailed": "Sessionen kunne ikke kasseres. Tjek forbindelsen og prøv igen."
+  },
+  "boot": {
+    "progressLabel": "Indlæsningsforløb",
+    "preparing": "Forbereder oversættelser",
+    "signingIn": "Logger ind",
+    "loadingAccount": "Indlæser din konto",
+    "loadingList": "Indlæser din liste",
+    "ready": "Klar"
   }
 }

@@ -335,5 +335,13 @@
     "sessionStartFailed": "Sessionen kunde inte startas. Kontrollera anslutningen och försök igen.",
     "sessionCloseFailed": "Sessionen kunde inte avslutas. Kontrollera anslutningen och försök igen.",
     "sessionDiscardFailed": "Sessionen kunde inte förkastas. Kontrollera anslutningen och försök igen."
+  },
+  "boot": {
+    "progressLabel": "Förlopp för laddning",
+    "preparing": "Förbereder översättningar",
+    "signingIn": "Loggar in",
+    "loadingAccount": "Laddar ditt konto",
+    "loadingList": "Laddar din lista",
+    "ready": "Klar"
   }
 }

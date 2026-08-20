@@ -34,6 +34,8 @@ import { itemsApiActions } from './store/items/items.actions';
 import { NavDrawerComponent } from './shell/nav-drawer/nav-drawer.component';
 import { ShopBannerComponent } from './shell/shop-banner/shop-banner.component';
 import { AppShellSkeletonComponent } from './shell/app-shell-skeleton/app-shell-skeleton.component';
+import { BootProgressComponent } from './shell/boot-progress/boot-progress.component';
+import { BootProgressService } from './core/boot/boot-progress.service';
 import {
   ShopSelectSheetComponent,
   ShopSelectData,
@@ -92,6 +94,7 @@ const ROUTE_TITLE_KEYS: Record<string, string> = {
     NavDrawerComponent,
     ShopBannerComponent,
     AppShellSkeletonComponent,
+    BootProgressComponent,
     TranslocoPipe,
     MoneyPipe,
   ],
@@ -105,6 +108,7 @@ export class App {
   private readonly titleService = inject(Title);
   private readonly transloco = inject(TranslocoService);
   private readonly themeService = inject(ThemeService);
+  private readonly bootProgress = inject(BootProgressService);
   private readonly bottomSheet = inject(MatBottomSheet);
   private readonly dialog = inject(MatDialog);
   private readonly actions$ = inject(Actions);
@@ -193,6 +197,9 @@ export class App {
   readonly isFullScreenRoute = computed(() =>
     FULL_SCREEN_ROUTES.some((r) => this.currentUrl().startsWith(r)),
   );
+
+  /** Covers the whole boot sequence, spanning the shell skeleton and the plan skeleton. */
+  readonly showBootProgress = computed(() => !this.bootProgress.complete());
 
   readonly showShopBanner = computed(
     () =>

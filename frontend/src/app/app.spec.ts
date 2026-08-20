@@ -16,10 +16,15 @@ import { accountReducer } from './store/account/account.reducer';
 import { uiReducer } from './store/ui/ui.reducer';
 import { uiActions } from './store/ui/ui.actions';
 import { categoriesReducer } from './store/categories/categories.reducer';
+import { categoriesActions } from './store/categories/categories.actions';
+import { categoryGroupsReducer } from './store/category-groups/category-groups.reducer';
+import { categoryGroupsActions } from './store/category-groups/category-groups.actions';
 import { shopsReducer } from './store/shops/shops.reducer';
 import { shopsActions } from './store/shops/shops.actions';
 import { itemsReducer } from './store/items/items.reducer';
+import { itemsActions } from './store/items/items.actions';
 import { sessionsReducer } from './store/sessions/sessions.reducer';
+import { sessionsActions } from './store/sessions/sessions.actions';
 import { authActions, accountActions } from './store/account/account.actions';
 import type { UserId, AccountId, ShopId } from './models/ids.model';
 import type { Shop } from './models/shop.model';
@@ -36,6 +41,7 @@ function createTestBed(routes = [], extraProviders: unknown[] = []) {
         account: accountReducer,
         ui: uiReducer,
         categories: categoriesReducer,
+        categoryGroups: categoryGroupsReducer,
         shops: shopsReducer,
         items: itemsReducer,
         sessions: sessionsReducer,
@@ -97,6 +103,54 @@ describe('App', () => {
     const el = fixture.nativeElement as HTMLElement;
     expect(el.querySelector('.app-root__top-bar')).toBeFalsy();
     expect(el.querySelector('.app-root__loading')).toBeTruthy();
+  });
+
+  describe('boot progress card', () => {
+    it('overlays the skeleton while boot is still in flight', async () => {
+      await createTestBed();
+      const fixture = TestBed.createComponent(App);
+      fixture.detectChanges();
+      await fixture.whenStable();
+      fixture.detectChanges();
+
+      const el = fixture.nativeElement as HTMLElement;
+      expect(el.querySelector('app-boot-progress')).toBeTruthy();
+      expect(el.querySelector('app-shell-skeleton')).toBeTruthy();
+    });
+
+    it('disappears once every boot milestone has landed', async () => {
+      await createTestBed();
+      const store = TestBed.inject(Store);
+      authenticate(store);
+      store.dispatch(itemsActions.itemsLoaded({ items: [] }));
+      store.dispatch(categoriesActions.categoriesLoaded({ categories: [] }));
+      store.dispatch(categoryGroupsActions.categoryGroupsLoaded({ groups: [] }));
+      store.dispatch(shopsActions.shopsLoaded({ shops: [] }));
+      store.dispatch(sessionsActions.sessionsLoaded({ sessions: [] }));
+
+      const fixture = TestBed.createComponent(App);
+      fixture.detectChanges();
+      await fixture.whenStable();
+      fixture.detectChanges();
+
+      const el = fixture.nativeElement as HTMLElement;
+      expect(el.querySelector('app-boot-progress')).toBeFalsy();
+    });
+
+    // The sign-in screen is a destination, not a loading state.
+    it('does not cover the sign-in screen', async () => {
+      await createTestBed();
+      const store = TestBed.inject(Store);
+      store.dispatch(authActions.authStateEmpty());
+
+      const fixture = TestBed.createComponent(App);
+      fixture.detectChanges();
+      await fixture.whenStable();
+      fixture.detectChanges();
+
+      const el = fixture.nativeElement as HTMLElement;
+      expect(el.querySelector('app-boot-progress')).toBeFalsy();
+    });
   });
 
   // DESIGN.md: spinners are for inline action feedback only, never page-level loading.
