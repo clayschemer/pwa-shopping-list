@@ -1,0 +1,125 @@
+@use '../../../styles/focus';
+
+.app-item-sheet {
+  display: flex;
+  flex-direction: column;
+  gap: var(--app-spacing-md);
+  padding: var(--app-spacing-lg) var(--app-spacing-md) var(--app-spacing-md);
+
+  &__title {
+    margin: 0;
+    font-size: var(--app-font-title);
+    font-weight: 600;
+    line-height: var(--app-line-height-title);
+    color: var(--mat-sys-on-surface);
+  }
+
+  &__field {
+    width: 100%;
+  }
+
+  &__row {
+    display: flex;
+    gap: var(--app-spacing-sm);
+    align-items: flex-start;
+  }
+
+  &__qty {
+    flex: 1 1 40%;
+    min-width: 0;
+  }
+
+  &__unit {
+    flex: 1 1 60%;
+    min-width: 0;
+  }
+
+  &__group {
+    border: none;
+    padding: 0;
+    margin: 0;
+    // Fieldset defaults to min-inline-size: min-content, which lets natural
+    // content widths push past the container and cause horizontal scroll.
+    // Force it to behave like a normal block.
+    min-inline-size: 0;
+    inline-size: 100%;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    gap: var(--app-spacing-xs);
+  }
+
+  &__group-label {
+    font-size: var(--app-font-label);
+    font-weight: 500;
+    color: var(--mat-sys-on-surface-variant);
+    padding: 0;
+  }
+
+  &__group-hint {
+    font-size: var(--app-font-caption);
+    color: var(--mat-sys-on-surface-variant);
+    margin: 0;
+  }
+
+  &__group-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--app-spacing-sm);
+    flex-wrap: wrap;
+  }
+
+  &__sort-field {
+    flex: 0 1 12rem;
+    min-width: 9rem;
+  }
+
+  &__chip-dot {
+    display: inline-block;
+    width: 0.5rem;
+    height: 0.5rem;
+    border-radius: 50%;
+    flex-shrink: 0;
+    margin-inline-end: var(--app-spacing-xxs);
+    vertical-align: middle;
+  }
+
+  &__chip--tinted {
+    background-color: var(--chip-tint) !important;
+  }
+
+  &__secondary-section {
+    display: flex;
+    flex-direction: column;
+    gap: var(--app-spacing-xs);
+  }
+
+  &__secondary-toggle {
+    all: unset;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: var(--app-font-label);
+    font-weight: 500;
+    color: var(--mat-sys-on-surface-variant);
+    padding: var(--app-spacing-xxs) 0;
+
+    &:focus-visible {
+      @include focus.ring;
+      border-radius: var(--app-shape-xs);
+    }
+  }
+
+  &__actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: var(--app-spacing-xs);
+    padding: var(--app-spacing-xs);
+    border-radius: var(--app-shape-sm);
+    position: sticky;
+    bottom: 0;
+    background: var(--mat-sys-surface-container);
+  }
+}

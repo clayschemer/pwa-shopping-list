@@ -1,0 +1,57 @@
+@use '../../../styles/focus';
+
+.app-price-dialog {
+  display: flex;
+  flex-direction: column;
+  gap: var(--app-spacing-xs);
+  min-width: 16rem;
+
+  &__row {
+    display: flex;
+    flex-direction: column;
+    gap: var(--app-spacing-xxs);
+    margin: 0;
+  }
+
+  &__label {
+    font-size: var(--app-font-caption);
+    color: var(--mat-sys-on-surface-variant);
+    text-transform: uppercase;
+    letter-spacing: var(--app-letter-spacing-caption);
+  }
+
+  &__value {
+    font-size: var(--app-font-body);
+    color: var(--mat-sys-on-surface);
+    word-break: break-word;
+  }
+
+  &__feedback-link {
+    all: unset;
+    cursor: pointer;
+    font-size: var(--app-font-label);
+    color: var(--mat-sys-primary);
+    text-decoration: underline;
+    align-self: flex-start;
+    margin-top: var(--app-spacing-xs);
+
+    &:focus-visible {
+      @include focus.ring;
+      border-radius: var(--app-shape-xs);
+    }
+  }
+
+  &__feedback {
+    margin-top: var(--app-spacing-xs);
+  }
+
+  &__feedback-field {
+    width: 100%;
+  }
+
+  &__thanks {
+    margin: var(--app-spacing-sm) 0 0;
+    font-size: var(--app-font-body);
+    color: var(--mat-sys-on-surface-variant);
+  }
+}

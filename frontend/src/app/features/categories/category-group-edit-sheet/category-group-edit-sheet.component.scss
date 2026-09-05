@@ -1,0 +1,78 @@
+.app-category-group-edit-sheet {
+  display: flex;
+  flex-direction: column;
+  gap: var(--app-spacing-md);
+  padding: var(--app-spacing-lg) var(--app-spacing-md) var(--app-spacing-md);
+
+  &__title {
+    margin: 0;
+    font-size: var(--app-font-title);
+    font-weight: 600;
+    line-height: var(--app-line-height-title);
+    color: var(--mat-sys-on-surface);
+  }
+
+  &__field {
+    width: 100%;
+  }
+
+  &__shops {
+    border: 1px solid var(--mat-sys-outline-variant);
+    border-radius: var(--app-shape-sm);
+    padding: var(--app-spacing-xs) var(--app-spacing-sm) var(--app-spacing-sm);
+    margin: 0;
+
+    &-legend {
+      padding: 0 var(--app-spacing-xxs);
+      font-size: var(--app-font-caption);
+      font-weight: 600;
+      letter-spacing: var(--app-letter-spacing-caption);
+      text-transform: uppercase;
+      color: var(--mat-sys-on-surface-variant);
+    }
+
+    &-empty {
+      font-size: var(--app-font-label);
+      color: var(--mat-sys-on-surface-variant);
+      margin: var(--app-spacing-xxs) 0 0;
+    }
+
+    &-list {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+    }
+
+    &-row {
+      min-height: 2.25rem;
+      display: flex;
+      align-items: center;
+    }
+  }
+
+  &__no-members,
+  &__member-count {
+    font-size: var(--app-font-label);
+    color: var(--mat-sys-on-surface-variant);
+    margin: var(--app-spacing-xxs) 0 var(--app-spacing-xs);
+  }
+
+  &__actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: var(--app-spacing-xs);
+  }
+
+  &__danger {
+    border-top: 1px solid var(--mat-sys-outline-variant);
+    padding-top: var(--app-spacing-xs);
+    display: flex;
+    justify-content: flex-start;
+  }
+
+  &__delete {
+    --mdc-text-button-label-text-color: var(--mat-sys-error);
+  }
+}

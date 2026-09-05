@@ -1,0 +1,41 @@
+<div class="shop-select-sheet">
+  <h2 class="shop-select-sheet__title">{{ 'shop.selectTitle' | transloco }}</h2>
+  <ul class="shop-select-sheet__list" role="list">
+    @for (shop of data.shops; track shop.id) {
+      <li>
+        <button
+          type="button"
+          class="shop-select-sheet__option"
+          (click)="choose(shop.id)"
+        >
+          <mat-icon aria-hidden="true">storefront</mat-icon>
+          <div class="shop-select-sheet__label">
+            <span>{{ shop.name }}</span>
+            @if (hasActiveSession(shop.id)) {
+              <span class="shop-select-sheet__active-indicator">
+                {{ 'shop.activeSession' | transloco }}
+              </span>
+            }
+          </div>
+        </button>
+      </li>
+    }
+    <li>
+      <button
+        type="button"
+        class="shop-select-sheet__option shop-select-sheet__option--global"
+        (click)="choose(null)"
+      >
+        <mat-icon aria-hidden="true">public</mat-icon>
+        <div class="shop-select-sheet__label">
+          <span>{{ 'shop.global' | transloco }}</span>
+          @if (hasActiveSession(null)) {
+            <span class="shop-select-sheet__active-indicator">
+              {{ 'shop.activeSession' | transloco }}
+            </span>
+          }
+        </div>
+      </button>
+    </li>
+  </ul>
+</div>

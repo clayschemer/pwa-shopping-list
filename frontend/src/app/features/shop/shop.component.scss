@@ -1,0 +1,412 @@
+@use '../../../styles/skeleton';
+@use '../../../styles/focus';
+
+.app-shop {
+  // Containing block for the leaving skeleton — see &__skeleton--leaving.
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: var(--app-spacing-xs);
+  // bottom padding clears the session pill / future FAB
+  padding: var(--app-spacing-xs) 0 calc(var(--app-spacing-xxl) * 2);
+
+  &__skeleton {
+    display: flex;
+    flex-direction: column;
+    gap: var(--app-spacing-xs);
+
+    // Crossfade into the real list. $top matches this container's padding-top.
+    &--leaving {
+      @include skeleton.dissolve(var(--app-spacing-xs));
+    }
+  }
+
+  &__skeleton-group {
+    display: flex;
+    flex-direction: column;
+  }
+
+  &__skeleton-header {
+    padding: var(--app-spacing-xxs) var(--app-spacing-xs) 0 var(--app-spacing-sm);
+    background: var(--mat-sys-surface-container);
+    border-radius: var(--app-shape-sm) var(--app-shape-sm) 0 0;
+    width: max-content;
+  }
+
+  &__skeleton-title {
+    @include skeleton.pulse;
+
+    width: 5rem;
+    height: var(--app-font-caption);
+    margin: var(--app-spacing-xxs) 0;
+  }
+
+  &__skeleton-items {
+    display: flex;
+    flex-direction: column;
+    gap: var(--app-spacing-xxs);
+    padding: var(--app-spacing-xxs);
+    background: var(--mat-sys-surface-container);
+    border-radius: 0 var(--app-shape-sm) var(--app-shape-sm) var(--app-shape-sm);
+  }
+
+  &__skeleton-item {
+    display: flex;
+    align-items: center;
+    min-height: var(--app-spacing-row-min-height);
+    gap: var(--app-spacing-xs);
+    border-radius: var(--app-shape-sm);
+    background-color: var(--mat-sys-surface-container-lowest);
+  }
+
+  &__skeleton-item-main {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--app-spacing-sm);
+  }
+
+  &__skeleton-name {
+    @include skeleton.pulse;
+
+    width: 40%;
+    height: var(--app-font-body-lg);
+  }
+
+  &__skeleton-price {
+    @include skeleton.pulse;
+
+    width: 3rem;
+    height: var(--app-font-label);
+  }
+
+  &__skeleton-check {
+    @include skeleton.pulse;
+
+    width: 1.5rem;
+    height: 1.5rem;
+    margin-inline-end: var(--app-spacing-md);
+    border-radius: 0.1875rem;
+  }
+
+  &__empty {
+    text-align: center;
+    padding: var(--app-spacing-xxl) var(--app-spacing-md);
+    font-size: var(--app-font-body-lg);
+    color: var(--mat-sys-on-surface-variant);
+  }
+
+  // Same grid-collapse technique as &__item (see comment above it), applied
+  // one level up so a category emptied down to its last item collapses the
+  // whole group — header included — instead of the section vanishing
+  // outright and jumping the groups below it into place.
+  &__group {
+    position: relative;
+    display: grid;
+    grid-template-rows: 1fr;
+    border-radius: var(--app-shape-sm);
+    overflow: hidden;
+
+    @media (prefers-reduced-motion: no-preference) {
+      transition:
+        grid-template-rows var(--app-duration-relaxed) var(--app-easing-standard),
+        opacity var(--app-duration-relaxed) var(--app-easing-standard),
+        transform var(--app-duration-relaxed) var(--app-easing-standard);
+
+      @starting-style {
+        grid-template-rows: 0fr;
+        opacity: 0;
+        transform: scale(0.96);
+      }
+    }
+
+    &--leaving {
+      grid-template-rows: 0fr;
+      opacity: 0;
+      transform: scale(0.96);
+
+      @media (prefers-reduced-motion: no-preference) {
+        transition:
+          grid-template-rows var(--app-duration-relaxed) var(--app-easing-standard),
+          opacity var(--app-duration-relaxed) var(--app-easing-standard),
+          transform var(--app-duration-relaxed) var(--app-easing-standard);
+      }
+    }
+
+    &--uncategorised {
+      .app-shop__group-title {
+        opacity: 0.5;
+        color: var(--mat-sys-on-surface);
+      }
+    }
+  }
+
+  &__group-collapse {
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    overflow: hidden;
+  }
+
+  // Decorative only. It is absolutely positioned over the group — including
+  // the item rows — so without this it swallows taps on the leading edge of
+  // every row it covers.
+  &__group-color-element {
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 4.5rem;
+    opacity: 0.2;
+    pointer-events: none;
+  }
+
+  &__group-header {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: var(--app-spacing-xs);
+    padding: var(--app-spacing-xxs) var(--app-spacing-xs) var(--app-spacing-xxs) var(--app-spacing-sm);
+    width: max-content;
+    background: var(--mat-sys-surface-container);
+    border-radius: var(--app-shape-sm) var(--app-shape-sm) 0 0;
+  }
+
+  &__group-title {
+    margin: 0;
+    font-size: var(--app-font-caption);
+    font-weight: 600;
+    line-height: var(--app-line-height-label);
+    letter-spacing: var(--app-letter-spacing-caption);
+    text-transform: uppercase;
+    color: var(--mat-sys-on-surface);
+    display: flex;
+    align-items: center;
+    gap: var(--app-spacing-xxs);
+  }
+
+  &__group-dot {
+    display: inline-block;
+    width: 0.5rem;
+    height: 0.5rem;
+    border-radius: 50%;
+    border: 0.1rem solid var(--mat-sys-surface);
+    flex-shrink: 0;
+    opacity: 1;
+  }
+
+  &__group-totals {
+    display: flex;
+    gap: var(--app-spacing-sm);
+    font-size: var(--app-font-label);
+    color: var(--mat-sys-on-surface-variant);
+  }
+
+  &__group-session {
+    color: var(--mat-sys-secondary);
+    font-weight: 600;
+  }
+
+  &__items-wrapper {
+    overflow: hidden;
+    position: relative;
+    background: var(--mat-sys-surface-container);
+    border-radius: 0 var(--app-shape-sm) var(--app-shape-sm) var(--app-shape-sm);
+  }
+
+  &__items {
+    list-style: none;
+    margin: 0;
+    padding: var(--app-spacing-xxs);
+    display: flex;
+    flex-direction: column;
+    gap: var(--app-spacing-xxs);
+  }
+
+  // Flat list mode (hide grouping): no category headers / shop-coloured
+  // container. Each row carries the primary category colour as a thin
+  // leading-edge accent so grouping context isn't lost.
+  &__items--flat {
+    padding: var(--app-spacing-xxs) 0;
+    background: transparent;
+
+    .app-shop__item {
+      background-color: var(--mat-sys-surface-container);
+      border-radius: 0 var(--app-shape-sm) var(--app-shape-sm) 0;
+    }
+  }
+
+  // Grid + a collapsing child is the CSS-only way to transition an
+  // auto-height row: grid-template-rows can animate between an explicit
+  // 1fr (natural height) and 0fr, unlike `height: auto`. The direct child
+  // (&__item-collapse) must have overflow: hidden so its automatic minimum
+  // size resolves to 0 instead of its content's min-content height, letting
+  // the track actually reach 0fr. This is what makes the surrounding rows
+  // slide smoothly into the closing/opening gap instead of snapping.
+  &__item {
+    position: relative;
+    display: grid;
+    grid-template-rows: 1fr;
+    border-radius: var(--app-shape-sm);
+    background-color: var(--mat-sys-surface-container-lowest);
+
+    @media (prefers-reduced-motion: no-preference) {
+      transition:
+        grid-template-rows var(--app-duration-relaxed) var(--app-easing-standard),
+        opacity var(--app-duration-relaxed) var(--app-easing-standard),
+        transform var(--app-duration-relaxed) var(--app-easing-standard);
+
+      @starting-style {
+        grid-template-rows: 0fr;
+        opacity: 0;
+        transform: scale(0.96);
+      }
+    }
+
+    &--accent {
+      border-left: 3px solid var(--app-shop-accent, transparent);
+      padding-left: var(--app-spacing-xxs);
+    }
+
+    &--pending,
+    &--checked {
+      opacity: 0.42;
+      transform: scale(0.98);
+
+      .app-shop__item-name {
+        text-decoration: line-through;
+      }
+    }
+
+    // Overrides --pending/--checked on final removal (after the undo window
+    // elapses) so the row collapses and fades out instead of vanishing when
+    // @for removes it.
+    &--leaving {
+      grid-template-rows: 0fr;
+      opacity: 0;
+      transform: scale(0.96);
+
+      @media (prefers-reduced-motion: no-preference) {
+        transition:
+          grid-template-rows var(--app-duration-relaxed) var(--app-easing-standard),
+          opacity var(--app-duration-relaxed) var(--app-easing-standard),
+          transform var(--app-duration-relaxed) var(--app-easing-standard);
+      }
+    }
+  }
+
+  &__item-collapse {
+    display: flex;
+    align-items: center;
+    gap: var(--app-spacing-xs);
+    min-height: 0;
+    overflow: hidden;
+  }
+
+  &__item-main {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    gap: var(--app-spacing-xxs);
+    padding: var(--app-spacing-sm);
+    justify-content: space-between;
+    flex-wrap: wrap;
+  }
+
+  &__item-name {
+    font-size: var(--app-font-body-lg);
+  }
+
+  &__item-description {
+    font-size: var(--app-font-label);
+    color: var(--mat-sys-on-surface-variant);
+    font-style: italic;
+    flex-basis: 100%;
+  }
+
+  &__item-meta {
+    display: flex;
+    align-items: baseline;
+    gap: var(--app-spacing-xs);
+    font-size: var(--app-font-label);
+    color: var(--mat-sys-on-surface-variant);
+  }
+
+  // The undo hint is the affordance it names: tapping it unchecks the item.
+  // It swaps in for the price during the undo window, so its box must match
+  // what it replaces — any min-height here grows the row the moment an item is
+  // checked. The reachable target on a phone held one-handed mid-shop comes
+  // from an overlay instead, which extends the hit area without taking space.
+  &__item-undo {
+    all: unset;
+    position: relative;
+    cursor: pointer;
+    color: var(--mat-sys-primary);
+    font-weight: 500;
+    white-space: nowrap;
+    padding: var(--app-spacing-xxs) var(--app-spacing-xs);
+    border-radius: var(--app-shape-xs);
+
+    &::after {
+      content: '';
+      position: absolute;
+      inset-inline: 0;
+      top: 50%;
+      block-size: var(--app-spacing-row-min-height);
+      transform: translateY(-50%);
+    }
+
+    &:focus-visible {
+      @include focus.ring;
+    }
+  }
+
+  &__item-price {
+    white-space: nowrap;
+
+    &--approximate {
+      font-style: italic;
+      color: var(--mat-sys-on-surface-variant);
+    }
+  }
+
+  &__item-price-btn {
+    all: unset;
+    cursor: pointer;
+    white-space: nowrap;
+    padding: var(--app-spacing-xxs) var(--app-spacing-xs);
+    border-radius: var(--app-shape-xs);
+
+    &:focus-visible {
+      @include focus.ring;
+    }
+
+    &--approximate {
+      font-style: italic;
+      color: var(--mat-sys-on-surface-variant);
+    }
+  }
+
+  &__item-check {
+    all: unset;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 3.5rem;
+    min-height: var(--app-spacing-row-min-height);
+    color: var(--mat-sys-primary);
+
+    &:focus-visible {
+      @include focus.ring;
+      border-radius: var(--app-shape-xs);
+    }
+  }
+}
+
+:host-context(body.theme-left-handed) {
+  .app-shop__item {
+    flex-direction: row-reverse;
+  }
+}

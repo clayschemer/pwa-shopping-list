@@ -1,0 +1,373 @@
+@use '../../../styles/skeleton';
+@use '../../../styles/focus';
+
+.app-plan {
+  // Containing block for the leaving skeleton — see &__skeleton--leaving.
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: var(--app-spacing-xs);
+  // bottom padding clears the FAB
+  padding: var(--app-spacing-xs) 0 calc(var(--app-spacing-xxl) * 2);
+
+  &__skeleton {
+    display: flex;
+    flex-direction: column;
+    gap: var(--app-spacing-xs);
+
+    // Crossfade into the real list. $top matches this container's padding-top.
+    &--leaving {
+      @include skeleton.dissolve(var(--app-spacing-xs));
+    }
+  }
+
+  &__skeleton-group {
+    display: flex;
+    flex-direction: column;
+    gap: var(--app-spacing-xxs);
+    background: var(--mat-sys-surface-container);
+    padding: 0 var(--app-spacing-xxs) var(--app-spacing-xxs);
+    border-radius: var(--app-shape-sm);
+  }
+
+  &__skeleton-header {
+    padding: var(--app-spacing-sm) var(--app-spacing-sm) var(--app-spacing-xs);
+  }
+
+  &__skeleton-title {
+    @include skeleton.pulse;
+
+    width: 5rem;
+    height: var(--app-font-caption);
+  }
+
+  &__skeleton-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    min-height: var(--app-spacing-row-min-height);
+    padding: var(--app-spacing-sm);
+    border-radius: var(--app-shape-sm);
+    background-color: var(--mat-sys-surface-container-lowest);
+  }
+
+  &__skeleton-name {
+    @include skeleton.pulse;
+
+    width: 40%;
+    height: var(--app-font-body-lg);
+  }
+
+  &__skeleton-qty {
+    @include skeleton.pulse;
+
+    width: 2.5rem;
+    height: var(--app-font-label);
+  }
+
+  &__empty {
+    text-align: center;
+    padding: var(--app-spacing-xxl) var(--app-spacing-md);
+    font-size: var(--app-font-body-lg);
+    color: var(--mat-sys-on-surface-variant);
+  }
+
+  // Same grid-collapse technique as &__item (see comment above it), applied
+  // one level up so a category emptied down to its last item collapses the
+  // whole group — header included — instead of the section vanishing
+  // outright and jumping the groups below it into place.
+  &__group {
+    position: relative;
+    display: grid;
+    grid-template-rows: 1fr;
+    overflow: hidden;
+    background: var(--mat-sys-surface-container);
+    border-radius: var(--app-shape-sm);
+
+    @media (prefers-reduced-motion: no-preference) {
+      transition:
+        grid-template-rows var(--app-duration-relaxed) var(--app-easing-standard),
+        opacity var(--app-duration-relaxed) var(--app-easing-standard),
+        transform var(--app-duration-relaxed) var(--app-easing-standard);
+
+      @starting-style {
+        grid-template-rows: 0fr;
+        opacity: 0;
+        transform: scale(0.96);
+      }
+    }
+
+    &--leaving {
+      grid-template-rows: 0fr;
+      opacity: 0;
+      transform: scale(0.96);
+
+      @media (prefers-reduced-motion: no-preference) {
+        transition:
+          grid-template-rows var(--app-duration-relaxed) var(--app-easing-standard),
+          opacity var(--app-duration-relaxed) var(--app-easing-standard),
+          transform var(--app-duration-relaxed) var(--app-easing-standard);
+      }
+    }
+
+    &--uncategorised {
+      .app-plan__group-header {
+        padding: var(--app-spacing-sm) var(--app-spacing-xxs) var(--app-spacing-xs) var(--app-spacing-sm);
+      }
+      .app-plan__group-title {
+        color: var(--mat-sys-on-surface-variant);
+        opacity: 0.5;
+      }
+    }
+  }
+
+  &__group-collapse {
+    display: flex;
+    flex-direction: column;
+    gap: var(--app-spacing-xxs);
+    padding: 0 var(--app-spacing-xxs) var(--app-spacing-xxs);
+    min-height: 0;
+    overflow: hidden;
+  }
+
+  &__group-color-element {
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 4.5rem;
+    opacity: 0.2;
+  }
+
+  &__group-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--app-spacing-xs);
+    padding: var(--app-spacing-xs) var(--app-spacing-xxs) var(--app-spacing-xxs) var(--app-spacing-sm);
+  }
+
+  &__group-title {
+    margin: 0;
+    font-size: var(--app-font-caption);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: var(--app-letter-spacing-caption);
+    color: var(--mat-sys-on-surface-variant);
+    display: flex;
+    align-items: center;
+    gap: var(--app-spacing-xxs);
+  }
+
+  &__group-dot {
+    display: inline-block;
+    width: 0.5rem;
+    height: 0.5rem;
+    border-radius: 50%;
+    border: 0.1rem solid var(--mat-sys-surface);
+    flex-shrink: 0;
+    opacity: 1;
+  }
+
+  &__group-meta {
+    display: flex;
+    align-items: center;
+    gap: var(--app-spacing-xxs);
+  }
+
+  &__group-total {
+    font-size: var(--app-font-label);
+    color: var(--mat-sys-on-surface-variant);
+  }
+
+  &__group-menu-btn {
+    color: var(--mat-sys-on-surface-variant);
+  }
+
+  &__items {
+    list-style: none;
+    position: relative;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--app-spacing-xxs);
+  }
+
+  // Grid + a collapsing child is the CSS-only way to transition an
+  // auto-height row: grid-template-rows can animate between an explicit
+  // 1fr (natural height) and 0fr, unlike `height: auto`. The direct child
+  // (&__item-collapse) must have overflow: hidden so its automatic minimum
+  // size resolves to 0 instead of its content's min-content height, letting
+  // the track actually reach 0fr. This is what makes the surrounding rows
+  // slide smoothly into the closing/opening gap instead of snapping.
+  &__item {
+    display: grid;
+    grid-template-rows: 1fr;
+    border-radius: var(--app-shape-sm);
+    background-color: var(--mat-sys-surface-container-lowest);
+
+    @media (prefers-reduced-motion: no-preference) {
+      transition:
+        grid-template-rows var(--app-duration-relaxed) var(--app-easing-standard),
+        opacity var(--app-duration-relaxed) var(--app-easing-standard),
+        transform var(--app-duration-relaxed) var(--app-easing-standard);
+
+      @starting-style {
+        grid-template-rows: 0fr;
+        opacity: 0;
+        transform: scale(0.96);
+      }
+    }
+
+    &--leaving {
+      grid-template-rows: 0fr;
+      opacity: 0;
+      transform: scale(0.96);
+
+      @media (prefers-reduced-motion: no-preference) {
+        transition:
+          grid-template-rows var(--app-duration-relaxed) var(--app-easing-standard),
+          opacity var(--app-duration-relaxed) var(--app-easing-standard),
+          transform var(--app-duration-relaxed) var(--app-easing-standard);
+      }
+    }
+  }
+
+  &__item-collapse {
+    display: flex;
+    align-items: center;
+    gap: var(--app-spacing-xs);
+    min-height: 0;
+    overflow: hidden;
+  }
+
+  // Flat list mode (hide grouping): each row carries the primary category
+  // colour as a thin leading-edge accent so grouping context isn't lost.
+  &__items--flat {
+    padding: var(--app-spacing-xxs) 0;
+
+    .app-plan__item {
+      border-radius: 0 var(--app-shape-sm) var(--app-shape-sm) 0;
+    }
+  }
+
+  &__item--accent {
+    border-left: 3px solid var(--app-plan-accent, transparent);
+    padding-left: var(--app-spacing-xxs);
+  }
+
+  // Revealed checked items (Show checked toggle): dimmed + struck-through.
+  // Tapping × deletes; tapping main area opens edit. No restore affordance.
+  &__item--checked {
+    .app-plan__item-name,
+    .app-plan__item-qty,
+    .app-plan__item-description {
+      text-decoration: line-through;
+      color: var(--mat-sys-on-surface-variant);
+      opacity: 0.7;
+    }
+
+    .app-plan__item-price,
+    .app-plan__item-price-btn {
+      opacity: 0.6;
+    }
+  }
+
+  &__item-main {
+    all: unset;
+    cursor: pointer;
+    flex: 1;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: var(--app-spacing-xs);
+    padding: var(--app-spacing-sm);
+    color: var(--mat-sys-on-surface);
+    min-height: var(--app-spacing-row-min-height);
+    box-sizing: border-box;
+    justify-content: space-between;
+
+    &:focus-visible {
+      @include focus.ring;
+      border-radius: var(--app-shape-xs);
+    }
+  }
+
+  &__item-name {
+    font-size: var(--app-font-body-lg);
+    margin-right: auto;
+  }
+
+  &__item-qty {
+    font-size: var(--app-font-label);
+    color: var(--mat-sys-on-surface-variant);
+  }
+
+  &__item-meta {
+    display: flex;
+    gap: var(--app-spacing-xs);
+    align-items: baseline;
+    font-size: var(--app-font-label);
+    color: var(--mat-sys-on-surface-variant);
+  }
+
+  &__item-price {
+    white-space: nowrap;
+    padding: var(--app-spacing-xxs) var(--app-spacing-xs);
+    font-size: var(--app-font-label);
+    color: var(--mat-sys-on-surface-variant);
+
+    &--approximate {
+      font-style: italic;
+    }
+  }
+
+  &__item-price-btn {
+    all: unset;
+    cursor: pointer;
+    white-space: nowrap;
+    padding: var(--app-spacing-xxs) var(--app-spacing-xs);
+    border-radius: var(--app-shape-xs);
+    font-size: var(--app-font-label);
+    color: var(--mat-sys-on-surface-variant);
+
+    &:focus-visible {
+      @include focus.ring;
+    }
+
+    &--approximate {
+      font-style: italic;
+    }
+  }
+
+  &__item-description {
+    flex-basis: 100%;
+    font-size: var(--app-font-label);
+    color: var(--mat-sys-on-surface-variant);
+  }
+
+  &__item-remove {
+    all: unset;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: var(--app-spacing-row-min-height);
+    height: var(--app-spacing-row-min-height);
+    color: var(--mat-sys-on-surface-variant);
+    border-radius: 50%;
+
+    @media (prefers-reduced-motion: no-preference) {
+      transition: color var(--app-duration-quick) var(--app-easing-standard);
+    }
+
+    &:hover {
+      color: var(--mat-sys-error);
+    }
+
+    &:focus-visible {
+      @include focus.ring;
+    }
+  }
+}

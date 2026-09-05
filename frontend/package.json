@@ -1,0 +1,58 @@
+{
+  "name": "frontend",
+  "version": "0.0.0",
+  "scripts": {
+    "ng": "ng",
+    "start": "ng serve",
+    "build": "ng build",
+    "watch": "ng build --watch --configuration development",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "test:acceptance": "cucumber-js --config cucumber.config.ts"
+  },
+  "private": true,
+  "packageManager": "npm@10.9.7",
+  "dependencies": {
+    "@angular/cdk": "^21.2.5",
+    "@angular/common": "^21.2.0",
+    "@angular/compiler": "^21.2.0",
+    "@angular/core": "^21.2.0",
+    "@angular/fire": "21.0.0-rc.0",
+    "@angular/forms": "^21.2.0",
+    "@angular/material": "^21.2.5",
+    "@angular/platform-browser": "^21.2.0",
+    "@angular/router": "^21.2.0",
+    "@angular/service-worker": "^21.2.9",
+    "@cucumber/cucumber": "^12.7.0",
+    "@cucumber/pretty-formatter": "^3.2.0",
+    "@jsverse/transloco": "^8.3.0",
+    "@ngrx/effects": "^21.1.0",
+    "@ngrx/entity": "^21.1.0",
+    "@ngrx/router-store": "^21.1.0",
+    "@ngrx/signals": "^21.1.0",
+    "@ngrx/store": "^21.1.0",
+    "firebase": "^12.11.0",
+    "rxjs": "~7.8.0",
+    "ts-node": "^10.9.2",
+    "tslib": "^2.3.0"
+  },
+  "devDependencies": {
+    "@analogjs/vite-plugin-angular": "^2.4.0",
+    "@analogjs/vitest-angular": "^2.4.0",
+    "@angular/build": "^21.2.6",
+    "@angular/cli": "^21.2.6",
+    "@angular/compiler-cli": "^21.2.0",
+    "@angular/pwa": "^21.2.7",
+    "@firebase/rules-unit-testing": "^5.0.0",
+    "@vitest/coverage-v8": "^4.1.2",
+    "firebase-tools": "^14.27.0",
+    "jsdom": "^28.1.0",
+    "prettier": "^3.8.1",
+    "typescript": "~5.9.2",
+    "vitest": "^4.0.8"
+  },
+  "volta": {
+    "node": "24.16.0"
+  }
+}

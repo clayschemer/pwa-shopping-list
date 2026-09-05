@@ -1,0 +1,54 @@
+@use '../../../styles/focus';
+
+.shop-select-sheet {
+  padding: var(--app-spacing-md);
+
+  &__title {
+    margin: 0 0 var(--app-spacing-sm);
+    font-size: var(--app-font-title);
+    font-weight: 600;
+    line-height: var(--app-line-height-title);
+    color: var(--mat-sys-on-surface);
+  }
+
+  &__list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+  }
+
+  &__option {
+    all: unset;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: var(--app-spacing-sm);
+    width: 100%;
+    min-height: var(--app-spacing-row-min-height);
+    padding: var(--app-spacing-xs) var(--app-spacing-xxs);
+    color: var(--mat-sys-on-surface);
+    border-bottom: 1px solid var(--mat-sys-outline-variant);
+
+    &:focus-visible {
+      @include focus.ring;
+      border-radius: var(--app-shape-xs);
+    }
+
+    &--global {
+      color: var(--mat-sys-on-surface-variant);
+    }
+  }
+
+  &__label {
+    display: flex;
+    flex-direction: column;
+  }
+
+  &__active-indicator {
+    font-size: var(--app-font-caption);
+    color: var(--mat-sys-secondary);
+    line-height: var(--app-line-height-label);
+  }
+}

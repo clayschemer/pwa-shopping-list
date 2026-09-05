@@ -1,0 +1,115 @@
+@use '../styles/focus';
+
+:host {
+  display: block;
+  min-height: 100vh;
+  min-height: 100dvh;
+}
+
+.app-root {
+  &__sidenav-container {
+    min-height: 100vh;
+    min-height: 100dvh;
+  }
+
+  &__top-bar {
+    position: fixed;
+    top: var(--app-shop-banner-height);
+    left: 0;
+    right: 0;
+    z-index: 10;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    min-height: var(--app-top-bar-height);
+    padding: var(--app-spacing-sm) var(--app-spacing-md);
+    background: color-mix(in srgb, var(--mat-sys-surface) 40%, transparent);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    box-sizing: border-box;
+  }
+
+  &__mode-toggle {
+    display: flex;
+    gap: var(--app-spacing-xxs);
+    padding: var(--app-spacing-xxs);
+    border-radius: var(--app-shape-pill);
+    background: var(--mat-sys-surface-container);
+  }
+
+  &__mode-btn {
+    all: unset;
+    cursor: pointer;
+    padding: var(--app-spacing-xs) var(--app-spacing-md);
+    border-radius: var(--app-shape-pill);
+    font-size: var(--app-font-label);
+    font-weight: 500;
+    color: var(--mat-sys-on-surface-variant);
+
+    @media (prefers-reduced-motion: no-preference) {
+      transition:
+        background-color var(--app-duration-standard) var(--app-easing-standard),
+        color var(--app-duration-standard) var(--app-easing-standard);
+    }
+
+    &--active {
+      background: var(--mat-sys-primary);
+      color: var(--mat-sys-on-primary);
+    }
+
+    &:focus-visible {
+      @include focus.ring;
+    }
+  }
+
+  &__session-pill {
+    all: unset;
+    cursor: pointer;
+    display: flex;
+    gap: var(--app-spacing-xs);
+    align-items: center;
+    padding: var(--app-spacing-xxs) var(--app-spacing-sm);
+    border-radius: var(--app-shape-lg);
+    font-size: var(--app-font-caption);
+    font-weight: 500;
+    background: var(--mat-sys-primary-container);
+    color: var(--mat-sys-on-primary-container);
+
+    &:focus-visible {
+      @include focus.ring;
+    }
+  }
+
+  &__session-pill-total {
+    font-size: var(--app-font-label);
+    font-weight: 600;
+  }
+
+  &__content {
+    // Top padding clears the fixed shop-banner + top-bar stack; bottom
+    // clears any FAB / safe area. Offsets are non-shrinking semantic tokens
+    // so compact mode doesn't pull content under the bars (the top-bar's
+    // own --app-top-bar-height shifts in lockstep — see _theme-modes.scss;
+    // --app-shop-banner-height is fixed across modes, see _theme-base.scss).
+    padding:
+      calc(var(--app-shop-banner-height) + var(--app-top-bar-height) + var(--app-spacing-xs))
+      var(--app-spacing-md)
+      var(--app-fab-clearance);
+  }
+
+  &__fullscreen {
+    min-height: 100vh;
+    min-height: 100dvh;
+
+    &--with-banner {
+      padding-top: var(--app-shop-banner-height);
+    }
+  }
+
+  // Wraps the shell skeleton, which fills the viewport itself — no centring here.
+  &__loading {
+    display: block;
+    min-height: 100vh;
+    min-height: 100dvh;
+  }
+}

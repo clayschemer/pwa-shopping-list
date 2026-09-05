@@ -1,0 +1,12 @@
+// _focus.scss — shared focus-ring mixin
+// Usage: @use '../../../styles/focus'; then `&:focus-visible { @include focus.ring; }`
+//
+// Reads from --app-focus-ring-* tokens declared on <html> in _theme-base.scss.
+// High-contrast mode already swaps --mat-sys-primary and bumps Material's own
+// focus indicators via mat.strong-focus-indicators(), so no per-component
+// branching is needed here.
+
+@mixin ring {
+  outline: var(--app-focus-ring-width) solid var(--app-focus-ring-color);
+  outline-offset: var(--app-focus-ring-offset);
+}

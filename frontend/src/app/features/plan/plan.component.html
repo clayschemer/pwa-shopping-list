@@ -1,0 +1,231 @@
+<section class="app-plan" [attr.aria-label]="'plan.listLabel' | transloco">
+  @if (!loaded()) {
+    <div
+      class="app-plan__skeleton"
+      aria-hidden="true"
+      animate.leave="app-plan__skeleton--leaving"
+    >
+      @for (g of [1, 2]; track g) {
+        <div class="app-plan__skeleton-group">
+          <div class="app-plan__skeleton-header">
+            <div class="app-plan__skeleton-title"></div>
+          </div>
+          @for (i of g === 1 ? [1, 2, 3] : [1, 2]; track i) {
+            <div class="app-plan__skeleton-item">
+              <div class="app-plan__skeleton-name"></div>
+              <div class="app-plan__skeleton-qty"></div>
+            </div>
+          }
+        </div>
+      }
+    </div>
+  } @else if (groups().length === 0) {
+    <p class="app-plan__empty">{{ 'plan.empty' | transloco }}</p>
+  } @else if (hideGrouping()) {
+    <ul class="app-plan__items app-plan__items--flat" role="list">
+      @for (row of flatRows(); track row.item.id) {
+        <li
+          class="app-plan__item app-plan__item--accent"
+          [class.app-plan__item--checked]="row.isChecked"
+          [style.--app-plan-accent]="row.categoryColor || 'transparent'"
+          animate.leave="app-plan__item--leaving"
+        >
+          <div class="app-plan__item-collapse">
+            <ng-container
+              *ngTemplateOutlet="itemBody; context: { item: row.item, isChecked: row.isChecked }"
+            ></ng-container>
+          </div>
+        </li>
+      }
+    </ul>
+  } @else {
+    @for (group of groups(); track group.categoryId ?? '__uncat__') {
+      <section
+        class="app-plan__group"
+        [class.app-plan__group--uncategorised]="group.categoryId === null"
+        animate.leave="app-plan__group--leaving"
+      >
+        <div class="app-plan__group-collapse">
+          @if (group.categoryColor) {
+            <span
+              class="app-plan__group-color-element"
+              [style.background]="`linear-gradient(90deg, ${group.categoryColor}, transparent)`"
+            ></span>
+          }
+          <header class="app-plan__group-header">
+            <h2 class="app-plan__group-title">
+              @if (group.categoryColor) {
+                <span
+                  class="app-plan__group-dot"
+                  [style.background-color]="group.categoryColor"
+                ></span>
+              }
+              {{ group.categoryName ?? ('plan.uncategorised' | transloco) }}
+            </h2>
+            <div class="app-plan__group-meta">
+              @if (group.estTotal > 0) {
+                <span class="app-plan__group-total">
+                  {{ group.estTotal | money }}
+                </span>
+              }
+            </div>
+          </header>
+
+          <ul class="app-plan__items" role="list">
+            @for (item of group.items; track item.id) {
+              <li
+                class="app-plan__item"
+                [class.app-plan__item--checked]="isItemChecked(item.id)"
+                animate.leave="app-plan__item--leaving"
+              >
+                <div class="app-plan__item-collapse">
+                  <ng-container
+                    *ngTemplateOutlet="itemBody; context: { item, isChecked: isItemChecked(item.id) }"
+                  ></ng-container>
+                </div>
+              </li>
+            }
+          </ul>
+        </div>
+      </section>
+    }
+  }
+
+  <app-add-item-pill
+  [existingNames]="existingNamesList()"
+  [categories]="shopOrderedCategories()"
+  (submitted)="onAddRequested($event)"
+/>
+</section>
+
+<ng-template #itemBody let-item="item" let-isChecked="isChecked">
+  <button type="button" class="app-plan__item-main" (click)="openEditSheet(item)">
+    <span class="app-plan__item-name">{{ item.name }}</span>
+    <span class="app-plan__item-meta">
+      @if (item.quantity !== null || item.unit !== null) {
+        <span class="app-plan__item-qty">
+          {{ item.quantity
+          }}{{ item.unit ? ' ' + ('units.' + item.unit | transloco) : '' }}
+        </span>
+      }
+    </span>
+    @if (item.description) {
+      <span class="app-plan__item-description">{{ item.description }}</span>
+    }
+  </button>
+  @let priceResult = item | effectivePrice: selectedShopId();
+  @if (priceResult.kind !== 'none' && !hidePrices()) {
+    @if (canInspectPrice(item)) {
+      <button
+        type="button"
+        class="app-plan__item-price-btn"
+        [class.app-plan__item-price-btn--approximate]="priceResult.kind === 'approximate'"
+        [class.app-plan__item-price-btn--global-fallback]="priceResult.isGlobalFallback"
+        [attr.aria-label]="'pricePopup.openLabel' | transloco: { name: item.name }"
+        (click)="openPriceDialog(item)"
+      >
+        @if (priceResult.kind === 'exact') {
+          @if (priceResult.isGlobalFallback) {
+            ({{ priceResult.total | money }})
+          } @else {
+            {{ priceResult.total | money }}
+          }
+        } @else if (priceResult.kind === 'approximate') {
+          @if (priceResult.shelfQuantity !== null && priceResult.shelfUnit) {
+            @if (priceResult.isGlobalFallback) {
+              ({{
+                'shop.approxShelfPrice'
+                  | transloco
+                    : {
+                        price: priceResult.shelfPrice | money,
+                        quantity: priceResult.shelfQuantity,
+                        unit: priceResult.shelfUnit,
+                      }
+              }})
+            } @else {
+              {{
+                'shop.approxShelfPrice'
+                  | transloco
+                    : {
+                        price: priceResult.shelfPrice | money,
+                        quantity: priceResult.shelfQuantity,
+                        unit: priceResult.shelfUnit,
+                      }
+              }}
+            }
+          } @else {
+            @if (priceResult.isGlobalFallback) {
+              ({{
+                'shop.approxShelfPriceNoQty'
+                  | transloco: { price: priceResult.shelfPrice | money }
+              }})
+            } @else {
+              {{
+                'shop.approxShelfPriceNoQty'
+                  | transloco: { price: priceResult.shelfPrice | money }
+              }}
+            }
+          }
+        }
+      </button>
+    } @else {
+      <span
+        class="app-plan__item-price"
+        [class.app-plan__item-price--approximate]="priceResult.kind === 'approximate'"
+        [class.app-plan__item-price--global-fallback]="priceResult.isGlobalFallback"
+      >
+        @if (priceResult.kind === 'exact') {
+          @if (priceResult.isGlobalFallback) {
+            ({{ priceResult.total | money }})
+          } @else {
+            {{ priceResult.total | money }}
+          }
+        } @else if (priceResult.kind === 'approximate') {
+          @if (priceResult.shelfQuantity !== null && priceResult.shelfUnit) {
+            @if (priceResult.isGlobalFallback) {
+              ({{
+                'shop.approxShelfPrice'
+                  | transloco
+                    : {
+                        price: priceResult.shelfPrice | money,
+                        quantity: priceResult.shelfQuantity,
+                        unit: priceResult.shelfUnit,
+                      }
+              }})
+            } @else {
+              {{
+                'shop.approxShelfPrice'
+                  | transloco
+                    : {
+                        price: priceResult.shelfPrice | money,
+                        quantity: priceResult.shelfQuantity,
+                        unit: priceResult.shelfUnit,
+                      }
+              }}
+            }
+          } @else {
+            @if (priceResult.isGlobalFallback) {
+              ({{
+                'shop.approxShelfPriceNoQty'
+                  | transloco: { price: priceResult.shelfPrice | money }
+              }})
+            } @else {
+              {{
+                'shop.approxShelfPriceNoQty'
+                  | transloco: { price: priceResult.shelfPrice | money }
+              }}
+            }
+          }
+        }
+      </span>
+    }
+  }
+  <button
+    type="button"
+    class="app-plan__item-remove"
+    [attr.aria-label]="'plan.removeItem' | transloco: { name: item.name }"
+    (click)="confirmRemove(item)"
+  >
+    <mat-icon aria-hidden="true">close</mat-icon>
+  </button>
+</ng-template>

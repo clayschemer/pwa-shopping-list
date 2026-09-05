@@ -1,0 +1,23 @@
+<div class="app-boot-progress">
+  <div class="app-boot-progress__card">
+    <div
+      class="app-boot-progress__track"
+      role="progressbar"
+      aria-valuemin="0"
+      aria-valuemax="100"
+      [attr.aria-valuenow]="percent()"
+      [attr.aria-label]="'boot.progressLabel' | transloco"
+    >
+      <div class="app-boot-progress__fill" [style.width.%]="percent()"></div>
+    </div>
+
+    <p class="app-boot-progress__phase" role="status">
+      {{ phaseKey() | transloco }}
+    </p>
+
+    <p class="app-boot-progress__diagnostics" aria-hidden="true">
+      <span class="app-boot-progress__detail">{{ detail() }}</span>
+      <span class="app-boot-progress__counter">{{ counter() }}</span>
+    </p>
+  </div>
+</div>

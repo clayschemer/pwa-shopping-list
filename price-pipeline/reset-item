@@ -1,0 +1,23 @@
+#!/bin/bash
+set -e
+
+ITEM_ID="${1}"
+ACCOUNT_ID="${2}"
+
+if [ -z "$ITEM_ID" ] || [ -z "$ACCOUNT_ID" ]; then
+  echo "Usage: ./reset-item <itemId> <accountId>"
+  echo ""
+  echo "Resets priceUpdatedAt and priceAttemptedAt to null so the next"
+  echo "unpriced scan picks up the item. Both IDs are Firestore document IDs."
+  echo ""
+  echo "Example: ./reset-item abc123 xyz789"
+  exit 1
+fi
+
+if [ ! -f service-account.json ]; then
+  echo "Error: service-account.json not found."
+  exit 1
+fi
+
+docker compose -f docker-compose.yml -f docker-compose.scheduler.yml run --rm price-fetcher \
+  npx tsx src/index.ts --mode reset-item --item-id "$ITEM_ID" --account-id "$ACCOUNT_ID"

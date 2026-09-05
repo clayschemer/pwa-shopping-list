@@ -1,0 +1,308 @@
+@use '../../../styles/focus';
+
+:host {
+  position: fixed;
+  right: var(--app-spacing-lg);
+  bottom: var(--app-spacing-lg);
+  z-index: 20;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.app-add-item-pill {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: var(--app-spacing-xs);
+  width: min(calc(100vw - var(--app-spacing-xxl)), 32rem);
+
+  &__fab {
+    position: static;
+  }
+
+  &__suggestions {
+    display: flex;
+    flex-direction: column;
+    gap: var(--app-spacing-xxs);
+    /* The height below is a full-box measurement — keep the padding inside it. */
+    box-sizing: border-box;
+    padding: var(--app-spacing-xs);
+    background: var(--mat-sys-surface-container);
+    border-radius: var(--app-shape-xl);
+    box-shadow: var(--mat-sys-level3);
+
+    /*
+     * Both endpoints of the expand transition are explicit, so `height` can be
+     * transitioned directly — no JS measuring, no max-height guesswork. Rows are
+     * fixed-height and never wrap, so `--rows` (bound from the template) gives an
+     * exact collapsed height: N rows, N-1 gaps, plus the panel padding.
+     */
+    height: calc(
+      var(--rows, 0) * (var(--app-spacing-row-min-height) + var(--app-spacing-xxs)) -
+        var(--app-spacing-xxs) + var(--app-spacing-xs) * 2
+    );
+
+    @media (prefers-reduced-motion: no-preference) {
+      transition: height var(--app-duration-emphasized) var(--app-easing-emphasized);
+    }
+
+    &--browsing {
+      height: min(65dvh, calc(100dvh - var(--app-spacing-xxl) * 2));
+    }
+  }
+
+  &__browse-header {
+    flex: 0 0 auto;
+    display: flex;
+    align-items: center;
+    gap: var(--app-spacing-xs);
+    padding-inline-end: var(--app-spacing-sm);
+    min-height: var(--app-spacing-row-min-height);
+  }
+
+  &__query {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: var(--app-font-body-lg);
+    color: var(--mat-sys-on-surface-variant);
+  }
+
+  &__list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--app-spacing-xxs);
+    min-height: 0;
+  }
+
+  &__suggestions--browsing &__list {
+    position: relative;
+    flex: 1;
+    overflow-y: auto;
+    /* Keep the plan list underneath from scrolling once this list hits its end. */
+    overscroll-behavior: contain;
+    /* Fade the last row to signal there is more below. */
+    mask-image: linear-gradient(
+      to bottom,
+      #000 calc(100% - var(--app-spacing-xl)),
+      transparent
+    );
+  }
+
+  &__suggestion {
+    display: flex;
+    flex: 0 0 auto;
+  }
+
+  &__suggestion-btn {
+    all: unset;
+    cursor: pointer;
+    flex: 1;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    /* Three columns share a narrow panel on phones — keep the gutters tight. */
+    gap: var(--app-spacing-xs);
+    box-sizing: border-box;
+    /* Fixed, not min — the collapsed panel height is derived from this. */
+    height: var(--app-spacing-row-min-height);
+    padding: var(--app-spacing-xs) var(--app-spacing-sm);
+    border-radius: var(--app-shape-md);
+    color: var(--mat-sys-on-surface);
+    background-color: var(--mat-sys-surface-container-high);
+
+    @media (prefers-reduced-motion: no-preference) {
+      transition: background-color var(--app-duration-quick) var(--app-easing-standard);
+    }
+
+    &:hover {
+      background: var(--mat-sys-surface-container-highest);
+    }
+
+    &:focus-visible {
+      @include focus.ring;
+    }
+
+    &--on-list {
+      cursor: default;
+      opacity: 0.55;
+    }
+  }
+
+  &__suggestion-name {
+    /* Absorbs the slack so the chip and amount stay right-aligned together. */
+    flex: 1 1 auto;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: var(--app-font-body-lg);
+  }
+
+  &__suggestion-qty {
+    flex: 0 0 auto;
+    white-space: nowrap;
+    font-size: var(--app-font-label);
+    color: var(--mat-sys-on-surface-variant);
+  }
+
+  &__chip {
+    flex: 0 1 auto;
+    max-width: 40%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    padding: var(--app-spacing-xxs) var(--app-spacing-xs);
+    border-radius: var(--app-shape-pill);
+    font-size: var(--app-font-caption);
+    color: var(--mat-sys-on-surface-variant);
+    background: color-mix(
+      in srgb,
+      var(--app-chip-color, var(--mat-sys-outline-variant)) 22%,
+      transparent
+    );
+  }
+
+  &__on-list {
+    flex: 0 0 auto;
+    font-size: var(--app-font-caption);
+    color: var(--mat-sys-on-surface-variant);
+  }
+
+  &__show-all {
+    all: unset;
+    cursor: pointer;
+    flex: 0 0 auto;
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: var(--app-spacing-row-min-height);
+    padding: var(--app-spacing-xs) var(--app-spacing-sm);
+    border-radius: var(--app-shape-md);
+    font-size: var(--app-font-label);
+    font-weight: 600;
+    color: var(--mat-sys-primary);
+
+    &:hover {
+      background: var(--mat-sys-surface-container-high);
+    }
+
+    &:focus-visible {
+      @include focus.ring;
+    }
+  }
+
+  &__bar {
+    display: flex;
+    align-items: center;
+    gap: var(--app-spacing-xs);
+    padding: var(--app-spacing-xs) var(--app-spacing-sm);
+    background: var(--mat-sys-surface-container-high);
+    border-radius: var(--app-shape-pill);
+    box-shadow: var(--mat-sys-level3);
+    min-height: 3.5rem;
+  }
+
+  &__input {
+    all: unset;
+    flex: 1;
+    min-width: 0;
+    font-size: var(--app-font-body-lg);
+    color: var(--mat-sys-on-surface);
+    padding: var(--app-spacing-xs) var(--app-spacing-xxs);
+
+    &[aria-invalid='true'] {
+      color: var(--mat-sys-error);
+    }
+  }
+
+  &__error {
+    flex-basis: 100%;
+    order: 10;
+    font-size: var(--app-font-label);
+    color: var(--mat-sys-error);
+  }
+
+  &__ok {
+    all: unset;
+    cursor: pointer;
+    padding: var(--app-spacing-xs) var(--app-spacing-lg);
+    border-radius: var(--app-shape-pill);
+    min-height: var(--app-spacing-row-min-height);
+    font-weight: 600;
+    background: var(--mat-sys-tertiary, var(--mat-sys-primary));
+    color: var(--mat-sys-on-tertiary, var(--mat-sys-on-primary));
+
+    &:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+
+    &:focus-visible {
+      @include focus.ring;
+    }
+  }
+
+  &__name-badge {
+    padding: var(--app-spacing-xxs) var(--app-spacing-sm);
+    border-radius: var(--app-shape-lg);
+    background: var(--mat-sys-secondary-container);
+    color: var(--mat-sys-on-secondary-container);
+    font-size: var(--app-font-body);
+    max-width: 40%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  &__qty {
+    all: unset;
+    width: 4.5rem;
+    padding: var(--app-spacing-xs);
+    border-radius: var(--app-shape-sm);
+    background: var(--mat-sys-surface);
+    color: var(--mat-sys-on-surface);
+    font-size: var(--app-font-body-lg);
+    text-align: right;
+
+    &:focus-visible {
+      @include focus.ring;
+    }
+  }
+
+  &__unit {
+    all: unset;
+    cursor: pointer;
+    padding: var(--app-spacing-xs);
+    border-radius: var(--app-shape-sm);
+    background: var(--mat-sys-surface);
+    color: var(--mat-sys-on-surface);
+    font-size: var(--app-font-body);
+    min-width: 4.5rem;
+
+    &:focus-visible {
+      @include focus.ring;
+    }
+  }
+
+  &__add {
+    all: unset;
+    cursor: pointer;
+    padding: var(--app-spacing-xs) var(--app-spacing-lg);
+    border-radius: var(--app-shape-pill);
+    min-height: var(--app-spacing-row-min-height);
+    font-weight: 600;
+    margin-left: auto;
+    background: var(--mat-sys-primary);
+    color: var(--mat-sys-on-primary);
+
+    &:focus-visible {
+      @include focus.ring;
+    }
+  }
+}

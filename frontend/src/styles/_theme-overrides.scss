@@ -1,0 +1,15 @@
+// _theme-overrides.scss — Global Angular Material component token overrides
+// See .claude/skills/angular-material3-theming/SKILL.md for conventions.
+// Add component-level global overrides here using mat.*-overrides() mixins.
+// Do NOT use ::ng-deep or hardcoded colour values.
+
+@use '@angular/material' as mat;
+
+// Example — uncomment and adapt when overrides are needed:
+// :root {
+//   @include mat.button-overrides((
+//     filled-container-color: var(--mat-sys-primary),
+//   ));
+// }
+
+

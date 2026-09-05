@@ -1,0 +1,66 @@
+@use '../../../styles/focus';
+
+.undo-history-sheet {
+  padding: var(--app-spacing-md);
+
+  &__title {
+    margin: 0 0 var(--app-spacing-sm);
+    font-size: var(--app-font-title);
+    font-weight: 600;
+    line-height: var(--app-line-height-title);
+  }
+
+  &__empty {
+    padding: var(--app-spacing-xl) 0;
+    text-align: center;
+    color: var(--mat-sys-on-surface-variant);
+  }
+
+  &__list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+  }
+
+  &__entry {
+    border-bottom: 1px solid var(--mat-sys-outline-variant);
+  }
+
+  &__uncheck {
+    all: unset;
+    cursor: pointer;
+    display: grid;
+    grid-template-columns: 2rem 1fr auto;
+    gap: var(--app-spacing-sm);
+    align-items: center;
+    width: 100%;
+    min-height: var(--app-spacing-row-min-height);
+    padding: var(--app-spacing-xs) var(--app-spacing-xxs);
+    color: var(--mat-sys-on-surface);
+
+    &:focus-visible {
+      @include focus.ring;
+      border-radius: var(--app-shape-xs);
+    }
+  }
+
+  &__initials {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2rem;
+    height: 2rem;
+    border-radius: 50%;
+    background: var(--mat-sys-secondary-container);
+    color: var(--mat-sys-on-secondary-container);
+    font-size: var(--app-font-caption);
+    font-weight: 600;
+  }
+
+  &__price {
+    font-size: var(--app-font-label);
+    color: var(--mat-sys-on-surface-variant);
+  }
+}

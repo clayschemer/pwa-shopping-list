@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>06 · Filter sheet</title>
+  <link rel="stylesheet" href="shared.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Symbols+Outlined" rel="stylesheet">
+</head>
+<body>
+  <div class="page">
+    <h1 class="page__title">06 — Filter sheet (plan view)</h1>
+    <p class="page__subtitle">
+      Bottom sheet from the new <span class="material-symbols-outlined" style="vertical-align:-3px;font-size:1rem;">tune</span>
+      icon. Three persistent toggles + one navigation shortcut. All toggle state persists per
+      device (localStorage), alongside dark mode / compact / language.
+    </p>
+
+    <div class="phone">
+      <header class="topbar">
+        <button class="topbar__icon-btn" aria-label="Open menu">
+          <span class="material-symbols-outlined">menu</span>
+        </button>
+        <nav class="topbar__mode-toggle" aria-label="Mode selection">
+          <button class="topbar__mode-btn topbar__mode-btn--active">Plan</button>
+          <button class="topbar__mode-btn">Shop</button>
+        </nav>
+        <button class="topbar__icon-btn" aria-label="Filter and layout" style="background: var(--primary-container); color: var(--on-primary-container);">
+          <span class="material-symbols-outlined">tune</span>
+        </button>
+      </header>
+
+      <main class="content" aria-hidden="true">
+        <section class="group">
+          <header class="group__header">
+            <h2 class="group__title"><span class="group__dot" style="background:#6d9c71"></span>Produce</h2>
+            <span class="group__total">£3.00</span>
+          </header>
+          <ul class="items">
+            <li class="item">
+              <div class="item__main">
+                <span class="item__name">Bananas</span>
+                <span class="item__qty">3 pcs</span>
+              </div>
+              <span class="item__price">£1.20</span>
+              <button class="item__remove">
+                <span class="material-symbols-outlined" style="font-size:1.1rem;">close</span>
+              </button>
+            </li>
+            <li class="item">
+              <div class="item__main">
+                <span class="item__name">Tomatoes</span>
+                <span class="item__qty">500 g</span>
+              </div>
+              <span class="item__price item__price--approximate">≈ £3.60 / kg</span>
+              <button class="item__remove">
+                <span class="material-symbols-outlined" style="font-size:1.1rem;">close</span>
+              </button>
+            </li>
+          </ul>
+        </section>
+      </main>
+
+      <div class="scrim"></div>
+
+      <div class="sheet">
+        <div class="sheet__handle"></div>
+        <h3 class="sheet__title">Filter &amp; layout</h3>
+
+        <button class="sheet__row">
+          <span class="sheet__row-icon"><span class="material-symbols-outlined">view_agenda</span></span>
+          <span class="sheet__row-label">
+            Hide category grouping
+            <span class="sheet__row-sub">Flat list in shop-layout order</span>
+          </span>
+          <span class="switch"><span class="switch__track"></span><span class="switch__thumb"></span></span>
+        </button>
+
+        <button class="sheet__row">
+          <span class="sheet__row-icon"><span class="material-symbols-outlined">visibility</span></span>
+          <span class="sheet__row-label">
+            Show checked items
+            <span class="sheet__row-sub">Reveal items checked in the current shop session</span>
+          </span>
+          <span class="switch switch--on"><span class="switch__track"></span><span class="switch__thumb"></span></span>
+        </button>
+
+        <button class="sheet__row">
+          <span class="sheet__row-icon"><span class="material-symbols-outlined">sell</span></span>
+          <span class="sheet__row-label">
+            Hide prices
+            <span class="sheet__row-sub">Per-item price chips; sums and checkout stay visible</span>
+          </span>
+          <span class="switch"><span class="switch__track"></span><span class="switch__thumb"></span></span>
+        </button>
+
+        <hr style="border:none; height:1px; background: var(--outline-variant); margin: 0.25rem 1rem;" />
+
+        <button class="sheet__row">
+          <span class="sheet__row-icon"><span class="material-symbols-outlined">reorder</span></span>
+          <span class="sheet__row-label">
+            Reorder categories…
+            <span class="sheet__row-sub">Edit the order for Global (current shop layout)</span>
+          </span>
+          <span class="sheet__row-icon"><span class="material-symbols-outlined" style="color: var(--on-surface-variant);">arrow_forward</span></span>
+        </button>
+      </div>
+    </div>
+
+    <p class="caption">
+      Sub-labels under each toggle explain the effect at-a-glance — they replace the in-app help
+      we'd otherwise need. Last row is an action (not a toggle), deep-linking to
+      <a href="07-categories.html">Categories view</a> with the current shop pre-selected.
+      <br />
+      <a href="index.html">← back to index</a> ·
+      <a href="01-plan-default.html">01 · plan default</a> ·
+      <a href="07-categories.html">07 · categories view →</a>
+    </p>
+  </div>
+</body>
+</html>

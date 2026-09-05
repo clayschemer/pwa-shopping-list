@@ -1,0 +1,15 @@
+#!/bin/bash
+set -e
+
+if [ ! -f service-account.json ]; then
+  echo "Error: service-account.json not found."
+  echo ""
+  echo "To create it:"
+  echo "  1. Firebase Console → Project Settings → Service Accounts"
+  echo "  2. Click 'Generate new private key'"
+  echo "  3. Save the file as price-pipeline/service-account.json"
+  exit 1
+fi
+
+echo "Starting price pipeline scheduler..."
+docker compose -f docker-compose.yml -f docker-compose.scheduler.yml up

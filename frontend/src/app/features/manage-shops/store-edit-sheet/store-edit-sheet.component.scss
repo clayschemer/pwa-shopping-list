@@ -1,0 +1,35 @@
+.app-store-edit-sheet {
+  display: flex;
+  flex-direction: column;
+  gap: var(--app-spacing-md);
+  padding: var(--app-spacing-lg) var(--app-spacing-md) var(--app-spacing-md);
+
+  &__title {
+    margin: 0;
+    font-size: var(--app-font-title);
+    font-weight: 600;
+    line-height: var(--app-line-height-title);
+    color: var(--mat-sys-on-surface);
+  }
+
+  &__field {
+    width: 100%;
+  }
+
+  &__actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: var(--app-spacing-xs);
+  }
+
+  &__danger {
+    border-top: 1px solid var(--mat-sys-outline-variant);
+    padding-top: var(--app-spacing-xs);
+    display: flex;
+    justify-content: flex-start;
+  }
+
+  &__delete {
+    --mdc-text-button-label-text-color: var(--mat-sys-error);
+  }
+}

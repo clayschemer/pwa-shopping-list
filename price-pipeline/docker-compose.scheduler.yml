@@ -1,0 +1,25 @@
+# Overlay for production-emulation / scheduler mode.
+# Requires price-pipeline/service-account.json (Firebase service account key).
+#
+# To get service-account.json:
+#   Firebase Console → Project Settings → Service Accounts → Generate new private key
+#   Save the downloaded file as price-pipeline/service-account.json
+#
+# Start the full pipeline:
+#   docker compose -f docker-compose.yml -f docker-compose.scheduler.yml up
+#
+# Or use the convenience script:
+#   ./start-scheduler
+
+services:
+  price-fetcher:
+    environment:
+      GOOGLE_APPLICATION_CREDENTIALS: /run/secrets/firebase-sa
+      # stalePriceDays is now a per-account setting stored in Firestore (aiConfig).
+      # Default is 90 days when not set. PRICE_STALE_DAYS env var is no longer used.
+      # 5-minute polling — queue is typically empty so each cycle costs ~2 reads.
+      SCAN_INTERVAL_SECONDS: "300"
+    volumes:
+      - ./service-account.json:/run/secrets/firebase-sa:ro
+    command: ["npx", "tsx", "src/index.ts", "--mode", "scheduler"]
+    restart: unless-stopped

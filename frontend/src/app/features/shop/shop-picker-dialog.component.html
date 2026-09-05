@@ -1,0 +1,35 @@
+<h2 mat-dialog-title>{{ 'shopPickerDialog.title' | transloco }}</h2>
+<mat-dialog-content>
+  <ul class="app-shop-picker-dialog__list" role="list">
+    @for (shop of data.shops; track shop.id) {
+      <li>
+        <button
+          type="button"
+          class="app-shop-picker-dialog__option"
+          [class.app-shop-picker-dialog__option--selected]="isSelected(shop.id)"
+          (click)="choose(shop.id)"
+        >
+          <mat-icon aria-hidden="true">storefront</mat-icon>
+          <span class="app-shop-picker-dialog__label">{{ shop.name }}</span>
+          @if (isSelected(shop.id)) {
+            <mat-icon aria-hidden="true" class="app-shop-picker-dialog__check">check</mat-icon>
+          }
+        </button>
+      </li>
+    }
+    <li>
+      <button
+        type="button"
+        class="app-shop-picker-dialog__option app-shop-picker-dialog__option--global"
+        [class.app-shop-picker-dialog__option--selected]="isSelected(null)"
+        (click)="choose(null)"
+      >
+        <mat-icon aria-hidden="true">public</mat-icon>
+        <span class="app-shop-picker-dialog__label">{{ 'navDrawer.globalAll' | transloco }}</span>
+        @if (isSelected(null)) {
+          <mat-icon aria-hidden="true" class="app-shop-picker-dialog__check">check</mat-icon>
+        }
+      </button>
+    </li>
+  </ul>
+</mat-dialog-content>

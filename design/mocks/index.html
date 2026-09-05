@@ -1,0 +1,184 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Nav rework — mocks index</title>
+  <link rel="stylesheet" href="shared.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Symbols+Outlined" rel="stylesheet">
+  <style>
+    .index {
+      max-width: 60rem;
+      margin: 0 auto;
+      padding: 2.5rem 1.25rem 4rem;
+    }
+    .index h1 {
+      font-family: 'DM Serif Display', serif;
+      font-weight: 400;
+      font-size: 2rem;
+      margin: 0 0 0.5rem;
+      color: #2b1a0d;
+    }
+    .index__lede {
+      font-size: 0.9375rem;
+      color: #5a3e26;
+      max-width: 42rem;
+      line-height: 1.55;
+      margin: 0 0 2rem;
+    }
+    .index__lede strong { color: #2b1a0d; }
+    .index__section {
+      font-family: 'DM Serif Display', serif;
+      font-weight: 400;
+      font-size: 1.125rem;
+      color: #2b1a0d;
+      margin: 1.5rem 0 0.5rem;
+      padding-bottom: 0.25rem;
+      border-bottom: 1px solid rgba(115, 88, 81, 0.25);
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 0.75rem;
+    }
+    .card {
+      display: flex;
+      flex-direction: column;
+      padding: 0.85rem 1rem;
+      background: var(--surface-container-low);
+      border-radius: 12px;
+      color: var(--on-surface);
+      text-decoration: none;
+      border: 1px solid transparent;
+      transition: border-color 0.15s, transform 0.15s;
+    }
+    .card:hover {
+      border-color: var(--primary);
+      transform: translateY(-1px);
+    }
+    .card__num {
+      font-size: 0.75rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--primary);
+      font-weight: 600;
+      margin-bottom: 0.25rem;
+    }
+    .card__title {
+      font-size: 0.95rem;
+      font-weight: 600;
+      margin: 0 0 0.25rem;
+    }
+    .card__note {
+      font-size: 0.8125rem;
+      color: var(--on-surface-variant);
+      line-height: 1.45;
+    }
+    .legend {
+      background: var(--surface-container-low);
+      padding: 1rem 1.25rem;
+      border-radius: 12px;
+      margin: 0 0 1.75rem;
+      font-size: 0.875rem;
+      line-height: 1.55;
+      color: var(--on-surface);
+    }
+    .legend p { margin: 0; }
+    .legend code {
+      background: rgba(176, 47, 0, 0.08);
+      color: var(--primary);
+      padding: 0.1rem 0.35rem;
+      border-radius: 4px;
+      font-size: 0.85em;
+    }
+  </style>
+</head>
+<body>
+  <div class="index">
+    <h1>Navigation &amp; Flow Rework — Mocks</h1>
+    <p class="index__lede">
+      Click-through mocks for the proposed nav rework. The aim is to evaluate <strong>how the changes feel</strong>
+      before any Angular code is touched. Each mock is a single phone-screen snapshot; cross-page links stand in
+      for real navigation. Style approximates the M3 light theme — exact spacing, motion, and component fidelity
+      come in the implementation phase.
+    </p>
+
+    <div class="legend">
+      <p>
+        Per the plan: the drawer becomes a navigation hub, the top-bar right slot moves from
+        <code>Settings</code> to a filter sheet, and Categories &amp; Stores each get a dedicated full-screen
+        view where rows are draggable and tap-to-edit opens an action sheet.
+      </p>
+    </div>
+
+    <div class="index__section">Plan view</div>
+    <div class="grid">
+      <a class="card" href="01-plan-default.html">
+        <span class="card__num">01</span>
+        <h3 class="card__title">Plan — default</h3>
+        <p class="card__note">Categories grouped, prices visible. New <em>filter</em> icon replaces Settings in the top-bar right slot.</p>
+      </a>
+      <a class="card" href="02-plan-no-grouping.html">
+        <span class="card__num">02</span>
+        <h3 class="card__title">Plan — hide grouping</h3>
+        <p class="card__note">Flat list in shop-layout order. No category headers. Reclaims vertical space.</p>
+      </a>
+      <a class="card" href="03-plan-show-checked.html">
+        <span class="card__num">03</span>
+        <h3 class="card__title">Plan — show checked</h3>
+        <p class="card__note">Reveals items checked during the most recent shop session, dimmed and struck through.</p>
+      </a>
+      <a class="card" href="04-plan-no-prices.html">
+        <span class="card__num">04</span>
+        <h3 class="card__title">Plan — hide prices</h3>
+        <p class="card__note">Per-item prices suppressed. Category sums and the checkout pill still show totals.</p>
+      </a>
+    </div>
+
+    <div class="index__section">Shell &amp; filter sheet</div>
+    <div class="grid">
+      <a class="card" href="05-drawer.html">
+        <span class="card__num">05</span>
+        <h3 class="card__title">Hamburger drawer</h3>
+        <p class="card__note">Simplified to navigation: Shop layout · Categories · Stores · History · Settings.</p>
+      </a>
+      <a class="card" href="06-filter-sheet.html">
+        <span class="card__num">06</span>
+        <h3 class="card__title">Filter sheet</h3>
+        <p class="card__note">Bottom sheet from plan top bar. Three toggles + a reorder shortcut.</p>
+      </a>
+    </div>
+
+    <div class="index__section">Categories</div>
+    <div class="grid">
+      <a class="card" href="07-categories.html">
+        <span class="card__num">07</span>
+        <h3 class="card__title">Categories — view</h3>
+        <p class="card__note">"Order for:" dropdown (scales as stores grow) + draggable list. Drag handle left, tap row to edit.</p>
+      </a>
+      <a class="card" href="08-category-edit-sheet.html">
+        <span class="card__num">08</span>
+        <h3 class="card__title">Category — edit form</h3>
+        <p class="card__note">Unified form with name + colour + available-in-shops all upfront. Delete at the bottom.</p>
+      </a>
+    </div>
+
+    <div class="index__section">Stores</div>
+    <div class="grid">
+      <a class="card" href="09-stores.html">
+        <span class="card__num">09</span>
+        <h3 class="card__title">Stores — view</h3>
+        <p class="card__note">Reorderable shop list with FAB. Replaces today's row-side action icons with row-tap editing.</p>
+      </a>
+      <a class="card" href="10-store-edit-sheet.html">
+        <span class="card__num">10</span>
+        <h3 class="card__title">Store — edit form</h3>
+        <p class="card__note">Unified form with name + price-search URL upfront. Delete at the bottom.</p>
+      </a>
+    </div>
+  </div>
+</body>
+</html>

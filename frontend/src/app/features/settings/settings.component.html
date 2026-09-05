@@ -1,0 +1,234 @@
+<header class="app-settings__header">
+  <button
+    mat-icon-button
+    class="app-settings__back-btn"
+    [attr.aria-label]="'settings.goBack' | transloco"
+    (click)="goBack()"
+  >
+    <mat-icon>arrow_back</mat-icon>
+  </button>
+  <h1 class="app-settings__title">{{ 'settings.title' | transloco }}</h1>
+</header>
+
+@if (loading()) {
+  <div class="app-settings__body" aria-hidden="true">
+    @for (section of [1, 2, 3]; track section) {
+      <div class="app-settings__skeleton-section">
+        <div class="app-settings__skeleton-section-title"></div>
+        <div class="app-settings__skeleton-rows">
+          @for (row of section === 2 ? [1, 2, 3] : [1, 2]; track row) {
+            <div class="app-settings__skeleton-row">
+              <div class="app-settings__skeleton-row-item">
+                <div class="app-settings__skeleton-icon"></div>
+                <div class="app-settings__skeleton-label"></div>
+                <div class="app-settings__skeleton-toggle"></div>
+              </div>
+              <div class="app-settings__skeleton-hint"></div>
+            </div>
+          }
+        </div>
+      </div>
+    }
+  </div>
+} @else {
+<div class="app-settings__body">
+  <!-- Appearance -->
+  <section class="app-settings__section">
+    <h2 class="app-settings__section-title">{{ 'settings.appearance' | transloco }}</h2>
+
+    <div class="app-settings__row">
+      <div class="app-settings__row-item">
+        <div class="app-settings__row-content">
+          <mat-slide-toggle
+            [checked]="effectiveDarkMode()"
+            (change)="onDarkModeToggle($event.checked)"
+            labelPosition="before"
+            ><mat-icon class="app-settings__row-icon">dark_mode</mat-icon>{{ 'settings.darkMode' | transloco }}</mat-slide-toggle
+          >
+          <p class="app-settings__hint">{{ 'settings.darkModeHint' | transloco }}</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="app-settings__row">
+      <div class="app-settings__row-item">
+        <div class="app-settings__row-content">
+          <mat-slide-toggle
+            [checked]="settings().compact"
+            (change)="onCompactToggle($event.checked)"
+            labelPosition="before"
+            ><mat-icon class="app-settings__row-icon">density_small</mat-icon>{{ 'settings.compactMode' | transloco }}</mat-slide-toggle
+          >
+          <p class="app-settings__hint">{{ 'settings.compactModeHint' | transloco }}</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Accessibility -->
+  <section class="app-settings__section">
+    <h2 class="app-settings__section-title">{{ 'settings.accessibility' | transloco }}</h2>
+
+    <div class="app-settings__row">
+      <div class="app-settings__row-item">
+        <div class="app-settings__row-content">
+          <mat-slide-toggle
+            [checked]="effectiveReduceMotion()"
+            (change)="onReduceMotionToggle($event.checked)"
+            labelPosition="before"
+            ><mat-icon class="app-settings__row-icon">motion_photos_off</mat-icon>{{ 'settings.reduceMotion' | transloco }}</mat-slide-toggle
+          >
+          <p class="app-settings__hint">{{ 'settings.reduceMotionHint' | transloco }}</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="app-settings__row">
+      <div class="app-settings__row-item">
+        <div class="app-settings__row-content">
+          <mat-slide-toggle
+            [checked]="effectiveHighContrast()"
+            (change)="onHighContrastToggle($event.checked)"
+            labelPosition="before"
+            ><mat-icon class="app-settings__row-icon">contrast</mat-icon>{{ 'settings.highContrast' | transloco }}</mat-slide-toggle
+          >
+          <p class="app-settings__hint">{{ 'settings.highContrastHint' | transloco }}</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="app-settings__row">
+      <div class="app-settings__row-item">
+        <div class="app-settings__row-content">
+          <mat-slide-toggle
+            [checked]="settings().leftHanded"
+            (change)="onLeftHandedToggle($event.checked)"
+            labelPosition="before"
+            ><mat-icon class="app-settings__row-icon">back_hand</mat-icon>{{ 'settings.leftHanded' | transloco }}</mat-slide-toggle
+          >
+          <p class="app-settings__hint">{{ 'settings.leftHandedHint' | transloco }}</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Language & Region -->
+  <section class="app-settings__section">
+    <h2 class="app-settings__section-title">{{ 'settings.languageRegion' | transloco }}</h2>
+
+    <div class="app-settings__row">
+      <div class="app-settings__row-item">
+        <div class="app-settings__row-content">
+          <mat-form-field class="app-settings__select-field">
+            <mat-icon matPrefix class="app-settings__row-icon">language</mat-icon>
+            <mat-label>{{ 'settings.language' | transloco }}</mat-label>
+            <mat-select
+              [value]="settings().language"
+              (selectionChange)="onLanguageChange($event.value)"
+            >
+              @for (lang of languages; track lang) {
+                <mat-option [value]="lang">{{ languageLabels[lang] }} ({{ lang }})</mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+          <p class="app-settings__hint">{{ 'settings.languageHint' | transloco }}</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="app-settings__row">
+      <div class="app-settings__row-item">
+        <div class="app-settings__row-content">
+          <mat-form-field class="app-settings__select-field">
+            <mat-icon matPrefix class="app-settings__row-icon">payments</mat-icon>
+            <mat-label>{{ 'settings.currency' | transloco }}</mat-label>
+            <mat-select
+              [value]="settings().currency"
+              (selectionChange)="onCurrencyChange($event.value)"
+            >
+              @for (cur of currencies; track cur) {
+                <mat-option [value]="cur">{{ cur }}</mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+          <p class="app-settings__hint">{{ 'settings.currencyHint' | transloco }}</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Display -->
+  <section class="app-settings__section">
+    <h2 class="app-settings__section-title">{{ 'settings.display' | transloco }}</h2>
+
+    <div class="app-settings__row">
+      <div class="app-settings__row-item">
+        <div class="app-settings__row-content">
+          <mat-slide-toggle
+            [checked]="settings().keepScreenAwake"
+            (change)="onKeepScreenAwakeToggle($event.checked)"
+            labelPosition="before"
+            ><mat-icon class="app-settings__row-icon">visibility</mat-icon>{{ 'settings.keepScreenAwake' | transloco }}</mat-slide-toggle
+          >
+          <p class="app-settings__hint">{{ 'settings.keepScreenAwakeHint' | transloco }}</p>
+        </div>
+      </div>
+    </div>
+
+    @switch (pwaInstall.state()) {
+      @case ('installable') {
+        <div class="app-settings__row">
+          <div class="app-settings__row-item app-settings__row-item--action">
+            <button mat-stroked-button class="app-settings__install-btn" (click)="installApp()">
+              <mat-icon>install_mobile</mat-icon>
+              {{ 'settings.installApp' | transloco }}
+            </button>
+          </div>
+        </div>
+      }
+      @case ('installed') {
+        <div class="app-settings__row app-settings__install-status">
+          <div class="app-settings__row-item">
+            <mat-icon class="app-settings__row-icon app-settings__install-status-icon">check_circle</mat-icon>
+            <span class="app-settings__label">{{ 'settings.alreadyInstalled' | transloco }}</span>
+          </div>
+        </div>
+      }
+      @case ('unsupported') {
+        @if (pwaInstall.isIos) {
+          <div class="app-settings__row app-settings__install-manual">
+            <div class="app-settings__row-item">
+              <mat-icon class="app-settings__row-icon">ios_share</mat-icon>
+              <span class="app-settings__label">{{ 'settings.installIosHint' | transloco }}</span>
+            </div>
+          </div>
+        }
+      }
+    }
+  </section>
+
+  <!-- Account -->
+  <section class="app-settings__section">
+    <h2 class="app-settings__section-title">{{ 'settings.account' | transloco }}</h2>
+
+    @if (user(); as u) {
+      <div class="app-settings__row">
+        <div class="app-settings__row-item">
+          <mat-icon class="app-settings__row-icon">person</mat-icon>
+          <span class="app-settings__label">{{ 'settings.signedInAs' | transloco }}</span>
+          <span class="app-settings__email">{{ u.email }}</span>
+        </div>
+      </div>
+    }
+
+    <div class="app-settings__row">
+      <div class="app-settings__row-item app-settings__row-item--action">
+        <button mat-flat-button class="app-settings__sign-out-btn" (click)="signOut()">
+          <mat-icon>logout</mat-icon>
+          {{ 'settings.signOut' | transloco }}
+        </button>
+      </div>
+    </div>
+  </section>
+</div>
+}
