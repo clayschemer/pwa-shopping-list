@@ -139,7 +139,13 @@
     "cancel": "Annuler",
     "remove": "Supprimer",
     "ok": "OK",
-    "add": "Ajouter"
+    "add": "Ajouter",
+    "showAllSuggestions": "Tout afficher ({{count}})",
+    "backToNameInput": "Retour à la saisie du nom",
+    "suggestionsForQuery": "« {{query}} »",
+    "alreadyOnList": "Déjà sur la liste",
+    "suggestionQtyWithUnit": "{{quantity}} {{unit}}",
+    "suggestionQtyOnly": "{{quantity}}"
   },
   "itemSheet": {
     "addTitle": "Ajouter un article",

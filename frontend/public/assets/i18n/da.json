@@ -139,7 +139,13 @@
     "cancel": "Annuller",
     "remove": "Fjern",
     "ok": "OK",
-    "add": "Tilføj"
+    "add": "Tilføj",
+    "showAllSuggestions": "Vis alle ({{count}})",
+    "backToNameInput": "Tilbage til navnefeltet",
+    "suggestionsForQuery": "\"{{query}}\"",
+    "alreadyOnList": "Allerede på listen",
+    "suggestionQtyWithUnit": "{{quantity}} {{unit}}",
+    "suggestionQtyOnly": "{{quantity}}"
   },
   "itemSheet": {
     "addTitle": "Tilføj vare",

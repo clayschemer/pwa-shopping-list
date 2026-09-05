@@ -30,6 +30,23 @@ Feature: Autocomplete on Item Add
     Then only the most frequently bought variant of that item should be suggested
     And no other variant of the same item should appear in the suggestions
 
+  Scenario: All matching items can be revealed when suggestions are truncated
+    Given more previously added items match what I am adding than are initially suggested
+    When I choose to see all matching items
+    Then every matching previously added item should be listed
+
+  Scenario: Choosing an item from the full match list adds it directly
+    Given all matching previously added items are listed
+    When I choose one of them
+    Then that item should be added to the list with its previously used category, quantity, and unit
+    And the full match list should no longer be shown
+
+  Scenario: Items already on the list cannot be added again
+    Given all matching previously added items are listed
+    And one of them is already on the shopping list
+    Then that item should be indicated as already on the list
+    And it should not be selectable
+
   Scenario: No suggestion is forced on the user
     Given suggestions are displayed when adding a new item
     When I ignore the suggestions and enter a new item name

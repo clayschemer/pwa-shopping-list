@@ -21,19 +21,81 @@
   }
 
   &__suggestions {
-    list-style: none;
-    margin: 0;
-    padding: var(--app-spacing-xs);
     display: flex;
     flex-direction: column;
     gap: var(--app-spacing-xxs);
+    /* The height below is a full-box measurement — keep the padding inside it. */
+    box-sizing: border-box;
+    padding: var(--app-spacing-xs);
     background: var(--mat-sys-surface-container);
     border-radius: var(--app-shape-xl);
     box-shadow: var(--mat-sys-level3);
+
+    /*
+     * Both endpoints of the expand transition are explicit, so `height` can be
+     * transitioned directly — no JS measuring, no max-height guesswork. Rows are
+     * fixed-height and never wrap, so `--rows` (bound from the template) gives an
+     * exact collapsed height: N rows, N-1 gaps, plus the panel padding.
+     */
+    height: calc(
+      var(--rows, 0) * (var(--app-spacing-row-min-height) + var(--app-spacing-xxs)) -
+        var(--app-spacing-xxs) + var(--app-spacing-xs) * 2
+    );
+
+    @media (prefers-reduced-motion: no-preference) {
+      transition: height var(--app-duration-emphasized) var(--app-easing-emphasized);
+    }
+
+    &--browsing {
+      height: min(65dvh, calc(100dvh - var(--app-spacing-xxl) * 2));
+    }
+  }
+
+  &__browse-header {
+    flex: 0 0 auto;
+    display: flex;
+    align-items: center;
+    gap: var(--app-spacing-xs);
+    padding-inline-end: var(--app-spacing-sm);
+    min-height: var(--app-spacing-row-min-height);
+  }
+
+  &__query {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: var(--app-font-body-lg);
+    color: var(--mat-sys-on-surface-variant);
+  }
+
+  &__list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--app-spacing-xxs);
+    min-height: 0;
+  }
+
+  &__suggestions--browsing &__list {
+    position: relative;
+    flex: 1;
+    overflow-y: auto;
+    /* Keep the plan list underneath from scrolling once this list hits its end. */
+    overscroll-behavior: contain;
+    /* Fade the last row to signal there is more below. */
+    mask-image: linear-gradient(
+      to bottom,
+      #000 calc(100% - var(--app-spacing-xl)),
+      transparent
+    );
   }
 
   &__suggestion {
     display: flex;
+    flex: 0 0 auto;
   }
 
   &__suggestion-btn {
@@ -43,8 +105,11 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    gap: var(--app-spacing-sm);
-    min-height: var(--app-spacing-row-min-height);
+    /* Three columns share a narrow panel on phones — keep the gutters tight. */
+    gap: var(--app-spacing-xs);
+    box-sizing: border-box;
+    /* Fixed, not min — the collapsed panel height is derived from this. */
+    height: var(--app-spacing-row-min-height);
     padding: var(--app-spacing-xs) var(--app-spacing-sm);
     border-radius: var(--app-shape-md);
     color: var(--mat-sys-on-surface);
@@ -55,21 +120,81 @@
     }
 
     &:hover {
+      background: var(--mat-sys-surface-container-highest);
+    }
+
+    &:focus-visible {
+      @include focus.ring;
+    }
+
+    &--on-list {
+      cursor: default;
+      opacity: 0.55;
+    }
+  }
+
+  &__suggestion-name {
+    /* Absorbs the slack so the chip and amount stay right-aligned together. */
+    flex: 1 1 auto;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: var(--app-font-body-lg);
+  }
+
+  &__suggestion-qty {
+    flex: 0 0 auto;
+    white-space: nowrap;
+    font-size: var(--app-font-label);
+    color: var(--mat-sys-on-surface-variant);
+  }
+
+  &__chip {
+    flex: 0 1 auto;
+    max-width: 40%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    padding: var(--app-spacing-xxs) var(--app-spacing-xs);
+    border-radius: var(--app-shape-pill);
+    font-size: var(--app-font-caption);
+    color: var(--mat-sys-on-surface-variant);
+    background: color-mix(
+      in srgb,
+      var(--app-chip-color, var(--mat-sys-outline-variant)) 22%,
+      transparent
+    );
+  }
+
+  &__on-list {
+    flex: 0 0 auto;
+    font-size: var(--app-font-caption);
+    color: var(--mat-sys-on-surface-variant);
+  }
+
+  &__show-all {
+    all: unset;
+    cursor: pointer;
+    flex: 0 0 auto;
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: var(--app-spacing-row-min-height);
+    padding: var(--app-spacing-xs) var(--app-spacing-sm);
+    border-radius: var(--app-shape-md);
+    font-size: var(--app-font-label);
+    font-weight: 600;
+    color: var(--mat-sys-primary);
+
+    &:hover {
       background: var(--mat-sys-surface-container-high);
     }
 
     &:focus-visible {
       @include focus.ring;
     }
-  }
-
-  &__suggestion-name {
-    font-size: var(--app-font-body-lg);
-  }
-
-  &__suggestion-qty {
-    font-size: var(--app-font-label);
-    color: var(--mat-sys-on-surface-variant);
   }
 
   &__bar {

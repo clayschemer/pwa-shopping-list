@@ -23,7 +23,8 @@ export class AutocompleteService {
     return this.pending;
   }
 
-  suggest(query: string, limit = 3): AutocompleteItem[] {
+  /** Omit `limit` to get every match — the full set is already cached client-side. */
+  suggest(query: string, limit?: number): AutocompleteItem[] {
     const trimmed = query.trim().toLowerCase();
     if (!trimmed) {
       return [];
@@ -40,8 +41,9 @@ export class AutocompleteService {
         byName.set(key, item);
       }
     }
-    return [...byName.values()]
-      .sort((a, b) => b.purchaseCount - a.purchaseCount)
-      .slice(0, limit);
+    const ranked = [...byName.values()].sort(
+      (a, b) => b.purchaseCount - a.purchaseCount,
+    );
+    return limit === undefined ? ranked : ranked.slice(0, limit);
   }
 }

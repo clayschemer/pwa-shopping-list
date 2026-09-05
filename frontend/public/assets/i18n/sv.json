@@ -139,7 +139,13 @@
     "cancel": "Avbryt",
     "remove": "Ta bort",
     "ok": "OK",
-    "add": "Lägg till"
+    "add": "Lägg till",
+    "showAllSuggestions": "Visa alla ({{count}})",
+    "backToNameInput": "Tillbaka till namnfältet",
+    "suggestionsForQuery": "”{{query}}”",
+    "alreadyOnList": "Redan på listan",
+    "suggestionQtyWithUnit": "{{quantity}} {{unit}}",
+    "suggestionQtyOnly": "{{quantity}}"
   },
   "itemSheet": {
     "addTitle": "Lägg till vara",

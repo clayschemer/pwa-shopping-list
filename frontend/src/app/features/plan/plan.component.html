@@ -91,7 +91,11 @@
     }
   }
 
-  <app-add-item-pill [existingNames]="existingNamesList()" (submitted)="onAddRequested($event)" />
+  <app-add-item-pill
+  [existingNames]="existingNamesList()"
+  [categories]="shopOrderedCategories()"
+  (submitted)="onAddRequested($event)"
+/>
 </section>
 
 <ng-template #itemBody let-item="item" let-isChecked="isChecked">

@@ -113,6 +113,35 @@ describe('AutocompleteService', () => {
     ]);
   });
 
+  it('returns every match ranked by purchaseCount when no limit is given', async () => {
+    itemApi.fetchAutocompleteItems.mockResolvedValue([
+      ac('Milk', 1),
+      ac('Milky Way', 10),
+      ac('Milkshake', 5),
+      ac('Milky Things', 2),
+      ac('Bread', 7),
+    ]);
+    await service.ensureLoaded();
+    const result = service.suggest('milk');
+    expect(result.map((i) => i.name)).toEqual([
+      'Milky Way',
+      'Milkshake',
+      'Milky Things',
+      'Milk',
+    ]);
+  });
+
+  it('still collapses same-name variants when no limit is given', async () => {
+    itemApi.fetchAutocompleteItems.mockResolvedValue([
+      variant('Milk', 1, 'L', 4),
+      variant('milk', 1.5, 'L', 9),
+      variant('Milkshake', 1, 'pcs', 5),
+    ]);
+    await service.ensureLoaded();
+    const result = service.suggest('milk');
+    expect(result.map((i) => i.name)).toEqual(['milk', 'Milkshake']);
+  });
+
   it('filters case-insensitively on substring match', async () => {
     itemApi.fetchAutocompleteItems.mockResolvedValue([
       ac('Organic Milk', 1),

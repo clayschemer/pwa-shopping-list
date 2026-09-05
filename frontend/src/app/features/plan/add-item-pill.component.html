@@ -11,26 +11,76 @@
 } @else {
   <div class="app-add-item-pill" role="dialog" [attr.aria-label]="'plan.addItem' | transloco">
     @if (suggestions().length > 0) {
-      <ul class="app-add-item-pill__suggestions" role="listbox">
-        @for (suggestion of suggestions(); track suggestion.id) {
-          <li class="app-add-item-pill__suggestion" role="option">
+      <div
+        class="app-add-item-pill__suggestions"
+        [class.app-add-item-pill__suggestions--browsing]="stage() === 'browse'"
+        [style.--rows]="rowCount()"
+      >
+        @if (stage() === 'browse') {
+          <div class="app-add-item-pill__browse-header">
             <button
+              #backButton
+              mat-icon-button
               type="button"
-              class="app-add-item-pill__suggestion-btn"
-              (click)="applySuggestion(suggestion)"
+              class="app-add-item-pill__back"
+              [attr.aria-label]="'plan.backToNameInput' | transloco"
+              (click)="collapseToInput()"
             >
-              <span class="app-add-item-pill__suggestion-name">{{ suggestion.name }}</span>
-              @if (suggestion.quantity !== null || suggestion.unit !== null) {
-                <span class="app-add-item-pill__suggestion-qty">
-                  {{ suggestion.quantity }}{{ suggestion.unit ? ' ' + ('units.' + suggestion.unit | transloco) : '' }}
-                </span>
-              }
+              <mat-icon>arrow_back</mat-icon>
             </button>
-          </li>
+            <span class="app-add-item-pill__query">
+              {{ 'plan.suggestionsForQuery' | transloco: { query: name() } }}
+            </span>
+          </div>
         }
-      </ul>
+
+        <ul class="app-add-item-pill__list" role="listbox">
+          @for (suggestion of suggestions(); track suggestion.id) {
+            @let category = categoryFor(suggestion.primaryCategoryId);
+            @let onList = isOnList(suggestion.name);
+            <li class="app-add-item-pill__suggestion" role="option" [attr.aria-disabled]="onList">
+              <button
+                type="button"
+                class="app-add-item-pill__suggestion-btn"
+                [class.app-add-item-pill__suggestion-btn--on-list]="onList"
+                [disabled]="onList"
+                (click)="stage() === 'browse' ? addFromBrowse(suggestion) : applySuggestion(suggestion)"
+              >
+                <span class="app-add-item-pill__suggestion-name">{{ suggestion.name }}</span>
+                @if (onList) {
+                  <span class="app-add-item-pill__on-list">
+                    {{ 'plan.alreadyOnList' | transloco }}
+                  </span>
+                } @else if (category) {
+                  <span
+                    class="app-add-item-pill__chip"
+                    [style.--app-chip-color]="category.color"
+                  >
+                    {{ category.name }}
+                  </span>
+                }
+                @let quantity = quantityLabel(suggestion);
+                @if (quantity) {
+                  <span class="app-add-item-pill__suggestion-qty">{{ quantity }}</span>
+                }
+              </button>
+            </li>
+          }
+        </ul>
+
+        @if (canShowAll()) {
+          <button
+            type="button"
+            class="app-add-item-pill__show-all"
+            (click)="expandAll()"
+          >
+            {{ 'plan.showAllSuggestions' | transloco: { count: matchCount() } }}
+          </button>
+        }
+      </div>
     }
 
+    @if (stage() !== 'browse') {
     <form class="app-add-item-pill__bar" (ngSubmit)="stage() === 'name' ? confirmName() : submit()">
       @if (stage() === 'name') {
         <input
@@ -86,5 +136,6 @@
         </button>
       }
     </form>
+    }
   </div>
 }

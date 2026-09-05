@@ -119,7 +119,7 @@ export class PlanComponent {
     return this.checkedItemIds().has(id);
   }
 
-  private readonly shopOrderedCategories = toSignal(
+  readonly shopOrderedCategories = toSignal(
     this.store.select(selectOrderedCategories),
     { initialValue: [] },
   );
