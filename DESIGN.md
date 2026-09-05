@@ -196,12 +196,16 @@ FAB morphs into a floating pill input, expanding leftward from its position. The
 
 **Stages:**
 1. Pill expands — name input active, list visible behind
-2. As user types, up to 3 autocomplete suggestions appear **above** the pill (growing upward), ranked by purchase frequency. Each suggestion shows: item name · qty+unit · category badge
+2. As user types, up to 3 autocomplete suggestions appear **above** the pill (growing upward), ranked by purchase frequency. Each suggestion shows: item name · category chip (tinted with the category colour) · qty+unit. A suggestion already on the active list is dimmed, labelled "already on list" in place of the chip, and not selectable.
 3. When name is valid (>1 char): button inside pill reads **"OK"** (terracotta)
 4. Tapping OK (or a suggestion): name is confirmed. Qty + unit field appears to the left of the "Add" button inside the pill. Layout: `[name badge] | [qty field (cursor here)] [unit dropdown] [Add]`
 5. **"Add" is always green and always valid** — qty and unit are optional, never block submission
 6. Tap Add: item added to list, pill collapses back to FAB
 7. Dismiss: tap outside the pill
+
+**Show all (browse stage):** when more than 3 items match, a **"Show all (n)"** row sits below the suggestions. Tapping it dismisses the on-screen keyboard, swaps the input bar out, and animates the panel to a fixed **65 dvh** browsing surface listing every match. A pinned header carries a back arrow and the query; results scroll beneath it with a fade over the bottom edge as the scroll cue. Here a suggestion is a **one-tap add** — the item goes straight onto the list with its previously used category, quantity, and unit, and the pill closes. Back returns to the name field with the query intact and the keyboard reopened; tapping outside or Escape closes the pill entirely.
+
+The expansion animates on `height` with explicit endpoints on both sides — the row count is bound into CSS and the collapsed height is derived from the spacing tokens — so compact mode and reduced motion are honoured without hard-coded values.
 
 Unit field is a dropdown with ~20 options:
 `pcs, g, kg, mg, ml, L, cl, bag, pack, box, can, bottle, jar, carton, bunch, head, loaf, slice, sheet, tsp, tbsp, cup, oz, lb`

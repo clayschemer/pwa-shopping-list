@@ -361,6 +361,7 @@ Built (test-first, behind the API service layer):
 - Auth: Firebase Google OAuth, allowlist gate via `getAccount()`, sign-in / access-denied / pending-verification screens, route guard, session restore loading state. First-time Google sign-in self-registers a `/users/{uid}` doc with `verified: false` and routes to `/pending-verification`; admin flips `verified` and sets `accountId` in the Firebase console to grant access. Legacy docs without the `verified` field are treated as verified.
 - App shell: top bar with mode toggle, nav drawer, full-screen routes for Settings / Manage Shops / History, runtime i18n + theme service + compact / high-contrast / left-handed / reduced-motion modes
 - Items: store + plan-mode list, add-pill flow, edit sheet, remove confirm dialog
+- Autocomplete: session-cached item history behind `AutocompleteService`; the add-pill shows the top 3 matches with a colour-tinted primary-category chip and the previously used qty+unit, flags names already on the list as unselectable, and offers "Show all (n)" when more match — expanding to a 65 dvh browse panel (keyboard dismissed, input swapped for a pinned back-arrow header, scrollable list, one-tap add)
 - Shops: store + Manage Shops screen with add / rename / delete sheets + price search URL sheet (link icon per row opens bottom sheet to set or clear `priceSearchUrl`; empty on save = null)
 - Categories: store + plan-mode header ⋯ menu (rename / available-in-shops / delete), nav-drawer drag reorder dispatches `setShopCategoryOrder` per shop or `setGlobalCategoryOrder` when "Global" is selected, add-category sheet from drawer
 - Category groups: `categoryGroups` subcollection + store slice; group chip row on `/categories` opens a group sheet (rename / tri-state available-in-shops / delete); selection mode on the same route bulk-adds and bulk-removes the selection to/from a group in one batched write
@@ -376,7 +377,7 @@ Price pipeline: `price-pipeline/` is a standalone Docker Compose workspace conta
 
 Deployment: GitHub Actions workflow (`.github/workflows/deploy.yml`) runs Vitest + Cucumber on every push/PR to `develop`/`main`, then deploys `develop` → GitHub Pages and `main` → cPanel via FTPS. Firestore rules and indexes deploy separately via `firebase deploy --only firestore:rules,firestore:indexes` from `backend/firebase/`. Firebase Hosting config exists in `firebase.json` as a fallback path but is not part of the active pipeline.
 
-Acceptance: Gherkin `.feature` files under `frontend/tests/acceptance/features/` cover auth, modes, settings, categories, shops, items, sessions, autocomplete, AI price estimation, AI list suggestions, and barcode scanning. Step definitions are written for all non-AI / non-barcode features and pass.
+Acceptance: Gherkin `.feature` files under `frontend/tests/acceptance/features/` cover auth, modes, settings, categories, shops, items, sessions, autocomplete, AI price estimation, AI list suggestions, and barcode scanning. Step definitions are written for all non-AI / non-barcode features; the whole suite passes (151 scenarios).
 
 ---
 

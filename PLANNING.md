@@ -19,6 +19,7 @@ Built (test-first, behind the API service layer):
 - Auth: Firebase Google OAuth, allowlist gate via `getAccount()`, sign-in / access-denied screens, route guard, session restore loading state
 - App shell: top bar with mode toggle, nav drawer, full-screen routes for Settings / Manage Shops / History, runtime i18n + theme service + compact / high-contrast / left-handed / reduced-motion modes
 - Items: store + plan-mode list, add-pill flow, edit sheet, remove confirm dialog
+- Autocomplete: session-cached item history behind `AutocompleteService`; the add-pill shows the top 3 matches with a colour-tinted primary-category chip and the previously used qty+unit, flags names already on the list as unselectable, and offers "Show all (n)" when more match — expanding to a 65 dvh browse panel (keyboard dismissed, input swapped for a pinned back-arrow header, scrollable list, one-tap add)
 - Shops: store + Manage Shops screen with add / rename / delete sheets
 - Categories: store + plan-mode header ⋯ menu (rename / available-in-shops / delete), nav-drawer drag reorder dispatches `setShopCategoryOrder` per shop or `setGlobalCategoryOrder` when "Global" is selected, add-category sheet from drawer
 - Sessions + shop mode: session API + store, auto-start on shop select, shop-mode list with grouped Est. and session totals, 2 s client-side undo window, undo-history sheet, close-session dialog, 30-min inactivity reminder dialog (close session or keep shopping)
@@ -29,7 +30,7 @@ Backend status: All API services (Auth, Item, Category, Shop, Session, Account, 
 
 Deployment: GitHub Actions workflow (`.github/workflows/deploy.yml`) runs Vitest + Cucumber on every push/PR to `develop`/`main`, then deploys `develop` → GitHub Pages and `main` → cPanel via FTPS. Firestore rules and indexes deploy separately via `firebase deploy --only firestore:rules,firestore:indexes` from `backend/firebase/`. Firebase Hosting config exists as a fallback path but is not part of the active pipeline.
 
-Acceptance: Gherkin `.feature` files under `frontend/tests/acceptance/features/` cover auth, modes, settings, categories, shops, items, sessions, autocomplete, AI price estimation, AI list suggestions, and barcode scanning. Step definitions are written for all non-AI / non-barcode features and pass.
+Acceptance: Gherkin `.feature` files under `frontend/tests/acceptance/features/` cover auth, modes, settings, categories, shops, items, sessions, autocomplete, AI price estimation, AI list suggestions, and barcode scanning. Step definitions are written for all non-AI / non-barcode features; the whole suite passes (151 scenarios).
 
 ---
 
@@ -912,6 +913,29 @@ Feature: Autocomplete on Item Add
     Given multiple previously added items match what I am adding
     When suggestions are displayed
     Then more frequently bought items should appear higher in the suggestions
+
+  Scenario: Only the most-purchased variant of an item is suggested
+    Given the same item has previously been bought in several quantity or unit variants
+    When suggestions are displayed for that item
+    Then only the most frequently bought variant of that item should be suggested
+    And no other variant of the same item should appear in the suggestions
+
+  Scenario: All matching items can be revealed when suggestions are truncated
+    Given more previously added items match what I am adding than are initially suggested
+    When I choose to see all matching items
+    Then every matching previously added item should be listed
+
+  Scenario: Choosing an item from the full match list adds it directly
+    Given all matching previously added items are listed
+    When I choose one of them
+    Then that item should be added to the list with its previously used category, quantity, and unit
+    And the full match list should no longer be shown
+
+  Scenario: Items already on the list cannot be added again
+    Given all matching previously added items are listed
+    And one of them is already on the shopping list
+    Then that item should be indicated as already on the list
+    And it should not be selectable
 
   Scenario: No suggestion is forced on the user
     Given suggestions are displayed when adding a new item
