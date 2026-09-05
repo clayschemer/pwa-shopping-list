@@ -140,6 +140,17 @@ When(
   },
 );
 
+When(
+  'my authentication session expires or is revoked',
+  function (this: AuthWorld) {
+    // Not user-initiated: the auth state stream emits null mid-session, so
+    // access is lost exactly as on sign-out and nothing is left to restore.
+    this.isAuthenticated = false;
+    this.hasAccess = false;
+    this.sessionRestored = false;
+  },
+);
+
 // ---------------------------------------------------------------------------
 // Then steps
 // ---------------------------------------------------------------------------
