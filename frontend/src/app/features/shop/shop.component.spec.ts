@@ -166,6 +166,35 @@ describe('ShopComponent — undo within the check window', () => {
   });
 });
 
+const scss = readFileSync('src/app/features/shop/shop.component.scss', 'utf8');
+
+/** Returns the body of an SCSS rule, nested rules included. */
+function block(selector: string): string {
+  const start = scss.indexOf(`${selector} {`);
+  expect(start, `${selector} not found in shop.component.scss`).toBeGreaterThan(-1);
+
+  const open = scss.indexOf('{', start);
+  let depth = 0;
+  for (let i = open; i < scss.length; i++) {
+    if (scss[i] === '{') depth++;
+    if (scss[i] === '}' && --depth === 0) return scss.slice(open + 1, i);
+  }
+  throw new Error(`unterminated block for ${selector}`);
+}
+
+/** The rule's own declarations, with nested rules stripped out. */
+function ownDeclarations(selector: string): string {
+  return block(selector).replace(/&[^{]*\{[^}]*\}/gs, '');
+}
+
+/** The innermost rules of a block, as selector → declarations pairs. */
+function nestedRules(body: string): { selector: string; declarations: string }[] {
+  return [...body.matchAll(/([^{}]+)\{([^{}]*)\}/g)].map((match) => ({
+    selector: match[1].trim(),
+    declarations: match[2],
+  }));
+}
+
 /**
  * Component styles are not compiled into the jsdom test environment, so the
  * row's height cannot be measured here. These assert the source declarations
@@ -174,30 +203,6 @@ describe('ShopComponent — undo within the check window', () => {
  * the row jump the moment an item is checked.
  */
 describe('ShopComponent — undo hint keeps the row height stable', () => {
-  const scss = readFileSync(
-    'src/app/features/shop/shop.component.scss',
-    'utf8',
-  );
-
-  /** Returns the body of an SCSS rule, nested rules included. */
-  function block(selector: string): string {
-    const start = scss.indexOf(`${selector} {`);
-    expect(start, `${selector} not found in shop.component.scss`).toBeGreaterThan(-1);
-
-    const open = scss.indexOf('{', start);
-    let depth = 0;
-    for (let i = open; i < scss.length; i++) {
-      if (scss[i] === '{') depth++;
-      if (scss[i] === '}' && --depth === 0) return scss.slice(open + 1, i);
-    }
-    throw new Error(`unterminated block for ${selector}`);
-  }
-
-  /** The rule's own declarations, with nested rules stripped out. */
-  function ownDeclarations(selector: string): string {
-    return block(selector).replace(/&[^{]*\{[^}]*\}/gs, '');
-  }
-
   it('does not reserve vertical space on the undo affordance', () => {
     expect(ownDeclarations('&__item-undo')).not.toMatch(/(min-)?height:/);
   });
@@ -207,5 +212,54 @@ describe('ShopComponent — undo hint keeps the row height stable', () => {
 
     expect(overlay).toContain('position: absolute');
     expect(overlay).toContain('block-size: var(--app-spacing-row-min-height)');
+  });
+});
+
+/**
+ * Left-handed mode is CSS-only and jsdom compiles no component styles, so the
+ * checkbox's side cannot be measured here. What decides it is which element the
+ * mirror lands on: the row is a grid (&__item, animating its own height) wrapping
+ * a flex line (&__item-collapse, laying name and checkbox out side by side).
+ * Flex properties on the grid are inert — that is exactly how this regressed —
+ * so these assert the mirror acts inside the flex context, whether it reverses
+ * the container or reorders its children.
+ */
+describe('ShopComponent — left-handed mode moves the checkbox to the leading edge', () => {
+  /** The class whose rule owns `display: flex` for the row. */
+  const flexRow = '&__item-collapse';
+  const flexRowClass = flexRow.replace('&', '.app-shop');
+  const rules = nestedRules(block(':host-context(body.theme-left-handed)'));
+
+  it('lays the row out as a flex line, so the mirror has something to act on', () => {
+    expect(ownDeclarations(flexRow)).toMatch(/display:\s*flex/);
+  });
+
+  it('mirrors the row, by reversing the flex line or reordering its children', () => {
+    const reversesTheLine = rules.some(
+      (rule) =>
+        rule.selector === flexRowClass &&
+        /flex-direction:\s*row-reverse/.test(rule.declarations),
+    );
+    const reordersTheChildren = rules.some(
+      (rule) =>
+        /^\.app-shop__item-(check|main)$/.test(rule.selector) &&
+        /\border:\s*-?\d/.test(rule.declarations),
+    );
+
+    expect(
+      reversesTheLine || reordersTheChildren,
+      `nothing in the left-handed rule mirrors ${flexRowClass}`,
+    ).toBe(true);
+  });
+
+  it('never spends a flex property on an element that is not a flex container', () => {
+    for (const rule of rules) {
+      if (!/flex-direction:/.test(rule.declarations)) continue;
+
+      expect(
+        ownDeclarations(rule.selector.replace('.app-shop', '&')),
+        `${rule.selector} is not a flex container, so flex-direction does nothing`,
+      ).toMatch(/display:\s*flex/);
+    }
   });
 });

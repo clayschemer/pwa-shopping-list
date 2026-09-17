@@ -405,8 +405,11 @@
   }
 }
 
+// Mirrors the row so the checkbox falls under the left thumb. This has to act on
+// &__item-collapse, the flex line that lays name and checkbox out: &__item is the
+// grid that animates the row height, and flex properties on a grid do nothing.
 :host-context(body.theme-left-handed) {
-  .app-shop__item {
+  .app-shop__item-collapse {
     flex-direction: row-reverse;
   }
 }
