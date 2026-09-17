@@ -45,6 +45,7 @@
             <button
               mat-icon-button
               class="app-root__undo-btn"
+              [disabled]="checkedCount() === 0"
               [attr.aria-label]="'nav.viewChecked' | transloco"
               (click)="onOpenUndoHistory()"
             >

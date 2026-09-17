@@ -3,7 +3,7 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { TestBed } from '@angular/core/testing';
 import { Component } from '@angular/core';
 import { Title } from '@angular/platform-browser';
-import { Router, provideRouter } from '@angular/router';
+import { Router, provideRouter, type Routes } from '@angular/router';
 import { of, EMPTY } from 'rxjs';
 import { MatBottomSheet } from '@angular/material/bottom-sheet';
 import { MatDialog } from '@angular/material/dialog';
@@ -26,13 +26,14 @@ import { itemsActions } from './store/items/items.actions';
 import { sessionsReducer } from './store/sessions/sessions.reducer';
 import { sessionsActions } from './store/sessions/sessions.actions';
 import { authActions, accountActions } from './store/account/account.actions';
-import type { UserId, AccountId, ShopId } from './models/ids.model';
+import type { UserId, AccountId, ShopId, ItemId, SessionId } from './models/ids.model';
 import type { Shop } from './models/shop.model';
+import type { Session, SessionCheckedItem } from './models/session.model';
 
 @Component({ template: '' })
 class DummyComponent {}
 
-function createTestBed(routes = [], extraProviders: unknown[] = []) {
+function createTestBed(routes: Routes = [], extraProviders: unknown[] = []) {
   return TestBed.configureTestingModule({
     imports: [App, provideTranslocoTesting()],
     providers: [
@@ -442,6 +443,87 @@ describe('App', () => {
       expect(pill?.textContent).toContain('£0.00');
       expect(pill?.textContent).not.toContain('Tesco');
       expect(el.querySelector('.app-root__session-pill-sub')).toBeFalsy();
+    });
+  });
+  /**
+   * The top-bar undo button is shop mode's only route into the check history.
+   * Until something has been checked it has nothing to open, so it must read as
+   * unavailable rather than offering a tap that opens an empty sheet.
+   */
+  describe('shop-mode undo button', () => {
+    const routes = [
+      { path: '', component: DummyComponent },
+      { path: 'shop', component: DummyComponent },
+    ];
+
+    const checked = (itemId: string): SessionCheckedItem => ({
+      itemId: itemId as ItemId,
+      checkedBy: 'u1' as UserId,
+      checkedAt: 1,
+      priceSnapshot: null,
+      priceQuantitySnapshot: null,
+      priceUnitSnapshot: null,
+      nameSnapshot: null,
+      quantitySnapshot: null,
+      unitSnapshot: null,
+    });
+
+    const sessionWith = (checkedItems: SessionCheckedItem[]): Session => ({
+      id: 'sess-1' as SessionId,
+      accountId: 'a1' as AccountId,
+      shopId: 's1' as ShopId,
+      participants: ['u1' as UserId],
+      startedBy: 'u1' as UserId,
+      startedAt: 1,
+      completedAt: null,
+      checkedItems,
+    });
+
+    async function setupShopMode(checkedItems: SessionCheckedItem[]) {
+      await createTestBed(routes, [
+        { provide: MatBottomSheet, useValue: { open: vi.fn().mockReturnValue({ afterDismissed: () => EMPTY }) } },
+        { provide: MatDialog, useValue: { open: vi.fn().mockReturnValue({ afterClosed: () => EMPTY }) } },
+      ]);
+      const store = TestBed.inject(Store);
+      authenticate(store);
+      store.dispatch(shopsActions.shopsLoaded({ shops: [shop('s1', 'Tesco')] }));
+      store.dispatch(uiActions.switchToShopModeWithShop({ shopId: 's1' as ShopId }));
+      store.dispatch(sessionsActions.sessionsLoaded({ sessions: [sessionWith(checkedItems)] }));
+
+      const fixture = TestBed.createComponent(App);
+      fixture.detectChanges();
+      await fixture.whenStable();
+      fixture.detectChanges();
+
+      const button = (fixture.nativeElement as HTMLElement).querySelector(
+        '.app-root__undo-btn',
+      ) as HTMLButtonElement;
+      return { fixture, store, button };
+    }
+
+    it('is disabled while nothing has been checked', async () => {
+      const { button } = await setupShopMode([]);
+
+      expect(button).toBeTruthy();
+      expect(button.disabled).toBe(true);
+    });
+
+    it('becomes available as soon as an item is checked', async () => {
+      const { button } = await setupShopMode([checked('i1')]);
+
+      expect(button.disabled).toBe(false);
+    });
+
+    it('enables itself live when the first check lands', async () => {
+      const { fixture, store, button } = await setupShopMode([]);
+      expect(button.disabled).toBe(true);
+
+      store.dispatch(sessionsActions.sessionUpdated({ session: sessionWith([checked('i1')]) }));
+      fixture.detectChanges();
+      await fixture.whenStable();
+      fixture.detectChanges();
+
+      expect(button.disabled).toBe(false);
     });
   });
 });
