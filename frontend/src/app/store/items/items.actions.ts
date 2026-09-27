@@ -36,6 +36,20 @@ export const itemsActions = createActionGroup({
   },
 });
 
+/**
+ * The recurring-item evaluation's own progress. Separate from `itemsActions`
+ * because these say nothing about any individual item — they bracket a batch of
+ * reads that the user is entitled to see happening, since it runs unprompted on
+ * app open and spends a noticeable share of the day's read budget.
+ */
+export const autoAddActions = createActionGroup({
+  source: 'Auto Add',
+  events: {
+    'Sync Started': emptyProps(),
+    'Sync Finished': emptyProps(),
+  },
+});
+
 export const itemsApiActions = createActionGroup({
   source: 'Items API',
   events: {

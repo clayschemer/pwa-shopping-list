@@ -35,7 +35,7 @@ import type {
   NameConflictError,
   NotFoundError,
 } from '../../models/errors.model';
-import type { Session } from '../../models/session.model';
+import type { Session, SessionCheckedItem } from '../../models/session.model';
 import type { AutocompleteItem } from '../../models/autocomplete.model';
 import { AccountContext } from './account-context';
 import { StreamErrorService } from './stream-error.service';
@@ -602,7 +602,17 @@ export class ItemApiService {
       const sessionRef = paths.sessionDoc(this.db, accountId, sessionId);
 
       try {
-        const result = await runTransaction(this.db, async (tx) => {
+        // The return value is composed from the two documents the transaction
+        // reads, plus the mutation it applies to them. It deliberately does not
+        // re-read either one afterwards: the checked item leaves the active list
+        // and the old re-read therefore had to scan every removed item — a set
+        // that only ever grows, since items are never hard deleted — plus every
+        // session including all history, once per check. That was thousands of
+        // reads per shopping trip spent on data already in hand, and the daily
+        // quota it burned took every other write down with it. `itemChanges$`
+        // and `sessionChanges$` stream both documents unfiltered anyway, so the
+        // shared state arrives through the listeners regardless.
+        return await runTransaction(this.db, async (tx) => {
           const itemSnap = await tx.get(itemRef);
           const sessionSnap = await tx.get(sessionRef);
           if (!itemSnap.exists() || !sessionSnap.exists()) {
@@ -613,13 +623,13 @@ export class ItemApiService {
             throw new Error('CHECK_CONFLICT');
           }
           const checkedAt = Date.now();
-          const checkedEntry = {
+          const checkedEntry: SessionCheckedItem = {
             itemId: id,
             checkedBy: userId,
             checkedAt,
-            priceSnapshot: itemData['price'] ?? null,
-            priceQuantitySnapshot: itemData['priceQuantity'] ?? null,
-            priceUnitSnapshot: itemData['priceUnit'] ?? null,
+            priceSnapshot: (itemData['price'] ?? null) as number | null,
+            priceQuantitySnapshot: (itemData['priceQuantity'] ?? null) as number | null,
+            priceUnitSnapshot: (itemData['priceUnit'] ?? null) as string | null,
             nameSnapshot: (itemData['name'] ?? null) as string | null,
             quantitySnapshot: (itemData['quantity'] ?? null) as number | null,
             unitSnapshot: (itemData['unit'] ?? null) as string | null,
@@ -628,25 +638,17 @@ export class ItemApiService {
           tx.update(sessionRef, {
             checkedItems: arrayUnion(checkedEntry),
           });
-          return { checkedEntry };
-        });
 
-        // Re-read to return full updated entities.
-        const itemSnap2 = (
-          await getDocs(
-            query(paths.items(this.db, accountId), where('removed', '==', true)),
-          )
-        ).docs.find((d) => d.id === id);
-        const sessionDocs = await getDocs(paths.sessions(this.db, accountId));
-        const sessionDoc = sessionDocs.docs.find((d) => d.id === sessionId);
-        if (!itemSnap2 || !sessionDoc) {
-          return { type: 'CHECK_CONFLICT', itemId: id } satisfies CheckConflictError;
-        }
-        return {
-          type: 'CHECK_SUCCESS',
-          item: mapItem(itemSnap2, accountId),
-          session: mapSession(sessionDoc, accountId),
-        };
+          const session = mapSession(sessionSnap, accountId);
+          return {
+            type: 'CHECK_SUCCESS',
+            item: { ...mapItem(itemSnap, accountId), removed: true, removedAt: checkedAt },
+            session: {
+              ...session,
+              checkedItems: [...session.checkedItems, checkedEntry],
+            },
+          } satisfies CheckSuccess;
+        });
       } catch (err) {
         const msg = (err as Error).message;
         if (msg === 'CHECK_CONFLICT' || msg === 'NOT_FOUND') {

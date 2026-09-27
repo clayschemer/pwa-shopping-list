@@ -339,12 +339,26 @@
     "autoAddRequiresInstall": "Installez l'application pour utiliser cette option — les ajouts sont vérifiés à l'ouverture."
   },
   "errors": {
-    "saveFailed": "Votre modification n'a pas pu être enregistrée. Vérifiez votre connexion et réessayez.",
-    "checkFailed": "L'article n'a pas pu être coché. Vérifiez votre connexion et réessayez.",
-    "uncheckFailed": "L'article n'a pas pu être décoché. Vérifiez votre connexion et réessayez.",
-    "sessionStartFailed": "La session n'a pas pu être démarrée. Vérifiez votre connexion et réessayez.",
-    "sessionCloseFailed": "La session n'a pas pu être fermée. Vérifiez votre connexion et réessayez.",
-    "sessionDiscardFailed": "La session n'a pas pu être abandonnée. Vérifiez votre connexion et réessayez."
+    "saveFailed": "Votre modification n'a pas pu être enregistrée.",
+    "checkFailed": "L'article n'a pas pu être coché.",
+    "uncheckFailed": "L'article n'a pas pu être décoché.",
+    "sessionStartFailed": "La session n'a pas pu être démarrée.",
+    "sessionCloseFailed": "La session n'a pas pu être fermée.",
+    "sessionDiscardFailed": "La session n'a pas pu être abandonnée.",
+    "loadFailed": "Certaines de vos données n'ont pas pu être chargées.",
+    "accountLoadFailed": "Votre liste n'a pas pu être ouverte.",
+    "autoAddFailed": "La vérification des articles récurrents n'a pas pu aboutir.",
+    "withCause": "{{what}} {{why}}",
+    "streamFailed": "La liste ne reçoit plus de mises à jour.",
+    "cause": {
+      "offline": "Vérifiez votre connexion et réessayez.",
+      "quotaExceeded": "L'application a épuisé son quota de base de données pour aujourd'hui. Elle devrait refonctionner une fois la limite quotidienne réinitialisée.",
+      "permissionDenied": "L'application n'a pas été autorisée à faire cela. Ses règles de base de données sont peut-être obsolètes.",
+      "authExpired": "Votre session de connexion a expiré. Reconnectez-vous.",
+      "notConfigured": "Un réglage nécessaire est absent de la base de données.",
+      "contention": "Trop de modifications simultanées. Réessayez.",
+      "unknown": "Une erreur s'est produite. Réessayez."
+    }
   },
   "boot": {
     "progressLabel": "Progression du chargement",
@@ -358,6 +372,7 @@
     "title": "Ajouté automatiquement",
     "periodicity": "Ajouté automatiquement — vous achetez cet article environ tous les {{days}} jours.",
     "openLabel": "Pourquoi {{name}} a été ajouté automatiquement",
-    "close": "Fermer"
+    "close": "Fermer",
+    "syncing": "Recherche d'articles récurrents…"
   }
 }

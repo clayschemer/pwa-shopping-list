@@ -6,6 +6,7 @@ import {
   DocumentChange,
 } from '@angular/fire/firestore';
 import type { StreamError } from '../../models/errors.model';
+import { classifyApiFailure } from '../diagnostics/api-failure';
 import type { StreamErrorService } from './stream-error.service';
 
 export interface EntityChange<T> {
@@ -38,6 +39,7 @@ export function snapshotChanges<T>(
       (err: unknown) => {
         const error: StreamError = {
           type: classifyStreamError(err),
+          kind: classifyApiFailure(err),
           message: (err as { message?: string })?.message ?? 'Unknown stream error',
         };
         streamError.emit(error);

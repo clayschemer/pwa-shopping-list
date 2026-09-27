@@ -11,6 +11,7 @@ import { uiActions } from '../ui/ui.actions';
 import { selectActiveSessionForCurrentShop } from './sessions.selectors';
 import { SessionApiService } from '../../core/api/session-api.service';
 import type { Session } from '../../models/session.model';
+import { apiFailureActions } from '../../../testing/api-failure-actions';
 import type {
   AccountId,
   SessionId,
@@ -183,13 +184,13 @@ describe('SessionsEffects', () => {
       actions$.next(req);
       await flush();
       expect(errored).toBe(false);
-      expect(results).toEqual([
-        sessionsActions.sessionCloseFailed({ sessionId: 's1' as SessionId }),
-      ]);
+      expect(results).toEqual(
+        apiFailureActions(sessionsActions.sessionCloseFailed({ sessionId: 's1' as SessionId }), 'sessions.closeSession'),
+      );
 
       actions$.next(req);
       await flush();
-      expect(results[1]).toEqual(
+      expect(results[2]).toEqual(
         sessionsActions.sessionClosed({ id: 's1' as SessionId }),
       );
     });
@@ -211,13 +212,13 @@ describe('SessionsEffects', () => {
       actions$.next(req);
       await flush();
       expect(errored).toBe(false);
-      expect(results).toEqual([
-        sessionsActions.sessionDiscardFailed({ sessionId: 's1' as SessionId }),
-      ]);
+      expect(results).toEqual(
+        apiFailureActions(sessionsActions.sessionDiscardFailed({ sessionId: 's1' as SessionId }), 'sessions.discardSession'),
+      );
 
       actions$.next(req);
       await flush();
-      expect(results[1]).toEqual(
+      expect(results[2]).toEqual(
         sessionsActions.sessionDiscarded({ id: 's1' as SessionId }),
       );
     });
@@ -239,11 +240,13 @@ describe('SessionsEffects', () => {
       actions$.next(req);
       await flush();
       expect(errored).toBe(false);
-      expect(results).toEqual([sessionsActions.sessionStartFailed()]);
+      expect(results).toEqual(
+        apiFailureActions(sessionsActions.sessionStartFailed(), 'sessions.startSession'),
+      );
 
       actions$.next(req);
       await flush();
-      expect(results[1]).toEqual(
+      expect(results[2]).toEqual(
         sessionsActions.sessionStarted({ session: mockSession }),
       );
     });

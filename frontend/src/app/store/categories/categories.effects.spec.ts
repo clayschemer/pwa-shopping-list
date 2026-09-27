@@ -9,6 +9,7 @@ import { accountActions } from '../account/account.actions';
 import { CategoryApiService } from '../../core/api/category-api.service';
 import type { Category } from '../../models/category.model';
 import type { AccountId, CategoryGroupId, CategoryId } from '../../models/ids.model';
+import { apiFailureActions } from '../../../testing/api-failure-actions';
 
 const mockCategories: Category[] = [
   { id: 'c1' as CategoryId, accountId: 'a1' as AccountId, name: 'Produce', color: null, globalSortOrder: 0, groupIds: [] },
@@ -246,11 +247,13 @@ describe('CategoriesEffects', () => {
       actions$.next(req);
       await flush();
       expect(errored).toBe(false);
-      expect(results).toEqual([categoriesActions.categorySaveFailed({ id: null })]);
+      expect(results).toEqual(
+        apiFailureActions(categoriesActions.categorySaveFailed({ id: null }), 'categories.addCategoriesToGroup'),
+      );
 
       actions$.next(req);
       await flush();
-      expect((results[1] as { type: string }).type).toContain(
+      expect((results[2] as { type: string }).type).toContain(
         'Categories Added To Group',
       );
     });
@@ -275,11 +278,13 @@ describe('CategoriesEffects', () => {
       actions$.next(req);
       await flush();
       expect(errored).toBe(false);
-      expect(results).toEqual([categoriesActions.categorySaveFailed({ id: null })]);
+      expect(results).toEqual(
+        apiFailureActions(categoriesActions.categorySaveFailed({ id: null }), 'categories.removeCategoriesFromGroup'),
+      );
 
       actions$.next(req);
       await flush();
-      expect((results[1] as { type: string }).type).toContain(
+      expect((results[2] as { type: string }).type).toContain(
         'Categories Removed From Group',
       );
     });
@@ -306,11 +311,13 @@ describe('CategoriesEffects', () => {
       actions$.next(req);
       await flush();
       expect(errored).toBe(false);
-      expect(results).toEqual([categoriesActions.categorySaveFailed({ id: null })]);
+      expect(results).toEqual(
+        apiFailureActions(categoriesActions.categorySaveFailed({ id: null }), 'categories.addCategory'),
+      );
 
       actions$.next(req);
       await flush();
-      expect((results[1] as { type: string }).type).toContain('Category Added');
+      expect((results[2] as { type: string }).type).toContain('Category Added');
     });
 
     it('renameCategory$ dispatches categorySaveFailed and survives a rejected call', async () => {
@@ -332,13 +339,13 @@ describe('CategoriesEffects', () => {
       actions$.next(req);
       await flush();
       expect(errored).toBe(false);
-      expect(results).toEqual([
-        categoriesActions.categorySaveFailed({ id: 'c1' as CategoryId }),
-      ]);
+      expect(results).toEqual(
+        apiFailureActions(categoriesActions.categorySaveFailed({ id: 'c1' as CategoryId }), 'categories.renameCategory'),
+      );
 
       actions$.next(req);
       await flush();
-      expect((results[1] as { type: string }).type).toContain('Category Renamed');
+      expect((results[2] as { type: string }).type).toContain('Category Renamed');
     });
 
     it('deleteCategory$ dispatches categorySaveFailed and survives a rejected call', async () => {
@@ -358,13 +365,13 @@ describe('CategoriesEffects', () => {
       actions$.next(req);
       await flush();
       expect(errored).toBe(false);
-      expect(results).toEqual([
-        categoriesActions.categorySaveFailed({ id: 'c1' as CategoryId }),
-      ]);
+      expect(results).toEqual(
+        apiFailureActions(categoriesActions.categorySaveFailed({ id: 'c1' as CategoryId }), 'categories.deleteCategory'),
+      );
 
       actions$.next(req);
       await flush();
-      expect((results[1] as { type: string }).type).toContain('Category Deleted');
+      expect((results[2] as { type: string }).type).toContain('Category Deleted');
     });
 
     it('setGlobalCategoryOrder$ dispatches categorySaveFailed and survives a rejected call', async () => {
@@ -384,11 +391,13 @@ describe('CategoriesEffects', () => {
       actions$.next(req);
       await flush();
       expect(errored).toBe(false);
-      expect(results).toEqual([categoriesActions.categorySaveFailed({ id: null })]);
+      expect(results).toEqual(
+        apiFailureActions(categoriesActions.categorySaveFailed({ id: null }), 'categories.setGlobalCategoryOrder'),
+      );
 
       actions$.next(req);
       await flush();
-      expect((results[1] as { type: string }).type).toContain(
+      expect((results[2] as { type: string }).type).toContain(
         'Global Category Order Set',
       );
     });
@@ -413,9 +422,9 @@ describe('CategoriesEffects', () => {
       await flush();
 
       expect(errored).toBe(false);
-      expect(results).toEqual([
-        categoriesActions.categoriesLoaded({ categories: [] }),
-      ]);
+      expect(results).toEqual(
+        apiFailureActions(categoriesActions.categoriesLoaded({ categories: [] }), 'categories.fetchAllCategories'),
+      );
     });
   });
 });

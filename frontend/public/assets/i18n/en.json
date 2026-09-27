@@ -339,12 +339,26 @@
     "autoAddRequiresInstall": "Install the app to use this — additions are checked when you open it."
   },
   "errors": {
-    "saveFailed": "Your change could not be saved. Check your connection and try again.",
-    "checkFailed": "The item could not be checked off. Check your connection and try again.",
-    "uncheckFailed": "The item could not be unchecked. Check your connection and try again.",
-    "sessionStartFailed": "The session could not be started. Check your connection and try again.",
-    "sessionCloseFailed": "The session could not be closed. Check your connection and try again.",
-    "sessionDiscardFailed": "The session could not be discarded. Check your connection and try again."
+    "saveFailed": "Your change could not be saved.",
+    "checkFailed": "The item could not be checked off.",
+    "uncheckFailed": "The item could not be unchecked.",
+    "sessionStartFailed": "The session could not be started.",
+    "sessionCloseFailed": "The session could not be closed.",
+    "sessionDiscardFailed": "The session could not be discarded.",
+    "loadFailed": "Some of your data could not be loaded.",
+    "accountLoadFailed": "Your list could not be opened.",
+    "autoAddFailed": "The check for recurring items could not be completed.",
+    "withCause": "{{what}} {{why}}",
+    "streamFailed": "The list has stopped receiving updates.",
+    "cause": {
+      "offline": "Check your connection and try again.",
+      "quotaExceeded": "The app has used up today's database allowance. It should work again once the daily limit resets.",
+      "permissionDenied": "The app was not allowed to do this. Its database rules may be out of date.",
+      "authExpired": "Your sign-in has expired. Sign in again.",
+      "notConfigured": "The database is missing a setting this needs.",
+      "contention": "Too many changes happened at once. Try again.",
+      "unknown": "Something went wrong. Try again."
+    }
   },
   "boot": {
     "progressLabel": "Loading progress",
@@ -358,6 +372,7 @@
     "title": "Added automatically",
     "periodicity": "Added automatically — you usually buy this about every {{days}} days.",
     "openLabel": "Why {{name}} was added automatically",
-    "close": "Close"
+    "close": "Close",
+    "syncing": "Checking for recurring items…"
   }
 }

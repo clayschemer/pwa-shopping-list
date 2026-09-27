@@ -4,6 +4,7 @@ import { TestBed } from '@angular/core/testing';
 import { provideMockActions } from '@ngrx/effects/testing';
 import { provideMockStore } from '@ngrx/store/testing';
 import { Subject } from 'rxjs';
+import type { Action } from '@ngrx/store';
 import {
   AutoAddEffects,
   HISTORY_SESSION_LIMIT,
@@ -17,7 +18,9 @@ import { PwaInstallService } from '../../core/pwa/pwa-install.service';
 import { DEFAULT_POLICY } from '../../core/auto-add/recurrence';
 import { selectAutoAddEnabled } from '../account/account.selectors';
 import { selectActiveSessions, selectSessionsLoaded } from '../sessions/sessions.selectors';
+import { autoAddActions } from './items.actions';
 import { selectActiveItems, selectItemsLoaded } from './items.selectors';
+import { uiActions } from '../ui/ui.actions';
 import type { Item } from '../../models/item.model';
 import type { Session } from '../../models/session.model';
 import type { AccountId, ItemId, SessionId, UserId } from '../../models/ids.model';
@@ -109,6 +112,17 @@ interface SetupOptions {
   sessionsLoaded?: boolean;
   historyRejects?: boolean;
   autoAddRejects?: boolean;
+  /** Firebase error code the rejected read fails with. */
+  failureCode?: string;
+  /** Called when the history read is issued, to observe ordering. */
+  onHistoryFetch?: () => void;
+}
+
+function firebaseError(code: string): Error & { code: string } {
+  const err = new Error(code) as Error & { code: string };
+  err.name = 'FirebaseError';
+  err.code = code;
+  return err;
 }
 
 describe('AutoAddEffects', () => {
@@ -121,9 +135,11 @@ describe('AutoAddEffects', () => {
     autoAddItem: ReturnType<typeof vi.fn>;
   };
   let sessionApi: { fetchSessionHistory: ReturnType<typeof vi.fn> };
+  let dispatched: Action[];
 
   beforeEach(() => {
     vi.spyOn(console, 'debug').mockImplementation(() => {});
+    vi.spyOn(console, 'error').mockImplementation(() => {});
   });
 
   /** Builds the effect with every gate open unless overridden, and runs it. */
@@ -140,6 +156,8 @@ describe('AutoAddEffects', () => {
       sessionsLoaded = true,
       historyRejects = false,
       autoAddRejects = false,
+      failureCode = 'unavailable',
+      onHistoryFetch,
     } = options;
 
     accountApi = {
@@ -153,9 +171,11 @@ describe('AutoAddEffects', () => {
         : vi.fn().mockResolvedValue(undefined),
     };
     sessionApi = {
-      fetchSessionHistory: historyRejects
-        ? vi.fn().mockRejectedValue(new Error('offline'))
-        : vi.fn().mockResolvedValue(history),
+      fetchSessionHistory: vi.fn(async () => {
+        onHistoryFetch?.();
+        if (historyRejects) throw firebaseError(failureCode);
+        return history;
+      }),
     };
 
     TestBed.resetTestingModule();
@@ -180,10 +200,16 @@ describe('AutoAddEffects', () => {
     });
 
     const effects = TestBed.inject(AutoAddEffects);
-    effects.evaluateOnBoot$.subscribe();
+    dispatched = [];
+    effects.evaluateOnBoot$.subscribe((action) => dispatched.push(action));
     // Let the async evaluation settle.
     await new Promise((resolve) => setTimeout(resolve, 0));
     return effects;
+  }
+
+  /** The action types the effect emitted during the last `run`. */
+  function emittedTypes(): string[] {
+    return dispatched.map((a) => a.type);
   }
 
   describe('gates, cheapest first', () => {
@@ -273,6 +299,77 @@ describe('AutoAddEffects', () => {
       await new Promise((resolve) => setTimeout(resolve, 0));
 
       expect(accountApi.claimAutoAddRun).toHaveBeenCalledOnce();
+    });
+  });
+
+  /**
+   * The evaluation is the one thing the app does entirely on its own initiative,
+   * and it spends a real share of the day's read budget doing it. It announces
+   * itself so a sync that is slow, or that dies on an exhausted quota, is
+   * something the user can see rather than infer.
+   */
+  describe('announcing the sync', () => {
+    it('brackets a claimed run with a start and a finish', async () => {
+      await run();
+
+      expect(emittedTypes()).toEqual([
+        autoAddActions.syncStarted.type,
+        autoAddActions.syncFinished.type,
+      ]);
+    });
+
+    it('announces the start before the reads begin', async () => {
+      let typesAtFetch: string[] = [];
+      // What had been announced by the time the history read was issued.
+      await run({
+        onHistoryFetch: () => {
+          typesAtFetch = emittedTypes();
+        },
+      });
+
+      expect(typesAtFetch).toEqual([autoAddActions.syncStarted.type]);
+    });
+
+    /**
+     * Most opens lose the claim and do no work at all. A snackbar on those would
+     * be announcing a sync that never happened.
+     */
+    it('says nothing when the claim is lost', async () => {
+      await run({ claimed: false });
+
+      expect(emittedTypes()).toEqual([]);
+    });
+
+    it('says nothing when the feature is switched off', async () => {
+      await run({ enabled: false });
+
+      expect(emittedTypes()).toEqual([]);
+    });
+
+    /**
+     * Otherwise the progress snackbar outlives the run that opened it and sits
+     * there for the rest of the session.
+     */
+    it('still announces the finish when the run fails', async () => {
+      await run({ historyRejects: true });
+
+      expect(emittedTypes()).toEqual([
+        autoAddActions.syncStarted.type,
+        autoAddActions.syncFinished.type,
+        uiActions.apiFailureObserved.type,
+      ]);
+    });
+
+    /** The failure the user has never been shown: the read quota is spent. */
+    it('reports the real cause of a failed sync', async () => {
+      await run({ historyRejects: true, failureCode: 'resource-exhausted' });
+
+      expect(dispatched).toContainEqual(
+        uiActions.apiFailureObserved({
+          operation: 'autoAdd.evaluate',
+          kind: 'quotaExceeded',
+        }),
+      );
     });
   });
 

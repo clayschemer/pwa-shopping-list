@@ -1,8 +1,10 @@
 import { inject, Injectable } from '@angular/core';
 import { Router } from '@angular/router';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
-import { catchError, defer, from, map, mergeMap, switchMap, tap } from 'rxjs';
+import { catchError, defer, from, map, mergeMap, of, switchMap, tap } from 'rxjs';
+import type { Action } from '@ngrx/store';
 import { authActions, accountActions, accountApiActions } from './account.actions';
+import { uiActions } from '../ui/ui.actions';
 import { AccountApiService } from '../../core/api/account-api.service';
 import { onApiFailure } from '../../core/diagnostics/api-failure';
 import { StreamErrorService } from '../../core/api/stream-error.service';
@@ -12,6 +14,7 @@ import type {
   AccessDeniedError,
   AuthError,
   PendingVerificationError,
+  StreamError,
 } from '../../models/errors.model';
 
 @Injectable()
@@ -21,19 +24,33 @@ export class AccountEffects {
   private readonly router = inject(Router);
   private readonly streamError = inject(StreamErrorService);
 
+  /**
+   * A dead listener stops live updates for the rest of the session, so it is the
+   * one failure that must never be silent — and it was. `streamFailed` writes the
+   * message to `account.streamError`, which no selector and no template reads, so
+   * an exhausted read quota looked exactly like a list that had gone quiet. The
+   * classified cause now goes out alongside the state change for the UI to report.
+   */
   readonly watchStreamErrors$ = createEffect(() =>
     this.streamError.stream$.pipe(
-      map((err) => {
-        if (err.type === 'AUTH_REVOKED') {
-          return accountActions.streamAuthRevoked();
-        }
-        if (err.type === 'ACCOUNT_NOT_FOUND') {
-          return accountActions.streamAccountNotFound();
-        }
-        return accountActions.streamFailed({ message: err.message });
-      }),
+      mergeMap((err) =>
+        of(
+          this.streamStateAction(err),
+          uiActions.apiFailureObserved({ operation: 'stream.listen', kind: err.kind }),
+        ),
+      ),
     ),
   );
+
+  private streamStateAction(err: StreamError): Action {
+    if (err.type === 'AUTH_REVOKED') {
+      return accountActions.streamAuthRevoked();
+    }
+    if (err.type === 'ACCOUNT_NOT_FOUND') {
+      return accountActions.streamAccountNotFound();
+    }
+    return accountActions.streamFailed({ message: err.message });
+  }
 
   /** Subscribe to Firebase auth state on app init. */
   readonly watchAuthState$ = createEffect(() =>

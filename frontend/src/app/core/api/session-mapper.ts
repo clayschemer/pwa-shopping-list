@@ -1,4 +1,8 @@
-import { QueryDocumentSnapshot, Timestamp } from '@angular/fire/firestore';
+import {
+  DocumentSnapshot,
+  QueryDocumentSnapshot,
+  Timestamp,
+} from '@angular/fire/firestore';
 import type { Session, SessionCheckedItem } from '../../models/session.model';
 import type {
   AccountId,
@@ -30,11 +34,15 @@ function mapCheckedItem(raw: unknown): SessionCheckedItem {
   };
 }
 
+/**
+ * Accepts a plain `DocumentSnapshot` as well as a query result so a transaction's
+ * own read can be mapped without going back to the server for a second copy.
+ */
 export function mapSession(
-  snap: QueryDocumentSnapshot,
+  snap: QueryDocumentSnapshot | DocumentSnapshot,
   accountId: AccountId,
 ): Session {
-  const data = snap.data();
+  const data = (snap.data() ?? {}) as Record<string, unknown>;
   return {
     id: snap.id as SessionId,
     accountId,

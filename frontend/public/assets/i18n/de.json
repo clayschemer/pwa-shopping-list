@@ -339,12 +339,26 @@
     "autoAddRequiresInstall": "Installiere die App, um dies zu nutzen – Ergänzungen werden beim Öffnen geprüft."
   },
   "errors": {
-    "saveFailed": "Deine Änderung konnte nicht gespeichert werden. Prüfe die Verbindung und versuche es erneut.",
-    "checkFailed": "Der Artikel konnte nicht abgehakt werden. Prüfe die Verbindung und versuche es erneut.",
-    "uncheckFailed": "Das Abhaken konnte nicht rückgängig gemacht werden. Prüfe die Verbindung und versuche es erneut.",
-    "sessionStartFailed": "Die Sitzung konnte nicht gestartet werden. Prüfe die Verbindung und versuche es erneut.",
-    "sessionCloseFailed": "Die Sitzung konnte nicht beendet werden. Prüfe die Verbindung und versuche es erneut.",
-    "sessionDiscardFailed": "Die Sitzung konnte nicht verworfen werden. Prüfe die Verbindung und versuche es erneut."
+    "saveFailed": "Deine Änderung konnte nicht gespeichert werden.",
+    "checkFailed": "Der Artikel konnte nicht abgehakt werden.",
+    "uncheckFailed": "Das Abhaken konnte nicht rückgängig gemacht werden.",
+    "sessionStartFailed": "Die Sitzung konnte nicht gestartet werden.",
+    "sessionCloseFailed": "Die Sitzung konnte nicht beendet werden.",
+    "sessionDiscardFailed": "Die Sitzung konnte nicht verworfen werden.",
+    "loadFailed": "Einige deiner Daten konnten nicht geladen werden.",
+    "accountLoadFailed": "Deine Liste konnte nicht geöffnet werden.",
+    "autoAddFailed": "Die Prüfung auf wiederkehrende Artikel konnte nicht abgeschlossen werden.",
+    "withCause": "{{what}} {{why}}",
+    "streamFailed": "Die Liste erhält keine Aktualisierungen mehr.",
+    "cause": {
+      "offline": "Prüfe die Verbindung und versuche es erneut.",
+      "quotaExceeded": "Die App hat das heutige Datenbank-Kontingent aufgebraucht. Sie sollte wieder funktionieren, sobald das Tageslimit zurückgesetzt wird.",
+      "permissionDenied": "Die App durfte das nicht tun. Ihre Datenbankregeln sind möglicherweise veraltet.",
+      "authExpired": "Deine Anmeldung ist abgelaufen. Melde dich erneut an.",
+      "notConfigured": "In der Datenbank fehlt eine dafür nötige Einstellung.",
+      "contention": "Zu viele Änderungen auf einmal. Versuche es erneut.",
+      "unknown": "Etwas ist schiefgelaufen. Versuche es erneut."
+    }
   },
   "boot": {
     "progressLabel": "Ladefortschritt",
@@ -358,6 +372,7 @@
     "title": "Automatisch hinzugefügt",
     "periodicity": "Automatisch hinzugefügt – du kaufst das normalerweise etwa alle {{days}} Tage.",
     "openLabel": "Warum {{name}} automatisch hinzugefügt wurde",
-    "close": "Schließen"
+    "close": "Schließen",
+    "syncing": "Suche nach wiederkehrenden Artikeln…"
   }
 }

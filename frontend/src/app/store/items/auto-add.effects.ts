@@ -4,14 +4,19 @@ import { Store } from '@ngrx/store';
 import {
   catchError,
   combineLatest,
+  concat,
+  defer,
+  EMPTY,
   filter,
   from,
+  map,
   mergeMap,
+  of,
   take,
   withLatestFrom,
 } from 'rxjs';
 import { AccountApiService } from '../../core/api/account-api.service';
-import { ignoreApiFailure } from '../../core/diagnostics/api-failure';
+import { onApiFailure } from '../../core/diagnostics/api-failure';
 import { ItemApiService } from '../../core/api/item-api.service';
 import { SessionApiService } from '../../core/api/session-api.service';
 import { PwaInstallService } from '../../core/pwa/pwa-install.service';
@@ -30,6 +35,7 @@ import type { ItemId } from '../../models/ids.model';
 import type { Session } from '../../models/session.model';
 import { selectAutoAddEnabled } from '../account/account.selectors';
 import { selectActiveSessions, selectSessionsLoaded } from '../sessions/sessions.selectors';
+import { autoAddActions } from './items.actions';
 import { selectActiveItems, selectItemsLoaded } from './items.selectors';
 
 /**
@@ -53,6 +59,18 @@ export interface AutoAddRunMetrics {
   entryCount: number;
   candidateCount: number;
   addedCount: number;
+}
+
+/**
+ * An evaluation that has passed every gate and won the day's claim, so the
+ * expensive phase is about to start. Separating the claim from the work is what
+ * lets the UI announce a sync that is genuinely happening: most app opens lose
+ * the claim and do nothing, and a snackbar on those would be a lie.
+ */
+interface ClaimedRun {
+  capacity: number;
+  metrics: AutoAddRunMetrics;
+  startedAt: number;
 }
 
 function emptyMetrics(): AutoAddRunMetrics {
@@ -115,65 +133,94 @@ export class AutoAddEffects {
    * single evaluation per app open — the daily claim then decides whether that
    * evaluation does any work.
    */
-  readonly evaluateOnBoot$ = createEffect(
-    () =>
-      combineLatest([
-        this.store.select(selectItemsLoaded),
-        this.store.select(selectSessionsLoaded),
-      ]).pipe(
-        filter(([itemsLoaded, sessionsLoaded]) => itemsLoaded && sessionsLoaded),
-        take(1),
-        withLatestFrom(
-          this.store.select(selectAutoAddEnabled),
-          this.store.select(selectActiveItems),
-          this.store.select(selectActiveSessions),
-        ),
-        mergeMap(([, enabled, activeItems, activeSessions]) =>
-          from(this.evaluate(enabled, activeItems, activeSessions)).pipe(
-            // Background work with nobody waiting on it: a failure must never
-            // take the effect stream down with it — but it still gets logged,
-            // since this runs unattended and an invisible failure here would
-            // leave no trace anywhere.
-            catchError(ignoreApiFailure('autoAdd.evaluate')),
+  readonly evaluateOnBoot$ = createEffect(() =>
+    combineLatest([
+      this.store.select(selectItemsLoaded),
+      this.store.select(selectSessionsLoaded),
+    ]).pipe(
+      filter(([itemsLoaded, sessionsLoaded]) => itemsLoaded && sessionsLoaded),
+      take(1),
+      withLatestFrom(
+        this.store.select(selectAutoAddEnabled),
+        this.store.select(selectActiveItems),
+        this.store.select(selectActiveSessions),
+      ),
+      mergeMap(([, enabled, activeItems, activeSessions]) =>
+        from(this.claimRun(enabled, activeItems, activeSessions)).pipe(
+          mergeMap((run) =>
+            run === null
+              ? // Gated out, or another client already did today's evaluation.
+                // Nothing happened, so nothing is announced.
+                EMPTY
+              : concat(
+                  of(autoAddActions.syncStarted()),
+                  // `defer`, not `from`: a promise passed to `from` is already
+                  // running by the time `concat` gets to it, which would start
+                  // the reads before the announcement that they are happening.
+                  defer(() => this.runClaimed(run)).pipe(
+                    map(() => autoAddActions.syncFinished()),
+                  ),
+                ),
+          ),
+          // Background work with nobody waiting on it: a failure must never take
+          // the effect stream down with it. It used to be swallowed to the
+          // console alone; now the cause is classified and surfaced, because an
+          // unattended sync dying of an exhausted read quota is precisely the
+          // failure that has been invisible. `syncFinished` keeps the progress
+          // snackbar from outliving the run that opened it.
+          catchError(
+            onApiFailure('autoAdd.evaluate', () => autoAddActions.syncFinished()),
           ),
         ),
       ),
-    { dispatch: false },
+    ),
   );
 
-  private async evaluate(
+  /**
+   * Runs the gates and tries to claim the day. Returns null when this open does
+   * no work — which is the common case and must stay completely silent.
+   */
+  private async claimRun(
     enabled: boolean,
     activeItems: readonly Item[],
     activeSessions: readonly Session[],
-  ): Promise<void> {
-    if (this.evaluated) return;
+  ): Promise<ClaimedRun | null> {
+    if (this.evaluated) return null;
     this.evaluated = true;
 
     const startedAt = performance.now();
     const metrics = emptyMetrics();
 
+    const alreadyAuto = activeItems.filter((i) => i.addedBy === 'auto').length;
+    const blocked = blockingReason(
+      {
+        enabled,
+        installed: this.install.isInstalled(),
+        hasActiveSession: activeSessions.length > 0,
+        activeAutoCount: alreadyAuto,
+      },
+      this.policy,
+    );
+    if (blocked !== null) return null;
+
+    const claimStarted = performance.now();
+    const claimed = await this.accountApi.claimAutoAddRun(MIN_RUN_GAP_HOURS);
+    metrics.claimMs = performance.now() - claimStarted;
+    // The other client, or an earlier open today, already did this. Bailing out
+    // here is what keeps a day's evaluation to one read rather than a few
+    // hundred per app open.
+    if (!claimed) return null;
+
+    return {
+      capacity: remainingCapacity(alreadyAuto, this.policy),
+      metrics,
+      startedAt,
+    };
+  }
+
+  /** The expensive phase: the history read, the cadence maths, and the restores. */
+  private async runClaimed({ capacity, metrics, startedAt }: ClaimedRun): Promise<void> {
     try {
-      const alreadyAuto = activeItems.filter((i) => i.addedBy === 'auto').length;
-      const blocked = blockingReason(
-        {
-          enabled,
-          installed: this.install.isInstalled(),
-          hasActiveSession: activeSessions.length > 0,
-          activeAutoCount: alreadyAuto,
-        },
-        this.policy,
-      );
-      if (blocked !== null) return;
-      const capacity = remainingCapacity(alreadyAuto, this.policy);
-
-      const claimStarted = performance.now();
-      const claimed = await this.accountApi.claimAutoAddRun(MIN_RUN_GAP_HOURS);
-      metrics.claimMs = performance.now() - claimStarted;
-      // The other client, or an earlier open today, already did this. Bailing
-      // out here is what keeps a day's evaluation to one read rather than a few
-      // hundred per app open.
-      if (!claimed) return;
-
       const fetchStarted = performance.now();
       const [sessions, allItems] = await Promise.all([
         this.sessionApi.fetchSessionHistory(HISTORY_SESSION_LIMIT),
@@ -187,13 +234,7 @@ export class AutoAddEffects {
       metrics.entryCount = histories.reduce((sum, h) => sum + h.checkedAt.length, 0);
       const now = Date.now();
       const byId = new Map(allItems.map((i) => [i.id, i]));
-      const selected = selectAutoAdds(
-        histories,
-        (id) => byId.get(id),
-        capacity,
-        now,
-        this.policy,
-      );
+      const selected = selectAutoAdds(histories, (id) => byId.get(id), capacity, now, this.policy);
       metrics.computeMs = performance.now() - computeStarted;
       metrics.candidateCount = selected.length;
 
@@ -210,7 +251,7 @@ export class AutoAddEffects {
       metrics.totalMs = performance.now() - startedAt;
       // Reported even on the failure path: a slow failure needs to be as
       // visible as a slow success when judging whether this belongs on a client.
-      if (metrics.claimMs > 0) await this.report(metrics);
+      await this.report(metrics);
     }
   }
 

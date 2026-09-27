@@ -1,4 +1,5 @@
 import type { ItemId } from './ids.model';
+import type { ApiFailureKind } from '../core/diagnostics/api-failure';
 
 export interface NameConflictError {
   type: 'NAME_CONFLICT';
@@ -40,5 +41,13 @@ export interface AiUnavailableError {
 
 export interface StreamError {
   type: 'AUTH_REVOKED' | 'ACCOUNT_NOT_FOUND' | 'STREAM_FAILED';
+  /**
+   * The classified cause, carried alongside `type` because `type` says what the
+   * app must do and this says what the user must be told. A listener dying takes
+   * live updates down for the rest of the session, so it is the one failure that
+   * absolutely cannot be silent — and it was: the message went into the store and
+   * no selector or template ever read it.
+   */
+  kind: ApiFailureKind;
   message: string;
 }

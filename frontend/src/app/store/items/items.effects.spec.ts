@@ -12,6 +12,7 @@ import { ItemApiService } from '../../core/api/item-api.service';
 import { PriceQueueApiService } from '../../core/api/price-queue-api.service';
 import type { Item } from '../../models/item.model';
 import type { AccountId, ItemId, SessionId } from '../../models/ids.model';
+import { apiFailureActions } from '../../../testing/api-failure-actions';
 
 const mockItem: Item = {
   id: 'i1' as ItemId,
@@ -265,13 +266,13 @@ describe('ItemsEffects', () => {
       actions$.next(checkReq());
       await flush();
       expect(errored).toBe(false);
-      expect(results).toEqual([
-        itemsActions.itemCheckFailed({ id: 'i1' as ItemId }),
-      ]);
+      expect(results).toEqual(
+        apiFailureActions(itemsActions.itemCheckFailed({ id: 'i1' as ItemId }), 'items.checkItem'),
+      );
 
       actions$.next(checkReq());
       await flush();
-      expect((results[1] as { type: string }).type).toContain('Item Checked');
+      expect((results[2] as { type: string }).type).toContain('Item Checked');
     });
 
     it('updateItem$ dispatches itemSaveFailed and survives a rejected call', async () => {
@@ -299,13 +300,13 @@ describe('ItemsEffects', () => {
       actions$.next(req);
       await flush();
       expect(errored).toBe(false);
-      expect(results).toEqual([
-        itemsActions.itemSaveFailed({ id: 'i1' as ItemId }),
-      ]);
+      expect(results).toEqual(
+        apiFailureActions(itemsActions.itemSaveFailed({ id: 'i1' as ItemId }), 'items.updateItem'),
+      );
 
       actions$.next(req);
       await flush();
-      expect((results[1] as { type: string }).type).toContain('Item Updated');
+      expect((results[2] as { type: string }).type).toContain('Item Updated');
     });
 
     it('addItem$ dispatches itemSaveFailed and survives a rejected call', async () => {
@@ -332,11 +333,13 @@ describe('ItemsEffects', () => {
       actions$.next(req);
       await flush();
       expect(errored).toBe(false);
-      expect(results).toEqual([itemsActions.itemSaveFailed({ id: null })]);
+      expect(results).toEqual(
+        apiFailureActions(itemsActions.itemSaveFailed({ id: null }), 'items.addItem'),
+      );
 
       actions$.next(req);
       await flush();
-      expect((results[1] as { type: string }).type).toContain('Item Added');
+      expect((results[2] as { type: string }).type).toContain('Item Added');
     });
 
     it('removeItem$ dispatches itemSaveFailed and survives a rejected call', async () => {
@@ -353,13 +356,13 @@ describe('ItemsEffects', () => {
       actions$.next(itemsApiActions.removeItemRequested({ id: 'i1' as ItemId }));
       await flush();
       expect(errored).toBe(false);
-      expect(results).toEqual([
-        itemsActions.itemSaveFailed({ id: 'i1' as ItemId }),
-      ]);
+      expect(results).toEqual(
+        apiFailureActions(itemsActions.itemSaveFailed({ id: 'i1' as ItemId }), 'items.removeItem'),
+      );
 
       actions$.next(itemsApiActions.removeItemRequested({ id: 'i1' as ItemId }));
       await flush();
-      expect(results[1]).toEqual(
+      expect(results[2]).toEqual(
         itemsActions.itemRemoved({ id: 'i1' as ItemId }),
       );
     });
@@ -382,13 +385,13 @@ describe('ItemsEffects', () => {
       actions$.next(req);
       await flush();
       expect(errored).toBe(false);
-      expect(results).toEqual([
-        itemsActions.itemUncheckFailed({ id: 'i1' as ItemId }),
-      ]);
+      expect(results).toEqual(
+        apiFailureActions(itemsActions.itemUncheckFailed({ id: 'i1' as ItemId }), 'items.uncheckItem'),
+      );
 
       actions$.next(req);
       await flush();
-      expect(results[1]).toEqual(
+      expect(results[2]).toEqual(
         itemsActions.itemUnchecked({ id: 'i1' as ItemId }),
       );
     });

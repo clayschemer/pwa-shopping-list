@@ -9,6 +9,7 @@ import { accountActions } from '../account/account.actions';
 import { CategoryGroupApiService } from '../../core/api/category-group-api.service';
 import type { CategoryGroup } from '../../models/category-group.model';
 import type { AccountId, CategoryGroupId } from '../../models/ids.model';
+import { apiFailureActions } from '../../../testing/api-failure-actions';
 
 const mockGroups: CategoryGroup[] = [
   { id: 'g1' as CategoryGroupId, accountId: 'a1' as AccountId, name: 'Grocery' },
@@ -176,13 +177,13 @@ describe('CategoryGroupsEffects', () => {
       actions$.next(req);
       await flush();
       expect(errored).toBe(false);
-      expect(results).toEqual([
-        categoryGroupsActions.categoryGroupSaveFailed({ id: null }),
-      ]);
+      expect(results).toEqual(
+        apiFailureActions(categoryGroupsActions.categoryGroupSaveFailed({ id: null }), 'categoryGroups.addCategoryGroup'),
+      );
 
       actions$.next(req);
       await flush();
-      expect((results[1] as { type: string }).type).toContain('Category Group Added');
+      expect((results[2] as { type: string }).type).toContain('Category Group Added');
     });
 
     it('renameCategoryGroup$ dispatches categoryGroupSaveFailed and survives a rejected call', async () => {
@@ -203,13 +204,13 @@ describe('CategoryGroupsEffects', () => {
       actions$.next(req);
       await flush();
       expect(errored).toBe(false);
-      expect(results).toEqual([
-        categoryGroupsActions.categoryGroupSaveFailed({ id: 'g1' as CategoryGroupId }),
-      ]);
+      expect(results).toEqual(
+        apiFailureActions(categoryGroupsActions.categoryGroupSaveFailed({ id: 'g1' as CategoryGroupId }), 'categoryGroups.renameCategoryGroup'),
+      );
 
       actions$.next(req);
       await flush();
-      expect((results[1] as { type: string }).type).toContain('Category Group Renamed');
+      expect((results[2] as { type: string }).type).toContain('Category Group Renamed');
     });
 
     it('deleteCategoryGroup$ dispatches categoryGroupSaveFailed and survives a rejected call', async () => {
@@ -229,13 +230,13 @@ describe('CategoryGroupsEffects', () => {
       actions$.next(req);
       await flush();
       expect(errored).toBe(false);
-      expect(results).toEqual([
-        categoryGroupsActions.categoryGroupSaveFailed({ id: 'g1' as CategoryGroupId }),
-      ]);
+      expect(results).toEqual(
+        apiFailureActions(categoryGroupsActions.categoryGroupSaveFailed({ id: 'g1' as CategoryGroupId }), 'categoryGroups.deleteCategoryGroup'),
+      );
 
       actions$.next(req);
       await flush();
-      expect((results[1] as { type: string }).type).toContain('Category Group Deleted');
+      expect((results[2] as { type: string }).type).toContain('Category Group Deleted');
     });
 
     // Groups are a fourth gate on selectListDataLoaded — a rejected fetch that
@@ -253,9 +254,9 @@ describe('CategoryGroupsEffects', () => {
       await flush();
 
       expect(errored).toBe(false);
-      expect(results).toEqual([
-        categoryGroupsActions.categoryGroupsLoaded({ groups: [] }),
-      ]);
+      expect(results).toEqual(
+        apiFailureActions(categoryGroupsActions.categoryGroupsLoaded({ groups: [] }), 'categoryGroups.fetchAll'),
+      );
     });
   });
 });

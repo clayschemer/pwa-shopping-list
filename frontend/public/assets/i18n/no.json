@@ -339,12 +339,26 @@
     "autoAddRequiresInstall": "Installer appen for å bruke dette – tillegg sjekkes når du åpner den."
   },
   "errors": {
-    "saveFailed": "Endringen din kunne ikke lagres. Sjekk tilkoblingen og prøv igjen.",
-    "checkFailed": "Varen kunne ikke krysses av. Sjekk tilkoblingen og prøv igjen.",
-    "uncheckFailed": "Avkryssingen kunne ikke angres. Sjekk tilkoblingen og prøv igjen.",
-    "sessionStartFailed": "Økten kunne ikke startes. Sjekk tilkoblingen og prøv igjen.",
-    "sessionCloseFailed": "Økten kunne ikke avsluttes. Sjekk tilkoblingen og prøv igjen.",
-    "sessionDiscardFailed": "Økten kunne ikke forkastes. Sjekk tilkoblingen og prøv igjen."
+    "saveFailed": "Endringen din kunne ikke lagres.",
+    "checkFailed": "Varen kunne ikke krysses av.",
+    "uncheckFailed": "Avkryssingen kunne ikke angres.",
+    "sessionStartFailed": "Økten kunne ikke startes.",
+    "sessionCloseFailed": "Økten kunne ikke avsluttes.",
+    "sessionDiscardFailed": "Økten kunne ikke forkastes.",
+    "loadFailed": "Noen av dataene dine kunne ikke lastes.",
+    "accountLoadFailed": "Listen din kunne ikke åpnes.",
+    "autoAddFailed": "Sjekken etter gjentakende varer kunne ikke fullføres.",
+    "withCause": "{{what}} {{why}}",
+    "streamFailed": "Listen mottar ikke oppdateringer lenger.",
+    "cause": {
+      "offline": "Sjekk tilkoblingen og prøv igjen.",
+      "quotaExceeded": "Appen har brukt opp dagens databasekvote. Den bør virke igjen når døgngrensen nullstilles.",
+      "permissionDenied": "Appen fikk ikke tillatelse til dette. Databasereglene kan være utdaterte.",
+      "authExpired": "Innloggingen din har utløpt. Logg inn på nytt.",
+      "notConfigured": "Databasen mangler en innstilling som dette krever.",
+      "contention": "For mange endringer skjedde samtidig. Prøv igjen.",
+      "unknown": "Noe gikk galt. Prøv igjen."
+    }
   },
   "boot": {
     "progressLabel": "Fremdrift for lasting",
@@ -358,6 +372,7 @@
     "title": "Lagt til automatisk",
     "periodicity": "Lagt til automatisk – du kjøper vanligvis dette omtrent hver {{days}}. dag.",
     "openLabel": "Hvorfor {{name}} ble lagt til automatisk",
-    "close": "Lukk"
+    "close": "Lukk",
+    "syncing": "Ser etter gjentakende varer…"
   }
 }

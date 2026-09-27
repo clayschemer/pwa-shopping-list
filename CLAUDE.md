@@ -40,6 +40,7 @@ A shared shopping list PWA for two users (a couple). Private by default, may ope
 
 ## Core Principles
 
+- **Design for failure** — every feature, fix, and behaviour answers "what happens when this fails, and is what the user sees *true*?" before it is done. A wrong diagnosis in the UI is worse than no diagnosis: "check your connection" was shown for an exhausted read quota, undeployed rules, and a missing index, and sent real debugging effort after a network fault that did not exist. Classify failures, never collapse distinct causes into one message, and never leave a failure state written to the store that no UI reads. Prefer telling the truth about a failure over engineering around it — resilience machinery comes after the cause is actually known.
 - **TDD and BDD first** — no feature is built without a failing test. Acceptance tests are written in Gherkin and drive development. Unit and component tests use Vitest.
 - **Spec-driven** — feature files in `frontend/tests/acceptance/features/` are the source of truth for behaviour. When in doubt, refer to the feature file.
 - **Technology-agnostic specs** — Gherkin scenarios describe *what* the system does, never *how* the user interacts with it. No UI assumptions in feature files. Style follows David Farley.
@@ -63,7 +64,10 @@ These rules are baked in. They reflect recurring lessons; do not skip them.
 
 ### API service layer
 - **Transactions only for genuine read-modify-write atomicity.** A Firestore transaction needs a live server read, so it *rejects* on a dead connection; a plain `updateDoc` / `addDoc` / `writeBatch` applies to the local cache, echoes to the listeners, and leaves its Promise pending until the backend acks. An existence check is not a reason to open a transaction — a write to a missing document fails on its own. `updateItem` and `setShopCategoryOrder` were both existence-check transactions and produced a user-visible split: adds worked, edits and category reordering failed with "check your connection". Still transactional on purpose: `checkItem`, `uncheckItem`, `setItemPrice(shopId)`, `submitPriceFeedback`. Details in `API-CONTRACT.md` → Part 5, "Write behaviour when the connection is lost".
-- **Never swallow an API failure without logging it.** Every `catchError` in an effect goes through `onApiFailure(operation, actionFactory)` or `ignoreApiFailure(operation)` from `core/diagnostics/api-failure.ts`. Failures collapse into one generic snackbar, so the console is the only channel that can tell `unavailable` (dead connection) from `permission-denied` (rules not deployed) from `failed-precondition` (missing index) — and on a phone running the deployed PWA it is the only diagnostic channel at all. Grep the console for `[api]`. The guard spec `store/api-failure-logging.spec.ts` fails the suite on a bare `catchError`.
+- **Never swallow an API failure without logging it.** Every `catchError` in an effect goes through `onApiFailure(operation, actionFactory)` or `ignoreApiFailure(operation)` from `core/diagnostics/api-failure.ts`. Grep the console for `[api]` — each line carries the Firebase code *and* the classified kind. The guard spec `store/api-failure-logging.spec.ts` fails the suite on a bare `catchError`.
+- **Failures name their own cause.** `onApiFailure` also emits `uiActions.apiFailureObserved({ operation, kind })`, where `kind` comes from `classifyApiFailure` — `offline` / `quotaExceeded` / `permissionDenied` / `authExpired` / `notConfigured` / `contention` / `unknown`. `UiFeedbackEffects` composes the snackbar from the operation (*what* failed, `WHAT_BY_OPERATION` with a read/write fallback) and the kind (*why*, `WHY_BY_KIND`), joined by `errors.withCause` so locales control the wording and order. Nothing per-call-site needs wiring: a new API call gets a correct message for free, and `store/ui/failure-messages.spec.ts` fails the suite if any kind or operation points at a translation key that does not exist. `operation` labels are therefore load-bearing — renaming one silently downgrades its message to the generic wording, which is why the effect specs pin them via `testing/api-failure-actions.ts`.
+- **Stream failures are user-visible too.** A dead `onSnapshot` listener stops live updates for the whole session. `StreamError` carries `kind` alongside `type`, and `watchStreamErrors$` announces it as `stream.listen`. Note `account.streamError` in the store is still read by no UI — the snackbar is the surface.
+- **`checkItem` returns what its transaction already read.** It must never re-read to build its result. It used to scan every removed item (a set that only grows — items are never hard deleted) plus every session, once per check, which is how one shopping trip could exhaust the day's read quota and take every other write down with it. `itemChanges$` and `sessionChanges$` deliver the shared state anyway.
 
 ### Gherkin Scenarios
 - **Always pause for user review before proceeding** whenever a Gherkin scenario is added, changed, or deleted — show the full scenario diff and wait for explicit approval before writing any step definitions or production code that depends on it. The feature file is the contract; the user must sign off on the contract before implementation begins.
@@ -146,6 +150,7 @@ For SCSS conventions (BEM, units, layout, accessibility, reduced motion) → `.c
 ├── DESIGN.md                        ← UI/UX specification (all 6 screens signed off)
 ├── BACKEND.md                       ← backend specification and decisions
 ├── FUTURE-FEATURES.md               ← deferred Gherkin scenarios (barcode scanning, etc.)
+├── QUOTA-AND-HOSTING.md             ← Firestore read budget, growth sites, hosting options (investigation)
 ├── design-system.scss               ← all design tokens, typography, motion contract
 │
 ├── frontend/                        ← Angular PWA
@@ -390,7 +395,7 @@ Price pipeline: `price-pipeline/` is a standalone Docker Compose workspace conta
 
 Deployment: GitHub Actions workflow (`.github/workflows/deploy.yml`) runs Vitest + Cucumber on every push/PR to `develop`/`main`, then deploys `develop` → GitHub Pages and `main` → cPanel via FTPS. Firestore rules and indexes deploy separately via `firebase deploy --only firestore:rules,firestore:indexes` from `backend/firebase/`. Firebase Hosting config exists in `firebase.json` as a fallback path but is not part of the active pipeline.
 
-Acceptance: Gherkin `.feature` files under `frontend/tests/acceptance/features/` cover auth, modes, settings, categories, shops, items, sessions, autocomplete, AI price estimation, AI list suggestions, and barcode scanning. Step definitions are written for all non-AI / non-barcode features; the whole suite passes (151 scenarios).
+Acceptance: Gherkin `.feature` files under `frontend/tests/acceptance/features/` cover auth, modes, settings, categories, shops, items, sessions, autocomplete, AI price estimation, AI list suggestions, and barcode scanning. Step definitions are written for all non-AI / non-barcode features; the whole suite passes (168 scenarios).
 
 ---
 

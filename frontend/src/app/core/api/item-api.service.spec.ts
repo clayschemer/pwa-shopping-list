@@ -4,7 +4,13 @@ import { TestBed } from '@angular/core/testing';
 import { Firestore } from '@angular/fire/firestore';
 import { ItemApiService } from './item-api.service';
 import { AccountContext } from './account-context';
-import type { AccountId, CategoryId, ItemId, UserId } from '../../models/ids.model';
+import type {
+  AccountId,
+  CategoryId,
+  ItemId,
+  SessionId,
+  UserId,
+} from '../../models/ids.model';
 
 /**
  * The Firestore SDK is mocked wholesale: these specs are about *which write
@@ -331,6 +337,110 @@ describe('ItemApiService', () => {
 
       const [, payload] = updateDocMock.mock.calls[0];
       expect(payload).not.toHaveProperty('autoAddDeclinedAt');
+    });
+  });
+
+  /**
+   * Checking an item used to re-read two whole collections after the
+   * transaction had already committed, purely to build the return value:
+   * every item ever removed (items are never hard deleted, so that set only
+   * grows) plus every session including all history. A thirty-item trip cost
+   * thirty times that, which is how a shopping trip came to exhaust the daily
+   * read quota and leave the whole app failing every write for the rest of the
+   * day. The transaction has already read both documents, and `itemChanges$`
+   * streams the collection unfiltered, so neither read bought anything.
+   */
+  describe('checkItem', () => {
+    const SESSION_ID = 'session-1' as SessionId;
+
+    function stubCheckTransaction(
+      itemData: Record<string, unknown> = {},
+      sessionData: Record<string, unknown> = {},
+    ) {
+      const tx = {
+        get: vi.fn(async (ref: { path: string }) =>
+          ref.path.includes('sessions')
+            ? {
+                id: SESSION_ID,
+                exists: () => true,
+                data: () => ({
+                  shopId: 'shop-1',
+                  participants: ['user-1'],
+                  startedBy: 'user-1',
+                  startedAt: 1_000,
+                  completedAt: null,
+                  checkedItems: [],
+                  ...sessionData,
+                }),
+              }
+            : itemDocSnapshot(itemData),
+        ),
+        update: vi.fn(),
+        set: vi.fn(),
+      };
+      runTransactionMock.mockImplementation(
+        async (_db: unknown, cb: (t: typeof tx) => Promise<unknown>) => cb(tx),
+      );
+      return tx;
+    }
+
+    it('reads nothing beyond the two documents the transaction needs', async () => {
+      const tx = stubCheckTransaction();
+
+      await service.checkItem(ITEM_ID, SESSION_ID);
+
+      expect(tx.get).toHaveBeenCalledTimes(2);
+      expect(getDocsMock).not.toHaveBeenCalled();
+    });
+
+    it('returns the checked item and the updated session from what it already read', async () => {
+      stubCheckTransaction();
+
+      const result = await service.checkItem(ITEM_ID, SESSION_ID);
+
+      expect(result).toMatchObject({
+        type: 'CHECK_SUCCESS',
+        item: { id: ITEM_ID, name: 'Milk', removed: true, purchaseCount: 7 },
+        session: { id: SESSION_ID, shopId: 'shop-1' },
+      });
+      const success = result as { session: { checkedItems: unknown[] } };
+      expect(success.session.checkedItems).toEqual([
+        expect.objectContaining({
+          itemId: ITEM_ID,
+          checkedBy: USER_ID,
+          priceSnapshot: 12.5,
+          nameSnapshot: 'Milk',
+        }),
+      ]);
+    });
+
+    /** The entry is appended to what other participants have already checked. */
+    it('keeps the checks already in the session', async () => {
+      stubCheckTransaction(
+        {},
+        {
+          checkedItems: [
+            { itemId: 'other-item', checkedBy: 'user-2', checkedAt: 500 },
+          ],
+        },
+      );
+
+      const result = (await service.checkItem(ITEM_ID, SESSION_ID)) as {
+        session: { checkedItems: { itemId: string }[] };
+      };
+
+      expect(result.session.checkedItems.map((c) => c.itemId)).toEqual([
+        'other-item',
+        ITEM_ID,
+      ]);
+    });
+
+    it('reports a conflict when the item is already off the list', async () => {
+      stubCheckTransaction({ removed: true });
+
+      const result = await service.checkItem(ITEM_ID, SESSION_ID);
+
+      expect(result).toEqual({ type: 'CHECK_CONFLICT', itemId: ITEM_ID });
     });
   });
 

@@ -7,6 +7,10 @@ import { Observable, of, Subject } from 'rxjs';
 import { AccountEffects } from './account.effects';
 import { authActions, accountActions, accountApiActions } from './account.actions';
 import { AccountApiService } from '../../core/api/account-api.service';
+import { apiFailureActions } from '../../../testing/api-failure-actions';
+import { StreamErrorService } from '../../core/api/stream-error.service';
+import { uiActions } from '../ui/ui.actions';
+import type { StreamError } from '../../models/errors.model';
 import type { Account } from '../../models/account.model';
 import type {
   AccessDeniedError,
@@ -65,6 +69,58 @@ describe('AccountEffects', () => {
     effects = TestBed.inject(AccountEffects);
   });
 
+  /**
+   * A dead listener is the worst failure the app has: live updates stop for the
+   * rest of the session and every write starts failing, with nothing on screen
+   * to say so. The classified cause used to be dropped entirely — the message
+   * went into `account.streamError`, which no selector or template reads.
+   */
+  describe('watchStreamErrors$', () => {
+    function emitStreamError(error: StreamError): unknown[] {
+      const results: unknown[] = [];
+      effects.watchStreamErrors$.subscribe((action) => results.push(action));
+      TestBed.inject(StreamErrorService).emit(error);
+      return results;
+    }
+
+    it('announces the cause of an exhausted read quota', () => {
+      const results = emitStreamError({
+        type: 'STREAM_FAILED',
+        kind: 'quotaExceeded',
+        message: 'Quota exceeded',
+      });
+
+      expect(results).toEqual([
+        accountActions.streamFailed({ message: 'Quota exceeded' }),
+        uiActions.apiFailureObserved({
+          operation: 'stream.listen',
+          kind: 'quotaExceeded',
+        }),
+      ]);
+    });
+
+    /**
+     * Undeployed rules present as a revoked session and bounce the user to
+     * sign-in. That redirect stays — but it now arrives with a message naming
+     * rules rather than leaving a silent sign-out to be puzzled over.
+     */
+    it('names undeployed rules behind a revoked stream', () => {
+      const results = emitStreamError({
+        type: 'AUTH_REVOKED',
+        kind: 'permissionDenied',
+        message: 'Missing or insufficient permissions',
+      });
+
+      expect(results).toEqual([
+        accountActions.streamAuthRevoked(),
+        uiActions.apiFailureObserved({
+          operation: 'stream.listen',
+          kind: 'permissionDenied',
+        }),
+      ]);
+    });
+  });
+
   describe('loadAccount$', () => {
     it('dispatches accountLoaded when getAccount returns an account', () => {
       accountApi.getAccount.mockResolvedValue({ account: mockAccount, selectedShopId: null });
@@ -120,7 +176,14 @@ describe('AccountEffects', () => {
       });
     });
 
-    it('dispatches accessDenied when getAccount throws', () => {
+    /**
+     * Known shortcoming, kept explicit rather than left implied: a boot read that
+     * fails for any reason lands the user on "access denied", which is only the
+     * truth for `permission-denied`. The announcement at least names the real
+     * cause in the snackbar; the screen itself still needs a transient-failure
+     * state of its own.
+     */
+    it('dispatches accessDenied when getAccount throws, and names the cause', () => {
       accountApi.getAccount.mockRejectedValue(new Error('Firestore error'));
 
       const results: unknown[] = [];
@@ -130,7 +193,9 @@ describe('AccountEffects', () => {
 
       return new Promise<void>((resolve) => {
         setTimeout(() => {
-          expect(results).toEqual([accountActions.accessDenied()]);
+          expect(results).toEqual(
+            apiFailureActions(accountActions.accessDenied(), 'account.getAccount'),
+          );
           resolve();
         });
       });
@@ -236,14 +301,19 @@ describe('AccountEffects', () => {
       await Promise.resolve();
       await Promise.resolve();
 
-      expect(dispatched).toEqual([accountActions.autoAddEnableFailed({ enabled: true })]);
+      expect(dispatched).toEqual(
+        apiFailureActions(
+          accountActions.autoAddEnableFailed({ enabled: true }),
+          'account.setAutoAddEnabled',
+        ),
+      );
 
       // Still processing actions after the failure.
       accountApi.setAutoAddEnabled.mockResolvedValue(undefined);
       actions$.next(accountApiActions.setAutoAddEnabledRequested({ enabled: false }));
       await Promise.resolve();
 
-      expect(dispatched).toHaveLength(2);
+      expect(dispatched).toHaveLength(3);
     });
   });
 });

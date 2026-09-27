@@ -1,7 +1,8 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import { firstValueFrom, lastValueFrom, of, throwError } from 'rxjs';
+import { firstValueFrom, lastValueFrom, of, throwError, toArray } from 'rxjs';
 import { catchError, defaultIfEmpty } from 'rxjs/operators';
-import { apiErrorCode, ignoreApiFailure, onApiFailure } from './api-failure';
+import { apiErrorCode, classifyApiFailure, ignoreApiFailure, onApiFailure } from './api-failure';
+import { uiActions } from '../../store/ui/ui.actions';
 
 const NOTHING_EMITTED = Symbol('nothing emitted');
 
@@ -14,9 +15,7 @@ function firebaseError(code: string, message = 'boom'): Error & { code: string }
 
 describe('apiErrorCode', () => {
   it('reads the code off a FirebaseError', () => {
-    expect(apiErrorCode(firebaseError('permission-denied'))).toBe(
-      'permission-denied',
-    );
+    expect(apiErrorCode(firebaseError('permission-denied'))).toBe('permission-denied');
   });
 
   it('falls back to the error name when there is no code', () => {
@@ -26,6 +25,49 @@ describe('apiErrorCode', () => {
   it('reports a code for values that are not errors at all', () => {
     expect(apiErrorCode('just a string')).toBe('unknown');
     expect(apiErrorCode(undefined)).toBe('unknown');
+  });
+});
+
+/**
+ * The whole point of classification: "check your connection" was shown for
+ * every one of these, and it sent the user hunting a network problem that did
+ * not exist. A message that names the wrong cause is worse than no message.
+ */
+describe('classifyApiFailure', () => {
+  it.each([
+    ['unavailable', 'offline'],
+    ['deadline-exceeded', 'offline'],
+    ['resource-exhausted', 'quotaExceeded'],
+    ['permission-denied', 'permissionDenied'],
+    ['unauthenticated', 'authExpired'],
+    ['failed-precondition', 'notConfigured'],
+    ['aborted', 'contention'],
+    ['internal', 'unknown'],
+  ])('maps %s to %s', (code, kind) => {
+    expect(classifyApiFailure(firebaseError(code))).toBe(kind);
+  });
+
+  it('treats an unrecognised failure as offline when the device is offline', () => {
+    const onLine = vi.spyOn(navigator, 'onLine', 'get').mockReturnValue(false);
+    try {
+      expect(classifyApiFailure(new TypeError('Failed to fetch'))).toBe('offline');
+    } finally {
+      onLine.mockRestore();
+    }
+  });
+
+  /**
+   * A recognised code always wins. `permission-denied` while the device happens
+   * to be offline is still undeployed rules, and blaming the connection would
+   * hide the real cause for as long as the rules stay unpushed.
+   */
+  it('keeps a recognised code even when the device is offline', () => {
+    const onLine = vi.spyOn(navigator, 'onLine', 'get').mockReturnValue(false);
+    try {
+      expect(classifyApiFailure(firebaseError('permission-denied'))).toBe('permissionDenied');
+    } finally {
+      onLine.mockRestore();
+    }
   });
 });
 
@@ -75,6 +117,30 @@ describe('onApiFailure', () => {
     });
   });
 
+  /**
+   * The announcement rides along with every fallback action rather than being
+   * wired up per call site, so a new API call cannot be added with a failure
+   * path that says nothing — or says the wrong thing — to the user.
+   */
+  it('announces the classified cause alongside the fallback action', async () => {
+    const action = { type: '[Items] Item Check Failed' };
+
+    const emitted = await firstValueFrom(
+      throwError(() => firebaseError('resource-exhausted')).pipe(
+        catchError(onApiFailure('items.checkItem', () => action)),
+        toArray(),
+      ),
+    );
+
+    expect(emitted).toEqual([
+      action,
+      uiActions.apiFailureObserved({
+        operation: 'items.checkItem',
+        kind: 'quotaExceeded',
+      }),
+    ]);
+  });
+
   it('does not log when nothing fails', async () => {
     await firstValueFrom(
       of({ type: 'ok' }).pipe(
@@ -107,8 +173,6 @@ describe('ignoreApiFailure', () => {
 
     expect(result).toBe(NOTHING_EMITTED);
     expect(consoleError).toHaveBeenCalledOnce();
-    expect(consoleError.mock.calls[0][0]).toContain(
-      'items.enqueuePriceLookup',
-    );
+    expect(consoleError.mock.calls[0][0]).toContain('items.enqueuePriceLookup');
   });
 });

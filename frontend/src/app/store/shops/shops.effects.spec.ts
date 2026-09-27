@@ -9,6 +9,7 @@ import { accountActions } from '../account/account.actions';
 import { ShopApiService } from '../../core/api/shop-api.service';
 import type { Shop } from '../../models/shop.model';
 import type { AccountId, CategoryId, ShopId } from '../../models/ids.model';
+import { apiFailureActions } from '../../../testing/api-failure-actions';
 
 const mockShops: Shop[] = [
   { id: 's1' as ShopId, accountId: 'a1' as AccountId, name: 'Tesco', categoryOrder: [], priceSearchUrl: null },
@@ -215,13 +216,13 @@ describe('ShopsEffects', () => {
       actions$.next(req);
       await flush();
       expect(errored).toBe(false);
-      expect(results).toEqual([
-        shopsActions.shopSaveFailed({ id: 's1' as ShopId }),
-      ]);
+      expect(results).toEqual(
+        apiFailureActions(shopsActions.shopSaveFailed({ id: 's1' as ShopId }), 'shops.setShopCategoryOrder'),
+      );
 
       actions$.next(req);
       await flush();
-      expect((results[1] as { type: string }).type).toContain(
+      expect((results[2] as { type: string }).type).toContain(
         'Shop Category Order Set',
       );
     });
@@ -241,11 +242,13 @@ describe('ShopsEffects', () => {
       actions$.next(req);
       await flush();
       expect(errored).toBe(false);
-      expect(results).toEqual([shopsActions.shopSaveFailed({ id: null })]);
+      expect(results).toEqual(
+        apiFailureActions(shopsActions.shopSaveFailed({ id: null }), 'shops.addShop'),
+      );
 
       actions$.next(req);
       await flush();
-      expect((results[1] as { type: string }).type).toContain('Shop Added');
+      expect((results[2] as { type: string }).type).toContain('Shop Added');
     });
 
     it('renameShop$ dispatches shopSaveFailed and survives a rejected call', async () => {
@@ -266,13 +269,13 @@ describe('ShopsEffects', () => {
       actions$.next(req);
       await flush();
       expect(errored).toBe(false);
-      expect(results).toEqual([
-        shopsActions.shopSaveFailed({ id: 's1' as ShopId }),
-      ]);
+      expect(results).toEqual(
+        apiFailureActions(shopsActions.shopSaveFailed({ id: 's1' as ShopId }), 'shops.renameShop'),
+      );
 
       actions$.next(req);
       await flush();
-      expect((results[1] as { type: string }).type).toContain('Shop Renamed');
+      expect((results[2] as { type: string }).type).toContain('Shop Renamed');
     });
 
     it('deleteShop$ dispatches shopSaveFailed and survives a rejected call', async () => {
@@ -290,13 +293,13 @@ describe('ShopsEffects', () => {
       actions$.next(req);
       await flush();
       expect(errored).toBe(false);
-      expect(results).toEqual([
-        shopsActions.shopSaveFailed({ id: 's1' as ShopId }),
-      ]);
+      expect(results).toEqual(
+        apiFailureActions(shopsActions.shopSaveFailed({ id: 's1' as ShopId }), 'shops.deleteShop'),
+      );
 
       actions$.next(req);
       await flush();
-      expect((results[1] as { type: string }).type).toContain('Shop Deleted');
+      expect((results[2] as { type: string }).type).toContain('Shop Deleted');
     });
 
     it('setShopPriceUrl$ dispatches shopSaveFailed and survives a rejected call', async () => {
@@ -317,13 +320,13 @@ describe('ShopsEffects', () => {
       actions$.next(req);
       await flush();
       expect(errored).toBe(false);
-      expect(results).toEqual([
-        shopsActions.shopSaveFailed({ id: 's1' as ShopId }),
-      ]);
+      expect(results).toEqual(
+        apiFailureActions(shopsActions.shopSaveFailed({ id: 's1' as ShopId }), 'shops.setShopPriceUrl'),
+      );
 
       actions$.next(req);
       await flush();
-      expect((results[1] as { type: string }).type).toContain('Shop Price Url Set');
+      expect((results[2] as { type: string }).type).toContain('Shop Price Url Set');
     });
 
     it('setShopOrder$ dispatches shopSaveFailed and survives a rejected call', async () => {
@@ -343,11 +346,13 @@ describe('ShopsEffects', () => {
       actions$.next(req);
       await flush();
       expect(errored).toBe(false);
-      expect(results).toEqual([shopsActions.shopSaveFailed({ id: null })]);
+      expect(results).toEqual(
+        apiFailureActions(shopsActions.shopSaveFailed({ id: null }), 'shops.setShopOrder'),
+      );
 
       actions$.next(req);
       await flush();
-      expect((results[1] as { type: string }).type).toContain('Shop Order Updated');
+      expect((results[2] as { type: string }).type).toContain('Shop Order Updated');
     });
 
     // The list skeleton is gated on every slice reporting loaded. A rejected
@@ -368,7 +373,9 @@ describe('ShopsEffects', () => {
       await flush();
 
       expect(errored).toBe(false);
-      expect(results).toEqual([shopsActions.shopsLoaded({ shops: [] })]);
+      expect(results).toEqual(
+        apiFailureActions(shopsActions.shopsLoaded({ shops: [] }), 'shops.fetchAllShops'),
+      );
     });
   });
 });

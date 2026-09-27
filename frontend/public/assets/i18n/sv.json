@@ -339,12 +339,26 @@
     "autoAddRequiresInstall": "Installera appen för att använda detta – tillägg kontrolleras när du öppnar den."
   },
   "errors": {
-    "saveFailed": "Din ändring kunde inte sparas. Kontrollera anslutningen och försök igen.",
-    "checkFailed": "Varan kunde inte bockas av. Kontrollera anslutningen och försök igen.",
-    "uncheckFailed": "Avbockningen kunde inte ångras. Kontrollera anslutningen och försök igen.",
-    "sessionStartFailed": "Sessionen kunde inte startas. Kontrollera anslutningen och försök igen.",
-    "sessionCloseFailed": "Sessionen kunde inte avslutas. Kontrollera anslutningen och försök igen.",
-    "sessionDiscardFailed": "Sessionen kunde inte förkastas. Kontrollera anslutningen och försök igen."
+    "saveFailed": "Din ändring kunde inte sparas.",
+    "checkFailed": "Varan kunde inte bockas av.",
+    "uncheckFailed": "Avbockningen kunde inte ångras.",
+    "sessionStartFailed": "Sessionen kunde inte startas.",
+    "sessionCloseFailed": "Sessionen kunde inte avslutas.",
+    "sessionDiscardFailed": "Sessionen kunde inte förkastas.",
+    "loadFailed": "Några av dina uppgifter kunde inte läsas in.",
+    "accountLoadFailed": "Din lista kunde inte öppnas.",
+    "autoAddFailed": "Kontrollen av återkommande varor kunde inte slutföras.",
+    "withCause": "{{what}} {{why}}",
+    "streamFailed": "Listan tar inte längre emot uppdateringar.",
+    "cause": {
+      "offline": "Kontrollera anslutningen och försök igen.",
+      "quotaExceeded": "Appen har använt upp dagens databaskvot. Den bör fungera igen när dygnsgränsen nollställs.",
+      "permissionDenied": "Appen fick inte behörighet till detta. Databasreglerna kan vara inaktuella.",
+      "authExpired": "Din inloggning har gått ut. Logga in igen.",
+      "notConfigured": "Databasen saknar en inställning som detta kräver.",
+      "contention": "För många ändringar skedde samtidigt. Försök igen.",
+      "unknown": "Något gick fel. Försök igen."
+    }
   },
   "boot": {
     "progressLabel": "Förlopp för laddning",
@@ -358,6 +372,7 @@
     "title": "Tillagd automatiskt",
     "periodicity": "Tillagd automatiskt – du köper vanligtvis detta ungefär var {{days}}:e dag.",
     "openLabel": "Varför {{name}} lades till automatiskt",
-    "close": "Stäng"
+    "close": "Stäng",
+    "syncing": "Letar efter återkommande varor…"
   }
 }
