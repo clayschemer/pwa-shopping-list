@@ -58,7 +58,7 @@ function authenticate(store: Store): void {
     user: { id: 'u1' as UserId, accountId: 'a1' as AccountId, email: 't@t.com', displayName: 'T' },
   }));
   store.dispatch(accountActions.accountLoaded({
-    account: { id: 'a1' as AccountId, name: 'A', aiConfig: null },
+    account: { id: 'a1' as AccountId, name: 'A', aiConfig: null, autoAddEnabled: false, autoAddLastRunAt: null },
     selectedShopId: null,
   }));
 }
@@ -183,6 +183,8 @@ describe('App', () => {
         id: 'a1' as AccountId,
         name: 'Test Account',
         aiConfig: null,
+        autoAddEnabled: false,
+        autoAddLastRunAt: null,
       },
       selectedShopId: null,
     }));
@@ -203,7 +205,7 @@ describe('App', () => {
       user: { id: 'u1' as UserId, accountId: 'a1' as AccountId, email: 't@t.com', displayName: 'T' },
     }));
     store.dispatch(accountActions.accountLoaded({
-      account: { id: 'a1' as AccountId, name: 'A', aiConfig: null },
+      account: { id: 'a1' as AccountId, name: 'A', aiConfig: null, autoAddEnabled: false, autoAddLastRunAt: null },
       selectedShopId: null,
     }));
 
@@ -249,6 +251,8 @@ describe('App', () => {
           id: 'a1' as AccountId,
           name: 'Test Account',
           aiConfig: null,
+          autoAddEnabled: false,
+          autoAddLastRunAt: null,
         },
       }));
 

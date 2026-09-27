@@ -66,6 +66,7 @@ import { accountActions } from '../account/account.actions';
 import { ItemApiService } from '../../core/api/item-api.service';
 import { PriceQueueApiService, type QueueReason } from '../../core/api/price-queue-api.service';
 import { selectAiConfig, selectStalePriceDays } from '../account/account.selectors';
+import { selectItemEntities } from './items.selectors';
 import type { Item } from '../../models/item.model';
 import type { ItemId } from '../../models/ids.model';
 import type {
@@ -176,8 +177,18 @@ export class ItemsEffects {
   readonly removeItem$ = createEffect(() =>
     this.actions$.pipe(
       ofType(itemsApiActions.removeItemRequested),
-      switchMap(({ id }) =>
-        from(this.itemApi.removeItem(id)).pipe(
+      withLatestFrom(this.store.select(selectItemEntities)),
+      switchMap(([{ id }, entities]) =>
+        // Removing an item the app added is the user declining it, which
+        // suppresses re-adding for a while. Derived here rather than passed in
+        // by the caller so every removal path gets it, and so no component has
+        // to know the rule. A *check* deliberately does not come through here:
+        // buying the item is acceptance, not refusal.
+        from(
+          this.itemApi.removeItem(id, {
+            declineAutoAdd: entities[id]?.addedBy === 'auto',
+          }),
+        ).pipe(
           map(() => itemsActions.itemRemoved({ id })),
           catchError(
             onApiFailure('items.removeItem', () => itemsActions.itemSaveFailed({ id })),

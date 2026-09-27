@@ -15,7 +15,7 @@ const mockCategories: Category[] = [
   { id: 'c2' as CategoryId, accountId: 'a1' as AccountId, name: 'Dairy', color: null, globalSortOrder: 1, groupIds: [] },
 ];
 
-const mockAccount = { id: 'a1' as AccountId, name: 'Test', shopOrder: [], aiConfig: null };
+const mockAccount = { id: 'a1' as AccountId, name: 'Test', shopOrder: [], aiConfig: null, autoAddEnabled: false, autoAddLastRunAt: null };
 
 describe('CategoriesEffects', () => {
   let effects: CategoriesEffects;

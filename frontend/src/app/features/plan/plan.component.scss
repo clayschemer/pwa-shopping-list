@@ -347,6 +347,38 @@
     color: var(--mat-sys-on-surface-variant);
   }
 
+  /**
+   * Marks an item the app added by itself, and opens the reason on tap.
+   *
+   * Sized off the row height like `__item-remove`, and the icon is pinned to a
+   * fixed box with `line-height: 1`: a taller-than-expected glyph here would
+   * stretch the row, which is the regression the undo button already caused
+   * once.
+   */
+  &__item-autoadd-btn {
+    all: unset;
+    cursor: pointer;
+    flex: 0 0 auto;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: var(--app-spacing-row-min-height);
+    height: var(--app-spacing-row-min-height);
+    color: var(--mat-sys-on-surface-variant);
+    border-radius: 50%;
+
+    mat-icon {
+      font-size: var(--app-font-body);
+      width: var(--app-font-body);
+      height: var(--app-font-body);
+      line-height: 1;
+    }
+
+    &:focus-visible {
+      @include focus.ring;
+    }
+  }
+
   &__item-remove {
     all: unset;
     cursor: pointer;

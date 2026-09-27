@@ -1,5 +1,5 @@
 import { createReducer, on } from '@ngrx/store';
-import { authActions, accountActions } from './account.actions';
+import { authActions, accountActions, accountApiActions } from './account.actions';
 import type { User } from '../../models/user.model';
 import type { Account } from '../../models/account.model';
 
@@ -94,6 +94,27 @@ export const accountReducer = createReducer(
   on(accountActions.shopOrderUpdated, (state, { orderedIds }) =>
     state.account
       ? { ...state, account: { ...state.account, shopOrder: orderedIds } }
+      : state,
+  ),
+
+  /**
+   * Applied on the *request* so the toggle responds immediately, and confirmed
+   * idempotently on success. The account document is not streamed, so a failure
+   * has to revert explicitly or the UI would keep showing a setting that was
+   * never stored.
+   */
+  on(
+    accountApiActions.setAutoAddEnabledRequested,
+    accountActions.autoAddEnabledChanged,
+    (state, { enabled }) =>
+      state.account
+        ? { ...state, account: { ...state.account, autoAddEnabled: enabled } }
+        : state,
+  ),
+
+  on(accountActions.autoAddEnableFailed, (state, { enabled }) =>
+    state.account
+      ? { ...state, account: { ...state.account, autoAddEnabled: !enabled } }
       : state,
   ),
 

@@ -332,7 +332,11 @@
     "installIosHint": "Zum Installieren tippe auf das Teilen-Symbol und wähle „Zum Home-Bildschirm“.",
     "account": "Konto",
     "signedInAs": "Angemeldet als",
-    "signOut": "Abmelden"
+    "signOut": "Abmelden",
+    "automation": "Automatisierung",
+    "autoAddRecurring": "Wiederkehrende Artikel automatisch hinzufügen",
+    "autoAddRecurringHint": "Für alle im Konto gemeinsam. Artikel, die du regelmäßig kaufst, kommen wieder auf die Liste, wenn es Zeit ist.",
+    "autoAddRequiresInstall": "Installiere die App, um dies zu nutzen – Ergänzungen werden beim Öffnen geprüft."
   },
   "errors": {
     "saveFailed": "Deine Änderung konnte nicht gespeichert werden. Prüfe die Verbindung und versuche es erneut.",
@@ -349,5 +353,11 @@
     "loadingAccount": "Konto wird geladen",
     "loadingList": "Liste wird geladen",
     "ready": "Fertig"
+  },
+  "autoAdd": {
+    "title": "Automatisch hinzugefügt",
+    "periodicity": "Automatisch hinzugefügt – du kaufst das normalerweise etwa alle {{days}} Tage.",
+    "openLabel": "Warum {{name}} automatisch hinzugefügt wurde",
+    "close": "Schließen"
   }
 }

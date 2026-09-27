@@ -24,7 +24,7 @@ const user = {
   email: 't@t.com',
   displayName: 'T',
 };
-const account = { id: 'a1' as AccountId, name: 'A', aiConfig: null };
+const account = { id: 'a1' as AccountId, name: 'A', aiConfig: null, autoAddEnabled: false, autoAddLastRunAt: null };
 
 describe('BootProgressService', () => {
   let service: BootProgressService;

@@ -29,7 +29,7 @@ const mockSession: Session = {
   checkedItems: [],
 };
 
-const mockAccount = { id: 'a1' as AccountId, name: 'T', aiConfig: null };
+const mockAccount = { id: 'a1' as AccountId, name: 'T', aiConfig: null, autoAddEnabled: false, autoAddLastRunAt: null };
 
 describe('SessionsEffects', () => {
   let effects: SessionsEffects;

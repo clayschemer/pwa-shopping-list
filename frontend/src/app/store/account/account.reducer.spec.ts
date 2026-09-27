@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { accountReducer, initialAccountState } from './account.reducer';
-import { authActions, accountActions } from './account.actions';
+import { authActions, accountActions, accountApiActions } from './account.actions';
 import type { UserId, AccountId } from '../../models/ids.model';
 
 const mockUser = {
@@ -14,6 +14,8 @@ const mockAccount = {
   id: 'a1' as AccountId,
   name: 'Test Account',
   aiConfig: null,
+  autoAddEnabled: false,
+  autoAddLastRunAt: null,
 };
 
 describe('accountReducer', () => {
@@ -119,5 +121,80 @@ describe('accountReducer', () => {
       authActions.authStateResolved({ user: mockUser }),
     );
     expect(state.signInError).toBeNull();
+  });
+
+  /**
+   * The account document is not streamed, so the toggle has to be applied
+   * optimistically on the request and reverted on failure — nothing else would
+   * ever correct the displayed value.
+   */
+  describe('auto-add toggle', () => {
+    function loaded() {
+      return accountReducer(
+        initialAccountState,
+        accountActions.accountLoaded({ account: mockAccount, selectedShopId: null }),
+      );
+    }
+
+    it('applies the new value as soon as the write is requested', () => {
+      const state = accountReducer(
+        loaded(),
+        accountApiActions.setAutoAddEnabledRequested({ enabled: true }),
+      );
+
+      expect(state.account?.autoAddEnabled).toBe(true);
+    });
+
+    it('confirms the value on success without changing it', () => {
+      const requested = accountReducer(
+        loaded(),
+        accountApiActions.setAutoAddEnabledRequested({ enabled: true }),
+      );
+      const state = accountReducer(
+        requested,
+        accountActions.autoAddEnabledChanged({ enabled: true }),
+      );
+
+      expect(state.account?.autoAddEnabled).toBe(true);
+    });
+
+    it('reverts the value when the write fails', () => {
+      const requested = accountReducer(
+        loaded(),
+        accountApiActions.setAutoAddEnabledRequested({ enabled: true }),
+      );
+      const state = accountReducer(
+        requested,
+        accountActions.autoAddEnableFailed({ enabled: true }),
+      );
+
+      expect(state.account?.autoAddEnabled).toBe(false);
+    });
+
+    it('reverts a disable that failed back to enabled', () => {
+      const enabled = accountReducer(
+        loaded(),
+        accountApiActions.setAutoAddEnabledRequested({ enabled: true }),
+      );
+      const disabling = accountReducer(
+        enabled,
+        accountApiActions.setAutoAddEnabledRequested({ enabled: false }),
+      );
+      const state = accountReducer(
+        disabling,
+        accountActions.autoAddEnableFailed({ enabled: false }),
+      );
+
+      expect(state.account?.autoAddEnabled).toBe(true);
+    });
+
+    it('ignores the toggle when no account is loaded', () => {
+      const state = accountReducer(
+        initialAccountState,
+        accountApiActions.setAutoAddEnabledRequested({ enabled: true }),
+      );
+
+      expect(state.account).toBeNull();
+    });
   });
 });

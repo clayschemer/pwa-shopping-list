@@ -159,12 +159,17 @@ Category reorder in drawer = shop-specific order for the selected shop. Global o
 
 ### Left to right (both modes):
 ```
-[Item name]  [AI *]  [qty + unit / price stack]  [x or checkbox]
+plan mode:  [Item name + qty]  [origin icon]  [price]  [x]
+shop mode:  [Item name]  [origin icon]  [qty / price]  [checkbox]
 ```
 
 - **Item name:** primary text, large, bold, dark
 - **Description (if set):** italic, muted, beneath name
-- **AI indicator (\*):** shown only on AI-added items, between name and qty/price. Tappable — shows motivation.
+- **Origin indicator:** shown only on items the app added by itself, after the name and before the price. Tappable — opens the reason dialog. It sits after the quantity in plan mode and before it in shop mode, because the plan row's name-and-quantity block is itself a button (it opens the editor) and interactive content cannot nest inside it. Two icons, deliberately distinct because they warrant different amounts of trust:
+  - **clock (`schedule`)** — rule-driven: this item is due again on its usual rhythm.
+  - **sparkle (`auto_awesome`)** — model-driven suggestion (deferred).
+
+  Rendered as a sibling of the row body, never nested inside it: the row body is itself a button (it opens the editor in plan mode), so nesting would make the tap target ambiguous. Its box is bounded to the row height and the icon pinned with `line-height: 1` — an icon carrying its own line height stretches every row it appears on, a fault the undo affordance shipped with once already. Never appended to the item *name*: that string feeds autocomplete, the name-conflict check, and every session snapshot.
 - **Qty + unit:** secondary, mid-tone, right-aligned
 - **Price:** tertiary, small, muted, beneath qty+unit
 - **Remove (x):** plan mode only, far right, 44px touch target height
@@ -337,11 +342,31 @@ Currency affects all price display throughout the app.
 
 Prevents screen dimming while shopping.
 
+### Automation
+| Setting | Control | Default |
+|---|---|---|
+| Auto-add recurring items | Toggle (shared account setting) | Off |
+
+Disabled until the app is installed, with the hint explaining why; the install
+affordance already sits in the Display section above it. The gate is a product
+choice rather than a technical one — the evaluation runs when someone opens the
+app, so in a rarely-opened browser tab the feature would seldom fire at all.
+
+Its own section, not under AI: the rule-driven half is a median over the
+household's own purchase log, works with no AI provider configured, and nothing
+user-visible about it says "AI".
+
+### Reason dialog
+Opened from the origin indicator on a row. One short sentence, translated, built
+from the stored reason — for the periodicity case, how often the item is usually
+bought. Model-authored prose, when a future reason carries any, replaces that
+sentence and is shown as written.
+
 ### AI
 | Setting | Control |
 |---|---|
 | AI provider | Link to setup screen (TBD) |
-| Auto-add suggestions | Toggle (shared account setting) |
+| Auto-add suggestions | Toggle (shared account setting) — model-driven, deferred |
 
 AI auto-add is shared (account-level) — exception to the device-local rule. Either user can toggle it.
 

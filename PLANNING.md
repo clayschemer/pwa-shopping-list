@@ -960,7 +960,7 @@ Feature: Autocomplete on Item Add
 | 1 | Permitted user definition | Allowlist for now; may expand to signup flow |
 | 2 | Uncategorised items label | Resolved: "Uncategorised", muted style, always last, no context menu |
 | 3 | Checked item undo window | Resolved: 2s, client-side only, checking user only |
-| 4 | AI analytical scope | Starting with purchase frequency. Basket analysis, co-occurrence, spend trends deferred. |
+| 4 | AI analytical scope | **Split.** Purchase-frequency auto-add is **built** and is not an AI feature: a median over the account's own session log, no model involved, its own `Account.autoAddEnabled` toggle, clock icon. Basket analysis, co-occurrence, recipe linkage and spend trends remain deferred to the model-driven half (`addedBy: 'ai'`, sparkle icon), which reuses the same fields and dialog. |
 | 5 | Price staleness threshold | Working assumption 6–12 months. Exact value TBD. |
 | 6 | AI price lookup mechanics | Beyond shop priority order — exact mechanics TBD. |
 | 7 | AI suggestion motivation refresh | Existing motivation reused on re-suggestion. Update deferred. |
@@ -978,7 +978,9 @@ Feature: Autocomplete on Item Add
 - **Mode difference**: Plan and shop mode share the same underlying list and data. The difference is purely visual, with the addition of shopping session history tracked only in shop mode.
 - **Categories as tags**: Categories are not containers. They appear in the list only when at least one item is assigned to them.
 - **Uncategorised items**: Appear as a distinct group at the bottom of the list, labelled "Uncategorised" in a muted style. No context menu. Always last.
-- **AI item origin**: The visual indicator on AI added items exists only to inform. It carries no functional meaning. Once the user interacts with the item in any way it is a fully owned list item.
+- **AI item origin**: The visual indicator on app-added items exists only to inform. It carries no functional meaning, and editing an item does not clear it. Adding the item back by hand after it was removed *does* — that makes it the user's outright, resetting `addedBy` and clearing the decline stamp.
+- **Auto-add is conservative by design**: on a list two people share, an item nobody asked for costs more than a reminder that arrives late. Every rule is a rejection rather than a weighting — at least four purchases, a median interval of 60 days or less, low variability, no resurrecting lapsed habits, at most five app-added items on the list at once, no additions mid-trip, and a 30-day silence after the user removes a suggestion.
+- **Auto-add runs on the client, once per app open**: not a cron. The binding cost is the Firestore read quota, which is the same wherever the code runs, so a hosted runner would have bought nothing while costing hosting. A transactional daily claim on the account document makes it idempotent across both clients; the claim is taken before the work so a client closed mid-run consumes the day rather than letting two clients evaluate concurrently. Every phase is timed and the timings persisted, so the choice can be revisited against real-device measurements — and the cadence maths is framework-free so moving it costs nothing.
 - **Session auto-start**: Selecting a shop (or global) when entering shop mode starts a session automatically. No separate action required.
 - **Items are never hard deleted**: Removed items persist in the database for autocomplete history and purchase frequency tracking.
 - **Two totals in shop mode**: The category total reflects all active unchecked items and drops when any session checks an item. The session checked total is the running checkout bill for this session only and drops on uncheck.

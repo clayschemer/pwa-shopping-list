@@ -332,7 +332,11 @@
     "installIosHint": "To install, tap the share button and then \"Add to Home Screen\".",
     "account": "Account",
     "signedInAs": "Signed in as",
-    "signOut": "Sign out"
+    "signOut": "Sign out",
+    "automation": "Automation",
+    "autoAddRecurring": "Auto-add recurring items",
+    "autoAddRecurringHint": "Shared with everyone on the account. Things you buy regularly are put back on the list when they are due.",
+    "autoAddRequiresInstall": "Install the app to use this — additions are checked when you open it."
   },
   "errors": {
     "saveFailed": "Your change could not be saved. Check your connection and try again.",
@@ -349,5 +353,11 @@
     "loadingAccount": "Loading your account",
     "loadingList": "Loading your list",
     "ready": "Ready"
+  },
+  "autoAdd": {
+    "title": "Added automatically",
+    "periodicity": "Added automatically — you usually buy this about every {{days}} days.",
+    "openLabel": "Why {{name}} was added automatically",
+    "close": "Close"
   }
 }

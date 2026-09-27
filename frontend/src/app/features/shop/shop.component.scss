@@ -318,6 +318,34 @@
     font-size: var(--app-font-body-lg);
   }
 
+  /**
+   * Marks an item the app added by itself. Icon pinned to a fixed box with
+   * `line-height: 1` so a glyph taller than expected cannot stretch the row.
+   */
+  &__item-autoadd-btn {
+    all: unset;
+    cursor: pointer;
+    flex: 0 0 auto;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: var(--app-spacing-row-min-height);
+    height: var(--app-spacing-row-min-height);
+    color: var(--mat-sys-on-surface-variant);
+    border-radius: 50%;
+
+    mat-icon {
+      font-size: var(--app-font-body);
+      width: var(--app-font-body);
+      height: var(--app-font-body);
+      line-height: 1;
+    }
+
+    &:focus-visible {
+      @include focus.ring;
+    }
+  }
+
   &__item-description {
     font-size: var(--app-font-label);
     color: var(--mat-sys-on-surface-variant);

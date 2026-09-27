@@ -9,7 +9,11 @@ import { ThemeService, AppSettings } from '../../core/theme/theme.service';
 import { PwaInstallService, PwaInstallState } from '../../core/pwa/pwa-install.service';
 import { accountReducer } from '../../store/account/account.reducer';
 import { uiReducer } from '../../store/ui/ui.reducer';
-import { authActions, accountActions } from '../../store/account/account.actions';
+import {
+  accountApiActions,
+  accountActions,
+  authActions,
+} from '../../store/account/account.actions';
 import type { User } from '../../models/user.model';
 import type { Account } from '../../models/account.model';
 import type { AccountId, UserId } from '../../models/ids.model';
@@ -39,6 +43,7 @@ describe('SettingsComponent', () => {
   let pwaInstallService: {
     canInstall: ReturnType<typeof vi.fn>;
     state: ReturnType<typeof vi.fn>;
+    isInstalled: ReturnType<typeof vi.fn>;
     isIos: boolean;
     install: ReturnType<typeof vi.fn>;
   };
@@ -57,6 +62,7 @@ describe('SettingsComponent', () => {
     pwaInstallService = {
       canInstall: vi.fn().mockReturnValue(false),
       state: vi.fn().mockReturnValue('unsupported' as PwaInstallState),
+      isInstalled: vi.fn().mockReturnValue(false),
       isIos: false,
       install: vi.fn().mockResolvedValue(false),
     };
@@ -88,6 +94,8 @@ describe('SettingsComponent', () => {
         id: 'a1' as AccountId,
         name: 'Test Account',
         aiConfig: null,
+        autoAddEnabled: false,
+        autoAddLastRunAt: null,
       },
       selectedShopId: null,
     }));
@@ -317,6 +325,89 @@ describe('SettingsComponent', () => {
       installBtn.click();
 
       expect(pwaInstallService.install).toHaveBeenCalled();
+    });
+  });
+
+  /**
+   * The one account-level setting on an otherwise device-local screen, and the
+   * only one gated on the app being installed.
+   */
+  describe('auto-add recurring items', () => {
+    /** Found by label rather than index, so adding rows above cannot break it. */
+    function toggle(): HTMLElement {
+      const toggles = [
+        ...(fixture.nativeElement as HTMLElement).querySelectorAll('mat-slide-toggle'),
+      ];
+      const found = toggles.find((t) =>
+        t.querySelector('label')?.textContent?.includes('Auto-add recurring items'),
+      );
+      expect(found, 'auto-add toggle not rendered').toBeTruthy();
+      return found as HTMLElement;
+    }
+
+    function setInstalled(installed: boolean): void {
+      pwaInstallService.isInstalled.mockReturnValue(installed);
+      fixture.detectChanges();
+    }
+
+    it('is rendered with its own label', () => {
+      setInstalled(true);
+      expect(toggle()).toBeTruthy();
+    });
+
+    it('reflects the stored account setting', () => {
+      setInstalled(true);
+      store.dispatch(
+        accountApiActions.setAutoAddEnabledRequested({ enabled: true }),
+      );
+      fixture.detectChanges();
+
+      expect(component.autoAddEnabled()).toBe(true);
+      expect(toggle().querySelector('button')?.getAttribute('aria-checked')).toBe('true');
+    });
+
+    it('dispatches the shared setting change when toggled', () => {
+      setInstalled(true);
+      const dispatchSpy = vi.spyOn(store, 'dispatch');
+
+      component.onAutoAddToggle(true);
+
+      expect(dispatchSpy).toHaveBeenCalledWith(
+        accountApiActions.setAutoAddEnabledRequested({ enabled: true }),
+      );
+    });
+
+    /**
+     * Auto-add only runs when someone opens the app, so offering it in a browser
+     * tab that is rarely opened would be a promise the feature cannot keep.
+     */
+    it('cannot be enabled until the app is installed', () => {
+      setInstalled(false);
+
+      const button = toggle().querySelector('button');
+      expect(button?.getAttribute('disabled')).not.toBeNull();
+    });
+
+    it('is enabled once the app is installed', () => {
+      setInstalled(true);
+
+      const button = toggle().querySelector('button');
+      expect(button?.getAttribute('disabled')).toBeNull();
+    });
+
+    it('explains the install requirement instead of the normal hint', () => {
+      setInstalled(false);
+      const text = (fixture.nativeElement as HTMLElement).textContent ?? '';
+
+      expect(text).toContain('Install the app to use this');
+    });
+
+    it('explains that the setting is shared once installed', () => {
+      setInstalled(true);
+      const text = (fixture.nativeElement as HTMLElement).textContent ?? '';
+
+      expect(text).toContain('Shared with everyone on the account');
+      expect(text).not.toContain('Install the app to use this');
     });
   });
 });

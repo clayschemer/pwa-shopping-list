@@ -113,6 +113,18 @@
       <span class="app-plan__item-description">{{ item.description }}</span>
     }
   </button>
+  @if (item.autoAddReason) {
+    <button
+      type="button"
+      class="app-plan__item-autoadd-btn"
+      [attr.aria-label]="'autoAdd.openLabel' | transloco: { name: item.name }"
+      (click)="openAutoAddReasonDialog(item)"
+    >
+      <mat-icon aria-hidden="true">{{
+        item.addedBy === 'ai' ? 'auto_awesome' : 'schedule'
+      }}</mat-icon>
+    </button>
+  }
   @let priceResult = item | effectivePrice: selectedShopId();
   @if (priceResult.kind !== 'none' && !hidePrices()) {
     @if (canInspectPrice(item)) {

@@ -20,6 +20,8 @@ const mockAccount = {
   name: 'Test',
   shopOrder: [],
   aiConfig: null,
+  autoAddEnabled: false,
+  autoAddLastRunAt: null,
 };
 
 const accountLoaded = () =>

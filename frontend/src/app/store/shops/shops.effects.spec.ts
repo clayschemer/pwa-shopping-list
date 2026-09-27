@@ -15,7 +15,7 @@ const mockShops: Shop[] = [
   { id: 's2' as ShopId, accountId: 'a1' as AccountId, name: 'Lidl', categoryOrder: [], priceSearchUrl: null },
 ];
 
-const mockAccount = { id: 'a1' as AccountId, name: 'Test', shopOrder: [], aiConfig: null };
+const mockAccount = { id: 'a1' as AccountId, name: 'Test', shopOrder: [], aiConfig: null, autoAddEnabled: false, autoAddLastRunAt: null };
 
 describe('ShopsEffects', () => {
   let effects: ShopsEffects;

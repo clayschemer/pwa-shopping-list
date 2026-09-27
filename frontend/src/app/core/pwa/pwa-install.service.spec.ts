@@ -105,4 +105,76 @@ describe('PwaInstallService', () => {
       expect(service.isIos).toBe(false);
     });
   });
+
+  /**
+   * `isInstalled` gates auto-add, which only runs when someone opens the app —
+   * so it has to be true for every way the platform reports a launched-from-home
+   * -screen app, not just `display-mode: standalone`.
+   */
+  describe('isInstalled', () => {
+    /** Reports matches only for the given display modes. */
+    function stubDisplayModes(modes: string[]): void {
+      window.matchMedia = vi.fn((queryString: string) => {
+        const mode = /\(display-mode:\s*([\w-]+)\)/.exec(queryString)?.[1] ?? '';
+        return { matches: modes.includes(mode) } as unknown as MediaQueryList;
+      });
+    }
+
+    function create(): PwaInstallService {
+      return TestBed.runInInjectionContext(() => new PwaInstallService());
+    }
+
+    afterEach(() => {
+      Object.defineProperty(navigator, 'standalone', {
+        value: undefined,
+        configurable: true,
+      });
+    });
+
+    it('is false in a plain browser tab', () => {
+      stubDisplayModes([]);
+      expect(create().isInstalled()).toBe(false);
+    });
+
+    it('is true in standalone display mode', () => {
+      stubDisplayModes(['standalone']);
+      expect(create().isInstalled()).toBe(true);
+    });
+
+    it('is true in minimal-ui display mode', () => {
+      stubDisplayModes(['minimal-ui']);
+      expect(create().isInstalled()).toBe(true);
+    });
+
+    it('is true in window-controls-overlay display mode', () => {
+      stubDisplayModes(['window-controls-overlay']);
+      expect(create().isInstalled()).toBe(true);
+    });
+
+    /** iOS Safari reports no display mode at all and exposes this instead. */
+    it('is true from the iOS standalone flag', () => {
+      stubDisplayModes([]);
+      Object.defineProperty(navigator, 'standalone', {
+        value: true,
+        configurable: true,
+      });
+      expect(create().isInstalled()).toBe(true);
+    });
+
+    it('becomes true once the browser reports the app installed', () => {
+      stubDisplayModes([]);
+      const service = create();
+      expect(service.isInstalled()).toBe(false);
+
+      listeners['appinstalled'](new Event('appinstalled'));
+
+      expect(service.isInstalled()).toBe(true);
+    });
+
+    /** Environments without the media-query API must not break construction. */
+    it('does not throw when matchMedia is unavailable', () => {
+      (window as unknown as { matchMedia?: unknown }).matchMedia = undefined;
+      expect(() => create()).not.toThrow();
+    });
+  });
 });

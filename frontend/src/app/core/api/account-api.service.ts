@@ -11,8 +11,11 @@ import {
   Firestore,
   doc,
   getDoc,
+  runTransaction,
   serverTimestamp,
   setDoc,
+  Timestamp,
+  updateDoc,
 } from '@angular/fire/firestore';
 import { Observable } from 'rxjs';
 import type { User } from '../../models/user.model';
@@ -25,6 +28,19 @@ import type {
 import type { AccountId, ShopId, UserId } from '../../models/ids.model';
 import { AccountContext } from './account-context';
 import { paths } from './firestore-paths';
+
+function toMillis(v: unknown): number | null {
+  if (v === null || v === undefined) return null;
+  if (v instanceof Timestamp) return v.toMillis();
+  if (typeof v === 'number') return v;
+  return null;
+}
+
+/** Diagnostics persisted after an auto-add evaluation. Write-only — nothing reads these back. */
+export interface AutoAddRunTimings {
+  totalMs: number;
+  computeMs: number;
+}
 
 /**
  * Account API service — the ONLY place that touches Firebase for auth and account operations.
@@ -172,12 +188,75 @@ export class AccountApiService {
               (id) => id as ShopId,
             ),
             aiConfig: accountData['aiConfig'] ?? null,
+            autoAddEnabled: accountData['autoAddEnabled'] === true,
+            autoAddLastRunAt: toMillis(accountData['autoAddLastRunAt']),
           },
           selectedShopId,
         };
       } catch {
         return { type: 'ACCESS_DENIED' };
       }
+    });
+  }
+
+  /** Shared, account-level toggle for rule-driven auto-add. */
+  async setAutoAddEnabled(enabled: boolean): Promise<void> {
+    const { accountId } = this.context.require();
+    return runInInjectionContext(this.injector, async () => {
+      await updateDoc(paths.accountDoc(this.firestore, accountId), {
+        autoAddEnabled: enabled,
+      });
+    });
+  }
+
+  /**
+   * Claims today's auto-add evaluation for this account, returning whether the
+   * caller won it.
+   *
+   * A transaction rather than a read-then-write because both users' clients can
+   * boot simultaneously: first-write-wins means the loser skips instead of
+   * spending the ~200 session reads a second time. The claim is deliberately
+   * taken *before* the work, so a client closed mid-run consumes the day — a
+   * skipped day costs nothing, whereas claiming on completion lets two clients
+   * run the whole evaluation concurrently.
+   *
+   * Returns `false` on any failure. A transaction needs a live server round-trip
+   * and so rejects when offline, and "skip" is the safe direction: the worst
+   * case is that auto-add waits until the next app open.
+   */
+  async claimAutoAddRun(minGapHours = 20): Promise<boolean> {
+    const { accountId } = this.context.require();
+    return runInInjectionContext(this.injector, async () => {
+      const ref = paths.accountDoc(this.firestore, accountId);
+      try {
+        return await runTransaction(this.firestore, async (tx) => {
+          const snap = await tx.get(ref);
+          if (!snap.exists()) return false;
+          const last = toMillis(snap.data()['autoAddLastRunAt']);
+          if (last !== null && Date.now() - last < minGapHours * 60 * 60 * 1000) {
+            return false;
+          }
+          tx.update(ref, { autoAddLastRunAt: serverTimestamp() });
+          return true;
+        });
+      } catch {
+        return false;
+      }
+    });
+  }
+
+  /**
+   * Records how long the last evaluation took, so the decision to keep this work
+   * on the client rests on measurements from real devices rather than estimates.
+   * Best-effort: a failure here must never surface to the user.
+   */
+  async recordAutoAddRunTimings(timings: AutoAddRunTimings): Promise<void> {
+    const { accountId } = this.context.require();
+    return runInInjectionContext(this.injector, async () => {
+      await updateDoc(paths.accountDoc(this.firestore, accountId), {
+        autoAddLastRunTotalMs: Math.round(timings.totalMs),
+        autoAddLastRunComputeMs: Math.round(timings.computeMs),
+      });
     });
   }
 }

@@ -1,0 +1,22 @@
+.app-auto-add-dialog {
+  display: flex;
+  flex-direction: column;
+  gap: var(--app-spacing-xs);
+  min-width: 14rem;
+  max-width: 22rem;
+
+  &__item {
+    margin: 0;
+    font-size: var(--app-font-caption);
+    color: var(--mat-sys-on-surface-variant);
+    text-transform: uppercase;
+    letter-spacing: var(--app-letter-spacing-caption);
+  }
+
+  &__reason {
+    margin: 0;
+    font-size: var(--app-font-body);
+    line-height: var(--app-line-height-body);
+    color: var(--mat-sys-on-surface);
+  }
+}

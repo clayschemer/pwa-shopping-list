@@ -2,10 +2,11 @@ import '../../../testing/init-testbed';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { TestBed } from '@angular/core/testing';
 import { provideMockActions } from '@ngrx/effects/testing';
-import { provideMockStore } from '@ngrx/store/testing';
+import { provideMockStore, MockStore } from '@ngrx/store/testing';
 import { Subject } from 'rxjs';
 import { ItemsEffects } from './items.effects';
 import { itemsActions, itemsApiActions } from './items.actions';
+import { selectItemEntities } from './items.selectors';
 import { accountActions } from '../account/account.actions';
 import { ItemApiService } from '../../core/api/item-api.service';
 import { PriceQueueApiService } from '../../core/api/price-queue-api.service';
@@ -24,7 +25,11 @@ const mockItem: Item = {
   removed: false,
   removedAt: null,
   addedBy: 'user',
-  aiMotivation: null,
+  autoAddReason: null,
+  autoAddedAt: null,
+  autoAddDeclinedAt: null,
+  autoAddMotivation: null,
+  autoAddMotivationLang: null,
   price: null,
   priceQuantity: null,
   priceUnit: null,
@@ -34,7 +39,7 @@ const mockItem: Item = {
   purchaseCount: 0,
 };
 
-const mockAccount = { id: 'a1' as AccountId, name: 'Test', aiConfig: null };
+const mockAccount = { id: 'a1' as AccountId, name: 'Test', aiConfig: null, autoAddEnabled: false, autoAddLastRunAt: null };
 
 describe('ItemsEffects', () => {
   let effects: ItemsEffects;
@@ -64,7 +69,9 @@ describe('ItemsEffects', () => {
         provideMockActions(() => actions$),
         { provide: ItemApiService, useValue: itemApi },
         { provide: PriceQueueApiService, useValue: { enqueue: vi.fn() } },
-        provideMockStore(),
+        provideMockStore({
+          selectors: [{ selector: selectItemEntities, value: { i1: mockItem } }],
+        }),
       ],
     });
     effects = TestBed.inject(ItemsEffects);
@@ -149,6 +156,36 @@ describe('ItemsEffects', () => {
     expect(results).toEqual([
       itemsActions.itemRemoved({ id: 'i1' as ItemId }),
     ]);
+  });
+
+  /**
+   * Removing an item the app added is the user declining it, which suppresses
+   * re-adding for a while. Derived in the effect from store state so every
+   * removal path gets it and no component has to know the rule.
+   */
+  it('records a decline when removing an auto-added item', async () => {
+    const store = TestBed.inject(MockStore);
+    store.overrideSelector(selectItemEntities, {
+      i1: { ...mockItem, addedBy: 'auto' },
+    });
+    store.refreshState();
+    itemApi.removeItem.mockResolvedValue(undefined);
+
+    effects.removeItem$.subscribe();
+    actions$.next(itemsApiActions.removeItemRequested({ id: 'i1' as ItemId }));
+    await flush();
+
+    expect(itemApi.removeItem).toHaveBeenCalledWith('i1', { declineAutoAdd: true });
+  });
+
+  it('does not record a decline when removing an item the user added', async () => {
+    itemApi.removeItem.mockResolvedValue(undefined);
+
+    effects.removeItem$.subscribe();
+    actions$.next(itemsApiActions.removeItemRequested({ id: 'i1' as ItemId }));
+    await flush();
+
+    expect(itemApi.removeItem).toHaveBeenCalledWith('i1', { declineAutoAdd: false });
   });
 
   it('dispatches itemCheckConflict when the API returns CHECK_CONFLICT', async () => {

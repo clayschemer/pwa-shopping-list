@@ -33,6 +33,10 @@ import {
   PriceProductDialogData,
 } from './price-product-dialog.component';
 import {
+  AutoAddReasonDialogComponent,
+  AutoAddReasonDialogData,
+} from './auto-add-reason-dialog.component';
+import {
   AddItemPillComponent,
   AddItemRequest,
 } from './add-item-pill.component';
@@ -236,6 +240,20 @@ export class PlanComponent {
           priceQuantity: shopEntry?.priceQuantity ?? item.priceQuantity,
           priceUnit: shopEntry?.priceUnit ?? item.priceUnit,
           priceUpdatedAt: shopEntry?.priceUpdatedAt ?? item.priceUpdatedAt,
+        },
+      },
+    );
+  }
+
+  openAutoAddReasonDialog(item: Item): void {
+    if (!item.autoAddReason) return;
+    this.dialog.open<AutoAddReasonDialogComponent, AutoAddReasonDialogData>(
+      AutoAddReasonDialogComponent,
+      {
+        data: {
+          itemName: item.name,
+          reason: item.autoAddReason,
+          motivation: item.autoAddMotivation,
         },
       },
     );

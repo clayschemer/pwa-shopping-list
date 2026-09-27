@@ -332,7 +332,11 @@
     "installIosHint": "For å installere, trykk på del-knappen og velg «Legg til på Hjem-skjerm».",
     "account": "Konto",
     "signedInAs": "Logget inn som",
-    "signOut": "Logg ut"
+    "signOut": "Logg ut",
+    "automation": "Automatisering",
+    "autoAddRecurring": "Legg til gjentakende varer automatisk",
+    "autoAddRecurringHint": "Deles med alle på kontoen. Varer du kjøper jevnlig legges tilbake på listen når det er tid for det.",
+    "autoAddRequiresInstall": "Installer appen for å bruke dette – tillegg sjekkes når du åpner den."
   },
   "errors": {
     "saveFailed": "Endringen din kunne ikke lagres. Sjekk tilkoblingen og prøv igjen.",
@@ -349,5 +353,11 @@
     "loadingAccount": "Laster kontoen din",
     "loadingList": "Laster listen din",
     "ready": "Klar"
+  },
+  "autoAdd": {
+    "title": "Lagt til automatisk",
+    "periodicity": "Lagt til automatisk – du kjøper vanligvis dette omtrent hver {{days}}. dag.",
+    "openLabel": "Hvorfor {{name}} ble lagt til automatisk",
+    "close": "Lukk"
   }
 }

@@ -1,8 +1,8 @@
 import { inject, Injectable } from '@angular/core';
 import { Router } from '@angular/router';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
-import { catchError, defer, from, map, switchMap, tap } from 'rxjs';
-import { authActions, accountActions } from './account.actions';
+import { catchError, defer, from, map, mergeMap, switchMap, tap } from 'rxjs';
+import { authActions, accountActions, accountApiActions } from './account.actions';
 import { AccountApiService } from '../../core/api/account-api.service';
 import { onApiFailure } from '../../core/diagnostics/api-failure';
 import { StreamErrorService } from '../../core/api/stream-error.service';
@@ -140,5 +140,26 @@ export class AccountEffects {
         tap(() => this.router.navigateByUrl('/sign-in')),
       ),
     { dispatch: false },
+  );
+
+  /**
+   * Shared auto-add toggle. `mergeMap` rather than `switchMap` so a rapid
+   * double-toggle does not cancel the first write and leave the stored value
+   * disagreeing with the reducer's optimistic state.
+   */
+  readonly setAutoAddEnabled$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(accountApiActions.setAutoAddEnabledRequested),
+      mergeMap(({ enabled }) =>
+        from(this.accountApi.setAutoAddEnabled(enabled)).pipe(
+          map(() => accountActions.autoAddEnabledChanged({ enabled })),
+          catchError(
+            onApiFailure('account.setAutoAddEnabled', () =>
+              accountActions.autoAddEnableFailed({ enabled }),
+            ),
+          ),
+        ),
+      ),
+    ),
   );
 }

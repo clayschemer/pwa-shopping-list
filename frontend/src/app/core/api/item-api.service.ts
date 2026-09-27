@@ -17,7 +17,12 @@ import {
   where,
   arrayUnion,
 } from '@angular/fire/firestore';
-import type { Item, PriceFeedbackEntry, ShopPriceEntry } from '../../models/item.model';
+import type {
+  AutoAddReason,
+  Item,
+  PriceFeedbackEntry,
+  ShopPriceEntry,
+} from '../../models/item.model';
 import type {
   AccountId,
   CategoryId,
@@ -85,6 +90,26 @@ function mapFeedback(raw: unknown): PriceFeedbackEntry[] {
   return out;
 }
 
+/**
+ * Reads a stored auto-add reason defensively. An unrecognised `kind` maps to
+ * null rather than being passed through: the renderer switches on `kind`, and a
+ * reason it cannot render would leave the indicator tappable but empty.
+ */
+function mapAutoAddReason(raw: unknown): AutoAddReason | null {
+  if (raw == null || typeof raw !== 'object' || Array.isArray(raw)) return null;
+  const r = raw as Record<string, unknown>;
+  if (r['kind'] !== 'periodicity') return null;
+  const median = r['medianIntervalDays'];
+  if (typeof median !== 'number' || !Number.isFinite(median) || median <= 0) return null;
+  return {
+    kind: 'periodicity',
+    medianIntervalDays: median,
+    daysSinceLastPurchase:
+      typeof r['daysSinceLastPurchase'] === 'number' ? r['daysSinceLastPurchase'] : 0,
+    purchaseCount: typeof r['purchaseCount'] === 'number' ? r['purchaseCount'] : 0,
+  };
+}
+
 function mapShopPrices(raw: unknown): Record<string, ShopPriceEntry> {
   if (raw == null || typeof raw !== 'object' || Array.isArray(raw)) return {};
   const result: Record<string, ShopPriceEntry> = {};
@@ -124,8 +149,12 @@ export function mapItem(
     ),
     removed: Boolean(data['removed']),
     removedAt: toMillis(data['removedAt']),
-    addedBy: (data['addedBy'] ?? 'user') as 'user' | 'ai',
-    aiMotivation: (data['aiMotivation'] ?? null) as string | null,
+    addedBy: (data['addedBy'] ?? 'user') as 'user' | 'auto' | 'ai',
+    autoAddReason: mapAutoAddReason(data['autoAddReason']),
+    autoAddedAt: toMillis(data['autoAddedAt']),
+    autoAddDeclinedAt: toMillis(data['autoAddDeclinedAt']),
+    autoAddMotivation: (data['autoAddMotivation'] ?? null) as string | null,
+    autoAddMotivationLang: (data['autoAddMotivationLang'] ?? null) as string | null,
     price: (data['price'] ?? null) as number | null,
     priceQuantity: (data['priceQuantity'] ?? null) as number | null,
     priceUnit: (data['priceUnit'] ?? null) as string | null,
@@ -211,6 +240,17 @@ export class ItemApiService {
           secondaryCategoryIds: input.secondaryCategoryIds,
           sizePerPieceQuantity: input.sizePerPieceQuantity,
           sizePerPieceUnit: input.sizePerPieceUnit,
+          // A manual add makes the item user-owned again. Without this reset an
+          // item the app once added keeps its indicator forever, because
+          // `addedBy` is otherwise only ever written at creation. Clearing
+          // `autoAddDeclinedAt` too: the user asking for the item back
+          // withdraws the earlier refusal.
+          addedBy: 'user' as const,
+          autoAddReason: null,
+          autoAddedAt: null,
+          autoAddDeclinedAt: null,
+          autoAddMotivation: null,
+          autoAddMotivationLang: null,
         };
         await updateDoc(snap.ref, restoreFields);
         return { ...mapItem(snap, accountId), ...restoreFields };
@@ -226,7 +266,11 @@ export class ItemApiService {
         removed: false,
         removedAt: null,
         addedBy: 'user' as const,
-        aiMotivation: null,
+        autoAddReason: null as AutoAddReason | null,
+        autoAddedAt: null as number | null,
+        autoAddDeclinedAt: null as number | null,
+        autoAddMotivation: null as string | null,
+        autoAddMotivationLang: null as string | null,
         price: null,
         priceQuantity: null,
         priceUnit: null,
@@ -478,16 +522,71 @@ export class ItemApiService {
     });
   }
 
-  async removeItem(id: ItemId): Promise<void | NotFoundError> {
+  /**
+   * @param opts.declineAutoAdd Also records the removal as a refusal of an
+   *   auto-add, suppressing re-addition for a window. Folded into the same write
+   *   rather than issued separately so the two can never diverge. The caller
+   *   decides, because only it knows whether the item was auto-added — a check
+   *   must never set this, since buying the item is acceptance.
+   */
+  async removeItem(
+    id: ItemId,
+    opts?: { declineAutoAdd?: boolean },
+  ): Promise<void | NotFoundError> {
     const { accountId } = this.context.require();
     return runInInjectionContext(this.injector, async () => {
       try {
         await updateDoc(paths.itemDoc(this.db, accountId, id), {
           removed: true,
           removedAt: serverTimestamp(),
+          ...(opts?.declineAutoAdd ? { autoAddDeclinedAt: serverTimestamp() } : {}),
         });
       } catch {
         return { type: 'NOT_FOUND', entityKind: 'item', id };
+      }
+      return;
+    });
+  }
+
+  /**
+   * Places a recurring item back on the list on the app's own initiative.
+   *
+   * Never creates a document: every candidate comes from the purchase log, so
+   * its item already exists as a removed doc. Restoring in place keeps the
+   * category, quantity, prices and `purchaseCount` the household has already
+   * taught it.
+   *
+   * A transaction because of the `removed` guard — if the evaluation raced a
+   * user adding the same item by hand, their active item must be left exactly as
+   * it is rather than relabelled as auto-added. Unlike `updateItem`, this is
+   * background work with no one waiting on it, so the fact that transactions
+   * reject when offline is the right trade: it simply waits for the next run.
+   */
+  async autoAddItem(
+    id: ItemId,
+    reason: AutoAddReason,
+  ): Promise<void | NotFoundError> {
+    const { accountId } = this.context.require();
+    return runInInjectionContext(this.injector, async () => {
+      const ref = paths.itemDoc(this.db, accountId, id);
+      try {
+        await runTransaction(this.db, async (tx) => {
+          const snap = await tx.get(ref);
+          if (!snap.exists()) throw new Error('NOT_FOUND');
+          if (snap.data()['removed'] !== true) return;
+          tx.update(ref, {
+            removed: false,
+            removedAt: null,
+            addedBy: 'auto',
+            autoAddReason: reason,
+            autoAddedAt: serverTimestamp(),
+          });
+        });
+      } catch (err) {
+        if ((err as Error).message === 'NOT_FOUND') {
+          return { type: 'NOT_FOUND', entityKind: 'item', id };
+        }
+        throw err;
       }
       return;
     });
@@ -587,6 +686,22 @@ export class ItemApiService {
         throw err;
       }
       return;
+    });
+  }
+
+  /**
+   * Every item, removed ones included.
+   *
+   * Auto-add needs this: its candidates are by definition items currently off
+   * the list, so the store — which only ever holds the active list plus
+   * whatever was removed this session — cannot say whether a candidate was
+   * declined last week or added yesterday.
+   */
+  async fetchAllItems(): Promise<Item[]> {
+    const { accountId } = this.context.require();
+    return runInInjectionContext(this.injector, async () => {
+      const snap = await getDocs(paths.items(this.db, accountId));
+      return snap.docs.map((d) => mapItem(d, accountId));
     });
   }
 

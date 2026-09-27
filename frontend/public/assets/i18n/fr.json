@@ -332,7 +332,11 @@
     "installIosHint": "Pour installer, appuyez sur le bouton de partage puis « Sur l'écran d'accueil ».",
     "account": "Compte",
     "signedInAs": "Connecté en tant que",
-    "signOut": "Se déconnecter"
+    "signOut": "Se déconnecter",
+    "automation": "Automatisation",
+    "autoAddRecurring": "Ajouter automatiquement les articles récurrents",
+    "autoAddRecurringHint": "Partagé avec tout le compte. Les articles que vous achetez régulièrement reviennent sur la liste le moment venu.",
+    "autoAddRequiresInstall": "Installez l'application pour utiliser cette option — les ajouts sont vérifiés à l'ouverture."
   },
   "errors": {
     "saveFailed": "Votre modification n'a pas pu être enregistrée. Vérifiez votre connexion et réessayez.",
@@ -349,5 +353,11 @@
     "loadingAccount": "Chargement de votre compte",
     "loadingList": "Chargement de votre liste",
     "ready": "Prêt"
+  },
+  "autoAdd": {
+    "title": "Ajouté automatiquement",
+    "periodicity": "Ajouté automatiquement — vous achetez cet article environ tous les {{days}} jours.",
+    "openLabel": "Pourquoi {{name}} a été ajouté automatiquement",
+    "close": "Fermer"
   }
 }

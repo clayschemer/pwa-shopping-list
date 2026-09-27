@@ -332,7 +332,11 @@
     "installIosHint": "För att installera, tryck på dela-knappen och välj \"Lägg till på hemskärmen\".",
     "account": "Konto",
     "signedInAs": "Inloggad som",
-    "signOut": "Logga ut"
+    "signOut": "Logga ut",
+    "automation": "Automatisering",
+    "autoAddRecurring": "Lägg till återkommande varor automatiskt",
+    "autoAddRecurringHint": "Delas med alla på kontot. Varor du köper regelbundet läggs tillbaka på listan när det är dags.",
+    "autoAddRequiresInstall": "Installera appen för att använda detta – tillägg kontrolleras när du öppnar den."
   },
   "errors": {
     "saveFailed": "Din ändring kunde inte sparas. Kontrollera anslutningen och försök igen.",
@@ -349,5 +353,11 @@
     "loadingAccount": "Laddar ditt konto",
     "loadingList": "Laddar din lista",
     "ready": "Klar"
+  },
+  "autoAdd": {
+    "title": "Tillagd automatiskt",
+    "periodicity": "Tillagd automatiskt – du köper vanligtvis detta ungefär var {{days}}:e dag.",
+    "openLabel": "Varför {{name}} lades till automatiskt",
+    "close": "Stäng"
   }
 }

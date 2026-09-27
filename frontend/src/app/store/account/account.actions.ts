@@ -26,5 +26,14 @@ export const accountActions = createActionGroup({
     'Stream Account Not Found': emptyProps(),
     'Stream Failed': props<{ message: string }>(),
     'Shop Order Updated': props<{ orderedIds: ShopId[] }>(),
+    'Auto Add Enabled Changed': props<{ enabled: boolean }>(),
+    'Auto Add Enable Failed': props<{ enabled: boolean }>(),
+  },
+});
+
+export const accountApiActions = createActionGroup({
+  source: 'Account API',
+  events: {
+    'Set Auto Add Enabled Requested': props<{ enabled: boolean }>(),
   },
 });

@@ -115,6 +115,18 @@
 <ng-template #itemBody let-item="item">
   <div class="app-shop__item-main">
     <span class="app-shop__item-name">{{ item.name }}</span>
+    @if (item.autoAddReason) {
+      <button
+        type="button"
+        class="app-shop__item-autoadd-btn"
+        [attr.aria-label]="'autoAdd.openLabel' | transloco: { name: item.name }"
+        (click)="openAutoAddReasonDialog(item)"
+      >
+        <mat-icon aria-hidden="true">{{
+          item.addedBy === 'ai' ? 'auto_awesome' : 'schedule'
+        }}</mat-icon>
+      </button>
+    }
     <span class="app-shop__item-meta">
       @if (item.quantity !== null || item.unit !== null) {
         <span class="app-shop__item-qty">

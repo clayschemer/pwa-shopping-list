@@ -25,7 +25,22 @@ Account
   - id
   - name
   - aiConfig: AiConfig | null          ← null means AI features are inactive
+  - autoAddEnabled: boolean            ← shared; rule-driven auto-add of recurring items
+  - autoAddLastRunAt: timestamp | null ← claimed transactionally before each evaluation
 ```
+
+**`autoAddEnabled` is deliberately top-level, not inside `AiConfig`.** Rule-driven
+auto-add is a median over the account's own purchase log — arithmetic, not a
+model — so it must work on an account with no AI provider configured.
+`AiConfig.autoAddEnabled` stays reserved for the model-driven half.
+
+`autoAddLastRunAt` is claimed in a transaction *before* the evaluation runs, so
+that two clients booting at the same moment cannot both spend the read budget on
+the same day. A client closed mid-run therefore consumes the day: a skipped day
+costs nothing, whereas claiming on completion would allow concurrent full runs.
+Two write-only diagnostics sit beside it — `autoAddLastRunTotalMs` and
+`autoAddLastRunComputeMs` — so the cost of keeping this work on the client can be
+judged from real devices. Nothing reads them back.
 
 ### AiConfig
 Stores the AI integration settings for an account. When absent or null, all AI features are disabled and the app operates in fully manual mode.
@@ -122,8 +137,12 @@ Item
   - secondaryCategoryIds: CategoryId[]
   - removed: boolean                    ← source of truth for list visibility
   - removedAt: timestamp | null         ← set when removed, cleared when restored
-  - addedBy: 'user' | 'ai'             ← origin indicator only, no functional difference
-  - aiMotivation: string | null         ← populated when addedBy is 'ai'; persists for reference
+  - addedBy: 'user' | 'auto' | 'ai'    ← origin indicator only, no functional difference
+  - autoAddReason: AutoAddReason | null ← structured, translatable; set when the app adds the item
+  - autoAddedAt: timestamp | null       ← last automatic addition; anchors the re-add cooldown
+  - autoAddDeclinedAt: timestamp | null ← set when a user removes an auto-added item unchecked
+  - autoAddMotivation: string | null    ← model-authored prose, single language, rendered verbatim
+  - autoAddMotivationLang: string | null ← which language autoAddMotivation was written in
   - price: number | null               ← global price — lowest raw price across all shopPrices entries;
                                           also set directly when no shop is in context (manual entry)
   - priceQuantity: number | null        ← quantity for the global price
@@ -159,6 +178,42 @@ ShopPriceEntry
   - priceUpdatedAt:   timestamp
 ```
 
+### AutoAddReason
+Why the app placed an item on the list by itself. A discriminated union so each
+reason carries only the data it needs, and so the renderer can pick a
+translation key per `kind`.
+
+```
+AutoAddReason
+  | { kind: 'periodicity'
+      medianIntervalDays:    number     ← the statistic used; the only field rendered
+      daysSinceLastPurchase: number     ← diagnostics
+      purchaseCount:         number     ← diagnostics
+    }
+```
+
+**Median, not mean.** Purchase intervals are right-skewed and sparse: a single
+long gap — a holiday — drags a mean far enough to suppress an item bought every
+week without fail. The median ignores it. A variability guard
+(stddev/mean ≤ 0.6) then rejects items with no rhythm at all, a ceiling on the
+median (≤ 60 days) excludes one-offs like a frying pan that would otherwise
+qualify simply by enough time passing, and a lapse guard (≤ 3× the median) stops
+long-abandoned habits being resurrected.
+
+**`'auto'` versus `'ai'` on `addedBy`.** `'auto'` is rule-driven and deterministic;
+`'ai'` is model-driven and deferred. They render with different icons — a clock
+and a sparkle — because they warrant different amounts of trust. Both share this
+one reason union and one indicator, so the model-driven half adds a `kind`
+rather than a parallel set of fields.
+
+**`autoAddMotivation` is the one documented exemption from the all-six-locales
+rule.** It holds prose a model wrote, stored in whichever language the
+generating client was using, and is rendered as-is in place of the translated
+sentence. `autoAddMotivationLang` records which language that was — `language` is
+a device-local setting, so two users on one account can differ, and "the
+account's language" really means "whichever client generated it". Every *fixed*
+string in the feature still ships in all six locales.
+
 ### PriceFeedbackEntry
 A single rejection entry stored on an Item. The pipeline reads the array on
 the next lookup and instructs the LLM to avoid these prior matches.
@@ -179,7 +234,9 @@ PriceFeedbackEntry
 - `priceProductName` and `priceProductUrl` capture *which* product the pipeline matched. They are set together by the pipeline whenever the LLM-returned `matchedName` resolves to an extracted JSON-LD product. Both are cleared when the price is cleared. They power the in-app price-inspection affordance — clicking a price opens a card showing the matched product with a link to its source page.
 - `priceFeedback` captures user rejections of prior matches. Each entry records the rejected match (name + URL) and the user's reason. The pipeline reads this array on the next run and instructs the LLM to avoid the listed matches and apply the reasons. The array is cleared by a successful pipeline write so feedback does not influence indefinitely. Independent of this operational state, every rejection is also append-written to an immutable corpus collection (see *Price feedback corpus* below) for future training analysis.
 - `sizePerPieceQuantity` and `sizePerPieceUnit` describe what one piece of the item typically weighs or measures — used by the frontend to convert between `pcs` and weight/volume when the user lists by piece but the shelf is priced per kg (or vice versa). The pipeline pre-fills it for produce-like items via Gemma. Sticky to user edits: once non-null, the pipeline does not overwrite. Clearing both fields lets the pipeline re-estimate on the next run.
-- `aiMotivation` is set when the AI adds the item and is never updated. If the AI re-suggests the same item, the existing motivation is reused.
+- `autoAddReason` is set when the app adds the item. An item the user then adds back by hand becomes theirs outright: the restore path resets `addedBy` to `'user'` and clears every `autoAdd*` field, including the decline stamp — asking for the item back withdraws the earlier refusal. Editing an auto-added item does *not* reset it, since the indicator is informational only.
+- `autoAddDeclinedAt` is set only by a removal, never by a check. Buying the item is acceptance, and the cadence resets naturally from the new session log entry.
+- An automatic addition never creates a document. Every candidate comes from the purchase log, so its item already exists with `removed: true`; the app restores it in place, leaving name, category, quantity, prices and `purchaseCount` exactly as the household taught them.
 - `purchaseCount` is incremented once per completed session in which the item appears in the session's checked log. It is the basis for autocomplete frequency ranking.
 - Price staleness is determined by `priceUpdatedAt` alone. Working assumption is a 6-12 month refresh window; exact threshold is an open decision.
 

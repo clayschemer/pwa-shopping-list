@@ -76,6 +76,7 @@ These rules are baked in. They reflect recurring lessons; do not skip them.
 
 ### i18n
 - Every user-facing string lives in **all six** translation files: `frontend/public/assets/i18n/{en,no,sv,de,fr,da}.json`. Adding a key to one without the others is a regression — the `i18n-parity.spec.ts` guard test enforces this.
+- **One documented exemption:** `Item.autoAddMotivation` holds prose a model wrote, stored in whichever language the generating client was using and rendered verbatim (`autoAddMotivationLang` records which). Translating generated text at runtime is not on the table, so it ships as stored. This is not a licence to hard-code anything else — every *fixed* string in that feature, including the rule-driven reason sentence, still ships in all six. Do not "fix" this exemption.
 - Templates use the `transloco` pipe; TS uses `TranslocoService.translate()`. **Nothing user-visible may be hard-coded** — that includes English words, separators (`, ` / `:` / ` · `), composed format strings (e.g. `${qty} ${unit}`), and any punctuation that joins or wraps interpolated values. If a user can see it, it ships as a translation key with placeholders so locales can rewrite the separator and order as needed (e.g. `"qtyWithUnit": ", {{quantity}} {{unit}}"`).
 - When adding or editing a feature, audit every user-visible render path for hard-coded text *or formatting* and route the whole pattern through transloco — not just the words.
 - Escape quotes inside translation values (`\"`) — unescaped quotes have broken `de.json` builds before.
@@ -243,7 +244,10 @@ Two modes, switchable per user independently. Mode is **not persisted** — alwa
 Full model with design rationale in `DATA-MODEL.md`. Read it before working on any service layer, store, or backend code.
 
 ```
-Account       { id, name, aiConfig: AiConfig | null }
+Account       { id, name, aiConfig: AiConfig | null,
+                autoAddEnabled, autoAddLastRunAt }
+AutoAddReason { kind: 'periodicity', medianIntervalDays,
+                daysSinceLastPurchase, purchaseCount }
 AiConfig      { provider, apiKeyRef, priceLookupShopOrder: ShopId[], autoAddEnabled }
               // Note: apiKeyRef exists in the logical data model but is backend-internal.
               // It is intentionally absent from the API contract — the frontend never sees it.
@@ -255,7 +259,10 @@ Category      { id, accountId, name, color, globalSortOrder,
 CategoryGroup { id, accountId, name }
 Item          { id, accountId, name, description, quantity, unit,
                 primaryCategoryId, secondaryCategoryIds,
-                removed, removedAt, addedBy, aiMotivation,
+                removed, removedAt,
+                addedBy: 'user' | 'auto' | 'ai',
+                autoAddReason, autoAddedAt, autoAddDeclinedAt,
+                autoAddMotivation, autoAddMotivationLang,
                 price, priceQuantity, priceUnit, priceShopId: ShopId | null,
                 priceUpdatedAt,
                 sizePerPieceQuantity, sizePerPieceUnit,
@@ -282,6 +289,10 @@ SessionCheckedItem { itemId, checkedBy, checkedAt,
 - **Price pipeline is external and additive.** A separate Docker service (`price-pipeline/`) uses Playwright + Gemma (Ollama) to scrape store pages and write prices back via the same Firestore path as `setItemPrice`. The Angular app cannot distinguish pipeline-written prices from user-entered ones. Removing the pipeline requires only decommissioning the Docker service and clearing `aiConfig` — zero frontend changes.
 - **`Shop.priceSearchUrl`** is the URL template (with `{query}` placeholder) the pipeline uses to scrape that shop. Null = shop is skipped during pipeline runs.
 - **AI gated by `AiConfig`.** Service layer enforces the gate — components never check this directly.
+- **Auto-add of recurring items is NOT an AI feature.** It is a median over the account's own session log — deterministic arithmetic, no model, no Ollama. It therefore has its own top-level `Account.autoAddEnabled` toggle (not inside `AiConfig`, which would make it require a provider), its own clock icon (`schedule`) to distinguish it from the sparkle reserved for genuine model suggestions, and no user-visible string anywhere in it says "AI". The model-driven half is deferred and will reuse the same fields with `addedBy: 'ai'` plus a new `AutoAddReason.kind`.
+- **Auto-add runs client-side once per app open**, not on a cron. The binding cost is the Firestore read quota, identical wherever the code runs, so a hosted runner would buy nothing while costing hosting. `claimAutoAddRun` claims the day in a transaction *before* the work — a losing client spends 1 read rather than ~200. Cadence maths and gates are pure functions in `frontend/src/app/core/auto-add/` with no framework or SDK imports, so the acceptance tests drive the real code and the module could move to a server unchanged. Timings are persisted on the account doc so that decision can rest on real-device measurements.
+- **Auto-add is deliberately conservative**: ≥4 purchases, median interval ≤60 days, stddev/mean ≤0.6, elapsed ≥ median but ≤3× it, ≤5 app-added items on the list, never mid-trip, 30-day suppression after a user removes one. On a shared list, an item nobody asked for costs more than a late reminder. Tuning lives entirely in `DEFAULT_POLICY`.
+- **An automatic addition is an auto-*restore*.** Candidates come from the purchase log, so the item already exists as a removed doc; `autoAddItem` flips it back in place and touches nothing else. It aborts if the item is already active, so racing a manual add never relabels the user's own item.
 - **`purchaseCount` incremented on session close** for all items in `checkedItems`. Drives autocomplete ranking.
 - **Category order per-shop with global fallback.** Drawer reorder → `setShopCategoryOrder`. Global order → `setGlobalCategoryOrder`.
 - **Category groups are bulk shortcuts for shop setup, nothing more.** `addShop` attaches every category to the new shop; a group ("Grocery", "Furniture") is how the irrelevant ones come off in one action. Membership is many-to-many on `Category.groupIds`. Groups carry **no ordering**, appear nowhere in plan or shop mode, and no selector consults them. Making a group available/unavailable at a shop resolves its members and issues one `setShopCategoryOrder` per shop — where two groups share a category, **last action wins**; there is no resolution rule. Assignment is via a selection mode on `/categories` (Select → Select all → Add/Remove group), batched into one `arrayUnion`/`arrayRemove` write. Deleting a group detaches it from members; it never deletes categories.
@@ -334,7 +345,8 @@ All device-local (localStorage) unless noted:
 | Compact mode | Toggle | Off | No |
 | Keep screen awake | Toggle | On | No |
 | Left-handed mode | Toggle | Off | No |
-| AI auto-add | Toggle | Off | **Yes — account-level** |
+| Auto-add recurring items | Toggle | Off | **Yes — account-level**; requires the app to be installed |
+| AI auto-add | Toggle | Off | **Yes — account-level** (model-driven half, deferred) |
 
 ---
 
@@ -368,6 +380,7 @@ Built (test-first, behind the API service layer):
 - Sessions + shop mode: session API + store, auto-start on shop select, shop-mode list with grouped Est. and session totals, 2 s client-side undo window, undo-history sheet, close-session dialog, 30-min inactivity reminder dialog (close session or keep shopping)
 - Session history: `/history` route loads completed sessions via `fetchSessionHistory`, expansion panels show shop, completed-at, total, and per-item snapshots
 - PWA shell: `@angular/service-worker` with `ngsw-config.json`, `manifest.webmanifest`, default icon set under `frontend/public/icons/`, hosting headers configured for SW + manifest in `backend/firebase/firebase.json`
+- Auto-add of recurring items: pure cadence engine + selection policy in `frontend/src/app/core/auto-add/` (`recurrence.ts`, `selection.ts`), `AutoAddEffects` in `frontend/src/app/store/items/auto-add.effects.ts` running once per app open behind a transactional daily claim, clock indicator + reason dialog in plan and shop rows, `Automation` settings section gated on `PwaInstallService.isInstalled()`. Acceptance scenarios in `features/items/auto-add-recurring.feature` import the real policy functions, so the Cucumber run uses `tsconfig.cucumber.json` (CommonJS, transpile-only) via `TS_NODE_PROJECT` — the root config's `module: preserve` leaves ESM specifiers that Node cannot resolve extensionlessly.
 
 Backend status: All API services (Auth, Item, Category, Shop, Session, Account, Users) are wired to Firestore through the `core/api/` layer. Each entity exposes a real `EntityChangeBatch<T>` stream via `snapshotChanges` (see `change-stream.ts`). `StreamErrorService` surfaces unrecoverable stream failures globally. Every swallowed write failure logs its Firebase error code via `core/diagnostics/api-failure.ts` (grep the console for `[api]`). Firestore security rules in `backend/firebase/firestore.rules` enforce the `accounts/{accountId}/...` subcollection layout via an `isMember()` check.
 

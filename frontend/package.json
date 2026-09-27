@@ -9,7 +9,7 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
-    "test:acceptance": "cucumber-js --config cucumber.config.ts"
+    "test:acceptance": "TS_NODE_PROJECT=tsconfig.cucumber.json cucumber-js --config cucumber.config.ts"
   },
   "private": true,
   "packageManager": "npm@10.9.7",

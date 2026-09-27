@@ -47,3 +47,12 @@ export const selectStalePriceDays = createSelector(
   selectAiConfig,
   (cfg) => cfg?.stalePriceDays ?? 90,
 );
+
+/**
+ * Shared, account-level. Read from the top-level account field rather than from
+ * `aiConfig`: rule-driven auto-add works with no AI provider configured.
+ */
+export const selectAutoAddEnabled = createSelector(
+  selectAccount,
+  (a) => a?.autoAddEnabled === true,
+);

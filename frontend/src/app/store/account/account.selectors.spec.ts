@@ -21,6 +21,8 @@ const mockAccount = {
   id: 'a1' as AccountId,
   name: 'Test Account',
   aiConfig: null,
+  autoAddEnabled: false,
+  autoAddLastRunAt: null,
 };
 
 function project(state: AccountState) {

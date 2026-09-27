@@ -5,7 +5,7 @@ import { Router } from '@angular/router';
 import { provideMockActions } from '@ngrx/effects/testing';
 import { Observable, of, Subject } from 'rxjs';
 import { AccountEffects } from './account.effects';
-import { authActions, accountActions } from './account.actions';
+import { authActions, accountActions, accountApiActions } from './account.actions';
 import { AccountApiService } from '../../core/api/account-api.service';
 import type { Account } from '../../models/account.model';
 import type {
@@ -26,6 +26,8 @@ const mockAccount: Account = {
   id: 'a1' as AccountId,
   name: 'Test Account',
   aiConfig: null,
+  autoAddEnabled: false,
+  autoAddLastRunAt: null,
 };
 
 describe('AccountEffects', () => {
@@ -36,6 +38,7 @@ describe('AccountEffects', () => {
     getAccount: ReturnType<typeof vi.fn>;
     signInWithGoogle: ReturnType<typeof vi.fn>;
     signOut: ReturnType<typeof vi.fn>;
+    setAutoAddEnabled: ReturnType<typeof vi.fn>;
   };
   let router: { navigateByUrl: ReturnType<typeof vi.fn> };
 
@@ -46,6 +49,7 @@ describe('AccountEffects', () => {
       getAccount: vi.fn(),
       signInWithGoogle: vi.fn(),
       signOut: vi.fn(),
+      setAutoAddEnabled: vi.fn(),
     };
     router = { navigateByUrl: vi.fn() };
 
@@ -202,6 +206,44 @@ describe('AccountEffects', () => {
       actions$.next(accountActions.streamAuthRevoked());
 
       expect(router.navigateByUrl).toHaveBeenCalledWith('/sign-in');
+    });
+  });
+
+  describe('setAutoAddEnabled$', () => {
+    it('confirms the change once the write lands', async () => {
+      accountApi.setAutoAddEnabled.mockResolvedValue(undefined);
+      const dispatched: unknown[] = [];
+      effects.setAutoAddEnabled$.subscribe((a) => dispatched.push(a));
+
+      actions$.next(accountApiActions.setAutoAddEnabledRequested({ enabled: true }));
+      await Promise.resolve();
+
+      expect(accountApi.setAutoAddEnabled).toHaveBeenCalledWith(true);
+      expect(dispatched).toEqual([accountActions.autoAddEnabledChanged({ enabled: true })]);
+    });
+
+    /**
+     * Mandatory failure-path cover: the effect has to survive a rejection and
+     * surface it, so the optimistic reducer state gets reverted rather than
+     * leaving a setting displayed that was never stored.
+     */
+    it('reports failure and stays alive when the write is rejected', async () => {
+      accountApi.setAutoAddEnabled.mockRejectedValue(new Error('permission denied'));
+      const dispatched: unknown[] = [];
+      effects.setAutoAddEnabled$.subscribe((a) => dispatched.push(a));
+
+      actions$.next(accountApiActions.setAutoAddEnabledRequested({ enabled: true }));
+      await Promise.resolve();
+      await Promise.resolve();
+
+      expect(dispatched).toEqual([accountActions.autoAddEnableFailed({ enabled: true })]);
+
+      // Still processing actions after the failure.
+      accountApi.setAutoAddEnabled.mockResolvedValue(undefined);
+      actions$.next(accountApiActions.setAutoAddEnabledRequested({ enabled: false }));
+      await Promise.resolve();
+
+      expect(dispatched).toHaveLength(2);
     });
   });
 });

@@ -13,7 +13,8 @@ import { ThemeService, Language, Currency } from '../../core/theme/theme.service
 import { PwaInstallService } from '../../core/pwa/pwa-install.service';
 import { selectCurrentUser } from '../../store/account/account.selectors';
 import { selectIsAuthChecking } from '../../store/account/account.selectors';
-import { authActions } from '../../store/account/account.actions';
+import { selectAutoAddEnabled } from '../../store/account/account.selectors';
+import { accountApiActions, authActions } from '../../store/account/account.actions';
 
 @Component({
   selector: 'app-settings',
@@ -48,6 +49,10 @@ export class SettingsComponent {
     initialValue: true,
   });
   readonly user = toSignal(this.store.select(selectCurrentUser));
+  /** Shared across the account — either user can change it for both. */
+  readonly autoAddEnabled = toSignal(this.store.select(selectAutoAddEnabled), {
+    initialValue: false,
+  });
 
   readonly languages: Language[] = ['EN', 'NO', 'SV', 'DE', 'FR', 'DA'];
   readonly languageLabels: Record<Language, string> = {
@@ -86,6 +91,16 @@ export class SettingsComponent {
 
   onKeepScreenAwakeToggle(checked: boolean): void {
     this.themeService.update({ keepScreenAwake: checked });
+  }
+
+  /**
+   * Account-level, not device-local like the rest of this screen — the whole
+   * point is that both users see the same additions on the shared list.
+   */
+  onAutoAddToggle(checked: boolean): void {
+    this.store.dispatch(
+      accountApiActions.setAutoAddEnabledRequested({ enabled: checked }),
+    );
   }
 
   onLanguageChange(value: string): void {

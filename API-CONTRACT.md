@@ -161,8 +161,12 @@ Item {
   secondaryCategoryIds: CategoryId[]
   removed:              boolean
   removedAt:            number | null    // Unix ms; null when item is active
-  addedBy:              'user' | 'ai'
-  aiMotivation:         string | null    // populated when addedBy is 'ai'
+  addedBy:              'user' | 'auto' | 'ai'   // 'auto' = rule-driven, 'ai' = model-driven
+  autoAddReason:        AutoAddReason | null      // structured, translatable; set when the app adds it
+  autoAddedAt:          number | null    // Unix ms; anchors the re-add cooldown
+  autoAddDeclinedAt:    number | null    // Unix ms; set by a removal, never by a check
+  autoAddMotivation:    string | null    // model-authored prose, single language, rendered verbatim
+  autoAddMotivationLang: string | null   // language autoAddMotivation was written in
   price:                number | null    // global price — lowest raw price across all shopPrices entries
   priceQuantity:        number | null    // quantity for the global price
   priceUnit:            string | null    // unit for the global price
@@ -503,6 +507,48 @@ Output:  void
 Errors:  AiUnavailableError
 ```
 
+#### setAutoAddEnabled
+```
+Intent:  Enable or disable rule-driven auto-add of recurring items.
+         Shared — the change affects everyone on the account immediately.
+         Distinct from toggleAiAutoAdd and deliberately not gated on AiConfig:
+         this half of auto-add is a median over the account's own purchase log,
+         so it works with no AI provider configured.
+         The account document is not streamed, so the caller applies the change
+         optimistically and reverts if this write fails.
+Input:   enabled: boolean
+Output:  void
+Errors:  none
+```
+
+#### claimAutoAddRun
+```
+Intent:  Claim today's auto-add evaluation for the account, returning whether the
+         caller won it. A transaction rather than a read-then-write because both
+         users' clients can boot simultaneously: first-write-wins means the loser
+         skips having spent one read rather than the couple of hundred a full
+         evaluation costs.
+         The claim is taken BEFORE the work, so a client closed mid-run consumes
+         the day — a skipped day costs nothing, whereas claiming on completion
+         would let two clients run the whole evaluation concurrently.
+Input:   minGapHours: number   (default 20 — under a full day, so a drifting run
+                                time cannot lock itself out)
+Output:  boolean               (true = proceed)
+Errors:  none — returns false on any failure. A transaction needs a live server
+         round-trip and so rejects when offline, and "skip" is the safe direction:
+         the worst case is auto-add waiting for the next app open.
+```
+
+#### recordAutoAddRunTimings
+```
+Intent:  Record how long the last evaluation took, so the decision to keep this
+         work on the client rests on measurements from real devices rather than
+         estimates. Write-only diagnostics; nothing reads them back.
+Input:   timings: { totalMs: number; computeMs: number }
+Output:  void
+Errors:  none (best-effort write)
+```
+
 ---
 
 ### 5.3 Users
@@ -614,7 +660,31 @@ Intent:  Remove an item from the active list. This is a plan-mode soft delete.
          Sets removed = true on the item. No session log entry is created.
          The item is not hard deleted and remains available for autocomplete.
          The updated Item arrives via itemChanges$.
-Input:   id: ItemId
+Input:   id:   ItemId
+         opts: { declineAutoAdd?: boolean }
+                 // When set, also stamps autoAddDeclinedAt — the caller telling
+                 // the app that removing this item was a refusal of an automatic
+                 // addition, suppressing re-addition for a window. Folded into the
+                 // same write so the two can never diverge. The caller decides
+                 // because only it knows the item's origin; checkItem must never
+                 // set it, since buying the item is acceptance.
+Output:  void
+Errors:  NotFoundError
+```
+
+#### autoAddItem
+```
+Intent:  Put a recurring item back on the list on the app's own initiative.
+         Never creates a document: every candidate comes from the purchase log, so
+         its item already exists with removed = true. Restoring in place preserves
+         the category, quantity, prices and purchaseCount the household has already
+         taught it. Sets removed = false, addedBy = 'auto', autoAddReason and
+         autoAddedAt, and nothing else.
+         Atomic on the removed flag: if the evaluation raced a user adding the same
+         item by hand, their active item is left exactly as it is rather than
+         relabelled as auto-added.
+Input:   id:     ItemId
+         reason: AutoAddReason
 Output:  void
 Errors:  NotFoundError
 ```
@@ -956,6 +1026,19 @@ AutocompleteItem {
 Note: Only the fields needed for autocomplete pre-fill are included.
 The full Item entity is not returned here.
 
+#### fetchAllItems
+```
+Intent:  Fetch every item, removed ones included.
+         Auto-add needs this: its candidates are by definition items currently off
+         the list, so the store — which holds the active list plus whatever was
+         removed this session — cannot say whether a candidate was declined last
+         week or added yesterday.
+         Read once per evaluation, at most once a day per account.
+Input:   none
+Output:  Item[]
+Errors:  none
+```
+
 ---
 
 ### 5.10 AI Operations
@@ -1053,6 +1136,14 @@ The following concerns are intentionally outside this contract:
 - **Session auto-start on shop selection** — orchestrated by an NgRx effect that calls
   `startSession` when the user selects a shop in shop mode. The contract provides
   `startSession`; the triggering logic is a store concern.
+- **When auto-add is evaluated** — an NgRx effect runs the evaluation once per app
+  open, after both items and sessions have loaded, and composes the operations this
+  contract provides: `claimAutoAddRun`, then `fetchSessionHistory` +
+  `fetchAllItems`, then `autoAddItem` per selection. The cadence maths and the
+  gates live in pure functions under `core/auto-add/` — deliberately free of
+  framework and SDK imports, so the same code the app runs is the code the
+  acceptance tests exercise, and so it could be lifted to a server runtime
+  unchanged if measurements ever justified it.
 - **Optimistic updates** — the store may apply speculative state before a write
   operation resolves. Rollback on error is a store concern. The contract provides
   the typed error values needed to trigger rollback.

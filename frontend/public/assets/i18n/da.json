@@ -322,7 +322,11 @@
     "installIosHint": "For at installere, tryk på del-knappen og vælg \"Føj til hjemmeskærm\".",
     "account": "Konto",
     "signedInAs": "Logget ind som",
-    "signOut": "Log ud"
+    "signOut": "Log ud",
+    "automation": "Automatisering",
+    "autoAddRecurring": "Tilføj gentagne varer automatisk",
+    "autoAddRecurringHint": "Deles med alle på kontoen. Varer du køber regelmæssigt kommer tilbage på listen, når det er tid.",
+    "autoAddRequiresInstall": "Installer appen for at bruge dette – tilføjelser kontrolleres, når du åbner den."
   },
   "shopModeChangeDialog": {
     "title": "Skift butik",
@@ -349,5 +353,11 @@
     "loadingAccount": "Indlæser din konto",
     "loadingList": "Indlæser din liste",
     "ready": "Klar"
+  },
+  "autoAdd": {
+    "title": "Tilføjet automatisk",
+    "periodicity": "Tilføjet automatisk – du køber normalt dette cirka hver {{days}}. dag.",
+    "openLabel": "Hvorfor {{name}} blev tilføjet automatisk",
+    "close": "Luk"
   }
 }

@@ -23,6 +23,10 @@ import {
   PriceProductDialogComponent,
   PriceProductDialogData,
 } from '../plan/price-product-dialog.component';
+import {
+  AutoAddReasonDialogComponent,
+  AutoAddReasonDialogData,
+} from '../plan/auto-add-reason-dialog.component';
 import type { Item } from '../../models/item.model';
 import type { ItemId, ShopId } from '../../models/ids.model';
 
@@ -123,6 +127,20 @@ export class ShopComponent {
 
   canInspectPrice(item: Item): boolean {
     return !!(item.priceProductName || item.priceProductUrl || item.priceSearchUrl);
+  }
+
+  openAutoAddReasonDialog(item: Item): void {
+    if (!item.autoAddReason) return;
+    this.dialog.open<AutoAddReasonDialogComponent, AutoAddReasonDialogData>(
+      AutoAddReasonDialogComponent,
+      {
+        data: {
+          itemName: item.name,
+          reason: item.autoAddReason,
+          motivation: item.autoAddMotivation,
+        },
+      },
+    );
   }
 
   openPriceDialog(item: Item): void {

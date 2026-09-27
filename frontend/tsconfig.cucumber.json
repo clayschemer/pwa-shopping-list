@@ -1,0 +1,33 @@
+/* TypeScript config for the Cucumber acceptance run only.
+ *
+ * The root config uses "module": "preserve", which leaves ESM import
+ * specifiers untouched — so ts-node compiles the step definitions but Node then
+ * resolves their imports under ESM rules, where extensionless paths fail. That
+ * only bites when a step definition imports application source, which the
+ * auto-add steps do deliberately: they drive the real selection policy rather
+ * than a stand-in, so a passing scenario means the shipped rules behave as
+ * specified.
+ *
+ * Compiling to CommonJS for this run restores Node-style resolution. Nothing
+ * else uses this file — the app build and Vitest keep the root config.
+ */
+{
+  "extends": "./tsconfig.json",
+  /* Transpile without type-checking, which is what this run did before this
+   * file existed (the root config's `files: []` kept the step definitions out of
+   * the program entirely) and what Vitest does for the unit specs. Naming them
+   * here would otherwise start type-checking ten step files that were never
+   * checked before, which is a separate piece of work. */
+  "ts-node": {
+    "transpileOnly": true
+  },
+  "compilerOptions": {
+    "module": "commonjs",
+    "moduleResolution": "node",
+    "esModuleInterop": true,
+    "verbatimModuleSyntax": false,
+    "isolatedModules": false,
+    "types": ["node"]
+  },
+  "include": ["tests/acceptance/**/*.ts", "src/**/*.ts"]
+}

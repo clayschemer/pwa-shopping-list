@@ -30,6 +30,7 @@ import { shopsReducer } from './store/shops/shops.reducer';
 import { ShopsEffects } from './store/shops/shops.effects';
 import { itemsReducer } from './store/items/items.reducer';
 import { ItemsEffects } from './store/items/items.effects';
+import { AutoAddEffects } from './store/items/auto-add.effects';
 import { sessionsReducer } from './store/sessions/sessions.reducer';
 import { SessionsEffects } from './store/sessions/sessions.effects';
 import { usersReducer } from './store/users/users.reducer';
@@ -108,6 +109,7 @@ export const appConfig: ApplicationConfig = {
       CategoryGroupsEffects,
       ShopsEffects,
       ItemsEffects,
+      AutoAddEffects,
       SessionsEffects,
       UsersEffects,
       ReconnectEffects,

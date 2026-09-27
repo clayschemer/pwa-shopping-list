@@ -221,4 +221,289 @@ describe('ItemApiService', () => {
       expect(updateDocMock).not.toHaveBeenCalled();
     });
   });
+
+  describe('auto-add fields on read', () => {
+    it('reads a stored periodicity reason', async () => {
+      getDocsMock.mockResolvedValue({
+        empty: false,
+        docs: [
+          itemDocSnapshot({
+            addedBy: 'auto',
+            autoAddReason: {
+              kind: 'periodicity',
+              medianIntervalDays: 7,
+              daysSinceLastPurchase: 9,
+              purchaseCount: 5,
+            },
+            autoAddedAt: 1_700_000_000_000,
+          }),
+        ],
+      });
+
+      const [item] = await service.fetchActiveList();
+
+      expect(item.addedBy).toBe('auto');
+      expect(item.autoAddReason).toEqual({
+        kind: 'periodicity',
+        medianIntervalDays: 7,
+        daysSinceLastPurchase: 9,
+        purchaseCount: 5,
+      });
+      expect(item.autoAddedAt).toBe(1_700_000_000_000);
+    });
+
+    it('defaults the auto-add fields on documents written before the feature', async () => {
+      getDocsMock.mockResolvedValue({ empty: false, docs: [itemDocSnapshot()] });
+
+      const [item] = await service.fetchActiveList();
+
+      expect(item.addedBy).toBe('user');
+      expect(item.autoAddReason).toBeNull();
+      expect(item.autoAddedAt).toBeNull();
+      expect(item.autoAddDeclinedAt).toBeNull();
+      expect(item.autoAddMotivation).toBeNull();
+    });
+
+    /**
+     * The indicator is tappable whenever a reason is present, so a reason the
+     * renderer cannot switch on would open an empty dialog. Unknown kinds and
+     * malformed payloads have to read as "no reason" rather than as data.
+     */
+    it('discards a reason whose kind it cannot render', async () => {
+      getDocsMock.mockResolvedValue({
+        empty: false,
+        docs: [
+          itemDocSnapshot({
+            addedBy: 'ai',
+            autoAddReason: { kind: 'recipe', recipeName: 'lasagne' },
+          }),
+        ],
+      });
+
+      const [item] = await service.fetchActiveList();
+
+      expect(item.autoAddReason).toBeNull();
+    });
+
+    it('discards a periodicity reason with no usable interval', async () => {
+      getDocsMock.mockResolvedValue({
+        empty: false,
+        docs: [
+          itemDocSnapshot({
+            autoAddReason: { kind: 'periodicity', medianIntervalDays: 0 },
+          }),
+        ],
+      });
+
+      const [item] = await service.fetchActiveList();
+
+      expect(item.autoAddReason).toBeNull();
+    });
+  });
+
+  describe('removeItem', () => {
+    it('marks the item removed without touching the decline stamp by default', async () => {
+      await service.removeItem(ITEM_ID);
+
+      expect(updateDocMock).toHaveBeenCalledOnce();
+      const [, payload] = updateDocMock.mock.calls[0];
+      expect(payload).toEqual({ removed: true, removedAt: 'SERVER_TIMESTAMP' });
+    });
+
+    /**
+     * A removal of an auto-added item is the user saying "no". Recorded in the
+     * same write as the removal so the two can never diverge.
+     */
+    it('records a decline in the same write when asked to', async () => {
+      await service.removeItem(ITEM_ID, { declineAutoAdd: true });
+
+      expect(updateDocMock).toHaveBeenCalledOnce();
+      const [, payload] = updateDocMock.mock.calls[0];
+      expect(payload).toEqual({
+        removed: true,
+        removedAt: 'SERVER_TIMESTAMP',
+        autoAddDeclinedAt: 'SERVER_TIMESTAMP',
+      });
+    });
+
+    it('does not record a decline when the flag is false', async () => {
+      await service.removeItem(ITEM_ID, { declineAutoAdd: false });
+
+      const [, payload] = updateDocMock.mock.calls[0];
+      expect(payload).not.toHaveProperty('autoAddDeclinedAt');
+    });
+  });
+
+  describe('autoAddItem', () => {
+    const REASON = {
+      kind: 'periodicity' as const,
+      medianIntervalDays: 7,
+      daysSinceLastPurchase: 9,
+      purchaseCount: 5,
+    };
+
+    function stubTransaction(snapshot: {
+      exists: () => boolean;
+      data: () => Record<string, unknown> | undefined;
+    }) {
+      const tx = {
+        get: vi.fn().mockResolvedValue(snapshot),
+        update: vi.fn(),
+        set: vi.fn(),
+      };
+      runTransactionMock.mockImplementation(
+        async (_db: unknown, cb: (t: typeof tx) => Promise<unknown>) => cb(tx),
+      );
+      return tx;
+    }
+
+    it('restores the removed item and marks it auto-added', async () => {
+      const tx = stubTransaction({
+        exists: () => true,
+        data: () => ({ name: 'Milk', removed: true, purchaseCount: 7 }),
+      });
+
+      const result = await service.autoAddItem(ITEM_ID, REASON);
+
+      expect(result).toBeUndefined();
+      expect(tx.update).toHaveBeenCalledOnce();
+      const [, payload] = tx.update.mock.calls[0];
+      expect(payload).toEqual({
+        removed: false,
+        removedAt: null,
+        addedBy: 'auto',
+        autoAddReason: REASON,
+        autoAddedAt: 'SERVER_TIMESTAMP',
+      });
+    });
+
+    /**
+     * Nothing the household has taught the item may be disturbed — the whole
+     * point of restoring in place rather than creating a document.
+     */
+    it('leaves name, category, quantity, prices and purchase count alone', async () => {
+      const tx = stubTransaction({
+        exists: () => true,
+        data: () => ({ removed: true }),
+      });
+
+      await service.autoAddItem(ITEM_ID, REASON);
+
+      const [, payload] = tx.update.mock.calls[0];
+      for (const field of [
+        'name',
+        'primaryCategoryId',
+        'secondaryCategoryIds',
+        'quantity',
+        'unit',
+        'price',
+        'purchaseCount',
+        'priceFeedback',
+      ]) {
+        expect(payload).not.toHaveProperty(field);
+      }
+    });
+
+    /**
+     * The evaluation races a user adding the same item by hand. Their item is
+     * already on the list and is theirs — relabelling it as auto-added would
+     * put an indicator on an item they added themselves.
+     */
+    it('leaves an already-active item untouched', async () => {
+      const tx = stubTransaction({
+        exists: () => true,
+        data: () => ({ name: 'Milk', removed: false }),
+      });
+
+      const result = await service.autoAddItem(ITEM_ID, REASON);
+
+      expect(result).toBeUndefined();
+      expect(tx.update).not.toHaveBeenCalled();
+    });
+
+    it('reports NOT_FOUND when the item document is gone', async () => {
+      stubTransaction({ exists: () => false, data: () => undefined });
+
+      const result = await service.autoAddItem(ITEM_ID, REASON);
+
+      expect(result).toEqual({
+        type: 'NOT_FOUND',
+        entityKind: 'item',
+        id: ITEM_ID,
+      });
+    });
+  });
+
+  describe('addItem restoring a removed item', () => {
+    beforeEach(() => {
+      // First query: no active name conflict. Second: a removed item matches.
+      getDocsMock
+        .mockResolvedValueOnce({ empty: true, docs: [] })
+        .mockResolvedValueOnce({
+          empty: false,
+          docs: [
+            {
+              ...itemDocSnapshot({
+                removed: true,
+                addedBy: 'auto',
+                autoAddReason: {
+                  kind: 'periodicity',
+                  medianIntervalDays: 7,
+                  daysSinceLastPurchase: 9,
+                  purchaseCount: 5,
+                },
+                autoAddedAt: 1_700_000_000_000,
+                autoAddDeclinedAt: 1_700_000_000_000,
+              }),
+              ref: { path: `accounts/${ACCOUNT_ID}/items/${ITEM_ID}` },
+            },
+          ],
+        });
+    });
+
+    /**
+     * `addedBy` is otherwise only written at creation, so without this reset an
+     * item the app once added keeps its indicator for good — even after the
+     * user adds it back by hand and owns it outright.
+     */
+    it('returns the item to user ownership', async () => {
+      const result = await service.addItem({
+        name: 'Milk',
+        description: null,
+        quantity: 1,
+        unit: 'l',
+        primaryCategoryId: null,
+        secondaryCategoryIds: [],
+        sizePerPieceQuantity: null,
+        sizePerPieceUnit: null,
+      });
+
+      const [, payload] = updateDocMock.mock.calls[0];
+      expect(payload).toMatchObject({
+        removed: false,
+        addedBy: 'user',
+        autoAddReason: null,
+        autoAddedAt: null,
+        autoAddMotivation: null,
+      });
+      expect(result).toMatchObject({ addedBy: 'user', autoAddReason: null });
+    });
+
+    /** Asking for the item back withdraws the earlier refusal. */
+    it('clears the decline stamp so the item can be auto-added again later', async () => {
+      await service.addItem({
+        name: 'Milk',
+        description: null,
+        quantity: null,
+        unit: null,
+        primaryCategoryId: null,
+        secondaryCategoryIds: [],
+        sizePerPieceQuantity: null,
+        sizePerPieceUnit: null,
+      });
+
+      const [, payload] = updateDocMock.mock.calls[0];
+      expect(payload).toMatchObject({ autoAddDeclinedAt: null });
+    });
+  });
 });

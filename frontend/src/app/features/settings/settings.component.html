@@ -207,6 +207,32 @@
     }
   </section>
 
+  <!-- Automation -->
+  <section class="app-settings__section">
+    <h2 class="app-settings__section-title">{{ 'settings.automation' | transloco }}</h2>
+
+    <div class="app-settings__row">
+      <div class="app-settings__row-item">
+        <div class="app-settings__row-content">
+          <mat-slide-toggle
+            [checked]="autoAddEnabled()"
+            [disabled]="!pwaInstall.isInstalled()"
+            (change)="onAutoAddToggle($event.checked)"
+            labelPosition="before"
+            ><mat-icon class="app-settings__row-icon">schedule</mat-icon>{{ 'settings.autoAddRecurring' | transloco }}</mat-slide-toggle
+          >
+          <p class="app-settings__hint">
+            @if (pwaInstall.isInstalled()) {
+              {{ 'settings.autoAddRecurringHint' | transloco }}
+            } @else {
+              {{ 'settings.autoAddRequiresInstall' | transloco }}
+            }
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
   <!-- Account -->
   <section class="app-settings__section">
     <h2 class="app-settings__section-title">{{ 'settings.account' | transloco }}</h2>
