@@ -92,25 +92,46 @@ costed before any migration is considered.
 
 ---
 
-## 4. Estimated current spend
+## 4. Measured spend
 
-Rough, unmeasured, for a two-user household after a year:
+Measured 2026-10-04 with `count()` aggregations against the live account, after a
+week of the quota being exhausted *every single day* (the price-pipeline log shows
+~80 `RESOURCE_EXHAUSTED` cycles per day — it runs dry around 17:00 PT and the app
+dies for the evening):
 
-- ~400 total items, ~40 active, ~150 completed sessions.
-- Cold app open: ~400 (items listener) + ~40 (active list) + small collections
-  ≈ **450 reads**.
-- 10 opens/day across two users ≈ **4,500 reads**.
-- Auto-add, once/day: 150 sessions + 400 items ≈ **550 reads**.
-- A 30-item shopping trip, post-fix: ~60 reads plus listener echoes.
+| | count |
+| --- | --- |
+| Total items | **627** |
+| Removed items | **604** |
+| Active items | **23** |
+| Sessions | **192** |
 
-Total on the order of **5,000–6,000 reads/day**, against 50,000. That is
-comfortable — which is consistent with the app working fine most days, and with
-both outages being caused by something anomalous (a runaway container; a
-quadratic-ish per-check cost) rather than by baseline usage.
+The ratio is the whole story: **604 removed items against 23 active**. Every read
+site that scales with total history pays 27× what the list itself costs.
 
-**Implication: the free tier is probably not the binding constraint yet.** It is
-the *lack of headroom warning* that hurts — the app goes from fine to dead with
-nothing in between.
+Against those counts:
+
+| Site | Reads | Notes |
+| --- | --- | --- |
+| `checkItem`, **pre-fix** | **796 per check** | 604 removed + 192 sessions |
+| A 30-item trip, pre-fix | **~24,000** | half the daily quota in one shop |
+| `checkItem`, post-fix | **2** | a ~400× reduction |
+| Cold boot (`itemChanges$`, unfiltered) | **627** | ~6,300/day at 10 opens |
+| Auto-add, once/day | **~820** | 192 sessions + 627 items |
+| Price pipeline steady state | **~290/day** | one empty query per 5 min |
+
+**This was never a tier-capacity problem. It was one quadratic call site.** A
+single shopping trip spent ~24,000 reads re-reading data the transaction already
+held; two trips, or both users checking, exhausted 50,000. Everything else in the
+app combined is under 8,000/day.
+
+My earlier estimate in this section guessed ~400 items and ~5–6k reads/day total,
+and concluded the free tier was comfortable. The item count was 1.5× off and the
+conclusion was wrong for the one reason that mattered: it assumed `checkItem` had
+already been fixed in production. It had not been deployed.
+
+**Post-deploy projection: ~7,500 reads/day against 50,000.** Comfortable, and the
+largest remaining item becomes the unfiltered items listener at ~6,300/day — §3(a).
 
 ---
 
@@ -164,17 +185,24 @@ ops burden is the blocker.
 
 ## 6. Recommendation
 
-1. **Now:** (A) — instrument, then fix the unfiltered `items` listener and cap
-   the history-scaling reads. Cheap, useful whatever else happens, and it is what
-   turns this document's guesses into numbers.
-2. **Then, once a baseline exists:** (B), on the strength of a measurement rather
-   than a fear. Set a Firebase budget alert at the same time. The failure mode
-   changes from "app dies for the afternoon" to "an email arrives".
+0. **Deploy the `checkItem` fix.** Done in code, not yet in production as of
+   2026-10-04. This is ~95% of the problem; nothing else on this list comes close.
+1. **Then:** (A) — the unfiltered items listener at ~6,300 reads/day is now the
+   largest remaining cost, and archiving old removed items caps three sites at
+   once. Still cheap, still useful whatever else happens.
+2. **(B) is not currently justified.** Post-deploy projection is ~7,500/day
+   against 50,000 — the tier was never the constraint. Revisit only if measured
+   spend actually approaches the ceiling. A budget alert is still worth having if
+   Blaze is ever enabled, since the failure mode becomes a bill rather than an
+   outage.
 3. **Defer (C) until a trigger fires**, not on a date. Triggers: opening to users
    beyond the household; Blaze costs exceeding a threshold worth naming; or a
    Firestore limitation the app actually hits.
 
-The thing not to do is migrate to escape a quota we have never measured.
+The thing not to do is migrate to escape a quota that one quadratic call site was
+spending on our behalf. **Measure the call sites before changing the plan** — that
+lesson cost a week of evenings with an unusable list, and this document spent its
+first draft recommending a hosting change for a bug.
 
 ---
 
@@ -182,7 +210,7 @@ The thing not to do is migrate to escape a quota we have never measured.
 
 | # | Question | Needed before |
 | - | -------- | ------------- |
-| 1 | Actual reads/day, and the split across boot / auto-add / shopping | any hosting decision |
+| 1 | ~~Actual reads/day, and the split across boot / auto-add / shopping~~ — **answered 2026-10-04, see §4** | — |
 | 2 | Can the `items` listener be filtered without breaking auto-add restores and the shop-mode undo window? | §3(a) |
 | 3 | Archive threshold for old removed items — how much history does autocomplete genuinely need? | §3(b) |
 | 4 | If Blaze: what monthly figure triggers revisiting (C)? | option B |
