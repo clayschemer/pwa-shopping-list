@@ -1,0 +1,23 @@
+<div class="undo-history-sheet">
+  <h2 class="undo-history-sheet__title">{{ 'undoHistory.title' | transloco }}</h2>
+  @if (entries().length === 0) {
+    <p class="undo-history-sheet__empty">{{ 'undoHistory.empty' | transloco }}</p>
+  } @else {
+    <ul class="undo-history-sheet__list" role="list">
+      @for (entry of entries(); track entry.itemId) {
+        <li class="undo-history-sheet__entry">
+          <button
+            type="button"
+            class="undo-history-sheet__uncheck"
+            (click)="uncheck(entry.itemId)"
+            [attr.aria-label]="'undoHistory.uncheck' | transloco: { name: entry.itemName }"
+          >
+            <span class="undo-history-sheet__initials">{{ entry.userInitials }}</span>
+            <span class="undo-history-sheet__name">{{ entry.itemName }}</span>
+            <span class="undo-history-sheet__price">{{ entry.price | money }}</span>
+          </button>
+        </li>
+      }
+    </ul>
+  }
+</div>

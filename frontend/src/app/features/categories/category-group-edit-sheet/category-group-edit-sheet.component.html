@@ -1,0 +1,83 @@
+<div class="app-category-group-edit-sheet">
+  <h3 class="app-category-group-edit-sheet__title">
+    @if (mode === 'create') {
+      {{ 'categoryGroupEditSheet.createTitle' | transloco }}
+    } @else {
+      {{ 'categoryGroupEditSheet.editTitle' | transloco }}
+    }
+  </h3>
+
+  <mat-form-field class="app-category-group-edit-sheet__field">
+    <mat-label>{{ 'categoryGroupEditSheet.name' | transloco }}</mat-label>
+    <input
+      matInput
+      [ngModel]="name()"
+      (ngModelChange)="name.set($event)"
+      cdkFocusInitial
+    />
+    @if (hasConflict()) {
+      <mat-error>{{ 'categoryGroupEditSheet.nameConflict' | transloco }}</mat-error>
+    }
+  </mat-form-field>
+
+  @if (mode === 'edit') {
+    <fieldset class="app-category-group-edit-sheet__shops">
+      <legend class="app-category-group-edit-sheet__shops-legend">
+        {{ 'categoryGroupEditSheet.availableInShops' | transloco }}
+      </legend>
+      @if (memberCount === 0) {
+        <p class="app-category-group-edit-sheet__no-members">
+          {{ 'categoryGroupEditSheet.noMembers' | transloco }}
+        </p>
+      } @else if (shopRows().length === 0) {
+        <p class="app-category-group-edit-sheet__shops-empty">
+          {{ 'categoryGroupEditSheet.noShops' | transloco }}
+        </p>
+      } @else {
+        <p class="app-category-group-edit-sheet__member-count">
+          {{ 'categoryGroupEditSheet.memberCount' | transloco: { count: memberCount } }}
+        </p>
+        <ul class="app-category-group-edit-sheet__shops-list" role="list">
+          @for (row of shopRows(); track row.id) {
+            <li class="app-category-group-edit-sheet__shops-row">
+              <mat-checkbox
+                [checked]="row.state === 'all'"
+                [indeterminate]="row.state === 'some'"
+                (change)="toggleShop(row.id)"
+              >
+                {{ row.name }}
+              </mat-checkbox>
+            </li>
+          }
+        </ul>
+      }
+    </fieldset>
+  }
+
+  <div class="app-category-group-edit-sheet__actions">
+    <button mat-button (click)="onCancel()">
+      {{ 'categoryGroupEditSheet.cancel' | transloco }}
+    </button>
+    <button
+      mat-flat-button
+      color="primary"
+      [disabled]="!isValid()"
+      (click)="onSave()"
+    >
+      {{ 'categoryGroupEditSheet.save' | transloco }}
+    </button>
+  </div>
+
+  @if (mode === 'edit') {
+    <div class="app-category-group-edit-sheet__danger">
+      <button
+        mat-button
+        color="warn"
+        class="app-category-group-edit-sheet__delete"
+        (click)="onDelete()"
+      >
+        {{ 'categoryGroupEditSheet.delete' | transloco }}
+      </button>
+    </div>
+  }
+</div>

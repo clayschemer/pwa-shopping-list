@@ -1,0 +1,26 @@
+<h2 mat-dialog-title>{{ 'autoAdd.title' | transloco }}</h2>
+<mat-dialog-content>
+  <div class="app-auto-add-dialog">
+    <p class="app-auto-add-dialog__item">{{ data.itemName }}</p>
+
+    @if (data.motivation) {
+      <p class="app-auto-add-dialog__reason">{{ data.motivation }}</p>
+    } @else {
+      @switch (data.reason.kind) {
+        @case ('periodicity') {
+          <p class="app-auto-add-dialog__reason">
+            {{
+              'autoAdd.periodicity'
+                | transloco: { days: data.reason.medianIntervalDays }
+            }}
+          </p>
+        }
+      }
+    }
+  </div>
+</mat-dialog-content>
+<mat-dialog-actions align="end">
+  <button mat-flat-button color="primary" (click)="onClose()">
+    {{ 'autoAdd.close' | transloco }}
+  </button>
+</mat-dialog-actions>

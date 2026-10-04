@@ -1,0 +1,53 @@
+<div class="app-nav-drawer">
+  <section class="app-nav-drawer__shop-section">
+    <span class="app-nav-drawer__shop-label">{{ 'navDrawer.shopLayout' | transloco }}</span>
+    <button
+      type="button"
+      class="app-nav-drawer__shop-trigger"
+      [attr.aria-label]="'shop.changeShop' | transloco"
+      (click)="openShopPicker()"
+    >
+      <mat-icon aria-hidden="true">storefront</mat-icon>
+      <span class="app-nav-drawer__shop-trigger-label">
+        {{ selectedShopName() ?? ('nav.global' | transloco) }}
+      </span>
+      <mat-icon aria-hidden="true">chevron_right</mat-icon>
+    </button>
+
+    <mat-divider></mat-divider>
+
+    <a matButton
+      class="app-nav-drawer__manage-shops app-nav-drawer__categories"
+      (click)="onViewCategories()"
+    >
+      <mat-icon>category</mat-icon>
+      {{ 'navDrawer.categories' | transloco }}
+    </a>
+
+    <a matButton
+      class="app-nav-drawer__manage-shops app-nav-drawer__stores"
+      (click)="onManageShops()"
+    >
+      <mat-icon>store</mat-icon>
+      {{ 'navDrawer.stores' | transloco }}
+    </a>
+
+    <a matButton
+      class="app-nav-drawer__manage-shops"
+      (click)="onViewHistory()"
+    >
+      <mat-icon>history</mat-icon>
+      {{ 'navDrawer.viewHistory' | transloco }}
+    </a>
+
+    <mat-divider></mat-divider>
+
+    <a matButton
+      class="app-nav-drawer__manage-shops app-nav-drawer__settings"
+      (click)="onViewSettings()"
+    >
+      <mat-icon>settings</mat-icon>
+      {{ 'navDrawer.settings' | transloco }}
+    </a>
+  </section>
+</div>

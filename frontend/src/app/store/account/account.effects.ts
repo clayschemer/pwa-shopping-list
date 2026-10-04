@@ -1,0 +1,182 @@
+import { inject, Injectable } from '@angular/core';
+import { Router } from '@angular/router';
+import { Actions, createEffect, ofType } from '@ngrx/effects';
+import { catchError, defer, from, map, mergeMap, of, switchMap, tap } from 'rxjs';
+import type { Action } from '@ngrx/store';
+import { authActions, accountActions, accountApiActions } from './account.actions';
+import { uiActions } from '../ui/ui.actions';
+import { AccountApiService } from '../../core/api/account-api.service';
+import { onApiFailure } from '../../core/diagnostics/api-failure';
+import { StreamErrorService } from '../../core/api/stream-error.service';
+import type { Account } from '../../models/account.model';
+import type { ShopId } from '../../models/ids.model';
+import type {
+  AccessDeniedError,
+  AuthError,
+  PendingVerificationError,
+  StreamError,
+} from '../../models/errors.model';
+
+@Injectable()
+export class AccountEffects {
+  private readonly actions$ = inject(Actions);
+  private readonly accountApi = inject(AccountApiService);
+  private readonly router = inject(Router);
+  private readonly streamError = inject(StreamErrorService);
+
+  /**
+   * A dead listener stops live updates for the rest of the session, so it is the
+   * one failure that must never be silent — and it was. `streamFailed` writes the
+   * message to `account.streamError`, which no selector and no template reads, so
+   * an exhausted read quota looked exactly like a list that had gone quiet. The
+   * classified cause now goes out alongside the state change for the UI to report.
+   */
+  readonly watchStreamErrors$ = createEffect(() =>
+    this.streamError.stream$.pipe(
+      mergeMap((err) =>
+        of(
+          this.streamStateAction(err),
+          uiActions.apiFailureObserved({ operation: 'stream.listen', kind: err.kind }),
+        ),
+      ),
+    ),
+  );
+
+  private streamStateAction(err: StreamError): Action {
+    if (err.type === 'AUTH_REVOKED') {
+      return accountActions.streamAuthRevoked();
+    }
+    if (err.type === 'ACCOUNT_NOT_FOUND') {
+      return accountActions.streamAccountNotFound();
+    }
+    return accountActions.streamFailed({ message: err.message });
+  }
+
+  /** Subscribe to Firebase auth state on app init. */
+  readonly watchAuthState$ = createEffect(() =>
+    defer(() => this.accountApi.getAuthState()).pipe(
+      map((user) =>
+        user
+          ? authActions.authStateResolved({ user })
+          : authActions.authStateEmpty(),
+      ),
+    ),
+  );
+
+  /** Once auth resolves, fetch the account (allowlist check). */
+  readonly loadAccount$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(authActions.authStateResolved),
+      switchMap(() =>
+        from(this.accountApi.getAccount()).pipe(
+          map((result) => {
+            const tag = (result as AccessDeniedError | PendingVerificationError).type;
+            if (tag === 'ACCESS_DENIED') {
+              return accountActions.accessDenied();
+            }
+            if (tag === 'PENDING_VERIFICATION') {
+              return accountActions.pendingVerification();
+            }
+            const { account, selectedShopId } = result as {
+              account: Account;
+              selectedShopId: ShopId | null;
+            };
+            return accountActions.accountLoaded({ account, selectedShopId });
+          }),
+          // Logged loudly: an undeployed-rules `permission-denied` here is
+          // indistinguishable from a genuine access denial in the UI, and has
+          // previously presented as users being silently signed out.
+          catchError(
+            onApiFailure('account.getAccount', () => accountActions.accessDenied()),
+          ),
+        ),
+      ),
+    ),
+  );
+
+  /** Google OAuth popup. Auth result is picked up by watchAuthState$. */
+  readonly signInWithGoogle$ = createEffect(
+    () =>
+      this.actions$.pipe(
+        ofType(authActions.signInWithGoogleRequested),
+        switchMap(() => from(this.accountApi.signInWithGoogle())),
+      ),
+    { dispatch: false },
+  );
+
+  /** Email/password sign-in. */
+  readonly signInWithEmail$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(authActions.signInWithEmailRequested),
+      switchMap(({ email, password }) =>
+        from(this.accountApi.signInWithEmail(email, password)).pipe(
+          map((result) => {
+            if (result && (result as AuthError).type === 'AUTH_FAILED') {
+              return authActions.signInFailed({ code: (result as AuthError).code });
+            }
+            // Success — authState observable will emit the new user
+            return { type: '[Auth] Email Sign In Success (noop)' };
+          }),
+          catchError(
+            onApiFailure('auth.signInWithEmail', () =>
+              authActions.signInFailed({ code: 'auth/unknown' }),
+            ),
+          ),
+        ),
+      ),
+    ),
+  );
+
+  /** Sign out. */
+  readonly signOut$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(authActions.signOutRequested),
+      switchMap(() =>
+        from(this.accountApi.signOut()).pipe(
+          map(() => authActions.signedOut()),
+        ),
+      ),
+    ),
+  );
+
+  /** Navigate to sign-in after sign out completes. */
+  readonly navigateOnSignOut$ = createEffect(
+    () =>
+      this.actions$.pipe(
+        ofType(authActions.signedOut),
+        tap(() => this.router.navigateByUrl('/sign-in')),
+      ),
+    { dispatch: false },
+  );
+
+  /** Navigate to sign-in when auth session expires or is revoked mid-use. */
+  readonly navigateOnAuthLost$ = createEffect(
+    () =>
+      this.actions$.pipe(
+        ofType(authActions.authStateEmpty, accountActions.streamAuthRevoked),
+        tap(() => this.router.navigateByUrl('/sign-in')),
+      ),
+    { dispatch: false },
+  );
+
+  /**
+   * Shared auto-add toggle. `mergeMap` rather than `switchMap` so a rapid
+   * double-toggle does not cancel the first write and leave the stored value
+   * disagreeing with the reducer's optimistic state.
+   */
+  readonly setAutoAddEnabled$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(accountApiActions.setAutoAddEnabledRequested),
+      mergeMap(({ enabled }) =>
+        from(this.accountApi.setAutoAddEnabled(enabled)).pipe(
+          map(() => accountActions.autoAddEnabledChanged({ enabled })),
+          catchError(
+            onApiFailure('account.setAutoAddEnabled', () =>
+              accountActions.autoAddEnableFailed({ enabled }),
+            ),
+          ),
+        ),
+      ),
+    ),
+  );
+}

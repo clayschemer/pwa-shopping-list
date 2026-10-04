@@ -1,0 +1,144 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>04 · Plan — hide prices</title>
+  <link rel="stylesheet" href="shared.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Symbols+Outlined" rel="stylesheet">
+</head>
+<body>
+  <div class="page">
+    <h1 class="page__title">04 — Plan view (hide prices)</h1>
+    <p class="page__subtitle">
+      Per-item price chips are suppressed. Category totals are kept (they're a compact summary
+      and free up no real estate to hide). In shop mode the checkout pill still shows the
+      session sum.
+    </p>
+
+    <div class="phone">
+      <header class="topbar">
+        <button class="topbar__icon-btn" aria-label="Open menu">
+          <span class="material-symbols-outlined">menu</span>
+        </button>
+        <nav class="topbar__mode-toggle" aria-label="Mode selection">
+          <button class="topbar__mode-btn topbar__mode-btn--active">Plan</button>
+          <button class="topbar__mode-btn">Shop</button>
+        </nav>
+        <button class="topbar__icon-btn" aria-label="Filter and layout" style="background: var(--primary-container); color: var(--on-primary-container);">
+          <span class="material-symbols-outlined">tune</span>
+        </button>
+      </header>
+
+      <main class="content">
+        <section class="group">
+          <span class="group__color-stripe" style="background: linear-gradient(90deg, #6d9c71, transparent);"></span>
+          <header class="group__header">
+            <h2 class="group__title"><span class="group__dot" style="background:#6d9c71"></span>Produce</h2>
+            <span class="group__total">£3.00</span>
+          </header>
+          <ul class="items">
+            <li class="item" style="grid-template-columns: 1fr auto;">
+              <div class="item__main">
+                <span class="item__name">Bananas</span>
+                <span class="item__qty">3 pcs</span>
+              </div>
+              <button class="item__remove" aria-label="Remove">
+                <span class="material-symbols-outlined" style="font-size:1.1rem;">close</span>
+              </button>
+            </li>
+            <li class="item" style="grid-template-columns: 1fr auto;">
+              <div class="item__main">
+                <span class="item__name">Tomatoes</span>
+                <span class="item__qty">500 g</span>
+                <span class="item__description">ekologisk om möjligt</span>
+              </div>
+              <button class="item__remove" aria-label="Remove">
+                <span class="material-symbols-outlined" style="font-size:1.1rem;">close</span>
+              </button>
+            </li>
+            <li class="item" style="grid-template-columns: 1fr auto;">
+              <div class="item__main">
+                <span class="item__name">Lime</span>
+                <span class="item__qty">2 pcs</span>
+              </div>
+              <button class="item__remove" aria-label="Remove">
+                <span class="material-symbols-outlined" style="font-size:1.1rem;">close</span>
+              </button>
+            </li>
+          </ul>
+        </section>
+
+        <section class="group">
+          <span class="group__color-stripe" style="background: linear-gradient(90deg, #87b7d2, transparent);"></span>
+          <header class="group__header">
+            <h2 class="group__title"><span class="group__dot" style="background:#87b7d2"></span>Dairy</h2>
+            <span class="group__total">£5.90</span>
+          </header>
+          <ul class="items">
+            <li class="item" style="grid-template-columns: 1fr auto;">
+              <div class="item__main">
+                <span class="item__name">Milk</span>
+                <span class="item__qty">2 L</span>
+                <span class="item__description">inte Arla</span>
+              </div>
+              <button class="item__remove" aria-label="Remove">
+                <span class="material-symbols-outlined" style="font-size:1.1rem;">close</span>
+              </button>
+            </li>
+            <li class="item" style="grid-template-columns: 1fr auto;">
+              <div class="item__main">
+                <span class="item__name">Butter</span>
+                <span class="item__qty">1 pkg</span>
+              </div>
+              <button class="item__remove" aria-label="Remove">
+                <span class="material-symbols-outlined" style="font-size:1.1rem;">close</span>
+              </button>
+            </li>
+          </ul>
+        </section>
+
+        <section class="group">
+          <span class="group__color-stripe" style="background: linear-gradient(90deg, #e1c465, transparent);"></span>
+          <header class="group__header">
+            <h2 class="group__title"><span class="group__dot" style="background:#e1c465"></span>Bakery</h2>
+            <span class="group__total">£3.20</span>
+          </header>
+          <ul class="items">
+            <li class="item" style="grid-template-columns: 1fr auto;">
+              <div class="item__main">
+                <span class="item__name">Sourdough</span>
+                <span class="item__qty">1 pcs</span>
+              </div>
+              <button class="item__remove" aria-label="Remove">
+                <span class="material-symbols-outlined" style="font-size:1.1rem;">close</span>
+              </button>
+            </li>
+          </ul>
+        </section>
+      </main>
+
+      <div class="add-pill">
+        <span class="material-symbols-outlined" style="color: var(--on-surface-variant);">add</span>
+        <input class="add-pill__input" placeholder="Add item…" />
+        <button class="add-pill__btn" aria-label="Add">
+          <span class="material-symbols-outlined" style="font-size:1.2rem;">arrow_forward</span>
+        </button>
+      </div>
+    </div>
+
+    <p class="caption">
+      Open question: when both "hide grouping" and "hide prices" are on, the category totals
+      disappear too — leaving just the item names. Worth confirming that's the intent before we
+      implement.
+      <br />
+      <a href="index.html">← back to index</a> ·
+      <a href="03-plan-show-checked.html">03 · show checked</a> ·
+      <a href="06-filter-sheet.html">06 · filter sheet →</a>
+    </p>
+  </div>
+</body>
+</html>

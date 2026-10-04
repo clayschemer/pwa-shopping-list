@@ -1,0 +1,27 @@
+// _section-title.scss — shared section-header treatment
+// Usage: @use '../../../styles/section-title'; then @include section-title.shoulder;
+//
+// Renders the uppercase, tracked, caption-tier label that sits as a
+// top-rounded shoulder on the top-left of a group frame (see _list-row.scss).
+// Used by plan + shop group headers, drawer section labels, settings sections.
+
+@mixin shoulder {
+  font-family: var(--app-font-family-body);
+  font-size: var(--app-font-caption);
+  font-weight: 600;
+  line-height: var(--app-line-height-label);
+  letter-spacing: var(--app-letter-spacing-caption);
+  text-transform: uppercase;
+  color: var(--mat-sys-on-surface);
+  background: var(--mat-sys-surface-container);
+  width: max-content;
+  margin: 0;
+  padding: var(--app-spacing-xs) var(--app-spacing-sm);
+  border-radius: var(--app-shape-sm) var(--app-shape-sm) 0 0;
+}
+
+// Muted variant for "Uncategorised" / non-actionable groups.
+@mixin shoulder-muted {
+  @include shoulder;
+  color: var(--mat-sys-on-surface-variant);
+}

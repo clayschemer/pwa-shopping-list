@@ -1,0 +1,9 @@
+// styles.scss — Angular Material 3 theme entry point
+// Imports the multi-file theme structure from src/styles/.
+// See .claude/skills/angular-material3-theming/SKILL.md for conventions.
+
+@use 'styles/theme-colors' as theme;
+@use 'styles/theme-base';
+@use 'styles/theme-overrides';
+@use 'styles/theme-modes';
+@use 'styles/view-transitions';

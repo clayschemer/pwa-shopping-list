@@ -1,0 +1,228 @@
+@use '../../../styles/skeleton';
+@use '../../../styles/section-title';
+@use '../../../styles/focus';
+
+:host {
+  display: block;
+}
+
+.app-settings {
+  &__skeleton-section {
+    display: flex;
+    flex-direction: column;
+    margin-block-end: var(--app-spacing-lg);
+  }
+
+  &__skeleton-section-title {
+    @include skeleton.pulse;
+
+    width: 6rem;
+    height: var(--app-font-caption);
+    margin: 0;
+    padding: var(--app-spacing-xs);
+    border-radius: var(--app-shape-sm) var(--app-shape-sm) 0 0;
+  }
+
+  &__skeleton-rows {
+    display: flex;
+    flex-direction: column;
+    background: var(--mat-sys-surface-container);
+    border-radius: 0 var(--app-shape-sm) var(--app-shape-sm) var(--app-shape-sm);
+    padding: var(--app-spacing-xxs);
+    gap: var(--app-spacing-xxs);
+  }
+
+  &__skeleton-row {
+    display: flex;
+    flex-direction: column;
+    padding: var(--app-spacing-sm);
+    border-radius: var(--app-shape-sm);
+    background-color: var(--mat-sys-surface-container-lowest);
+  }
+
+  &__skeleton-row-item {
+    display: flex;
+    align-items: center;
+    gap: var(--app-spacing-xs);
+    min-height: var(--app-spacing-row-min-height);
+  }
+
+  &__skeleton-icon {
+    @include skeleton.pulse;
+
+    width: 1.25rem;
+    height: 1.25rem;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  &__skeleton-label {
+    @include skeleton.pulse;
+
+    width: 45%;
+    height: var(--app-font-body);
+    flex: 1;
+    max-width: 10rem;
+  }
+
+  &__skeleton-toggle {
+    @include skeleton.pulse;
+
+    width: 2.25rem;
+    height: 1rem;
+    border-radius: var(--app-shape-sm);
+    margin-inline-start: auto;
+  }
+
+  &__skeleton-hint {
+    @include skeleton.pulse;
+
+    width: 70%;
+    height: var(--app-font-caption);
+    margin-block-start: var(--app-spacing-xxs);
+    margin-inline-start: 1.75rem;
+  }
+
+  &__header {
+    display: flex;
+    align-items: center;
+    margin-block-end: var(--app-spacing-md);
+    gap: var(--app-spacing-xs);
+    padding: var(--app-spacing-xs) var(--app-spacing-md);
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    background: color-mix(in srgb, var(--mat-sys-surface) 40%, transparent);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+  }
+
+  &__title {
+    font-family: var(--app-font-family-display);
+    font-size: var(--app-font-title-lg);
+    font-weight: 400;
+    line-height: var(--app-line-height-title);
+    margin: 0;
+    color: var(--mat-sys-on-surface);
+  }
+
+  &__body {
+    padding: 0 var(--app-spacing-md) var(--app-spacing-xl);
+  }
+
+  &__section {
+    display: flex;
+    flex-direction: column;
+    margin-block-end: var(--app-spacing-lg);
+    border-radius: var(--app-shape-sm);
+  }
+
+  &__section-title {
+    @include section-title.shoulder;
+  }
+
+  &__row {
+    display: flex;
+    align-items: stretch;
+    justify-content: space-between;
+    min-height: var(--app-spacing-row-min-height);
+    padding-inline: var(--app-spacing-xxs);
+    padding-block-end: var(--app-spacing-xxs);
+    background: var(--mat-sys-surface-container);
+
+    &:first-of-type {
+      padding-block-start: var(--app-spacing-xxs);
+      border-top-right-radius: var(--app-shape-sm);
+    }
+
+    &:last-of-type {
+      border-bottom-left-radius: var(--app-shape-sm);
+      border-bottom-right-radius: var(--app-shape-sm);
+    }
+  }
+
+  &__row-icon {
+    font-size: 1.25rem;
+    width: 1.25rem;
+    height: 1.25rem;
+    margin-inline-end: var(--app-spacing-xs);
+    margin-inline-start: var(--app-spacing-xxs);
+    color: var(--mat-sys-on-surface-variant);
+    vertical-align: middle;
+  }
+
+  &__row-content {
+    display: flex;
+    flex-direction: column;
+    flex-basis: 100%;
+  }
+
+  &__hint {
+    margin: 0;
+    padding: var(--app-spacing-xxs) 0 var(--app-spacing-xs) 2.25rem;
+    font-size: var(--app-font-caption);
+    line-height: var(--app-line-height-body);
+    color: var(--mat-sys-on-surface-variant);
+  }
+
+  &__row-item {
+    display: flex;
+    align-items: center;
+    flex-basis: 100%;
+    padding: var(--app-spacing-xs);
+    border-radius: var(--app-shape-sm);
+    background-color: var(--mat-sys-surface-container-lowest);
+
+    mat-slide-toggle {
+      width: 100%;
+
+      --mat-slide-toggle-label-text-size: var(--app-font-body);
+      --mat-slide-toggle-label-text-line-height: var(--app-line-height-body);
+      --mat-slide-toggle-label-text-color: var(--mat-sys-on-surface);
+    }
+
+    .mat-internal-form-field {
+      width: 100%;
+    }
+
+    .mdc-form-field--align-end > label {
+      margin-left: 0;
+      margin-right: auto;
+    }
+  }
+
+  &__row-item--action {
+    // Action-button row sits inside the section frame just like a control
+    // row, but lets the button shape carry the affordance.
+    padding: var(--app-spacing-xxs) var(--app-spacing-xs);
+  }
+
+  &__label {
+    font-size: var(--app-font-body);
+    line-height: var(--app-line-height-body);
+    color: var(--mat-sys-on-surface);
+    flex: 1;
+  }
+
+  &__email {
+    font-size: var(--app-font-caption);
+    line-height: var(--app-line-height-body);
+    color: var(--mat-sys-on-surface-variant);
+  }
+
+  &__select-field {
+    width: 100%;
+  }
+
+  &__install-status-icon {
+    color: var(--mat-sys-primary);
+  }
+
+  &__sign-out-btn {
+    // Recolour the filled button to use the error colour-set.
+    --mdc-filled-button-container-color: var(--mat-sys-error);
+    --mdc-filled-button-label-text-color: var(--mat-sys-on-error);
+    --mat-filled-button-state-layer-color: var(--mat-sys-on-error);
+    --mat-filled-button-ripple-color: color-mix(in srgb, var(--mat-sys-on-error) 16%, transparent);
+  }
+}

@@ -1,0 +1,28 @@
+<div class="app-pending-verification">
+  <h1 class="app-pending-verification__title">
+    {{ 'pendingVerification.title' | transloco }}
+  </h1>
+  <p class="app-pending-verification__message">
+    @if (userEmail(); as user) {
+      <span [innerHTML]="'pendingVerification.message' | transloco: { email: user.email }"></span>
+    } @else {
+      {{ 'pendingVerification.messageNoEmail' | transloco }}
+    }
+  </p>
+  <div class="app-pending-verification__actions">
+    <button
+      mat-flat-button
+      class="app-pending-verification__action"
+      (click)="reloadNow()"
+    >
+      {{ 'pendingVerification.reload' | transloco }}
+    </button>
+    <button
+      mat-stroked-button
+      class="app-pending-verification__action"
+      (click)="switchAccount()"
+    >
+      {{ 'pendingVerification.switchAccount' | transloco }}
+    </button>
+  </div>
+</div>

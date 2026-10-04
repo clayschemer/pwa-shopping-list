@@ -1,0 +1,149 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>08 · Category — edit form</title>
+  <link rel="stylesheet" href="shared.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Symbols+Outlined" rel="stylesheet">
+  <style>
+    /* Larger sheet for the form */
+    .sheet--tall { max-height: 92%; padding-bottom: 1rem; }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <h1 class="page__title">08 — Category edit form</h1>
+    <p class="page__subtitle">
+      Tap a row in Categories view → unified form with all fields up front: name, colour,
+      shop-availability checklist. Save / Cancel close the form; Delete is a destructive action
+      at the bottom (still gated by a confirmation dialog). No more drilling into sub-sheets.
+    </p>
+
+    <div class="phone">
+      <header class="appbar">
+        <button class="appbar__action" aria-label="Back">
+          <span class="material-symbols-outlined">arrow_back</span>
+        </button>
+        <h1 class="appbar__title">Categories</h1>
+      </header>
+
+      <div class="subbar" aria-hidden="true">
+        <p class="subbar__label">Order for</p>
+        <div class="dropdown">
+          <span class="dropdown__value">
+            <span class="material-symbols-outlined" style="color: var(--on-surface-variant);">public</span>
+            Global
+          </span>
+          <span class="dropdown__chevron"><span class="material-symbols-outlined">expand_more</span></span>
+        </div>
+      </div>
+
+      <main class="content" aria-hidden="true">
+        <ul class="row-list">
+          <li class="row">
+            <span class="row__handle"><span class="material-symbols-outlined">drag_indicator</span></span>
+            <span class="row__main">
+              <span class="row__dot" style="background:#6d9c71"></span>
+              <span class="row__name">Produce</span>
+            </span>
+            <span class="row__chevron"><span class="material-symbols-outlined">chevron_right</span></span>
+          </li>
+          <li class="row" style="background: var(--surface-container);">
+            <span class="row__handle"><span class="material-symbols-outlined">drag_indicator</span></span>
+            <span class="row__main">
+              <span class="row__dot" style="background:#87b7d2"></span>
+              <span class="row__name">Dairy</span>
+            </span>
+            <span class="row__chevron"><span class="material-symbols-outlined">chevron_right</span></span>
+          </li>
+        </ul>
+      </main>
+
+      <div class="scrim"></div>
+      <div class="sheet sheet--tall">
+        <div class="sheet__handle"></div>
+        <h3 class="sheet__title">
+          <span class="row__dot" style="background:#87b7d2; vertical-align:0; display: inline-block; margin-right: 0.5rem;"></span>
+          Edit category
+        </h3>
+
+        <div class="form">
+          <div class="field">
+            <label class="field__label">Name</label>
+            <input class="field__input" value="Dairy" />
+          </div>
+
+          <div class="field">
+            <label class="field__label">Colour</label>
+            <div class="swatch-row">
+              <span class="swatch" style="background:#6d9c71"></span>
+              <span class="swatch swatch--active" style="background:#87b7d2"></span>
+              <span class="swatch" style="background:#e1c465"></span>
+              <span class="swatch" style="background:#c47a9c"></span>
+              <span class="swatch" style="background:#9a93d6"></span>
+              <span class="swatch" style="background:#d68b4a"></span>
+              <span class="swatch" style="background:#7a7a7a"></span>
+              <span class="swatch" style="background:#b25c5c"></span>
+            </div>
+          </div>
+
+          <div class="field">
+            <label class="field__label">Available in shops</label>
+            <div class="check-list">
+              <label class="check-row">
+                <span class="check-row__box check-row__box--checked">
+                  <span class="material-symbols-outlined">check</span>
+                </span>
+                <span class="check-row__name">Tesco Express</span>
+              </label>
+              <label class="check-row">
+                <span class="check-row__box check-row__box--checked">
+                  <span class="material-symbols-outlined">check</span>
+                </span>
+                <span class="check-row__name">ICA Maxi</span>
+              </label>
+              <label class="check-row">
+                <span class="check-row__box"></span>
+                <span class="check-row__name">Coop</span>
+              </label>
+              <label class="check-row">
+                <span class="check-row__box check-row__box--checked">
+                  <span class="material-symbols-outlined">check</span>
+                </span>
+                <span class="check-row__name">Hemköp</span>
+              </label>
+            </div>
+            <span class="field__hint">When unchecked, this category is hidden in that shop's plan list.</span>
+          </div>
+        </div>
+
+        <div class="form-actions">
+          <button class="btn btn--text">Cancel</button>
+          <button class="btn btn--filled">Save</button>
+        </div>
+
+        <div class="form-danger">
+          <button class="btn btn--danger">
+            <span class="material-symbols-outlined" style="font-size:1.05rem;vertical-align:-3px;">delete</span>
+            Delete category
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <p class="caption">
+      Form replaces the old action sheet → existing-sheet indirection. All edit state lives in
+      one component; Save commits all changes in one round-trip. Delete still routes through
+      <code>DeleteCategoryDialog</code> for the destructive confirmation.
+      <br />
+      <a href="index.html">← back to index</a> ·
+      <a href="07-categories.html">07 · categories view</a> ·
+      <a href="09-stores.html">09 · stores →</a>
+    </p>
+  </div>
+</body>
+</html>

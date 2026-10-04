@@ -1,0 +1,61 @@
+// _list-row.scss — shared list-row primitives
+// Usage: @use '../../../styles/list-row'; then @include list-row.row; etc.
+//
+// Layered model that mirrors the visual structure: a `group` is the whole
+// section (margin between groups), a `frame` is the surface the rows sit
+// inside (rounded under the section-title shoulder), and `row` is a single
+// item inside the frame. `row-interactive` adds hover + focus for tappable
+// rows. All values flow from --app-* / --mat-sys-* tokens — components must
+// never hard-code spacing, shape, motion, or focus styles.
+
+@use './focus';
+
+@mixin group {
+  display: flex;
+  flex-direction: column;
+  margin-block-end: var(--app-spacing-lg);
+  border-radius: var(--app-shape-sm);
+}
+
+// The surface that wraps stacked rows. Top-left corner is square so the
+// section-title shoulder appears to grow out of it.
+@mixin frame {
+  display: flex;
+  flex-direction: column;
+  gap: var(--app-spacing-xxs);
+  padding: var(--app-spacing-xxs);
+  background: var(--mat-sys-surface-container);
+  border-radius: 0 var(--app-shape-sm) var(--app-shape-sm) var(--app-shape-sm);
+}
+
+@mixin row {
+  display: flex;
+  align-items: center;
+  gap: var(--app-spacing-xs);
+  min-height: var(--app-spacing-row-min-height);
+  padding: var(--app-spacing-xs);
+  border-radius: var(--app-shape-sm);
+  background: var(--mat-sys-surface-container-lowest);
+  color: var(--mat-sys-on-surface);
+}
+
+@mixin row-interactive {
+  @include row;
+
+  cursor: pointer;
+  border: 0;
+  text-align: inherit;
+  font: inherit;
+
+  @media (prefers-reduced-motion: no-preference) {
+    transition: background-color var(--app-duration-quick) var(--app-easing-standard);
+  }
+
+  &:hover {
+    background: color-mix(in srgb, var(--mat-sys-on-surface) 4%, var(--mat-sys-surface-container-lowest));
+  }
+
+  &:focus-visible {
+    @include focus.ring;
+  }
+}

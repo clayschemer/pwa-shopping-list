@@ -1,0 +1,103 @@
+@use '../../../styles/skeleton';
+
+.app-shell-skeleton {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  min-height: 100dvh;
+
+  // Stands in for app-shop-banner, which is a coloured strip rather than a grey
+  // placeholder — reserving the space with a bare margin made the real banner look
+  // like it dropped in from nowhere once it mounted.
+  &__banner {
+    height: var(--app-shop-banner-height);
+    background: var(--mat-sys-secondary-container);
+  }
+
+  &__top-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    box-sizing: border-box;
+    min-height: var(--app-top-bar-height);
+    padding: var(--app-spacing-sm) var(--app-spacing-md);
+  }
+
+  &__icon {
+    @include skeleton.pulse;
+
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: var(--app-shape-pill);
+  }
+
+  &__toggle {
+    @include skeleton.pulse;
+
+    width: 9rem;
+    height: 2.25rem;
+    border-radius: var(--app-shape-pill);
+  }
+
+  &__content {
+    display: flex;
+    flex-direction: column;
+    gap: var(--app-spacing-xs);
+    padding: var(--app-spacing-xs) var(--app-spacing-md);
+  }
+
+  // The group and row geometry below mirrors features/plan/plan.component.scss
+  // so the hand-off to the plan skeleton is invisible.
+  &__group {
+    display: flex;
+    flex-direction: column;
+    gap: var(--app-spacing-xxs);
+    padding: 0 var(--app-spacing-xxs) var(--app-spacing-xxs);
+    border-radius: var(--app-shape-sm);
+    background: var(--mat-sys-surface-container);
+  }
+
+  &__header {
+    padding: var(--app-spacing-sm) var(--app-spacing-sm) var(--app-spacing-xs);
+  }
+
+  &__title {
+    @include skeleton.pulse;
+
+    width: 5rem;
+    height: var(--app-font-caption);
+  }
+
+  &__item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    min-height: var(--app-spacing-row-min-height);
+    padding: var(--app-spacing-sm);
+    border-radius: var(--app-shape-sm);
+    background-color: var(--mat-sys-surface-container-lowest);
+  }
+
+  &__name {
+    @include skeleton.pulse;
+
+    width: 40%;
+    height: var(--app-font-body-lg);
+  }
+
+  // Varying widths suggest mixed content lengths rather than a uniform grid.
+  &__item:nth-child(3) &__name {
+    width: 60%;
+  }
+
+  &__item:nth-child(4) &__name {
+    width: 30%;
+  }
+
+  &__qty {
+    @include skeleton.pulse;
+
+    width: 2.5rem;
+    height: var(--app-font-label);
+  }
+}

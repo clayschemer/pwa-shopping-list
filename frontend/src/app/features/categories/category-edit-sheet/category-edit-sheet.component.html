@@ -1,0 +1,111 @@
+<div class="app-category-edit-sheet">
+  <h3 class="app-category-edit-sheet__title">
+    @if (mode === 'create') {
+      {{ 'categoryEditSheet.createTitle' | transloco }}
+    } @else {
+      {{ 'categoryEditSheet.editTitle' | transloco }}
+    }
+  </h3>
+
+  <mat-form-field class="app-category-edit-sheet__field">
+    <mat-label>{{ 'categoryEditSheet.name' | transloco }}</mat-label>
+    <input
+      matInput
+      [ngModel]="name()"
+      (ngModelChange)="name.set($event)"
+      cdkFocusInitial
+    />
+    @if (hasConflict()) {
+      <mat-error>{{ 'categoryEditSheet.nameConflict' | transloco }}</mat-error>
+    }
+  </mat-form-field>
+
+  <div class="app-category-edit-sheet__color-row">
+    <span class="app-category-edit-sheet__color-label">
+      {{ 'categoryEditSheet.color' | transloco }}
+    </span>
+    <div class="app-category-edit-sheet__color-controls">
+      @if (hasColor()) {
+        <span
+          class="app-category-edit-sheet__color-preview"
+          [style.background-color]="color()"
+        ></span>
+      } @else {
+        <span class="app-category-edit-sheet__color-preview app-category-edit-sheet__color-preview--none"></span>
+      }
+      <label class="app-category-edit-sheet__color-picker-label">
+        <input
+          type="color"
+          class="app-category-edit-sheet__color-input"
+          [value]="color() ?? '#808080'"
+          (input)="onColorInput($event)"
+        />
+        <span class="app-category-edit-sheet__color-picker-text">
+          {{ (hasColor() ? 'categoryEditSheet.changeColor' : 'categoryEditSheet.chooseColor') | transloco }}
+        </span>
+      </label>
+      @if (hasColor()) {
+        <button
+          type="button"
+          class="app-category-edit-sheet__color-clear"
+          (click)="onClearColor()"
+        >
+          {{ 'categoryEditSheet.clearColor' | transloco }}
+        </button>
+      }
+    </div>
+  </div>
+
+  @if (mode === 'edit') {
+    <fieldset class="app-category-edit-sheet__shops">
+      <legend class="app-category-edit-sheet__shops-legend">
+        {{ 'categoryEditSheet.availableInShops' | transloco }}
+      </legend>
+      @if (shopRows().length === 0) {
+        <p class="app-category-edit-sheet__shops-empty">
+          {{ 'categoryEditSheet.noShops' | transloco }}
+        </p>
+      } @else {
+        <ul class="app-category-edit-sheet__shops-list" role="list">
+          @for (row of shopRows(); track row.id) {
+            <li class="app-category-edit-sheet__shops-row">
+              <mat-checkbox
+                [checked]="row.includes"
+                (change)="toggleShop(row.id, $event.checked)"
+              >
+                {{ row.name }}
+              </mat-checkbox>
+            </li>
+          }
+        </ul>
+      }
+    </fieldset>
+  }
+
+  <div class="app-category-edit-sheet__actions">
+    <button mat-button (click)="onCancel()">
+      {{ 'categoryEditSheet.cancel' | transloco }}
+    </button>
+    <button
+      mat-flat-button
+      color="primary"
+      [disabled]="!isValid()"
+      (click)="onSave()"
+    >
+      {{ 'categoryEditSheet.save' | transloco }}
+    </button>
+  </div>
+
+  @if (mode === 'edit') {
+    <div class="app-category-edit-sheet__danger">
+      <button
+        mat-button
+        color="warn"
+        class="app-category-edit-sheet__delete"
+        (click)="onDelete()"
+      >
+        {{ 'categoryEditSheet.delete' | transloco }}
+      </button>
+    </div>
+  }
+</div>

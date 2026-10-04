@@ -1,0 +1,58 @@
+@use '../../../../styles/focus';
+
+.app-group-picker-sheet {
+  display: flex;
+  flex-direction: column;
+  gap: var(--app-spacing-xs);
+  padding: var(--app-spacing-lg) var(--app-spacing-md) var(--app-spacing-md);
+
+  &__title {
+    margin: 0 0 var(--app-spacing-xs);
+    font-size: var(--app-font-title);
+    font-weight: 600;
+    line-height: var(--app-line-height-title);
+    color: var(--mat-sys-on-surface);
+  }
+
+  &__empty {
+    margin: 0;
+    font-size: var(--app-font-label);
+    color: var(--mat-sys-on-surface-variant);
+  }
+
+  &__list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+  }
+
+  &__option {
+    all: unset;
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+    width: 100%;
+    min-height: var(--app-spacing-row-min-height);
+    padding: 0 var(--app-spacing-sm);
+    border-radius: var(--app-shape-sm);
+    cursor: pointer;
+    font-size: var(--app-font-body);
+    color: var(--mat-sys-on-surface);
+
+    &:hover {
+      background: var(--mat-sys-surface-container);
+    }
+
+    &:focus-visible {
+      @include focus.ring;
+    }
+  }
+
+  &__actions {
+    display: flex;
+    justify-content: flex-end;
+    padding-top: var(--app-spacing-xs);
+  }
+}

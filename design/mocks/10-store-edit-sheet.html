@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>10 · Store — edit form</title>
+  <link rel="stylesheet" href="shared.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Symbols+Outlined" rel="stylesheet">
+  <style>
+    .sheet--tall { max-height: 92%; padding-bottom: 1rem; }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <h1 class="page__title">10 — Store edit form</h1>
+    <p class="page__subtitle">
+      Tap a row in Stores view → unified form: name + price-search URL up front. Save / Cancel
+      close the form; Delete is a destructive action at the bottom (gated by a confirmation
+      dialog). Replaces today's separate ShopNameSheet + ShopPriceUrlSheet + native confirm().
+    </p>
+
+    <div class="phone">
+      <header class="appbar">
+        <button class="appbar__action" aria-label="Back">
+          <span class="material-symbols-outlined">arrow_back</span>
+        </button>
+        <h1 class="appbar__title">Stores</h1>
+      </header>
+
+      <main class="content" aria-hidden="true">
+        <ul class="row-list">
+          <li class="row">
+            <span class="row__handle"><span class="material-symbols-outlined">drag_indicator</span></span>
+            <span class="row__main" style="flex-direction:column; align-items:flex-start; gap:0.05rem;">
+              <span class="row__name">Tesco Express</span>
+              <span class="row__sub">
+                <span class="material-symbols-outlined" style="font-size:0.85rem;vertical-align:-2px;">link</span>
+                tesco.com/groceries/en-GB/search?query={query}
+              </span>
+            </span>
+            <span class="row__chevron"><span class="material-symbols-outlined">chevron_right</span></span>
+          </li>
+          <li class="row" style="background: var(--surface-container);">
+            <span class="row__handle"><span class="material-symbols-outlined">drag_indicator</span></span>
+            <span class="row__main" style="flex-direction:column; align-items:flex-start; gap:0.05rem;">
+              <span class="row__name">ICA Maxi</span>
+              <span class="row__sub">
+                <span class="material-symbols-outlined" style="font-size:0.85rem;vertical-align:-2px;">link</span>
+                ica.se/handla/sok/?q={query}
+              </span>
+            </span>
+            <span class="row__chevron"><span class="material-symbols-outlined">chevron_right</span></span>
+          </li>
+        </ul>
+      </main>
+
+      <div class="scrim"></div>
+      <div class="sheet sheet--tall">
+        <div class="sheet__handle"></div>
+        <h3 class="sheet__title">
+          <span class="material-symbols-outlined" style="vertical-align:-4px; color: var(--on-surface-variant); margin-right: 0.4rem;">storefront</span>
+          Edit store
+        </h3>
+
+        <div class="form">
+          <div class="field">
+            <label class="field__label">Name</label>
+            <input class="field__input" value="ICA Maxi" />
+          </div>
+
+          <div class="field">
+            <label class="field__label">Price-search URL</label>
+            <input class="field__input" value="https://www.ica.se/handla/sok/?q={query}" />
+            <span class="field__hint">Leave empty to skip this store during pipeline price lookups. Use <code>{query}</code> as the placeholder for the search term.</span>
+          </div>
+        </div>
+
+        <div class="form-actions">
+          <button class="btn btn--text">Cancel</button>
+          <button class="btn btn--filled">Save</button>
+        </div>
+
+        <div class="form-danger">
+          <button class="btn btn--danger">
+            <span class="material-symbols-outlined" style="font-size:1.05rem;vertical-align:-3px;">delete</span>
+            Delete store
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <p class="caption">
+      Form replaces today's split between two separate bottom sheets (name vs URL) plus a native
+      <code>confirm()</code> for delete. Single component owns all edit state; Save commits in
+      one round-trip. Delete still routes through a confirmation dialog.
+      <br />
+      <a href="index.html">← back to index</a> ·
+      <a href="09-stores.html">09 · stores view</a> ·
+      <a href="08-category-edit-sheet.html">08 · category edit form</a>
+    </p>
+  </div>
+</body>
+</html>

@@ -1,0 +1,71 @@
+<div class="app-plan-filter-sheet">
+  <h2 class="app-plan-filter-sheet__title">{{ 'planFilter.title' | transloco }}</h2>
+
+  <ul class="app-plan-filter-sheet__rows" role="list">
+    <li class="app-plan-filter-sheet__row">
+      <mat-slide-toggle
+        class="app-plan-filter-sheet__toggle"
+        labelPosition="before"
+        [checked]="hideCategoryGrouping()"
+        (change)="toggleHideGrouping($event.checked)"
+      >
+        <span class="app-plan-filter-sheet__label">
+          {{ 'planFilter.hideGrouping' | transloco }}
+          <span class="app-plan-filter-sheet__hint">
+            {{ 'planFilter.hideGroupingHint' | transloco }}
+          </span>
+        </span>
+      </mat-slide-toggle>
+    </li>
+
+    <li class="app-plan-filter-sheet__row">
+      <mat-slide-toggle
+        class="app-plan-filter-sheet__toggle"
+        labelPosition="before"
+        [checked]="showCheckedItems()"
+        (change)="toggleShowChecked($event.checked)"
+      >
+        <span class="app-plan-filter-sheet__label">
+          {{ 'planFilter.showChecked' | transloco }}
+          <span class="app-plan-filter-sheet__hint">
+            {{ 'planFilter.showCheckedHint' | transloco }}
+          </span>
+        </span>
+      </mat-slide-toggle>
+    </li>
+
+    <li class="app-plan-filter-sheet__row">
+      <mat-slide-toggle
+        class="app-plan-filter-sheet__toggle"
+        labelPosition="before"
+        [checked]="hidePrices()"
+        (change)="toggleHidePrices($event.checked)"
+      >
+        <span class="app-plan-filter-sheet__label">
+          {{ 'planFilter.hidePrices' | transloco }}
+          <span class="app-plan-filter-sheet__hint">
+            {{ 'planFilter.hidePricesHint' | transloco }}
+          </span>
+        </span>
+      </mat-slide-toggle>
+    </li>
+
+    <li class="app-plan-filter-sheet__row">
+      <button
+        type="button"
+        class="app-plan-filter-sheet__action"
+        (click)="reorderCategories()"
+      >
+        <span class="app-plan-filter-sheet__label">
+          {{ 'planFilter.reorderCategories' | transloco }}
+          <span class="app-plan-filter-sheet__hint">
+            {{ 'planFilter.reorderCategoriesHint' | transloco }}
+          </span>
+        </span>
+        <mat-icon class="app-plan-filter-sheet__action-icon" aria-hidden="true">
+          arrow_forward
+        </mat-icon>
+      </button>
+    </li>
+  </ul>
+</div>

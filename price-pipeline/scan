@@ -1,0 +1,25 @@
+#!/bin/bash
+set -e
+
+MODE="${1:-unpriced}"
+
+if [ "$MODE" != "unpriced" ] && [ "$MODE" != "full" ]; then
+  echo "Usage: ./scan [unpriced|full]"
+  echo ""
+  echo "  unpriced  Process items with no price yet (default)"
+  echo "  full      Process all items with missing or stale prices"
+  exit 1
+fi
+
+if [ ! -f service-account.json ]; then
+  echo "Error: service-account.json not found."
+  echo ""
+  echo "To create it:"
+  echo "  1. Firebase Console → Project Settings → Service Accounts"
+  echo "  2. Click 'Generate new private key'"
+  echo "  3. Save the file as price-pipeline/service-account.json"
+  exit 1
+fi
+
+echo "Running once-${MODE} scan..."
+docker compose -f docker-compose.yml -f docker-compose.scheduler.yml run --rm price-fetcher npx tsx src/index.ts --mode "once-${MODE}"

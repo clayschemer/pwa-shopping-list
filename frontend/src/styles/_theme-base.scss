@@ -1,0 +1,117 @@
+// _theme-base.scss — Angular Material 3 theme entry point
+// See .claude/skills/angular-material3-theming/SKILL.md for conventions.
+//
+// Palette source: _theme-colors.scss (generated via `ng generate @angular/material:m3-theme`
+// or Material Theme Builder at material-foundation.github.io/material-theme-builder).
+// To swap themes: replace _theme-colors.scss with builder output.
+
+@use '@angular/material' as mat;
+@use './theme-colors' as theme;
+
+html {
+  @include mat.theme(
+    (
+      color: (
+        primary: theme.$primary-palette,
+        tertiary: theme.$tertiary-palette,
+      ),
+      // Typography: Plus Jakarta Sans loaded via Google Fonts in index.html
+      typography: 'Plus Jakarta Sans',
+      density: 0,
+    )
+  );
+
+  // Default: let the browser switch based on prefers-color-scheme.
+  // Explicit overrides applied via ThemeService classes (see _theme-modes.scss).
+  color-scheme: light dark;
+
+  // ─── DESIGN TOKEN SCALES ───────────────────────────────────────────────
+  // Primitives consumed by all feature SCSS. Compact mode shifts type and
+  // spacing (see _theme-modes.scss); reduce-motion zeroes the duration
+  // tokens at source. Never hard-code these values in feature SCSS.
+
+  // Font families — Plus Jakarta Sans for UI, DM Serif Display for
+  // editorial moments (page titles, sheet titles, empty-state hero).
+  --app-font-family-display: 'DM Serif Display', Georgia, serif;
+  --app-font-family-body: 'Plus Jakarta Sans', sans-serif;
+
+  // Type scale
+  --app-font-display: 1.75rem;
+  --app-font-title-lg: 1.25rem;
+  --app-font-title: 1.0625rem;
+  --app-font-body-lg: 1rem;
+  --app-font-body: 0.9375rem;
+  --app-font-label: 0.8125rem;
+  --app-font-caption: 0.75rem;
+
+  --app-line-height-display: 1.2;
+  --app-line-height-title: 1.3;
+  --app-line-height-body: 1.5;
+  --app-line-height-label: 1.4;
+  --app-letter-spacing-caption: 0.05em;
+
+  // Spacing scale (primitive — prefer this in new code)
+  --app-spacing-xxs: 0.25rem;
+  --app-spacing-xs: 0.5rem;
+  --app-spacing-sm: 0.75rem;
+  --app-spacing-md: 1rem;
+  --app-spacing-lg: 1.5rem;
+  --app-spacing-xl: 2rem;
+  --app-spacing-xxl: 3rem;
+
+  // Shape scale
+  --app-shape-xs: 0.25rem;
+  --app-shape-sm: 0.5rem;
+  --app-shape-md: 0.75rem;
+  --app-shape-lg: 1rem;
+  --app-shape-xl: 1.25rem;
+  --app-shape-pill: 999rem;
+
+  // Motion scale
+  --app-duration-instant: 80ms;
+  --app-duration-quick: 160ms;
+  --app-duration-standard: 240ms;
+  --app-duration-emphasized: 320ms;
+  --app-duration-relaxed: 350ms;
+  --app-duration-skeleton: 1.5s;
+
+  --app-easing-standard: cubic-bezier(0.2, 0, 0, 1);
+  --app-easing-emphasized: cubic-bezier(0.2, 0, 0, 1.05);
+  --app-easing-exit: cubic-bezier(0.4, 0, 1, 1);
+
+  // Focus ring
+  --app-focus-ring-width: 2px;
+  --app-focus-ring-offset: 2px;
+  --app-focus-ring-color: var(--mat-sys-primary);
+
+  // App-shell layout offsets — measured, not derived, so the content area
+  // clears the fixed top-bar / FAB regardless of compact mode. Override
+  // these when the bar itself changes dimensions.
+  --app-top-bar-height: 4.25rem;
+  --app-fab-clearance: 5rem;
+  --app-shop-banner-height: 1.5rem;
+}
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  font-family: var(--app-font-family-body);
+  background: var(--mat-sys-surface);
+  color: var(--mat-sys-on-surface);
+
+  // Legacy semantic spacing tokens — retained while feature SCSS migrates to
+  // the primitive --app-spacing-* / --app-font-* scales on html { } above.
+  // Compact mode shifts these in _theme-modes.scss.
+  --app-spacing-section: 1.5rem;
+  --app-spacing-row: 0.75rem;
+  --app-spacing-row-min-height: 3rem;
+  --app-spacing-padding-block: 0.5rem;
+  --app-spacing-padding-inline: 1rem;
+  --app-line-height-heading: 1.3;
+  --app-font-size-body: 0.9375rem;
+  --app-font-size-section-title: 0.75rem;
+}

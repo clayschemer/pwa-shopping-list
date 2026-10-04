@@ -1,0 +1,31 @@
+<h2 mat-dialog-title>{{ 'shopModeChangeDialog.title' | transloco }}</h2>
+<mat-dialog-content>
+  <p>{{ 'shopModeChangeDialog.message' | transloco }}</p>
+</mat-dialog-content>
+<mat-dialog-actions align="end">
+  <button
+    mat-button
+    class="app-shop-mode-change-dialog__cancel"
+    type="button"
+    (click)="cancel()"
+  >
+    {{ 'shopModeChangeDialog.cancel' | transloco }}
+  </button>
+  <button
+    mat-button
+    class="app-shop-mode-change-dialog__start-session"
+    type="button"
+    (click)="startAnotherSession()"
+  >
+    {{ 'shopModeChangeDialog.startAnotherSession' | transloco }}
+  </button>
+  <button
+    mat-flat-button
+    color="primary"
+    class="app-shop-mode-change-dialog__switch-to-plan"
+    type="button"
+    (click)="switchToPlanMode()"
+  >
+    {{ 'shopModeChangeDialog.switchToPlanMode' | transloco }}
+  </button>
+</mat-dialog-actions>

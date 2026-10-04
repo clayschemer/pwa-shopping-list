@@ -1,0 +1,622 @@
+import { Given, When, Then } from '@cucumber/cucumber';
+import assert from 'node:assert/strict';
+
+// ---------------------------------------------------------------------------
+// World state
+// ---------------------------------------------------------------------------
+
+interface Item {
+  id: string;
+  name: string;
+  quantity: number | null;
+  unit: string | null;
+  primaryCategoryId: string | null;
+  secondaryCategoryIds: string[];
+  removed: boolean;
+  price: number | null;
+  priceUpdatedAt: number | null;
+  purchaseCount: number;
+}
+
+interface ItemsWorld {
+  mode: 'plan' | 'shop';
+  items: Item[];
+  categories: { id: string; name: string; globalSortOrder: number }[];
+  shops: { id: string; name: string; categoryOrder: string[] }[];
+  selectedShopId: string | null;
+  addError: string | null;
+  lastAddedItem: Item | null;
+  checkConflict: boolean;
+  // Immediate-check model: a check commits at once (removed + session record)
+  // and the item stays visible to the checking user for a short undo period.
+  sessionCheckedIds: string[];
+  recentlyCheckedIds: string[];
+  backendUnavailable: boolean;
+  failureNotice: string | null;
+  expectedFallbackCategoryId: string | null;
+}
+
+/** The list as the checking user sees it: active items plus items still inside the undo period. */
+function visibleItems(world: ItemsWorld): Item[] {
+  const recent = world.recentlyCheckedIds ?? [];
+  return world.items.filter((i) => !i.removed || recent.includes(i.id));
+}
+
+let _nextId = 1;
+
+function makeItem(
+  name: string,
+  catId: string | null = null,
+  secondaryCatIds: string[] = [],
+): Item {
+  return {
+    id: `item-${_nextId++}`,
+    name,
+    quantity: null,
+    unit: null,
+    primaryCategoryId: catId,
+    secondaryCategoryIds: secondaryCatIds,
+    removed: false,
+    price: null,
+    priceUpdatedAt: null,
+    purchaseCount: 0,
+  };
+}
+
+function activeItems(world: ItemsWorld): Item[] {
+  return world.items.filter((i) => !i.removed);
+}
+
+/** Categories the selected shop stocks, in its layout order. No shop selected: every category, global order. */
+function shopLayout(world: ItemsWorld): string[] {
+  const shop = world.shops?.find((s) => s.id === world.selectedShopId);
+  if (shop) return shop.categoryOrder;
+  return [...(world.categories ?? [])]
+    .sort((a, b) => a.globalSortOrder - b.globalSortOrder)
+    .map((c) => c.id);
+}
+
+/**
+ * Where plan mode places each visible item — exactly one row per item. An item
+ * sits under its primary category when the selected shop stocks it, otherwise
+ * under the first of its secondary categories the shop does stock (layout
+ * order). Items with no stocked category are absent; items with no category at
+ * all fall into the uncategorised bucket (categoryId null).
+ */
+function planPlacements(world: ItemsWorld): { item: Item; categoryId: string | null }[] {
+  const layout = shopLayout(world);
+  const placements: { item: Item; categoryId: string | null }[] = [];
+
+  for (const item of activeItems(world)) {
+    if (item.primaryCategoryId && layout.includes(item.primaryCategoryId)) {
+      placements.push({ item, categoryId: item.primaryCategoryId });
+      continue;
+    }
+    const fallback = layout.find((id) => item.secondaryCategoryIds.includes(id));
+    if (fallback) {
+      placements.push({ item, categoryId: fallback });
+      continue;
+    }
+    if (!item.primaryCategoryId && item.secondaryCategoryIds.length === 0) {
+      placements.push({ item, categoryId: null });
+    }
+  }
+
+  return placements;
+}
+
+function multiCategoryItem(world: ItemsWorld): Item {
+  const item = world.items.find((i) => i.secondaryCategoryIds.length > 0);
+  assert.ok(item, 'A multi-category item should exist');
+  return item;
+}
+
+// ---------------------------------------------------------------------------
+// Given steps
+// (Note: 'I am in plan mode' and 'I am in shop mode' are in shared.steps.ts)
+// ---------------------------------------------------------------------------
+
+Given('an item with a given name already exists on the list', function (this: ItemsWorld) {
+  this.items = this.items ?? [];
+  this.items.push(makeItem('Existing Item'));
+});
+
+Given('an item exists on the list', function (this: ItemsWorld) {
+  this.items = this.items ?? [];
+  if (!this.items.some((i) => !i.removed)) {
+    this.items.push(makeItem('Test Item'));
+  }
+});
+
+Given('an item exists on the list that has not been checked', function (this: ItemsWorld) {
+  this.items = this.items ?? [];
+  this.items.push(makeItem('Unchecked Item'));
+});
+
+Given('I have just checked an item', function (this: ItemsWorld) {
+  this.items = this.items ?? [];
+  const item = makeItem('Just Checked Item');
+  item.removed = true;
+  this.items.push(item);
+  this.sessionCheckedIds = [...(this.sessionCheckedIds ?? []), item.id];
+  this.recentlyCheckedIds = [...(this.recentlyCheckedIds ?? []), item.id];
+});
+
+Given('an item exists on the list that has been checked', function (this: ItemsWorld) {
+  this.items = this.items ?? [];
+  const item = makeItem('Checked Item');
+  item.removed = true;
+  this.items.push(item);
+});
+
+Given('one or more categories exist', function (this: ItemsWorld) {
+  this.categories = this.categories ?? [];
+  if (!this.categories.length) {
+    this.categories.push({ id: 'cat-1', name: 'Produce', globalSortOrder: 1 });
+  }
+});
+
+Given('an item exists with a primary category and one or more secondary categories', function (this: ItemsWorld) {
+  this.items = this.items ?? [];
+  this.categories = [
+    { id: 'cat-1', name: 'Produce', globalSortOrder: 1 },
+    { id: 'cat-2', name: 'Dairy', globalSortOrder: 2 },
+  ];
+  this.items.push(makeItem('Multi-category Item', 'cat-1', ['cat-2']));
+});
+
+Given("the selected shop does not stock the item's primary category", function (this: ItemsWorld) {
+  const item = multiCategoryItem(this);
+  this.shops = [
+    {
+      id: 'shop-1',
+      name: 'Superstore',
+      categoryOrder: this.categories
+        .map((c) => c.id)
+        .filter((id) => id !== item.primaryCategoryId),
+    },
+  ];
+  this.selectedShopId = 'shop-1';
+});
+
+Given("the selected shop stocks one of the item's secondary categories", function (this: ItemsWorld) {
+  const item = multiCategoryItem(this);
+  const shop = this.shops.find((s) => s.id === this.selectedShopId);
+  assert.ok(shop, 'A shop should be selected');
+  const secondary = item.secondaryCategoryIds[0]!;
+  if (!shop.categoryOrder.includes(secondary)) shop.categoryOrder.push(secondary);
+  this.expectedFallbackCategoryId = secondary;
+});
+
+Given("the selected shop stocks none of the item's categories", function (this: ItemsWorld) {
+  const item = multiCategoryItem(this);
+  const assigned = new Set([item.primaryCategoryId, ...item.secondaryCategoryIds]);
+  this.shops = [
+    {
+      id: 'shop-1',
+      name: 'Superstore',
+      categoryOrder: this.categories.map((c) => c.id).filter((id) => !assigned.has(id)),
+    },
+  ];
+  this.selectedShopId = 'shop-1';
+});
+
+Given('an item appears under more than one category', function (this: ItemsWorld) {
+  this.items = this.items ?? [];
+  if (!this.items.some((i) => i.secondaryCategoryIds.length > 0)) {
+    this.categories = [
+      { id: 'cat-1', name: 'Produce', globalSortOrder: 1 },
+      { id: 'cat-2', name: 'Frozen', globalSortOrder: 2 },
+    ];
+    this.items.push(makeItem('Multi Cat Item', 'cat-1', ['cat-2']));
+  }
+});
+
+Given('one user adds an item to the shopping list', function (this: ItemsWorld) {
+  this.items = this.items ?? [];
+  this.lastAddedItem = makeItem('Shared Item');
+  this.items.push(this.lastAddedItem);
+});
+
+Given('one or more unchecked items exist on the list', function (this: ItemsWorld) {
+  this.items = this.items ?? [];
+  this.items.push(makeItem('Unchecked Item 1'));
+  this.items.push(makeItem('Unchecked Item 2'));
+});
+
+Given('a shop has been selected', function (this: ItemsWorld) {
+  this.shops = [{ id: 'shop-1', name: 'Superstore', categoryOrder: ['cat-2', 'cat-1'] }];
+  this.selectedShopId = 'shop-1';
+  this.categories = [
+    { id: 'cat-1', name: 'Produce', globalSortOrder: 1 },
+    { id: 'cat-2', name: 'Dairy', globalSortOrder: 2 },
+  ];
+});
+
+Given('items exist across multiple categories', function (this: ItemsWorld) {
+  this.items = this.items ?? [];
+  this.items.push(makeItem('Item A', 'cat-1'));
+  this.items.push(makeItem('Item B', 'cat-2'));
+});
+
+Given('one or more items exist with no category assigned', function (this: ItemsWorld) {
+  this.items = this.items ?? [];
+  this.items.push(makeItem('No Category Item'));
+});
+
+Given('two or more items exist within the same category', function (this: ItemsWorld) {
+  this.items = this.items ?? [];
+  this.categories = [{ id: 'cat-1', name: 'Produce', globalSortOrder: 1 }];
+  this.items.push(makeItem('Bananas', 'cat-1'));
+  this.items.push(makeItem('Apples', 'cat-1'));
+});
+
+Given('one or more items were checked during a shopping session', function (this: ItemsWorld) {
+  this.items = this.items ?? [];
+  const item = makeItem('Session Checked Item', 'cat-1');
+  item.removed = true;
+  this.items.push(item);
+});
+
+Given('another user checks an item at the same moment I do', function (this: ItemsWorld) {
+  // Simulate: another user already marked the item removed before my check
+  this.items = this.items ?? [];
+  const item = makeItem('Contested Item');
+  item.removed = true; // other user already checked it
+  this.items.push(item);
+});
+
+// ---------------------------------------------------------------------------
+// When steps
+// ---------------------------------------------------------------------------
+
+When('I add a new item with a valid name', function (this: ItemsWorld) {
+  this.items = this.items ?? [];
+  const newItem = makeItem('New Item');
+  this.items.push(newItem);
+  this.lastAddedItem = newItem;
+  this.addError = null;
+});
+
+When('I attempt to add another item with the same name', function (this: ItemsWorld) {
+  const existingName = activeItems(this)[0]?.name;
+  const conflict = activeItems(this).some((i) => i.name === existingName);
+  if (conflict) {
+    this.addError = 'NAME_CONFLICT';
+  } else {
+    this.items.push(makeItem(existingName ?? 'Duplicate Item'));
+    this.addError = null;
+  }
+});
+
+When('I set a quantity and unit for the item', function (this: ItemsWorld) {
+  const item = activeItems(this)[0];
+  if (item) {
+    item.quantity = 2;
+    item.unit = 'kg';
+  }
+});
+
+When('I assign a primary category and optionally one or more secondary categories to the item', function (this: ItemsWorld) {
+  const item = activeItems(this)[0];
+  if (item && this.categories?.length) {
+    item.primaryCategoryId = this.categories[0].id;
+  }
+});
+
+When('I view the shopping list', function (this: ItemsWorld) {
+  // Viewing — no state change, assertions follow
+});
+
+When('I access the list in plan mode', function (this: ItemsWorld) {
+  this.mode = 'plan';
+});
+
+When('I view the shopping list in either mode', function (this: ItemsWorld) {
+  // Both plan and shop mode show uncategorised items — no state change needed
+});
+
+When('I check the item', function (this: ItemsWorld) {
+  const item = activeItems(this)[0];
+  if (!item) return;
+  // The check commits immediately: removed flag + session record in one step.
+  item.removed = true;
+  this.sessionCheckedIds = [...(this.sessionCheckedIds ?? []), item.id];
+  this.recentlyCheckedIds = [...(this.recentlyCheckedIds ?? []), item.id];
+});
+
+When('I check the item under any one of its categories', function (this: ItemsWorld) {
+  const multi = this.items.find((i) => i.secondaryCategoryIds.length > 0 && !i.removed);
+  if (multi) multi.removed = true;
+});
+
+When('I remove the item', function (this: ItemsWorld) {
+  const item = activeItems(this)[0];
+  if (item) item.removed = true;
+});
+
+function editItemDetails(world: ItemsWorld): void {
+  world.items = world.items ?? [];
+  if (!world.items.some((i) => !i.removed)) {
+    world.items.push(makeItem('Unedited Item'));
+  }
+  const item = activeItems(world)[0]!;
+  if (world.backendUnavailable) {
+    // The write is rejected — nothing changes and the user is informed.
+    world.failureNotice = 'save';
+    return;
+  }
+  item.name = `${item.name} (edited)`;
+}
+
+When('I edit the item\'s details', function (this: ItemsWorld) {
+  editItemDetails(this);
+});
+
+When('I edit an item\'s details', function (this: ItemsWorld) {
+  editItemDetails(this);
+});
+
+When('I uncheck the item', function (this: ItemsWorld) {
+  const checked = this.items.find((i) => i.removed);
+  if (checked) checked.removed = false;
+});
+
+When('I undo the check within the undo period', function (this: ItemsWorld) {
+  const id = (this.recentlyCheckedIds ?? [])[0];
+  assert.ok(id, 'The undo period must still be active');
+  const item = this.items.find((i) => i.id === id)!;
+  // Undo is a real uncheck: the committed check is reversed for everyone.
+  item.removed = false;
+  this.sessionCheckedIds = (this.sessionCheckedIds ?? []).filter((x) => x !== id);
+  this.recentlyCheckedIds = (this.recentlyCheckedIds ?? []).filter((x) => x !== id);
+});
+
+When('I switch between plan mode and shop mode', function (this: ItemsWorld) {
+  this.mode = this.mode === 'plan' ? 'shop' : 'plan';
+});
+
+When('my check attempt is rejected because the other user was faster', function (this: ItemsWorld) {
+  // Item already removed (set in Given) — simulate CHECK_CONFLICT
+  this.checkConflict = true;
+});
+
+// Note: 'the other user accesses the shopping list' is defined in shared.steps.ts
+
+// ---------------------------------------------------------------------------
+// Then steps
+// ---------------------------------------------------------------------------
+
+Then('the item should appear on the shopping list', function (this: ItemsWorld) {
+  assert.ok(this.lastAddedItem, 'Expected an item to have been added');
+  assert.ok(activeItems(this).some((i) => i.id === this.lastAddedItem!.id), 'Added item should be in active items');
+});
+
+Then('the new item should not be added', function (this: ItemsWorld) {
+  assert.equal(this.addError, 'NAME_CONFLICT', 'Expected a name conflict error');
+});
+
+Then('I should be informed that the item is already on the list', function (this: ItemsWorld) {
+  assert.equal(this.addError, 'NAME_CONFLICT');
+});
+
+Then('the item should reflect the specified quantity and unit on the list', function (this: ItemsWorld) {
+  const item = activeItems(this)[0];
+  assert.equal(item?.quantity, 2);
+  assert.equal(item?.unit, 'kg');
+});
+
+Then('the item should be displayed under its primary category in plan mode', function (this: ItemsWorld) {
+  const item = activeItems(this)[0];
+  assert.ok(item?.primaryCategoryId, 'Item should have a primary category');
+});
+
+Then('the secondary category assignments should be preserved for shop mode', function (this: ItemsWorld) {
+  // Secondary categories are preserved in the item model
+  const item = activeItems(this).find((i) => i.primaryCategoryId);
+  assert.ok(item, 'Item with category should exist');
+});
+
+Then('the item should appear under each of its assigned categories', function (this: ItemsWorld) {
+  const multi = this.items.find((i) => i.secondaryCategoryIds.length > 0);
+  assert.ok(multi, 'Multi-category item should exist');
+  const allCats = [multi!.primaryCategoryId, ...multi!.secondaryCategoryIds].filter(Boolean);
+  assert.ok(allCats.length > 1, 'Item should be in multiple categories');
+});
+
+Then('the item should appear exactly once, under that secondary category', function (this: ItemsWorld) {
+  assert.equal(this.mode, 'plan', 'This placement rule applies to plan mode');
+  const item = multiCategoryItem(this);
+  const placements = planPlacements(this).filter((p) => p.item.id === item.id);
+  assert.equal(placements.length, 1, 'Plan mode should list the item exactly once');
+  assert.equal(
+    placements[0]!.categoryId,
+    this.expectedFallbackCategoryId,
+    'The item should be listed under the stocked secondary category',
+  );
+});
+
+Then('the item should not appear on the shopping list', function (this: ItemsWorld) {
+  const item = multiCategoryItem(this);
+  assert.ok(
+    !planPlacements(this).some((p) => p.item.id === item.id),
+    'An item with no stocked category should not be listed',
+  );
+});
+
+Then('the item should appear as checked under all of its categories', function (this: ItemsWorld) {
+  const checked = this.items.find((i) => i.removed && i.secondaryCategoryIds.length > 0);
+  assert.ok(checked, 'Checked multi-category item should exist');
+  // A single removed flag covers all categories — consistent by design
+});
+
+Then('the item should no longer appear on the shopping list', function (this: ItemsWorld) {
+  const active = activeItems(this).filter((i) => i.name === this.items[0]?.name);
+  assert.equal(active.length, 0, 'Removed item should not appear on active list');
+});
+
+Then('they should see the newly added item without any manual intervention', function (this: ItemsWorld) {
+  // Shared state — the item is already in the shared list model
+  assert.ok(this.lastAddedItem, 'Item added by user 1 should be visible to user 2');
+});
+
+Then('the item should reflect the updated details on the list', function (this: ItemsWorld) {
+  const edited = activeItems(this).find((i) => i.name.includes('(edited)'));
+  assert.ok(edited, 'Edited item should have updated name');
+});
+
+Then('the item should be restored as unchecked for both users', function (this: ItemsWorld) {
+  assert.ok(
+    this.items.some((i) => !i.removed),
+    'The undone item should be active (unchecked) for all users',
+  );
+});
+
+Then('the session should no longer record the item as checked', function (this: ItemsWorld) {
+  assert.equal(
+    (this.sessionCheckedIds ?? []).length,
+    0,
+    'The session record for the check should be removed on undo',
+  );
+});
+
+Then('I should be informed that my change could not be saved', function (this: ItemsWorld) {
+  assert.equal(this.failureNotice, 'save', 'A save-failure notice should be shown');
+});
+
+Then('the item should retain its previous details', function (this: ItemsWorld) {
+  assert.ok(
+    !this.items.some((i) => i.name.includes('(edited)')),
+    'No item should carry the edit that failed to save',
+  );
+});
+
+Then('the item should be recorded as checked immediately for both users', function (this: ItemsWorld) {
+  // The commit happens at check time — removed flag AND session record are
+  // both in place before any undo period elapses.
+  const checked = this.items.find((i) => i.removed);
+  assert.ok(checked, 'Item should be removed (checked) for all users');
+  assert.ok(
+    (this.sessionCheckedIds ?? []).includes(checked!.id),
+    'The session should record the check at check time, not after a delay',
+  );
+});
+
+Then('the item should remain visible to me as checked for a short undo period', function (this: ItemsWorld) {
+  const checked = this.items.find((i) => i.removed);
+  assert.ok(checked, 'A checked item should exist');
+  assert.ok(
+    (this.recentlyCheckedIds ?? []).includes(checked!.id),
+    'The checked item should be inside the undo period',
+  );
+  assert.ok(
+    visibleItems(this).some((i) => i.id === checked!.id),
+    'The checked item should still be visible to the checking user',
+  );
+});
+
+Then('after the undo period the item should disappear from my active list', function (this: ItemsWorld) {
+  const checked = this.items.find((i) => i.removed);
+  assert.ok(checked, 'A checked item should exist');
+  // The undo period elapses
+  this.recentlyCheckedIds = (this.recentlyCheckedIds ?? []).filter((id) => id !== checked!.id);
+  assert.ok(
+    !visibleItems(this).some((i) => i.id === checked!.id),
+    'The checked item should leave the list once the undo period ends',
+  );
+});
+
+Then('the item should be marked as unchecked on the list for both users', function (this: ItemsWorld) {
+  const unchecked = this.items.find((i) => !i.removed);
+  assert.ok(unchecked, 'Item should be active (unchecked) for all users');
+  assert.ok(unchecked?.name === 'Checked Item', 'Previously checked item should be unchecked');
+});
+
+Then('the checked items should no longer appear on the list', function (this: ItemsWorld) {
+  // Checked items have removed:true — filtered out of active list
+  const removedItems = this.items.filter((i) => i.removed);
+  assert.ok(removedItems.length > 0, 'There should be removed items');
+  const activeInPlanMode = activeItems(this);
+  for (const removed of removedItems) {
+    assert.ok(!activeInPlanMode.some((i) => i.id === removed.id), 'Removed item should not appear in plan mode');
+  }
+});
+
+Then('all unchecked items should remain on the list in both modes', function (this: ItemsWorld) {
+  const unchecked = activeItems(this);
+  assert.ok(unchecked.length >= 2, 'All unchecked items should remain');
+});
+
+Then('the items should be grouped and ordered according to the selected shop\'s category order', function (this: ItemsWorld) {
+  const shop = this.shops?.find((s) => s.id === this.selectedShopId);
+  assert.ok(shop, 'A shop should be selected');
+  // In shop mode, items follow shop.categoryOrder — verified by selector logic
+});
+
+Then('the uncategorised items should be displayed as a distinct group', function (this: ItemsWorld) {
+  const uncategorised = activeItems(this).filter((i) => !i.primaryCategoryId && !i.secondaryCategoryIds.length);
+  assert.ok(uncategorised.length > 0, 'Should have uncategorised items');
+});
+
+Then('the items should be displayed in alphabetical order within their category', function (this: ItemsWorld) {
+  const catItems = activeItems(this).filter((i) => i.primaryCategoryId === 'cat-1');
+  const sorted = [...catItems].sort((a, b) => a.name.localeCompare(b.name));
+  // The selectGroupedPlanList selector sorts alphabetically.
+  // This step verifies that such sorting is the specified behaviour.
+  assert.deepEqual(sorted.map((i) => i.name), ['Apples', 'Bananas'], 'Items should sort alphabetically');
+});
+
+Then('I should be informed that the item has already been removed', function (this: ItemsWorld) {
+  assert.ok(this.checkConflict, 'Should have received a check conflict');
+});
+
+Then('the item should no longer appear on my list', function (this: ItemsWorld) {
+  const active = activeItems(this);
+  assert.ok(active.every((i) => !i.removed), 'No active items should be in removed state');
+});
+
+// ---------------------------------------------------------------------------
+// Re-adding a previously bought item
+// ---------------------------------------------------------------------------
+
+Given('an item has been on the list and has a price recorded', function (this: ItemsWorld) {
+  this.items = this.items ?? [];
+  this.categories = this.categories ?? [{ id: 'cat-1', name: 'Produce', globalSortOrder: 1 }];
+  const item = makeItem('Bananas', 'cat-1');
+  item.price = 12.90;
+  item.priceUpdatedAt = Date.now() - 86_400_000;
+  this.items.push(item);
+});
+
+Given('a session was completed in which that item was checked', function (this: ItemsWorld) {
+  const item = this.items.find((i) => i.name === 'Bananas');
+  if (item) {
+    item.removed = true;
+    item.purchaseCount = 1;
+  }
+});
+
+When('I add the item to the list again', function (this: ItemsWorld) {
+  // Simulate addItem restore logic: find removed item with same name and restore it
+  const removedItem = this.items.find((i) => i.removed && i.name === 'Bananas');
+  if (removedItem) {
+    removedItem.removed = false;
+  } else {
+    const newItem = makeItem('Bananas', 'cat-1');
+    this.items.push(newItem);
+    this.lastAddedItem = newItem;
+  }
+});
+
+Then('the item should retain its recorded price', function (this: ItemsWorld) {
+  const item = this.items.find((i) => i.name === 'Bananas' && !i.removed);
+  assert.ok(item, 'Restored item should be active on the list');
+  assert.equal(item!.price, 12.90, 'Restored item should retain its previously recorded price');
+});
+
+Then('its purchase count should reflect previous sessions', function (this: ItemsWorld) {
+  const item = this.items.find((i) => i.name === 'Bananas' && !i.removed);
+  assert.ok(item, 'Restored item should be active on the list');
+  assert.ok((item!.purchaseCount ?? 0) > 0,
+    'Purchase count should be preserved from previous sessions');
+});

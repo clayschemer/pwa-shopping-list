@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>07 · Categories — view</title>
+  <link rel="stylesheet" href="shared.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Symbols+Outlined" rel="stylesheet">
+</head>
+<body>
+  <div class="page">
+    <h1 class="page__title">07 — Categories view</h1>
+    <p class="page__subtitle">
+      Full-screen, reached from the drawer or as a deep-link from the filter sheet's "Reorder
+      categories…" row. "Order for:" is a dropdown (same affordance as today's drawer Shop-layout
+      selector) so it scales as more stores are added.
+    </p>
+
+    <div class="phone">
+      <header class="appbar">
+        <button class="appbar__action" aria-label="Back">
+          <span class="material-symbols-outlined">arrow_back</span>
+        </button>
+        <h1 class="appbar__title">Categories</h1>
+      </header>
+
+      <div class="subbar">
+        <p class="subbar__label">Order for</p>
+        <div class="dropdown">
+          <span class="dropdown__value">
+            <span class="material-symbols-outlined" style="color: var(--on-surface-variant);">public</span>
+            Global
+          </span>
+          <span class="dropdown__chevron"><span class="material-symbols-outlined">expand_more</span></span>
+        </div>
+      </div>
+
+      <main class="content" style="padding-bottom: 92px;">
+        <ul class="row-list">
+          <li class="row">
+            <span class="row__handle"><span class="material-symbols-outlined">drag_indicator</span></span>
+            <span class="row__main">
+              <span class="row__dot" style="background:#6d9c71"></span>
+              <span class="row__name">Produce</span>
+            </span>
+            <span class="row__chevron"><span class="material-symbols-outlined">chevron_right</span></span>
+          </li>
+          <li class="row row--dragging">
+            <span class="row__handle"><span class="material-symbols-outlined">drag_indicator</span></span>
+            <span class="row__main">
+              <span class="row__dot" style="background:#87b7d2"></span>
+              <span class="row__name">Dairy</span>
+              <span class="row__meta">· dragging</span>
+            </span>
+            <span class="row__chevron"><span class="material-symbols-outlined">chevron_right</span></span>
+          </li>
+          <li class="row">
+            <span class="row__handle"><span class="material-symbols-outlined">drag_indicator</span></span>
+            <span class="row__main">
+              <span class="row__dot" style="background:#e1c465"></span>
+              <span class="row__name">Bakery</span>
+            </span>
+            <span class="row__chevron"><span class="material-symbols-outlined">chevron_right</span></span>
+          </li>
+          <li class="row">
+            <span class="row__handle"><span class="material-symbols-outlined">drag_indicator</span></span>
+            <span class="row__main">
+              <span class="row__dot" style="background:#c47a9c"></span>
+              <span class="row__name">Meat &amp; Fish</span>
+            </span>
+            <span class="row__chevron"><span class="material-symbols-outlined">chevron_right</span></span>
+          </li>
+          <li class="row">
+            <span class="row__handle"><span class="material-symbols-outlined">drag_indicator</span></span>
+            <span class="row__main">
+              <span class="row__dot" style="background:#9a93d6"></span>
+              <span class="row__name">Frozen</span>
+            </span>
+            <span class="row__chevron"><span class="material-symbols-outlined">chevron_right</span></span>
+          </li>
+          <li class="row">
+            <span class="row__handle"><span class="material-symbols-outlined">drag_indicator</span></span>
+            <span class="row__main">
+              <span class="row__dot" style="background:#d68b4a"></span>
+              <span class="row__name">Pantry</span>
+            </span>
+            <span class="row__chevron"><span class="material-symbols-outlined">chevron_right</span></span>
+          </li>
+          <li class="row">
+            <span class="row__handle"><span class="material-symbols-outlined">drag_indicator</span></span>
+            <span class="row__main">
+              <span class="row__dot" style="background:#7a7a7a"></span>
+              <span class="row__name">Household</span>
+            </span>
+            <span class="row__chevron"><span class="material-symbols-outlined">chevron_right</span></span>
+          </li>
+        </ul>
+      </main>
+
+      <button class="fab" aria-label="Add category">
+        <span class="material-symbols-outlined">add</span>
+      </button>
+    </div>
+
+    <p class="caption">
+      Tap row anywhere (except the drag handle) → opens the
+      <a href="08-category-edit-sheet.html">unified edit form</a>. Switching the dropdown swaps
+      the visible order; reordering writes either <code>setGlobalCategoryOrder</code> or
+      <code>setShopCategoryOrder</code> for the selected shop.
+      <br />
+      <a href="index.html">← back to index</a> ·
+      <a href="06-filter-sheet.html">06 · filter sheet</a> ·
+      <a href="08-category-edit-sheet.html">08 · edit form →</a>
+    </p>
+  </div>
+</body>
+</html>

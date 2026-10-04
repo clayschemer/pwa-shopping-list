@@ -1,0 +1,61 @@
+<div class="app-store-edit-sheet">
+  <h3 class="app-store-edit-sheet__title">
+    @if (mode === 'create') {
+      {{ 'storeEditSheet.createTitle' | transloco }}
+    } @else {
+      {{ 'storeEditSheet.editTitle' | transloco }}
+    }
+  </h3>
+
+  <mat-form-field class="app-store-edit-sheet__field">
+    <mat-label>{{ 'storeEditSheet.name' | transloco }}</mat-label>
+    <input
+      matInput
+      [ngModel]="name()"
+      (ngModelChange)="name.set($event)"
+      cdkFocusInitial
+    />
+    @if (hasConflict()) {
+      <mat-error>{{ 'storeEditSheet.nameConflict' | transloco }}</mat-error>
+    }
+  </mat-form-field>
+
+  <mat-form-field class="app-store-edit-sheet__field">
+    <mat-label>{{ 'storeEditSheet.priceSearchUrl' | transloco }}</mat-label>
+    <input
+      matInput
+      type="url"
+      [ngModel]="priceSearchUrl()"
+      (ngModelChange)="priceSearchUrl.set($event)"
+      placeholder="https://example.com/search?q={query}"
+    />
+    <mat-hint>{{ 'storeEditSheet.priceSearchUrlHint' | transloco }}</mat-hint>
+  </mat-form-field>
+
+  <div class="app-store-edit-sheet__actions">
+    <button mat-button (click)="onCancel()">
+      {{ 'storeEditSheet.cancel' | transloco }}
+    </button>
+    <button
+      mat-flat-button
+      color="primary"
+      [disabled]="!isValid()"
+      (click)="onSave()"
+    >
+      {{ 'storeEditSheet.save' | transloco }}
+    </button>
+  </div>
+
+  @if (mode === 'edit') {
+    <div class="app-store-edit-sheet__danger">
+      <button
+        mat-button
+        color="warn"
+        class="app-store-edit-sheet__delete"
+        (click)="onDelete()"
+      >
+        {{ 'storeEditSheet.delete' | transloco }}
+      </button>
+    </div>
+  }
+</div>
